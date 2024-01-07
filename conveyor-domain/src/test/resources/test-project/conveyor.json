@@ -1,0 +1,14 @@
+{
+  "name": "test-project",
+  "version": 1,
+  "repository": "./repository",
+  "plugins": [
+    {
+      "name": "file-conveyor-plugin",
+      "version": 1,
+      "configuration": {
+        "name": "file"
+      }
+    }
+  ]
+}
