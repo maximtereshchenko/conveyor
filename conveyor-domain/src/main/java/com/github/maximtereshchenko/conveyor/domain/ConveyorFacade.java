@@ -9,6 +9,8 @@ import com.github.maximtereshchenko.conveyor.api.port.ProjectDefinitionReader;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPluginConfiguration;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
+import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskBinding;
+import com.github.maximtereshchenko.conveyor.plugin.api.Stage;
 import java.lang.module.ModuleFinder;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -25,27 +27,30 @@ public final class ConveyorFacade implements ConveyorModule {
     }
 
     @Override
-    public BuildResult build(Path projectDefinitionPath) {
+    public BuildResult build(Path projectDefinitionPath, Stage stage) {
         if (!Files.exists(projectDefinitionPath)) {
             return new CouldNotFindProjectDefinition(projectDefinitionPath);
         }
         var projectDefinition = projectDefinitionReader.projectDefinition(projectDefinitionPath);
-        var repository = new DirectoryRepository(projectDefinition.repository());
+        var repository = new DirectoryRepository(
+            projectDefinitionPath.getParent().resolve(projectDefinition.repository()));
         projectDefinition.plugins()
             .stream()
-            .map(pluginDefinition -> tasks(projectDefinitionPath, pluginDefinition, repository))
+            .map(pluginDefinition -> bindings(projectDefinitionPath, pluginDefinition, repository))
             .flatMap(Collection::stream)
+            .filter(binding -> binding.stage().compareTo(stage) <= 0)
+            .map(ConveyorTaskBinding::task)
             .forEach(ConveyorTask::execute);
         return new BuildSucceeded(projectDefinitionPath, projectDefinition.name(), projectDefinition.version());
     }
 
-    private Collection<ConveyorTask> tasks(
+    private Collection<ConveyorTaskBinding> bindings(
         Path projectDefinitionPath,
         PluginDefinition pluginDefinition,
         DirectoryRepository repository
     ) {
         return plugin(repository, pluginDefinition)
-            .tasks(
+            .bindings(
                 new ConveyorPluginConfiguration(
                     projectDefinitionPath.getParent(),
                     pluginDefinition.configuration()
