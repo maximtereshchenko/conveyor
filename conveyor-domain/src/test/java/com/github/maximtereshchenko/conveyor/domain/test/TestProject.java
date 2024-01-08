@@ -9,4 +9,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
 @ExtendWith(TestProjectExtension.class)
-@interface TestProject {}
+@interface TestProject {
+
+    String value();
+}

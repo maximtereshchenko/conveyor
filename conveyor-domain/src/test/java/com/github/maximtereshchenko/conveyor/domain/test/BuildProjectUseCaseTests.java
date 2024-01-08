@@ -24,25 +24,41 @@ final class BuildProjectUseCaseTests {
     }
 
     @Test
-    void givenProjectDefinition_whenBuild_thenProjectIsBuilt(@TestProject Path testProject) {
-        var conveyorJson = conveyorJson(testProject);
+    void givenProjectDefinition_whenBuild_thenProjectIsBuilt(
+        @TestProject("project-with-single-plugin") Path project
+    ) {
+        var conveyorJson = conveyorJson(project);
 
         assertThat(module.build(conveyorJson, Stage.COMPILE))
-            .isEqualTo(new BuildSucceeded(conveyorJson, "test-project", 1));
+            .isEqualTo(new BuildSucceeded(conveyorJson, "project", 1));
     }
 
     @Test
-    void givenConveyorPluginDefined_whenBuild_thenTaskFromPluginExecuted(@TestProject Path testProject) {
-        module.build(conveyorJson(testProject), Stage.COMPILE);
+    void givenConveyorPluginDefined_whenBuild_thenTaskFromPluginExecuted(
+        @TestProject("project-with-single-plugin") Path project
+    ) {
+        module.build(conveyorJson(project), Stage.COMPILE);
 
-        assertThat(testProject).isDirectoryContaining("glob:**file");
+        assertThat(project).isDirectoryContaining("glob:**file");
     }
 
     @Test
-    void givenTaskBindToCompileStage_whenBuildUntilCleanStage_thenTaskDidNotExecuted(@TestProject Path testProject) {
-        module.build(conveyorJson(testProject), Stage.CLEAN);
+    void givenTaskBindToCompileStage_whenBuildUntilCleanStage_thenTaskDidNotExecuted(
+        @TestProject("project-with-single-plugin") Path project
+    ) {
+        module.build(conveyorJson(project), Stage.CLEAN);
 
-        assertThat(testProject).isDirectoryNotContaining("glob:**file");
+        assertThat(project).isDirectoryNotContaining("glob:**file");
+    }
+
+    @Test
+    void givenPluginsRequireCommonDependency_whenBuild_thenDependencyUsedWithHigherVersion(
+        @TestProject("project-with-plugins-sharing-common-dependency") Path project
+    ) {
+        module.build(conveyorJson(project), Stage.COMPILE);
+
+        assertThat(project).isDirectoryContaining("glob:**first-2")
+            .isDirectoryContaining("glob:**second-2");
     }
 
     private Path conveyorJson(Path path) {
