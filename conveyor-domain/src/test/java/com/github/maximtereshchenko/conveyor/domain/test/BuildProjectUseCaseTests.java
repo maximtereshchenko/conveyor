@@ -61,6 +61,15 @@ final class BuildProjectUseCaseTests {
             .isDirectoryContaining("glob:**second-2");
     }
 
+    @Test
+    void givenPluginRequireTransitiveDependency_whenBuild_thenTransitiveDependencyLoaded(
+        @TestProject("project-with-plugin-transitive-dependency") Path project
+    ) {
+        module.build(conveyorJson(project), Stage.COMPILE);
+
+        assertThat(project).isDirectoryContaining("glob:**first-1-transitive");
+    }
+
     private Path conveyorJson(Path path) {
         return path.resolve("conveyor.json");
     }

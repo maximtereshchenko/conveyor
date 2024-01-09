@@ -13,4 +13,6 @@ dependencies {
     testCompileOnly(project(":first-conveyor-plugin-with-dependency"))
     testCompileOnly(project(":second-conveyor-plugin-with-dependency"))
     testCompileOnly(project(":conveyor-plugin-dependency"))
+    testCompileOnly(project(":conveyor-plugin-dependency-with-transitive"))
+    testCompileOnly(project(":conveyor-plugin-transitive-dependency"))
 }
