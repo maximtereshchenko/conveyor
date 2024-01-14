@@ -13,11 +13,12 @@ import com.github.maximtereshchenko.conveyor.plugin.api.Stage;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public final class ConveyorFacade implements ConveyorModule {
 
     private final JsonReader jsonReader;
-    private final ModulePathBuilder modulePathBuilder = new ModulePathBuilder();
     private final ModuleLoader moduleLoader = new ModuleLoader();
 
     public ConveyorFacade(JsonReader jsonReader) {
@@ -38,13 +39,21 @@ public final class ConveyorFacade implements ConveyorModule {
         return new BuildSucceeded(projectDefinitionPath, projectDefinition.name(), projectDefinition.version());
     }
 
+    Set<Path> pluginsModulePath(DirectoryRepository repository, ProjectDefinition projectDefinition) {
+        return Dependencies.forPlugins(repository, projectDefinition)
+            .modulePath(projectDefinition)
+            .stream()
+            .map(repository::artifact)
+            .collect(Collectors.toSet());
+    }
+
     private void executeTasks(
         Path projectDefinitionPath,
         Stage stage,
         DirectoryRepository repository,
         ProjectDefinition projectDefinition
     ) {
-        moduleLoader.conveyorPlugins(modulePathBuilder.pluginsModulePath(repository, projectDefinition.plugins()))
+        moduleLoader.conveyorPlugins(pluginsModulePath(repository, projectDefinition))
             .stream()
             .map(conveyorPlugin -> bindings(conveyorPlugin, projectDefinitionPath, projectDefinition))
             .flatMap(Collection::stream)

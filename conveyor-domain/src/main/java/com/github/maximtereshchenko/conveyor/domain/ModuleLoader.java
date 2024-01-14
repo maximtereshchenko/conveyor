@@ -3,28 +3,30 @@ package com.github.maximtereshchenko.conveyor.domain;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
 import java.lang.module.ModuleFinder;
 import java.nio.file.Path;
-import java.util.Collection;
 import java.util.ServiceLoader;
 import java.util.ServiceLoader.Provider;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 final class ModuleLoader {
 
-    Collection<ConveyorPlugin> conveyorPlugins(Collection<Path> artifacts) {
+    Set<ConveyorPlugin> conveyorPlugins(Set<Path> artifacts) {
         return ServiceLoader.load(moduleLayer(artifacts), ConveyorPlugin.class)
             .stream()
             .map(Provider::get)
-            .toList();
+            .collect(Collectors.toSet());
     }
 
-    private ModuleLayer moduleLayer(Collection<Path> artifacts) {
+    private ModuleLayer moduleLayer(Set<Path> artifacts) {
         var parent = getClass().getModule().getLayer();
-        var configuration = parent.configuration()
-            .resolveAndBind(
-                ModuleFinder.of(artifacts.toArray(Path[]::new)),
-                ModuleFinder.of(),
-                Set.of()
-            );
-        return parent.defineModulesWithOneLoader(configuration, Thread.currentThread().getContextClassLoader());
+        return parent.defineModulesWithOneLoader(
+            parent.configuration()
+                .resolveAndBind(
+                    ModuleFinder.of(artifacts.toArray(Path[]::new)),
+                    ModuleFinder.of(),
+                    Set.of()
+                ),
+            Thread.currentThread().getContextClassLoader()
+        );
     }
 }
