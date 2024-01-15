@@ -5,16 +5,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.github.maximtereshchenko.conveyor.api.BuildSucceeded;
 import com.github.maximtereshchenko.conveyor.api.ConveyorModule;
 import com.github.maximtereshchenko.conveyor.api.CouldNotFindProjectDefinition;
+import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
+import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import com.github.maximtereshchenko.conveyor.domain.ConveyorFacade;
-import com.github.maximtereshchenko.conveyor.plugin.api.Stage;
 import com.github.maximtereshchenko.conveyor.projectdefinitionreader.gson.GsonProjectDefinitionReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Instant;
+import java.util.Collection;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -38,7 +43,7 @@ final class BuildProjectUseCaseTests {
     }
 
     @Test
-    void givenConveyorPluginDefined_whenBuild_thenTaskFromPluginExecuted(@TempDir Path path) throws Exception {
+    void givenConveyorPluginDeclared_whenBuild_thenTaskFromPluginExecuted(@TempDir Path path) throws Exception {
         module.build(
             conveyorJson(path, new GeneratedConveyorPlugin("plugin").install(path)),
             Stage.COMPILE
@@ -190,9 +195,7 @@ final class BuildProjectUseCaseTests {
     }
 
     @Test
-    void givenPluginConfiguration_whenBuild_thenPluginCanSeeItsConfiguration(
-        @TempDir Path path
-    ) throws Exception {
+    void givenPluginConfiguration_whenBuild_thenPluginCanSeeItsConfiguration(@TempDir Path path) throws Exception {
         new GeneratedConveyorPlugin("plugin").install(path);
         module.build(
             conveyorJson(
@@ -222,9 +225,7 @@ final class BuildProjectUseCaseTests {
     }
 
     @Test
-    void givenProperty_whenBuild_thenPropertyInterpolatedIntoPluginConfiguration(
-        @TempDir Path path
-    ) throws Exception {
+    void givenProperty_whenBuild_thenPropertyInterpolatedIntoPluginConfiguration(@TempDir Path path) throws Exception {
         new GeneratedConveyorPlugin("plugin").install(path);
         module.build(
             conveyorJson(
@@ -257,9 +258,7 @@ final class BuildProjectUseCaseTests {
     }
 
     @Test
-    void givenPluginDefined_whenBuild_thenTasksShouldRunInStepOrder(
-        @TempDir Path path
-    ) throws Exception {
+    void givenPluginDeclared_whenBuild_thenTasksShouldRunInStepOrder(@TempDir Path path) throws Exception {
         module.build(
             conveyorJson(
                 path,
@@ -276,9 +275,7 @@ final class BuildProjectUseCaseTests {
     }
 
     @Test
-    void givenMultiplePlugins_whenBuild_thenTasksShouldRunInStageOrder(
-        @TempDir Path path
-    ) throws Exception {
+    void givenMultiplePlugins_whenBuild_thenTasksShouldRunInStageOrder(@TempDir Path path) throws Exception {
         module.build(
             conveyorJson(
                 path,
@@ -301,11 +298,49 @@ final class BuildProjectUseCaseTests {
         assertThat(compilePreparedTime).isAfter(cleanFinalizedTime);
     }
 
+    @Test
+    void givenDependenciesDeclared_whenBuild_thenPluginCanAccessModulePath(@TempDir Path path) throws Exception {
+        var implementation = new GeneratedDependency(path, "implementation").install(path);
+        var test = new GeneratedDependency(path, "test").install(path);
+
+        module.build(
+            conveyorJson(
+                path,
+                List.of(new GeneratedConveyorPlugin("plugin").install(path)),
+                Map.of(
+                    implementation, DependencyScope.IMPLEMENTATION,
+                    test, DependencyScope.TEST
+                )
+            ),
+            Stage.COMPILE
+        );
+
+        assertThat(modulePath(path.resolve("plugin-1-module-path-implementation")))
+            .containsExactly(implementation.jar());
+        assertThat(modulePath(path.resolve("plugin-1-module-path-test")))
+            .containsExactly(test.jar());
+    }
+
+    private Collection<Path> modulePath(Path path) throws IOException {
+        return Files.readAllLines(path)
+            .stream()
+            .map(Paths::get)
+            .toList();
+    }
+
     private Instant instant(Path path) throws IOException {
         return Instant.parse(Files.readString(path));
     }
 
-    private Path conveyorJson(Path path, GeneratedArtifactDefinition... definitions) throws IOException {
+    private Path conveyorJson(Path path, GeneratedArtifactDefinition... plugins) throws IOException {
+        return conveyorJson(path, List.of(plugins), Map.of());
+    }
+
+    private Path conveyorJson(
+        Path path,
+        Collection<GeneratedArtifactDefinition> plugins,
+        Map<GeneratedArtifactDefinition, DependencyScope> dependencies
+    ) throws IOException {
         return conveyorJson(
             path,
             """
@@ -314,23 +349,48 @@ final class BuildProjectUseCaseTests {
                    "version": 1,
                    "plugins": [
                      %s
+                   ],
+                   "dependencies": [
+                     %s
                    ]
                 }
                 """
-                .formatted(
-                    Stream.of(definitions)
-                        .map(definition ->
-                            """
-                                {
-                                   "name": "%s",
-                                   "version": %d
-                                }
-                                """
-                                .formatted(definition.name(), definition.version())
-                        )
-                        .collect(Collectors.joining(","))
-                )
+                .formatted(json(plugins), json(dependencies))
         );
+    }
+
+    private String json(Map<GeneratedArtifactDefinition, DependencyScope> dependencies) {
+        return dependencies.entrySet()
+            .stream()
+            .map(entry ->
+                """
+                    {
+                       "name": "%s",
+                       "version": %d,
+                       "scope": "%s"
+                    }
+                    """
+                    .formatted(
+                        entry.getKey().name(),
+                        entry.getKey().version(),
+                        entry.getValue().toString().toLowerCase(Locale.ROOT)
+                    )
+            )
+            .collect(Collectors.joining(","));
+    }
+
+    private String json(Collection<GeneratedArtifactDefinition> definitions) {
+        return definitions.stream()
+            .map(definition ->
+                """
+                    {
+                       "name": "%s",
+                       "version": %d
+                    }
+                    """
+                    .formatted(definition.name(), definition.version())
+            )
+            .collect(Collectors.joining(","));
     }
 
     private Path conveyorJson(Path path, String json) throws IOException {

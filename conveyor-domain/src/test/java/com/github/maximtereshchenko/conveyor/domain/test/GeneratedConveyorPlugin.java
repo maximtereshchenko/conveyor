@@ -1,6 +1,6 @@
 package com.github.maximtereshchenko.conveyor.domain.test;
 
-import com.github.maximtereshchenko.conveyor.plugin.api.Stage;
+import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -32,6 +32,7 @@ final class GeneratedConveyorPlugin extends GeneratedArtifact {
     String classSourceCode() {
         return """
             package %s;
+            import com.github.maximtereshchenko.conveyor.common.api.*;
             import com.github.maximtereshchenko.conveyor.plugin.api.*;
             import java.io.*;
             import java.nio.file.*;
@@ -50,19 +51,19 @@ final class GeneratedConveyorPlugin extends GeneratedArtifact {
                     return "%s";
                 }
                 @Override
-                public Collection<ConveyorTaskBinding> bindings(ConveyorPluginConfiguration configuration) {
+                public Collection<ConveyorTaskBinding> bindings(Project project, Map<String, String> configuration) {
                     return List.of(
                         new ConveyorTaskBinding(
                             stage,
                             Step.PREPARE,
-                            () -> writeInstant(configuration.projectDirectory().resolve(fullName + "-prepared"))
+                            () -> writeInstant(project.projectDirectory().resolve(fullName + "-prepared"))
                         ),
                         new ConveyorTaskBinding(
                             stage,
                             Step.FINALIZE,
-                            () -> writeInstant(configuration.projectDirectory().resolve(fullName + "-finalized"))
+                            () -> writeInstant(project.projectDirectory().resolve(fullName + "-finalized"))
                         ),
-                        new ConveyorTaskBinding(stage, Step.RUN, () -> execute(configuration))
+                        new ConveyorTaskBinding(stage, Step.RUN, () -> execute(project, configuration))
                     );
                 }
                 private void writeInstant(Path path) {
@@ -76,12 +77,20 @@ final class GeneratedConveyorPlugin extends GeneratedArtifact {
                         Thread.currentThread().interrupt();
                     }
                 }
-                private void execute(ConveyorPluginConfiguration configuration) {
+                private void execute(Project project, Map<String, String> configuration) {
                     write(
-                        configuration.projectDirectory().resolve(fullName + "-configuration"),
-                        toString(configuration.properties())
+                        project.projectDirectory().resolve(fullName + "-configuration"),
+                        toString(configuration.entrySet())
                     );
-                    writeInstant(configuration.projectDirectory().resolve(fullName + "-run"));
+                    write(
+                        project.projectDirectory().resolve(fullName + "-module-path-implementation"),
+                        toString(project.modulePath(DependencyScope.IMPLEMENTATION))
+                    );
+                    write(
+                        project.projectDirectory().resolve(fullName + "-module-path-test"),
+                        toString(project.modulePath(DependencyScope.TEST))
+                    );
+                    writeInstant(project.projectDirectory().resolve(fullName + "-run"));
                 }
                 private void write(Path path) {
                     write(path, Instant.now().toString());
@@ -93,10 +102,9 @@ final class GeneratedConveyorPlugin extends GeneratedArtifact {
                         throw new UncheckedIOException(e);
                     }
                 }
-                private String toString(Map<String, String> properties) {
-                    return properties.entrySet()
-                        .stream()
-                        .map(entry -> entry.getKey() + '=' + entry.getValue())
+                private String toString(Collection<?> objects) {
+                    return objects.stream()
+                        .map(Objects::toString)
                         .collect(Collectors.joining(System.lineSeparator()));
                 }
             }
@@ -115,7 +123,10 @@ final class GeneratedConveyorPlugin extends GeneratedArtifact {
         return new ModuleInfoSourceCode(
             packageName(),
             Stream.concat(
-                    Stream.of("com.github.maximtereshchenko.conveyor.plugin.api"),
+                    Stream.of(
+                        "com.github.maximtereshchenko.conveyor.plugin.api",
+                        "com.github.maximtereshchenko.conveyor.common.api"
+                    ),
                     dependencies()
                         .stream()
                         .map(GeneratedArtifactDefinition::moduleName)

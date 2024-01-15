@@ -10,7 +10,7 @@ import java.nio.file.Paths;
 final class PathTypeAdapter implements JsonDeserializer<Path> {
 
     @Override
-    public Path deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) {
-        return Paths.get(json.getAsString());
+    public Path deserialize(JsonElement element, Type type, JsonDeserializationContext context) {
+        return Paths.get(element.getAsString());
     }
 }

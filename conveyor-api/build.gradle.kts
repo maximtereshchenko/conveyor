@@ -3,5 +3,5 @@ plugins {
 }
 
 dependencies {
-    api(project(":conveyor-plugin-api"))
+    api(project(":conveyor-common-api"))
 }

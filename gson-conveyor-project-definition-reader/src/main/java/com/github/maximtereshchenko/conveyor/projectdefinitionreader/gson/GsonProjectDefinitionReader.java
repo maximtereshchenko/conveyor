@@ -1,6 +1,7 @@
 package com.github.maximtereshchenko.conveyor.projectdefinitionreader.gson;
 
 import com.github.maximtereshchenko.conveyor.api.port.JsonReader;
+import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.io.IOException;
@@ -12,6 +13,7 @@ public final class GsonProjectDefinitionReader implements JsonReader {
 
     private final Gson gson = new GsonBuilder()
         .registerTypeAdapter(Path.class, new PathTypeAdapter())
+        .registerTypeAdapter(DependencyScope.class, new DependencyScopeAdapter())
         .create();
 
     @Override
