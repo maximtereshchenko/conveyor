@@ -24,6 +24,7 @@ final class GeneratedConveyorPlugin extends GeneratedArtifact {
             import java.io.*;
             import java.nio.file.*;
             import java.util.*;
+            import java.util.stream.*;
             public final class ConveyorPluginImpl implements ConveyorPlugin {
                 public ConveyorPluginImpl() {
                     %s
@@ -35,15 +36,24 @@ final class GeneratedConveyorPlugin extends GeneratedArtifact {
                 @Override
                 public Collection<ConveyorTaskBinding> bindings(ConveyorPluginConfiguration configuration) {
                     return List.of(
-                        new ConveyorTaskBinding(Stage.COMPILE, () -> writeFile(configuration.projectDirectory()))
+                        new ConveyorTaskBinding(Stage.COMPILE, () -> writeFile(configuration))
                     );
                 }
-                private void writeFile(Path path) {
+                private void writeFile(ConveyorPluginConfiguration configuration) {
                     try {
-                        Files.createFile(path.resolve("%s-%d-task-executed"));
+                        Files.writeString(
+                            configuration.projectDirectory().resolve("%s-%d-task-executed"),
+                            toString(configuration.properties())
+                        );
                     } catch (IOException e) {
                         throw new UncheckedIOException(e);
                     }
+                }
+                private String toString(Map<String, String> properties) {
+                    return properties.entrySet()
+                        .stream()
+                        .map(entry -> entry.getKey() + '=' + entry.getValue())
+                        .collect(Collectors.joining(System.lineSeparator()));
                 }
             }
             """

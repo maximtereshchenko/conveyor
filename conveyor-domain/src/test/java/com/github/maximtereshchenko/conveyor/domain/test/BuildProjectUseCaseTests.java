@@ -9,6 +9,7 @@ import com.github.maximtereshchenko.conveyor.domain.ConveyorFacade;
 import com.github.maximtereshchenko.conveyor.plugin.api.Stage;
 import com.github.maximtereshchenko.conveyor.projectdefinitionreader.gson.GsonProjectDefinitionReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Collectors;
@@ -196,9 +197,41 @@ final class BuildProjectUseCaseTests {
             .isDirectoryNotContaining("glob:**should-not-be-updated-2");
     }
 
+    @Test
+    void givenPluginConfiguration_whenBuild_thenPluginCanSeeItsConfiguration(
+        @TempDir Path path
+    ) throws Exception {
+        new GeneratedConveyorPlugin("plugin", 1).install(path);
+        module.build(
+            conveyorJson(
+                path,
+                """
+                    {
+                       "name": "project",
+                       "version": 1,
+                       "plugins": [
+                           {
+                               "name": "plugin",
+                               "version": 1,
+                               "configuration": {
+                                   "property": "value"
+                               }
+                           }
+                       ]
+                    }
+                    """
+            ),
+            Stage.COMPILE
+        );
+
+        assertThat(path.resolve("plugin-1-task-executed"))
+            .content(StandardCharsets.UTF_8)
+            .isEqualTo("property=value");
+    }
+
     private Path conveyorJson(Path path, GeneratedArtifactDefinition... definitions) throws IOException {
-        return Files.writeString(
-            path.resolve("conveyor.json"),
+        return conveyorJson(
+            path,
             """
                 {
                    "name": "project",
@@ -222,5 +255,9 @@ final class BuildProjectUseCaseTests {
                         .collect(Collectors.joining(","))
                 )
         );
+    }
+
+    private Path conveyorJson(Path path, String json) throws IOException {
+        return Files.writeString(path.resolve("conveyor.json"), json);
     }
 }
