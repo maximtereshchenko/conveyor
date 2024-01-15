@@ -3,6 +3,9 @@ package com.github.maximtereshchenko.conveyor.domain;
 import com.github.maximtereshchenko.conveyor.api.port.ProjectDefinition;
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 import com.github.maximtereshchenko.conveyor.plugin.api.Project;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Set;
@@ -35,11 +38,17 @@ final class ProjectConveyorPluginAdapter implements Project {
 
     @Override
     public Path buildDirectory() {
-        return projectDirectory()
-            .resolve(
-                projectDefinition.properties()
-                    .getOrDefault("conveyor.project.build.directory", ".conveyor")
+        try {
+            return Files.createDirectories(
+                projectDirectory()
+                    .resolve(
+                        projectDefinition.properties()
+                            .getOrDefault("conveyor.project.build.directory", ".conveyor")
+                    )
             );
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     @Override

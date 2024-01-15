@@ -10,17 +10,13 @@ final class GeneratedConveyorPlugin extends GeneratedArtifact {
 
     private final Stage stage;
 
-    GeneratedConveyorPlugin(String name, int version, Stage stage, GeneratedArtifactDefinition... dependencies) {
-        super(name, version, List.of(dependencies));
+    GeneratedConveyorPlugin(String name, Stage stage, GeneratedArtifactDefinition... dependencies) {
+        super(name, 1, List.of(dependencies));
         this.stage = stage;
     }
 
-    GeneratedConveyorPlugin(String name, Stage stage, GeneratedArtifactDefinition... dependencies) {
-        this(name, 1, stage, dependencies);
-    }
-
     GeneratedConveyorPlugin(String name, GeneratedArtifactDefinition... dependencies) {
-        this(name, 1, Stage.COMPILE, dependencies);
+        this(name, Stage.COMPILE, dependencies);
     }
 
     @Override
@@ -43,9 +39,6 @@ final class GeneratedConveyorPlugin extends GeneratedArtifact {
             public final class ConveyorPluginImpl implements ConveyorPlugin {
                 private final Stage stage = Stage.%s;
                 private final String fullName = "%s-%d";
-                public ConveyorPluginImpl() {
-                    %s
-                }
                 @Override
                 public String name() {
                     return "%s";
@@ -56,12 +49,12 @@ final class GeneratedConveyorPlugin extends GeneratedArtifact {
                         new ConveyorTaskBinding(
                             stage,
                             Step.PREPARE,
-                            () -> writeInstant(project.projectDirectory().resolve(fullName + "-prepared"))
+                            () -> writeInstant(project.buildDirectory().resolve(fullName + "-prepared"))
                         ),
                         new ConveyorTaskBinding(
                             stage,
                             Step.FINALIZE,
-                            () -> writeInstant(project.projectDirectory().resolve(fullName + "-finalized"))
+                            () -> writeInstant(project.buildDirectory().resolve(fullName + "-finalized"))
                         ),
                         new ConveyorTaskBinding(stage, Step.RUN, () -> execute(project, configuration))
                     );
@@ -78,19 +71,20 @@ final class GeneratedConveyorPlugin extends GeneratedArtifact {
                     }
                 }
                 private void execute(Project project, Map<String, String> configuration) {
+                    %s
                     write(
-                        project.projectDirectory().resolve(fullName + "-configuration"),
+                        project.buildDirectory().resolve(fullName + "-configuration"),
                         toString(configuration.entrySet())
                     );
                     write(
-                        project.projectDirectory().resolve(fullName + "-module-path-implementation"),
+                        project.buildDirectory().resolve(fullName + "-module-path-implementation"),
                         toString(project.modulePath(DependencyScope.IMPLEMENTATION))
                     );
                     write(
-                        project.projectDirectory().resolve(fullName + "-module-path-test"),
+                        project.buildDirectory().resolve(fullName + "-module-path-test"),
                         toString(project.modulePath(DependencyScope.TEST))
                     );
-                    writeInstant(project.projectDirectory().resolve(fullName + "-run"));
+                    writeInstant(project.buildDirectory().resolve(fullName + "-run"));
                 }
                 private void write(Path path) {
                     write(path, Instant.now().toString());
@@ -113,8 +107,8 @@ final class GeneratedConveyorPlugin extends GeneratedArtifact {
                 packageName(),
                 stage.toString(),
                 name(), version(),
-                dependencyUsages(),
-                name()
+                name(),
+                dependencyUsages()
             );
     }
 
@@ -145,7 +139,7 @@ final class GeneratedConveyorPlugin extends GeneratedArtifact {
         return dependencies()
             .stream()
             .map(GeneratedArtifactDefinition::className)
-            .map("new %s();"::formatted)
+            .map("new %s(project.buildDirectory());"::formatted)
             .collect(Collectors.joining());
     }
 }
