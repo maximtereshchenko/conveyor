@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
@@ -39,22 +40,22 @@ final class BuildProjectUseCaseTests {
     @Test
     void givenConveyorPluginDefined_whenBuild_thenTaskFromPluginExecuted(@TempDir Path path) throws Exception {
         module.build(
-            conveyorJson(path, new GeneratedConveyorPlugin("plugin", 1).install(path)),
+            conveyorJson(path, new GeneratedConveyorPlugin("plugin").install(path)),
             Stage.COMPILE
         );
 
-        assertThat(path).isDirectoryContaining("glob:**plugin-1-task-executed");
+        assertThat(path).isDirectoryContaining("glob:**plugin-1-configuration");
     }
 
     @Test
     void givenTaskBindToCompileStage_whenBuildUntilCleanStage_thenTaskDidNotExecuted(@TempDir Path path)
         throws Exception {
         module.build(
-            conveyorJson(path, new GeneratedConveyorPlugin("plugin", 1).install(path)),
+            conveyorJson(path, new GeneratedConveyorPlugin("plugin").install(path)),
             Stage.CLEAN
         );
 
-        assertThat(path).isDirectoryNotContaining("glob:**plugin-1-task-executed");
+        assertThat(path).isDirectoryNotContaining("glob:**plugin-1-configuration");
     }
 
     @Test
@@ -65,13 +66,11 @@ final class BuildProjectUseCaseTests {
                 path,
                 new GeneratedConveyorPlugin(
                     "first-plugin",
-                    1,
                     new GeneratedDependency(path, "dependency", 1).install(path)
                 )
                     .install(path),
                 new GeneratedConveyorPlugin(
                     "second-plugin",
-                    1,
                     new GeneratedDependency(path, "dependency", 2).install(path)
                 )
                     .install(path)
@@ -79,8 +78,8 @@ final class BuildProjectUseCaseTests {
             Stage.COMPILE
         );
 
-        assertThat(path).isDirectoryContaining("glob:**first-plugin-1-task-executed")
-            .isDirectoryContaining("glob:**second-plugin-1-task-executed")
+        assertThat(path).isDirectoryContaining("glob:**first-plugin-1-configuration")
+            .isDirectoryContaining("glob:**second-plugin-1-configuration")
             .isDirectoryContaining("glob:**dependency-2")
             .isDirectoryNotContaining("glob:**dependency-1");
     }
@@ -93,12 +92,10 @@ final class BuildProjectUseCaseTests {
                 path,
                 new GeneratedConveyorPlugin(
                     "plugin",
-                    1,
                     new GeneratedDependency(
                         path,
                         "dependency",
-                        1,
-                        new GeneratedDependency(path, "transitive", 1).install(path)
+                        new GeneratedDependency(path, "transitive").install(path)
                     )
                         .install(path)
                 )
@@ -107,7 +104,7 @@ final class BuildProjectUseCaseTests {
             Stage.COMPILE
         );
 
-        assertThat(path).isDirectoryContaining("glob:**plugin-1-task-executed")
+        assertThat(path).isDirectoryContaining("glob:**plugin-1-configuration")
             .isDirectoryContaining("glob:**dependency-1")
             .isDirectoryContaining("glob:**transitive-1");
     }
@@ -121,7 +118,6 @@ final class BuildProjectUseCaseTests {
             path,
             new GeneratedConveyorPlugin(
                 "first-plugin",
-                1,
                 new GeneratedDependency(
                     path,
                     "common-dependency",
@@ -133,11 +129,9 @@ final class BuildProjectUseCaseTests {
                 .install(path),
             new GeneratedConveyorPlugin(
                 "second-plugin",
-                1,
                 new GeneratedDependency(
                     path,
                     "dependency",
-                    1,
                     new GeneratedDependency(
                         path,
                         "common-dependency",
@@ -153,8 +147,8 @@ final class BuildProjectUseCaseTests {
 
         module.build(conveyorJson, Stage.COMPILE);
 
-        assertThat(path).isDirectoryContaining("glob:**first-plugin-1-task-executed")
-            .isDirectoryContaining("glob:**second-plugin-1-task-executed")
+        assertThat(path).isDirectoryContaining("glob:**first-plugin-1-configuration")
+            .isDirectoryContaining("glob:**second-plugin-1-configuration")
             .isDirectoryContaining("glob:**dependency-1")
             .isDirectoryContaining("glob:**common-dependency-2");
     }
@@ -168,7 +162,6 @@ final class BuildProjectUseCaseTests {
                 path,
                 new GeneratedConveyorPlugin(
                     "plugin",
-                    1,
                     new GeneratedDependency(path, "should-not-be-updated", 1).install(path),
                     new GeneratedDependency(
                         path,
@@ -180,7 +173,6 @@ final class BuildProjectUseCaseTests {
                     new GeneratedDependency(
                         path,
                         "will-remove-dependency",
-                        1,
                         new GeneratedDependency(path, "can-affect-versions", 2).install(path)
                     )
                         .install(path)
@@ -190,7 +182,7 @@ final class BuildProjectUseCaseTests {
             Stage.COMPILE
         );
 
-        assertThat(path).isDirectoryContaining("glob:**plugin-1-task-executed")
+        assertThat(path).isDirectoryContaining("glob:**plugin-1-configuration")
             .isDirectoryContaining("glob:**will-remove-dependency-1")
             .isDirectoryContaining("glob:**can-affect-versions-2")
             .isDirectoryContaining("glob:**should-not-be-updated-1")
@@ -201,7 +193,7 @@ final class BuildProjectUseCaseTests {
     void givenPluginConfiguration_whenBuild_thenPluginCanSeeItsConfiguration(
         @TempDir Path path
     ) throws Exception {
-        new GeneratedConveyorPlugin("plugin", 1).install(path);
+        new GeneratedConveyorPlugin("plugin").install(path);
         module.build(
             conveyorJson(
                 path,
@@ -224,7 +216,7 @@ final class BuildProjectUseCaseTests {
             Stage.COMPILE
         );
 
-        assertThat(path.resolve("plugin-1-task-executed"))
+        assertThat(path.resolve("plugin-1-configuration"))
             .content(StandardCharsets.UTF_8)
             .isEqualTo("property=value");
     }
@@ -233,7 +225,7 @@ final class BuildProjectUseCaseTests {
     void givenProperty_whenBuild_thenPropertyInterpolatedIntoPluginConfiguration(
         @TempDir Path path
     ) throws Exception {
-        new GeneratedConveyorPlugin("plugin", 1).install(path);
+        new GeneratedConveyorPlugin("plugin").install(path);
         module.build(
             conveyorJson(
                 path,
@@ -259,9 +251,58 @@ final class BuildProjectUseCaseTests {
             Stage.COMPILE
         );
 
-        assertThat(path.resolve("plugin-1-task-executed"))
+        assertThat(path.resolve("plugin-1-configuration"))
             .content(StandardCharsets.UTF_8)
             .isEqualTo("property=value-suffix");
+    }
+
+    @Test
+    void givenPluginDefined_whenBuild_thenTasksShouldRunInStepOrder(
+        @TempDir Path path
+    ) throws Exception {
+        module.build(
+            conveyorJson(
+                path,
+                new GeneratedConveyorPlugin("plugin").install(path)
+            ),
+            Stage.COMPILE
+        );
+
+        var preparedTime = instant(path.resolve("plugin-1-prepared"));
+        var runTime = instant(path.resolve("plugin-1-run"));
+        var finalizedTime = instant(path.resolve("plugin-1-finalized"));
+        assertThat(preparedTime).isBefore(runTime);
+        assertThat(runTime).isBefore(finalizedTime);
+    }
+
+    @Test
+    void givenMultiplePlugins_whenBuild_thenTasksShouldRunInStageOrder(
+        @TempDir Path path
+    ) throws Exception {
+        module.build(
+            conveyorJson(
+                path,
+                new GeneratedConveyorPlugin("clean", Stage.CLEAN).install(path),
+                new GeneratedConveyorPlugin("compile", Stage.COMPILE).install(path)
+            ),
+            Stage.COMPILE
+        );
+
+        var cleanPreparedTime = instant(path.resolve("clean-1-prepared"));
+        var cleanRunTime = instant(path.resolve("clean-1-run"));
+        var cleanFinalizedTime = instant(path.resolve("clean-1-finalized"));
+        var compilePreparedTime = instant(path.resolve("compile-1-prepared"));
+        var compileRunTime = instant(path.resolve("compile-1-run"));
+        var compileFinalizedTime = instant(path.resolve("compile-1-finalized"));
+        assertThat(cleanPreparedTime).isBefore(cleanRunTime);
+        assertThat(cleanRunTime).isBefore(cleanFinalizedTime);
+        assertThat(compilePreparedTime).isBefore(compileRunTime);
+        assertThat(compileRunTime).isBefore(compileFinalizedTime);
+        assertThat(compilePreparedTime).isAfter(cleanFinalizedTime);
+    }
+
+    private Instant instant(Path path) throws IOException {
+        return Instant.parse(Files.readString(path));
     }
 
     private Path conveyorJson(Path path, GeneratedArtifactDefinition... definitions) throws IOException {

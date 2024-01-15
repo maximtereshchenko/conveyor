@@ -14,6 +14,10 @@ final class GeneratedDependency extends GeneratedArtifact {
         this.directory = directory;
     }
 
+    GeneratedDependency(Path directory, String name, GeneratedArtifactDefinition... dependencies) {
+        this(directory, name, 1, dependencies);
+    }
+
     @Override
     String className() {
         return capitalized(packageName());
