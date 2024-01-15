@@ -2,7 +2,7 @@ rootProject.name = "conveyor"
 include("conveyor-api")
 include("conveyor-domain")
 include("conveyor-plugin-api")
-include("gson-conveyor-project-definition-reader")
+include("gson-adapter")
 include("conveyor-common-api")
 dependencyResolutionManagement {
     versionCatalogs {

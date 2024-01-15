@@ -1,5 +1,6 @@
 package com.github.maximtereshchenko.conveyor.domain;
 
+import com.github.maximtereshchenko.conveyor.api.port.ProjectDefinition;
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 import com.github.maximtereshchenko.conveyor.plugin.api.Project;
 import java.nio.file.Path;

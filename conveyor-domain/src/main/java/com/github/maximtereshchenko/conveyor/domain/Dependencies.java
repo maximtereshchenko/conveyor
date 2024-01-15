@@ -1,5 +1,11 @@
 package com.github.maximtereshchenko.conveyor.domain;
 
+import com.github.maximtereshchenko.conveyor.api.port.ArtifactDefinition;
+import com.github.maximtereshchenko.conveyor.api.port.PluginDefinition;
+import com.github.maximtereshchenko.conveyor.api.port.ProjectDefinition;
+import com.github.maximtereshchenko.conveyor.api.port.ProjectDependencyDefinition;
+import com.github.maximtereshchenko.conveyor.api.port.StoredArtifactDefinition;
+import com.github.maximtereshchenko.conveyor.api.port.StoredDependencyDefinition;
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -107,7 +113,7 @@ final class Dependencies {
         }
 
         @Override
-        Set<String> dependsOn(Dependencies dependencies) {
+        Set<String> dependsOn() {
             return storedArtifactDefinition.dependencies()
                 .stream()
                 .map(StoredDependencyDefinition::name)
@@ -126,12 +132,12 @@ final class Dependencies {
         }
 
         @Override
-        public boolean canBeUsed(Dependencies dependencies) {
+        boolean canBeUsed(Dependencies dependencies) {
             return true;
         }
 
         @Override
-        Set<String> dependsOn(Dependencies dependencies) {
+        Set<String> dependsOn() {
             return projectDefinition.plugins()
                 .stream()
                 .map(PluginDefinition::name)
@@ -151,12 +157,12 @@ final class Dependencies {
         }
 
         @Override
-        public boolean canBeUsed(Dependencies dependencies) {
+        boolean canBeUsed(Dependencies dependencies) {
             return true;
         }
 
         @Override
-        Set<String> dependsOn(Dependencies dependencies) {
+        Set<String> dependsOn() {
             return projectDefinition.dependencies()
                 .stream()
                 .filter(definition -> scopes.contains(definition.scope()))
@@ -183,12 +189,12 @@ final class Dependencies {
 
         abstract boolean canBeUsed(Dependencies dependencies);
 
-        abstract Set<String> dependsOn(Dependencies dependencies);
+        abstract Set<String> dependsOn();
 
         Set<ArtifactDefinition> modulePath(Dependencies dependencies) {
             return Stream.concat(
                     Stream.of(artifactDefinition),
-                    dependsOn(dependencies)
+                    dependsOn()
                         .stream()
                         .map(name -> dependencies.modulePath(name, dependencies.effectiveVersion(name)))
                         .flatMap(Collection::stream)

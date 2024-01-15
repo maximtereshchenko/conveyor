@@ -63,7 +63,7 @@ final class TestProjectExtension implements ParameterResolver {
         private final Path source;
         private final Path destination;
 
-        public CopyRecursively(Path source, Path destination) {
+        CopyRecursively(Path source, Path destination) {
             this.source = source;
             this.destination = destination;
         }

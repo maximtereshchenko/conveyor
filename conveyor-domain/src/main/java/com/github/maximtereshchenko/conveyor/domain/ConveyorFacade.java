@@ -4,7 +4,10 @@ import com.github.maximtereshchenko.conveyor.api.BuildResult;
 import com.github.maximtereshchenko.conveyor.api.BuildSucceeded;
 import com.github.maximtereshchenko.conveyor.api.ConveyorModule;
 import com.github.maximtereshchenko.conveyor.api.CouldNotFindProjectDefinition;
-import com.github.maximtereshchenko.conveyor.api.port.JsonReader;
+import com.github.maximtereshchenko.conveyor.api.port.PluginDefinition;
+import com.github.maximtereshchenko.conveyor.api.port.ProjectDefinition;
+import com.github.maximtereshchenko.conveyor.api.port.ProjectDefinitionReader;
+import com.github.maximtereshchenko.conveyor.api.port.StoredArtifactDefinitionReader;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
@@ -21,12 +24,17 @@ import java.util.stream.Collectors;
 
 public final class ConveyorFacade implements ConveyorModule {
 
-    private final JsonReader jsonReader;
+    private final ProjectDefinitionReader projectDefinitionReader;
+    private final StoredArtifactDefinitionReader storedArtifactDefinitionReader;
     private final ModuleLoader moduleLoader = new ModuleLoader();
     private final Pattern interpolationPattern = Pattern.compile("\\$\\{([^}]+)}");
 
-    public ConveyorFacade(JsonReader jsonReader) {
-        this.jsonReader = jsonReader;
+    public ConveyorFacade(
+        ProjectDefinitionReader projectDefinitionReader,
+        StoredArtifactDefinitionReader storedArtifactDefinitionReader
+    ) {
+        this.projectDefinitionReader = projectDefinitionReader;
+        this.storedArtifactDefinitionReader = storedArtifactDefinitionReader;
     }
 
     @Override
@@ -34,10 +42,10 @@ public final class ConveyorFacade implements ConveyorModule {
         if (!Files.exists(projectDefinitionPath)) {
             return new CouldNotFindProjectDefinition(projectDefinitionPath);
         }
-        var projectDefinition = jsonReader.read(projectDefinitionPath, ProjectDefinition.class);
+        var projectDefinition = projectDefinitionReader.projectDefinition(projectDefinitionPath);
         var repository = new DirectoryRepository(
             projectDefinitionPath.getParent().resolve(projectDefinition.repository()),
-            jsonReader
+            storedArtifactDefinitionReader
         );
         executeTasks(projectDefinitionPath, stage, repository, projectDefinition);
         return new BuildSucceeded(projectDefinitionPath, projectDefinition.name(), projectDefinition.version());
@@ -80,9 +88,12 @@ public final class ConveyorFacade implements ConveyorModule {
     }
 
     private Map<String, String> pluginConfiguration(ProjectDefinition projectDefinition, String name) {
-        return projectDefinition.pluginConfiguration(name)
-            .entrySet()
+        return projectDefinition.plugins()
             .stream()
+            .filter(pluginDefinition -> pluginDefinition.name().equals(name))
+            .map(PluginDefinition::configuration)
+            .map(Map::entrySet)
+            .flatMap(Collection::stream)
             .map(entry -> Map.entry(entry.getKey(), interpolate(entry.getValue(), projectDefinition.properties())))
             .collect(Collectors.collectingAndThen(Collectors.toMap(Entry::getKey, Entry::getValue), Map::copyOf));
     }

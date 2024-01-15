@@ -1,4 +1,4 @@
-package com.github.maximtereshchenko.conveyor.domain;
+package com.github.maximtereshchenko.conveyor.api.port;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-record ProjectDefinition(
+public record ProjectDefinition(
     String name,
     int version,
     Path repository,
@@ -16,18 +16,10 @@ record ProjectDefinition(
     Collection<ProjectDependencyDefinition> dependencies
 ) implements ArtifactDefinition {
 
-    ProjectDefinition {
+    public ProjectDefinition {
         repository = Objects.requireNonNullElse(repository, Paths.get(""));
         properties = Objects.requireNonNullElse(properties, Map.of());
         plugins = Objects.requireNonNullElse(plugins, List.of());
         dependencies = Objects.requireNonNullElse(dependencies, List.of());
-    }
-
-    Map<String, String> pluginConfiguration(String name) {
-        return plugins.stream()
-            .filter(pluginDefinition -> pluginDefinition.name().equals(name))
-            .map(PluginDefinition::configuration)
-            .findAny()
-            .orElseThrow();
     }
 }
