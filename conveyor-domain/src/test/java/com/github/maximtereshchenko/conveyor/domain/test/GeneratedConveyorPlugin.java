@@ -49,19 +49,29 @@ final class GeneratedConveyorPlugin extends GeneratedArtifact {
                         new ConveyorTaskBinding(
                             stage,
                             Step.PREPARE,
-                            () -> writeInstant(project.buildDirectory().resolve(fullName + "-prepared"))
+                            (buildFiles) -> writeInstant(
+                                buildFiles,
+                                project.buildDirectory().resolve(fullName + "-prepared")
+                            )
                         ),
                         new ConveyorTaskBinding(
                             stage,
                             Step.FINALIZE,
-                            () -> writeInstant(project.buildDirectory().resolve(fullName + "-finalized"))
+                            (buildFiles) -> writeInstant(
+                                buildFiles,
+                                project.buildDirectory().resolve(fullName + "-finalized")
+                            )
                         ),
-                        new ConveyorTaskBinding(stage, Step.RUN, () -> execute(project, configuration))
+                        new ConveyorTaskBinding(
+                            stage,
+                            Step.RUN,
+                            (buildFiles) -> execute(buildFiles, project, configuration)
+                        )
                     );
                 }
-                private void writeInstant(Path path) {
-                    write(path);
+                private BuildFiles writeInstant(BuildFiles buildFiles, Path path) {
                     sleep();
+                    return buildFiles.with(new BuildFile(write(path), BuildFileType.ARTIFACT));
                 }
                 private void sleep() {
                     try {
@@ -70,7 +80,7 @@ final class GeneratedConveyorPlugin extends GeneratedArtifact {
                         Thread.currentThread().interrupt();
                     }
                 }
-                private void execute(Project project, Map<String, String> configuration) {
+                private BuildFiles execute(BuildFiles buildFiles, Project project, Map<String, String> configuration) {
                     %s
                     write(
                         project.buildDirectory().resolve(fullName + "-configuration"),
@@ -84,14 +94,14 @@ final class GeneratedConveyorPlugin extends GeneratedArtifact {
                         project.buildDirectory().resolve(fullName + "-module-path-test"),
                         toString(project.modulePath(DependencyScope.TEST))
                     );
-                    writeInstant(project.buildDirectory().resolve(fullName + "-run"));
+                    return writeInstant(buildFiles, project.buildDirectory().resolve(fullName + "-run"));
                 }
-                private void write(Path path) {
-                    write(path, Instant.now().toString());
+                private Path write(Path path) {
+                    return write(path, Instant.now().toString());
                 }
-                private void write(Path path, String content) {
+                private Path write(Path path, String content) {
                     try {
-                        Files.writeString(path, content);
+                        return Files.writeString(path, content).toAbsolutePath().normalize();
                     } catch (IOException e) {
                         throw new UncheckedIOException(e);
                     }

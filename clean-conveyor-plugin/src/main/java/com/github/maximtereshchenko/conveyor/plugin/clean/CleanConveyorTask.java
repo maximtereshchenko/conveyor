@@ -1,5 +1,6 @@
 package com.github.maximtereshchenko.conveyor.plugin.clean;
 
+import com.github.maximtereshchenko.conveyor.common.api.BuildFiles;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -15,14 +16,15 @@ final class CleanConveyorTask implements ConveyorTask {
     }
 
     @Override
-    public void execute() {
+    public BuildFiles execute(BuildFiles buildFiles) {
         if (!Files.exists(directory)) {
-            return;
+            return buildFiles;
         }
         try {
             Files.walkFileTree(directory, new DeleteDirectoryRecursively());
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+        return buildFiles;
     }
 }

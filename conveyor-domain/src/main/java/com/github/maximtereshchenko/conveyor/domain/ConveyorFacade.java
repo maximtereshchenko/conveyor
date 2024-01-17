@@ -1,16 +1,14 @@
 package com.github.maximtereshchenko.conveyor.domain;
 
-import com.github.maximtereshchenko.conveyor.api.BuildResult;
-import com.github.maximtereshchenko.conveyor.api.BuildSucceeded;
 import com.github.maximtereshchenko.conveyor.api.ConveyorModule;
-import com.github.maximtereshchenko.conveyor.api.CouldNotFindProjectDefinition;
+import com.github.maximtereshchenko.conveyor.api.exception.CouldNotFindProjectDefinition;
 import com.github.maximtereshchenko.conveyor.api.port.PluginDefinition;
 import com.github.maximtereshchenko.conveyor.api.port.ProjectDefinition;
 import com.github.maximtereshchenko.conveyor.api.port.ProjectDefinitionReader;
 import com.github.maximtereshchenko.conveyor.api.port.StoredArtifactDefinitionReader;
+import com.github.maximtereshchenko.conveyor.common.api.BuildFiles;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskBinding;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -38,17 +36,16 @@ public final class ConveyorFacade implements ConveyorModule {
     }
 
     @Override
-    public BuildResult build(Path projectDefinitionPath, Stage stage) {
+    public BuildFiles build(Path projectDefinitionPath, Stage stage) {
         if (!Files.exists(projectDefinitionPath)) {
-            return new CouldNotFindProjectDefinition(projectDefinitionPath);
+            throw new CouldNotFindProjectDefinition(projectDefinitionPath);
         }
         var projectDefinition = projectDefinitionReader.projectDefinition(projectDefinitionPath);
         var repository = new DirectoryRepository(
             projectDefinitionPath.getParent().resolve(projectDefinition.repository()),
             storedArtifactDefinitionReader
         );
-        executeTasks(projectDefinitionPath, stage, repository, projectDefinition);
-        return new BuildSucceeded(projectDefinitionPath, projectDefinition.name(), projectDefinition.version());
+        return executeTasks(projectDefinitionPath, stage, repository, projectDefinition);
     }
 
     Set<Path> pluginsModulePath(DirectoryRepository repository, ProjectDefinition projectDefinition) {
@@ -59,20 +56,24 @@ public final class ConveyorFacade implements ConveyorModule {
             .collect(Collectors.toSet());
     }
 
-    private void executeTasks(
+    private BuildFiles executeTasks(
         Path projectDefinitionPath,
         Stage stage,
         DirectoryRepository repository,
         ProjectDefinition projectDefinition
     ) {
-        moduleLoader.conveyorPlugins(pluginsModulePath(repository, projectDefinition))
+        return moduleLoader.conveyorPlugins(pluginsModulePath(repository, projectDefinition))
             .stream()
             .map(conveyorPlugin -> bindings(conveyorPlugin, projectDefinitionPath, repository, projectDefinition))
             .flatMap(Collection::stream)
             .filter(binding -> binding.stage().compareTo(stage) <= 0)
             .sorted(Comparator.comparing(ConveyorTaskBinding::stage).thenComparing(ConveyorTaskBinding::step))
             .map(ConveyorTaskBinding::task)
-            .forEach(ConveyorTask::execute);
+            .reduce(
+                new BuildFiles(),
+                (buildFiles, task) -> task.execute(buildFiles),
+                (first, second) -> first
+            );
     }
 
     private Collection<ConveyorTaskBinding> bindings(

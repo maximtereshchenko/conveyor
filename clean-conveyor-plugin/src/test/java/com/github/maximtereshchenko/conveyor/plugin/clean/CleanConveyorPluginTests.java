@@ -2,6 +2,9 @@ package com.github.maximtereshchenko.conveyor.plugin.clean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.github.maximtereshchenko.conveyor.common.api.BuildFile;
+import com.github.maximtereshchenko.conveyor.common.api.BuildFileType;
+import com.github.maximtereshchenko.conveyor.common.api.BuildFiles;
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import com.github.maximtereshchenko.conveyor.common.api.Step;
@@ -76,6 +79,13 @@ final class CleanConveyorPluginTests {
         assertThat(path).isEmptyDirectory();
     }
 
+    @Test
+    void givenBuildFiles_whenExecuteTask_thenBuildFilesAreNotModified(@TempDir Path path) {
+        var buildFiles = new BuildFiles().with(new BuildFile(path, BuildFileType.SOURCE));
+
+        assertThat(executeTask(path, buildFiles)).isSameAs(buildFiles);
+    }
+
     Project project(Path buildDirectory) {
         return new Project() {
 
@@ -97,6 +107,10 @@ final class CleanConveyorPluginTests {
     }
 
     private void executeTask(Path path) {
-        plugin.bindings(project(path), Map.of()).iterator().next().task().execute();
+        executeTask(path, new BuildFiles());
+    }
+
+    private BuildFiles executeTask(Path path, BuildFiles buildFiles) {
+        return plugin.bindings(project(path), Map.of()).iterator().next().task().execute(buildFiles);
     }
 }

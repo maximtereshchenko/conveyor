@@ -1,13 +1,16 @@
 package com.github.maximtereshchenko.conveyor.domain.test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.github.maximtereshchenko.conveyor.api.BuildSucceeded;
 import com.github.maximtereshchenko.conveyor.api.ConveyorModule;
-import com.github.maximtereshchenko.conveyor.api.CouldNotFindProjectDefinition;
+import com.github.maximtereshchenko.conveyor.api.exception.CouldNotFindProjectDefinition;
 import com.github.maximtereshchenko.conveyor.api.port.PluginDefinition;
 import com.github.maximtereshchenko.conveyor.api.port.ProjectDefinition;
 import com.github.maximtereshchenko.conveyor.api.port.ProjectDependencyDefinition;
+import com.github.maximtereshchenko.conveyor.common.api.BuildFile;
+import com.github.maximtereshchenko.conveyor.common.api.BuildFileType;
+import com.github.maximtereshchenko.conveyor.common.api.BuildFiles;
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import com.github.maximtereshchenko.conveyor.domain.ConveyorFacade;
@@ -33,42 +36,59 @@ final class BuildProjectUseCaseTests {
     void givenNoProjectDefinition_whenBuild_thenCouldNotFindProjectDefinitionReturned(@TempDir Path path) {
         var nonExistent = path.resolve("non-existent.json");
 
-        assertThat(module.build(nonExistent, Stage.COMPILE)).isEqualTo(new CouldNotFindProjectDefinition(nonExistent));
+        assertThatThrownBy(() -> module.build(nonExistent, Stage.COMPILE))
+            .isInstanceOf(CouldNotFindProjectDefinition.class)
+            .hasMessage(nonExistent.toString());
     }
 
     @Test
-    void givenProjectDefinition_whenBuild_thenProjectIsBuilt(@TempDir Path path) {
-        var conveyorJson = conveyorJson(path);
-
+    void givenNoConveyorPluginsDeclared_whenBuild_thenNoBuildFiles(@TempDir Path path) {
         assertThat(module.build(conveyorJson(path), Stage.COMPILE))
-            .isEqualTo(new BuildSucceeded(conveyorJson, "project", 1));
+            .isEqualTo(new BuildFiles());
     }
 
     @Test
     void givenConveyorPluginDeclared_whenBuild_thenTaskFromPluginExecuted(@TempDir Path path) throws Exception {
-        module.build(
-            conveyorJson(path, new GeneratedConveyorPlugin("plugin").install(path)),
-            Stage.COMPILE
-        );
-
-        assertThat(defaultBuildDirectory(path)).isDirectoryContaining("glob:**plugin-1-run");
+        assertThat(
+            module.build(
+                conveyorJson(path, new GeneratedConveyorPlugin("plugin").install(path)),
+                Stage.COMPILE
+            )
+        )
+            .isEqualTo(
+                new BuildFiles(
+                    new BuildFile(
+                        defaultBuildDirectory(path).resolve("plugin-1-prepared"),
+                        BuildFileType.ARTIFACT
+                    ),
+                    new BuildFile(
+                        defaultBuildDirectory(path).resolve("plugin-1-run"),
+                        BuildFileType.ARTIFACT
+                    ),
+                    new BuildFile(
+                        defaultBuildDirectory(path).resolve("plugin-1-finalized"),
+                        BuildFileType.ARTIFACT
+                    )
+                )
+            );
     }
 
     @Test
     void givenTaskBindToCompileStage_whenBuildUntilCleanStage_thenTaskDidNotExecuted(@TempDir Path path)
         throws Exception {
-        module.build(
-            conveyorJson(path, new GeneratedConveyorPlugin("plugin").install(path)),
-            Stage.CLEAN
-        );
-
-        assertThat(defaultBuildDirectory(path)).doesNotExist();
+        assertThat(
+            module.build(
+                conveyorJson(path, new GeneratedConveyorPlugin("plugin").install(path)),
+                Stage.CLEAN
+            )
+        )
+            .isEqualTo(new BuildFiles());
     }
 
     @Test
     void givenPluginsRequireCommonDependency_whenBuild_thenDependencyUsedWithHigherVersion(@TempDir Path path)
         throws Exception {
-        module.build(
+        var buildFiles = module.build(
             conveyorJson(
                 path,
                 new GeneratedConveyorPlugin(
@@ -85,8 +105,18 @@ final class BuildProjectUseCaseTests {
             Stage.COMPILE
         );
 
-        assertThat(defaultBuildDirectory(path)).isDirectoryContaining("glob:**first-plugin-1-run")
-            .isDirectoryContaining("glob:**second-plugin-1-run")
+        assertThat(buildFiles.byType(BuildFileType.ARTIFACT))
+            .contains(
+                new BuildFile(
+                    defaultBuildDirectory(path).resolve("first-plugin-1-run"),
+                    BuildFileType.ARTIFACT
+                ),
+                new BuildFile(
+                    defaultBuildDirectory(path).resolve("second-plugin-1-run"),
+                    BuildFileType.ARTIFACT
+                )
+            );
+        assertThat(defaultBuildDirectory(path))
             .isDirectoryContaining("glob:**dependency-2")
             .isDirectoryNotContaining("glob:**dependency-1");
     }
@@ -94,7 +124,7 @@ final class BuildProjectUseCaseTests {
     @Test
     void givenPluginRequireTransitiveDependency_whenBuild_thenTransitiveDependencyLoaded(@TempDir Path path)
         throws Exception {
-        module.build(
+        var buildFiles = module.build(
             conveyorJson(
                 path,
                 new GeneratedConveyorPlugin(
@@ -110,7 +140,14 @@ final class BuildProjectUseCaseTests {
             Stage.COMPILE
         );
 
-        assertThat(defaultBuildDirectory(path)).isDirectoryContaining("glob:**plugin-1-run")
+        assertThat(buildFiles.byType(BuildFileType.ARTIFACT))
+            .contains(
+                new BuildFile(
+                    defaultBuildDirectory(path).resolve("plugin-1-run"),
+                    BuildFileType.ARTIFACT
+                )
+            );
+        assertThat(defaultBuildDirectory(path))
             .isDirectoryContaining("glob:**dependency-1")
             .isDirectoryContaining("glob:**transitive-1");
     }
@@ -148,10 +185,20 @@ final class BuildProjectUseCaseTests {
         );
         Files.delete(transitive.jar());
 
-        module.build(conveyorJson, Stage.COMPILE);
+        var buildFiles = module.build(conveyorJson, Stage.COMPILE);
 
-        assertThat(defaultBuildDirectory(path)).isDirectoryContaining("glob:**first-plugin-1-run")
-            .isDirectoryContaining("glob:**second-plugin-1-run")
+        assertThat(buildFiles.byType(BuildFileType.ARTIFACT))
+            .contains(
+                new BuildFile(
+                    defaultBuildDirectory(path).resolve("first-plugin-1-run"),
+                    BuildFileType.ARTIFACT
+                ),
+                new BuildFile(
+                    defaultBuildDirectory(path).resolve("second-plugin-1-run"),
+                    BuildFileType.ARTIFACT
+                )
+            );
+        assertThat(defaultBuildDirectory(path))
             .isDirectoryContaining("glob:**dependency-1")
             .isDirectoryContaining("glob:**common-dependency-2");
     }
@@ -160,8 +207,6 @@ final class BuildProjectUseCaseTests {
     void givenDependencyAffectResolvedVersions_whenBuildWithDependencyExcluded_thenItShouldNotAffectVersions(
         @TempDir Path path
     ) throws Exception {
-        var defaultBuildDirectory = defaultBuildDirectory(path);
-
         module.build(
             conveyorJson(
                 path,
@@ -188,7 +233,8 @@ final class BuildProjectUseCaseTests {
             Stage.COMPILE
         );
 
-        assertThat(defaultBuildDirectory).isDirectoryContaining("glob:**plugin-1-run")
+        assertThat(defaultBuildDirectory(path))
+            .isDirectoryContaining("glob:**plugin-1-run")
             .isDirectoryContaining("glob:**will-remove-dependency-1")
             .isDirectoryContaining("glob:**can-affect-versions-2")
             .isDirectoryContaining("glob:**should-not-be-updated-1")
@@ -306,7 +352,7 @@ final class BuildProjectUseCaseTests {
         throws Exception {
         var project = Files.createDirectory(path.resolve("project"));
 
-        module.build(
+        var buildFiles = module.build(
             conveyorJson(
                 path,
                 Map.of("conveyor.project.directory", project.toString()),
@@ -315,7 +361,10 @@ final class BuildProjectUseCaseTests {
             Stage.COMPILE
         );
 
-        assertThat(defaultBuildDirectory(project)).isDirectoryContaining("glob:**plugin-1-run");
+        assertThat(buildFiles.byType(BuildFileType.ARTIFACT))
+            .contains(
+                new BuildFile(defaultBuildDirectory(project).resolve("plugin-1-run"), BuildFileType.ARTIFACT)
+            );
     }
 
     @Test
@@ -324,7 +373,7 @@ final class BuildProjectUseCaseTests {
     ) throws Exception {
         var project = Files.createDirectory(path.resolve("project"));
 
-        module.build(
+        var buildFiles = module.build(
             conveyorJson(
                 path,
                 Map.of(
@@ -336,7 +385,10 @@ final class BuildProjectUseCaseTests {
             Stage.COMPILE
         );
 
-        assertThat(defaultBuildDirectory(project)).isDirectoryContaining("glob:**plugin-1-run");
+        assertThat(buildFiles.byType(BuildFileType.ARTIFACT))
+            .contains(
+                new BuildFile(defaultBuildDirectory(project).resolve("plugin-1-run"), BuildFileType.ARTIFACT)
+            );
     }
 
     @Test
@@ -345,7 +397,7 @@ final class BuildProjectUseCaseTests {
     ) throws Exception {
         var build = path.resolve("build");
 
-        module.build(
+        var buildFiles = module.build(
             conveyorJson(
                 path,
                 Map.of("conveyor.project.build.directory", build.toString()),
@@ -354,7 +406,10 @@ final class BuildProjectUseCaseTests {
             Stage.COMPILE
         );
 
-        assertThat(build).isDirectoryContaining("glob:**plugin-1-run");
+        assertThat(buildFiles.byType(BuildFileType.ARTIFACT))
+            .contains(
+                new BuildFile(build.resolve("plugin-1-run"), BuildFileType.ARTIFACT)
+            );
     }
 
     @Test
@@ -363,7 +418,7 @@ final class BuildProjectUseCaseTests {
     ) throws Exception {
         var project = path.resolve("project");
 
-        module.build(
+        var buildFiles = module.build(
             conveyorJson(
                 path,
                 Map.of(
@@ -375,7 +430,10 @@ final class BuildProjectUseCaseTests {
             Stage.COMPILE
         );
 
-        assertThat(project.resolve("build")).isDirectoryContaining("glob:**plugin-1-run");
+        assertThat(buildFiles.byType(BuildFileType.ARTIFACT))
+            .contains(
+                new BuildFile(project.resolve("build").resolve("plugin-1-run"), BuildFileType.ARTIFACT)
+            );
     }
 
     private Collection<Path> modulePath(Path path) throws IOException {
