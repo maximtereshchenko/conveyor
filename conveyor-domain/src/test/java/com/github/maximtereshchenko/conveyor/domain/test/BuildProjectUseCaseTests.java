@@ -45,7 +45,7 @@ final class BuildProjectUseCaseTests {
     }
 
     @Test
-    void givenNoConveyorPluginsDeclared_whenBuild_thenNoBuildFiles(@TempDir Path path) throws Exception {
+    void givenNoConveyorPluginsDeclared_whenBuild_thenNoBuildFiles(@TempDir Path path) {
         installSuperParent(path);
 
         assertThat(module.build(conveyorJson(path), Stage.COMPILE))
@@ -566,6 +566,7 @@ final class BuildProjectUseCaseTests {
         new GeneratedConveyorPlugin(gsonAdapter, "plugin").install(path);
         installSuperParent(
             path,
+            Map.of(),
             List.of(new PluginDefinition("plugin", 1, Map.of("key", "parent-value"))),
             List.of()
         );
@@ -586,12 +587,13 @@ final class BuildProjectUseCaseTests {
     }
 
     @Test
-    void givenPluginDeclaredInChildWithAdditionalConfiguration_whenBuild_thenPluginConfigurationShouldBeMerged(
+    void givenPluginDeclaredInChildWithAdditionalConfiguration_whenBuild_thenPluginConfigurationsAreMerged(
         @TempDir Path path
     ) throws Exception {
         new GeneratedConveyorPlugin(gsonAdapter, "plugin").install(path);
         installSuperParent(
             path,
+            Map.of(),
             List.of(new PluginDefinition("plugin", 1, Map.of("parent-key", "value"))),
             List.of()
         );
@@ -619,6 +621,7 @@ final class BuildProjectUseCaseTests {
         var test = new GeneratedDependency(gsonAdapter, "test").install(path);
         installSuperParent(
             path,
+            Map.of(),
             List.of(),
             List.of(
                 new DependencyDefinition(
@@ -644,9 +647,72 @@ final class BuildProjectUseCaseTests {
             .containsExactly(test.jar());
     }
 
+    @Test
+    void givenChildHasDifferentProperty_whenBuild_thenPropertiesAreMerged(@TempDir Path path) throws Exception {
+        installSuperParent(
+            path,
+            Map.of("parent-key", "parent-value"),
+            List.of(),
+            List.of()
+        );
+        var plugin = new GeneratedConveyorPlugin(gsonAdapter, "plugin").install(path);
+
+        module.build(
+            conveyorJson(
+                path,
+                Map.of("child-key", "child-value"),
+                List.of(new PluginDefinition(
+                    plugin.name(),
+                    plugin.version(),
+                    Map.of(
+                        "parent-key", "${parent-key}",
+                        "child-key", "${child-key}"
+                    )
+                )),
+                List.of()
+            ),
+            Stage.COMPILE
+        );
+
+        assertThat(defaultBuildDirectory(path).resolve("plugin-1-configuration"))
+            .content(StandardCharsets.UTF_8)
+            .containsIgnoringNewLines("parent-key=parent-value", "child-key=child-value");
+    }
+
+    @Test
+    void givenChildHasPropertyWithSameKey_whenBuild_thenChildPropertyValueTookPrecedence(@TempDir Path path)
+        throws Exception {
+        installSuperParent(
+            path,
+            Map.of("key", "parent-value"),
+            List.of(),
+            List.of()
+        );
+        var plugin = new GeneratedConveyorPlugin(gsonAdapter, "plugin").install(path);
+
+        module.build(
+            conveyorJson(
+                path,
+                Map.of("key", "child-value"),
+                List.of(new PluginDefinition(
+                    plugin.name(),
+                    plugin.version(),
+                    Map.of("key", "${key}")
+                )),
+                List.of()
+            ),
+            Stage.COMPILE
+        );
+
+        assertThat(defaultBuildDirectory(path).resolve("plugin-1-configuration"))
+            .content(StandardCharsets.UTF_8)
+            .isEqualTo("key=child-value");
+    }
+
     private void installSuperParent(Path path, GeneratedArtifactDefinition... plugins) {
         installSuperParent(
             path,
+            Map.of(),
             Stream.of(plugins)
                 .map(definition -> new PluginDefinition(definition.name(), definition.version(), Map.of()))
                 .toList(),
@@ -656,6 +722,7 @@ final class BuildProjectUseCaseTests {
 
     private void installSuperParent(
         Path path,
+        Map<String, String> properties,
         Collection<PluginDefinition> plugins,
         Collection<DependencyDefinition> dependencies
     ) {
@@ -666,7 +733,7 @@ final class BuildProjectUseCaseTests {
                 1,
                 new NoExplicitParent(),
                 null,
-                Map.of(),
+                properties,
                 plugins,
                 dependencies
             )
