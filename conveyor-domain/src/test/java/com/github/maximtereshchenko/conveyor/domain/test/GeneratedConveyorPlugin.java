@@ -2,6 +2,7 @@ package com.github.maximtereshchenko.conveyor.domain.test;
 
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import com.github.maximtereshchenko.conveyor.gson.GsonAdapter;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -16,18 +17,11 @@ final class GeneratedConveyorPlugin extends GeneratedArtifact {
         String name,
         int version,
         Stage stage,
-        GeneratedArtifactDefinition... dependencies
+        Collection<GeneratedArtifactDefinition> dependencies,
+        Collection<GeneratedArtifactDefinition> testDependencies
     ) {
-        super(gsonAdapter, name, version, List.of(dependencies));
+        super(gsonAdapter, name, version, dependencies, testDependencies);
         this.stage = stage;
-    }
-
-    GeneratedConveyorPlugin(
-        GsonAdapter gsonAdapter,
-        String name,
-        int version
-    ) {
-        this(gsonAdapter, name, version, Stage.COMPILE);
     }
 
     GeneratedConveyorPlugin(
@@ -36,7 +30,15 @@ final class GeneratedConveyorPlugin extends GeneratedArtifact {
         Stage stage,
         GeneratedArtifactDefinition... dependencies
     ) {
-        this(gsonAdapter, name, 1, stage, dependencies);
+        this(gsonAdapter, name, 1, stage, List.of(dependencies), List.of());
+    }
+
+    GeneratedConveyorPlugin(
+        GsonAdapter gsonAdapter,
+        String name,
+        int version
+    ) {
+        this(gsonAdapter, name, version, Stage.COMPILE, List.of(), List.of());
     }
 
     GeneratedConveyorPlugin(GsonAdapter gsonAdapter, String name, GeneratedArtifactDefinition... dependencies) {

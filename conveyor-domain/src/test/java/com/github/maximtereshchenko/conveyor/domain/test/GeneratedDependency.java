@@ -12,9 +12,10 @@ final class GeneratedDependency extends GeneratedArtifact {
         GsonAdapter gsonAdapter,
         String name,
         int version,
-        Collection<GeneratedArtifactDefinition> dependencies
+        Collection<GeneratedArtifactDefinition> dependencies,
+        Collection<GeneratedArtifactDefinition> testDependencies
     ) {
-        super(gsonAdapter, name, version, dependencies);
+        super(gsonAdapter, name, version, dependencies, testDependencies);
     }
 
     GeneratedDependency(
@@ -23,11 +24,11 @@ final class GeneratedDependency extends GeneratedArtifact {
         int version,
         GeneratedArtifactDefinition... dependencies
     ) {
-        this(gsonAdapter, name, version, List.of(dependencies));
+        this(gsonAdapter, name, version, List.of(dependencies), List.of());
     }
 
     GeneratedDependency(GsonAdapter gsonAdapter, String name, GeneratedArtifactDefinition... dependencies) {
-        this(gsonAdapter, name, 1, List.of(dependencies));
+        this(gsonAdapter, name, 1, List.of(dependencies), List.of());
     }
 
     @Override

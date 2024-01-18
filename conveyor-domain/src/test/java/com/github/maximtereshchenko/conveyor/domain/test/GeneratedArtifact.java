@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import javax.tools.FileObject;
@@ -35,17 +36,20 @@ abstract class GeneratedArtifact {
     private final String name;
     private final int version;
     private final Collection<GeneratedArtifactDefinition> dependencies;
+    private final Collection<GeneratedArtifactDefinition> testDependencies;
 
     GeneratedArtifact(
         GsonAdapter gsonAdapter,
         String name,
         int version,
-        Collection<GeneratedArtifactDefinition> dependencies
+        Collection<GeneratedArtifactDefinition> dependencies,
+        Collection<GeneratedArtifactDefinition> testDependencies
     ) {
         this.gsonAdapter = gsonAdapter;
         this.name = name;
         this.version = version;
         this.dependencies = List.copyOf(dependencies);
+        this.testDependencies = List.copyOf(testDependencies);
     }
 
     final String name() {
@@ -73,13 +77,11 @@ abstract class GeneratedArtifact {
                 null,
                 Map.of(),
                 List.of(),
-                dependencies.stream()
-                    .map(definition ->
-                        new DependencyDefinition(
-                            definition.name(),
-                            definition.version(),
-                            DependencyScope.IMPLEMENTATION
-                        )
+                Stream.concat(
+                        dependencies.stream()
+                            .map(definition -> dependencyDefinition(definition, DependencyScope.IMPLEMENTATION)),
+                        testDependencies.stream()
+                            .map(definition -> dependencyDefinition(definition, DependencyScope.TEST))
                     )
                     .toList()
             )
@@ -101,6 +103,10 @@ abstract class GeneratedArtifact {
 
     final String packageName() {
         return name.replace("-", "");
+    }
+
+    private DependencyDefinition dependencyDefinition(GeneratedArtifactDefinition definition, DependencyScope scope) {
+        return new DependencyDefinition(definition.name(), definition.version(), scope);
     }
 
     private void writeJar(Path path, Collection<FileObject> compiled) throws IOException {
