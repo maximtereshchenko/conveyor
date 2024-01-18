@@ -1,5 +1,6 @@
 package com.github.maximtereshchenko.conveyor.gson;
 
+import com.github.maximtereshchenko.conveyor.api.port.ParentDefinition;
 import com.github.maximtereshchenko.conveyor.api.port.ProjectDefinition;
 import com.github.maximtereshchenko.conveyor.api.port.ProjectDefinitionReader;
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
@@ -14,6 +15,7 @@ public final class GsonAdapter implements ProjectDefinitionReader {
 
     private final Gson gson = new GsonBuilder()
         .registerTypeHierarchyAdapter(Path.class, new PathTypeAdapter())
+        .registerTypeHierarchyAdapter(ParentDefinition.class, new ParentDefinitionAdapter())
         .registerTypeAdapter(DependencyScope.class, new DependencyScopeAdapter())
         .create();
 

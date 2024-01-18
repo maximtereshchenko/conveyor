@@ -1,9 +1,9 @@
 package com.github.maximtereshchenko.conveyor.domain;
 
 import com.github.maximtereshchenko.conveyor.api.port.ArtifactDefinition;
+import com.github.maximtereshchenko.conveyor.api.port.DependencyDefinition;
 import com.github.maximtereshchenko.conveyor.api.port.PluginDefinition;
 import com.github.maximtereshchenko.conveyor.api.port.ProjectDefinition;
-import com.github.maximtereshchenko.conveyor.api.port.ProjectDependencyDefinition;
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,33 +16,33 @@ import java.util.stream.Stream;
 
 final class Dependencies {
 
-    private final ProjectDefinition projectDefinition;
+    private final Project project;
     private final Collection<Artifact> artifacts;
 
-    private Dependencies(ProjectDefinition projectDefinition, Collection<Artifact> artifacts) {
-        this.projectDefinition = projectDefinition;
+    private Dependencies(Project project, Collection<Artifact> artifacts) {
+        this.project = project;
         this.artifacts = List.copyOf(artifacts);
     }
 
-    static Dependencies forPlugins(DirectoryRepository repository, ProjectDefinition projectDefinition) {
+    static Dependencies forPlugins(DirectoryRepository repository, Project project) {
         return dependencies(
             repository,
-            new Dependencies(projectDefinition, List.of(new PluginsRoot(projectDefinition))),
-            projectDefinition,
-            projectDefinition.plugins()
+            new Dependencies(project, List.of(new PluginsRoot(project))),
+            project.definition(),
+            project.plugins()
         );
     }
 
     static Dependencies forDependencies(
         DirectoryRepository repository,
-        ProjectDefinition projectDefinition,
+        Project project,
         DependencyScope... scopes
     ) {
         return dependencies(
             repository,
-            new Dependencies(projectDefinition, List.of(new DependenciesRoot(projectDefinition, Set.of(scopes)))),
-            projectDefinition,
-            projectDefinition.dependencies()
+            new Dependencies(project, List.of(new DependenciesRoot(project.definition(), Set.of(scopes)))),
+            project.definition(),
+            project.definition().dependencies()
         );
     }
 
@@ -64,15 +64,15 @@ final class Dependencies {
     }
 
     Set<ArtifactDefinition> modulePath() {
-        var modulePath = new HashSet<>(modulePath(projectDefinition.name(), projectDefinition.version()));
-        modulePath.remove(projectDefinition);
+        var modulePath = new HashSet<>(modulePath(project.definition().name(), project.definition().version()));
+        modulePath.remove(project.definition());
         return Set.copyOf(modulePath);
     }
 
     private Dependencies with(ArtifactDefinition affectedBy, ProjectDefinition projectDefinition) {
         var copy = new ArrayList<>(artifacts);
         copy.add(new Dependency(affectedBy, projectDefinition));
-        return new Dependencies(this.projectDefinition, copy);
+        return new Dependencies(project, copy);
     }
 
     private int effectiveVersion(String name) {
@@ -114,7 +114,7 @@ final class Dependencies {
         Set<String> dependsOn() {
             return projectDefinition.dependencies()
                 .stream()
-                .map(ProjectDependencyDefinition::name)
+                .map(DependencyDefinition::name)
                 .collect(Collectors.toSet());
         }
 
@@ -122,11 +122,11 @@ final class Dependencies {
 
     private static final class PluginsRoot extends Artifact {
 
-        private final ProjectDefinition projectDefinition;
+        private final Project project;
 
-        PluginsRoot(ProjectDefinition projectDefinition) {
-            super(projectDefinition);
-            this.projectDefinition = projectDefinition;
+        PluginsRoot(Project project) {
+            super(project.definition());
+            this.project = project;
         }
 
         @Override
@@ -136,7 +136,7 @@ final class Dependencies {
 
         @Override
         Set<String> dependsOn() {
-            return projectDefinition.plugins()
+            return project.plugins()
                 .stream()
                 .map(PluginDefinition::name)
                 .collect(Collectors.toSet());
@@ -164,7 +164,7 @@ final class Dependencies {
             return projectDefinition.dependencies()
                 .stream()
                 .filter(definition -> scopes.contains(definition.scope()))
-                .map(ProjectDependencyDefinition::name)
+                .map(DependencyDefinition::name)
                 .collect(Collectors.toSet());
         }
     }

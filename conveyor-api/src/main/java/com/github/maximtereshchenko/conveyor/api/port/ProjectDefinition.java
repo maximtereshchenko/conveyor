@@ -10,13 +10,15 @@ import java.util.Objects;
 public record ProjectDefinition(
     String name,
     int version,
+    ParentDefinition parent,
     Path repository,
     Map<String, String> properties,
     Collection<PluginDefinition> plugins,
-    Collection<ProjectDependencyDefinition> dependencies
+    Collection<DependencyDefinition> dependencies
 ) implements ArtifactDefinition {
 
     public ProjectDefinition {
+        parent = Objects.requireNonNullElse(parent, new NoExplicitParent());
         repository = Objects.requireNonNullElse(repository, Paths.get(""));
         properties = Objects.requireNonNullElse(properties, Map.of());
         plugins = Objects.requireNonNullElse(plugins, List.of());

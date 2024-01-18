@@ -5,9 +5,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.github.maximtereshchenko.conveyor.api.ConveyorModule;
 import com.github.maximtereshchenko.conveyor.api.exception.CouldNotFindProjectDefinition;
+import com.github.maximtereshchenko.conveyor.api.port.DependencyDefinition;
+import com.github.maximtereshchenko.conveyor.api.port.NoExplicitParent;
 import com.github.maximtereshchenko.conveyor.api.port.PluginDefinition;
 import com.github.maximtereshchenko.conveyor.api.port.ProjectDefinition;
-import com.github.maximtereshchenko.conveyor.api.port.ProjectDependencyDefinition;
 import com.github.maximtereshchenko.conveyor.common.api.BuildFile;
 import com.github.maximtereshchenko.conveyor.common.api.BuildFileType;
 import com.github.maximtereshchenko.conveyor.common.api.BuildFiles;
@@ -24,6 +25,7 @@ import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -42,16 +44,20 @@ final class BuildProjectUseCaseTests {
     }
 
     @Test
-    void givenNoConveyorPluginsDeclared_whenBuild_thenNoBuildFiles(@TempDir Path path) {
+    void givenNoConveyorPluginsDeclared_whenBuild_thenNoBuildFiles(@TempDir Path path) throws Exception {
+        installSuperParent(path);
+
         assertThat(module.build(conveyorJson(path), Stage.COMPILE))
             .isEqualTo(new BuildFiles());
     }
 
     @Test
     void givenConveyorPluginDeclared_whenBuild_thenTaskFromPluginExecuted(@TempDir Path path) throws Exception {
+        installSuperParent(path);
+
         assertThat(
             module.build(
-                conveyorJson(path, new GeneratedConveyorPlugin("plugin").install(path)),
+                conveyorJson(path, new GeneratedConveyorPlugin(gsonAdapter, "plugin").install(path)),
                 Stage.COMPILE
             )
         )
@@ -76,9 +82,11 @@ final class BuildProjectUseCaseTests {
     @Test
     void givenTaskBindToCompileStage_whenBuildUntilCleanStage_thenTaskDidNotExecuted(@TempDir Path path)
         throws Exception {
+        installSuperParent(path);
+
         assertThat(
             module.build(
-                conveyorJson(path, new GeneratedConveyorPlugin("plugin").install(path)),
+                conveyorJson(path, new GeneratedConveyorPlugin(gsonAdapter, "plugin").install(path)),
                 Stage.CLEAN
             )
         )
@@ -88,17 +96,21 @@ final class BuildProjectUseCaseTests {
     @Test
     void givenPluginsRequireCommonDependency_whenBuild_thenDependencyUsedWithHigherVersion(@TempDir Path path)
         throws Exception {
+        installSuperParent(path);
+
         var buildFiles = module.build(
             conveyorJson(
                 path,
                 new GeneratedConveyorPlugin(
+                    gsonAdapter,
                     "first-plugin",
-                    new GeneratedDependency("dependency", 1).install(path)
+                    new GeneratedDependency(gsonAdapter, "dependency", 1).install(path)
                 )
                     .install(path),
                 new GeneratedConveyorPlugin(
+                    gsonAdapter,
                     "second-plugin",
-                    new GeneratedDependency("dependency", 2).install(path)
+                    new GeneratedDependency(gsonAdapter, "dependency", 2).install(path)
                 )
                     .install(path)
             ),
@@ -124,14 +136,18 @@ final class BuildProjectUseCaseTests {
     @Test
     void givenPluginRequireTransitiveDependency_whenBuild_thenTransitiveDependencyLoaded(@TempDir Path path)
         throws Exception {
+        installSuperParent(path);
+
         var buildFiles = module.build(
             conveyorJson(
                 path,
                 new GeneratedConveyorPlugin(
+                    gsonAdapter,
                     "plugin",
                     new GeneratedDependency(
+                        gsonAdapter,
                         "dependency",
-                        new GeneratedDependency("transitive").install(path)
+                        new GeneratedDependency(gsonAdapter, "transitive").install(path)
                     )
                         .install(path)
                 )
@@ -156,12 +172,15 @@ final class BuildProjectUseCaseTests {
     void givenPluginRequireTransitiveDependency_whenBuildWithHigherVersion_thenTransitiveDependencyExcluded(
         @TempDir Path path
     ) throws Exception {
-        var transitive = new GeneratedDependency("transitive", 1).install(path);
+        installSuperParent(path);
+        var transitive = new GeneratedDependency(gsonAdapter, "transitive", 1).install(path);
         var conveyorJson = conveyorJson(
             path,
             new GeneratedConveyorPlugin(
+                gsonAdapter,
                 "first-plugin",
                 new GeneratedDependency(
+                    gsonAdapter,
                     "common-dependency",
                     1,
                     transitive
@@ -170,10 +189,13 @@ final class BuildProjectUseCaseTests {
             )
                 .install(path),
             new GeneratedConveyorPlugin(
+                gsonAdapter,
                 "second-plugin",
                 new GeneratedDependency(
+                    gsonAdapter,
                     "dependency",
                     new GeneratedDependency(
+                        gsonAdapter,
                         "common-dependency",
                         2
                     )
@@ -207,23 +229,28 @@ final class BuildProjectUseCaseTests {
     void givenDependencyAffectResolvedVersions_whenBuildWithDependencyExcluded_thenItShouldNotAffectVersions(
         @TempDir Path path
     ) throws Exception {
+        installSuperParent(path);
+
         module.build(
             conveyorJson(
                 path,
                 new GeneratedConveyorPlugin(
+                    gsonAdapter,
                     "plugin",
-                    new GeneratedDependency("should-not-be-updated", 1)
+                    new GeneratedDependency(gsonAdapter, "should-not-be-updated", 1)
                         .install(path),
                     new GeneratedDependency(
+                        gsonAdapter,
                         "can-affect-versions",
                         1,
-                        new GeneratedDependency("should-not-be-updated", 2)
+                        new GeneratedDependency(gsonAdapter, "should-not-be-updated", 2)
                             .install(path)
                     )
                         .install(path),
                     new GeneratedDependency(
+                        gsonAdapter,
                         "will-remove-dependency",
-                        new GeneratedDependency("can-affect-versions", 2)
+                        new GeneratedDependency(gsonAdapter, "can-affect-versions", 2)
                             .install(path)
                     )
                         .install(path)
@@ -243,7 +270,8 @@ final class BuildProjectUseCaseTests {
 
     @Test
     void givenPluginConfiguration_whenBuild_thenPluginCanSeeItsConfiguration(@TempDir Path path) throws Exception {
-        new GeneratedConveyorPlugin("plugin").install(path);
+        installSuperParent(path);
+        new GeneratedConveyorPlugin(gsonAdapter, "plugin").install(path);
 
         module.build(
             conveyorJson(
@@ -262,7 +290,8 @@ final class BuildProjectUseCaseTests {
 
     @Test
     void givenProperty_whenBuild_thenPropertyInterpolatedIntoPluginConfiguration(@TempDir Path path) throws Exception {
-        new GeneratedConveyorPlugin("plugin").install(path);
+        installSuperParent(path);
+        new GeneratedConveyorPlugin(gsonAdapter, "plugin").install(path);
 
         module.build(
             conveyorJson(
@@ -281,10 +310,11 @@ final class BuildProjectUseCaseTests {
 
     @Test
     void givenPluginDeclared_whenBuild_thenTasksShouldRunInStepOrder(@TempDir Path path) throws Exception {
+        installSuperParent(path);
         module.build(
             conveyorJson(
                 path,
-                new GeneratedConveyorPlugin("plugin").install(path)
+                new GeneratedConveyorPlugin(gsonAdapter, "plugin").install(path)
             ),
             Stage.COMPILE
         );
@@ -299,11 +329,13 @@ final class BuildProjectUseCaseTests {
 
     @Test
     void givenMultiplePlugins_whenBuild_thenTasksShouldRunInStageOrder(@TempDir Path path) throws Exception {
+        installSuperParent(path);
+
         module.build(
             conveyorJson(
                 path,
-                new GeneratedConveyorPlugin("clean", Stage.CLEAN).install(path),
-                new GeneratedConveyorPlugin("compile", Stage.COMPILE).install(path)
+                new GeneratedConveyorPlugin(gsonAdapter, "clean", Stage.CLEAN).install(path),
+                new GeneratedConveyorPlugin(gsonAdapter, "compile", Stage.COMPILE).install(path)
             ),
             Stage.COMPILE
         );
@@ -324,14 +356,15 @@ final class BuildProjectUseCaseTests {
 
     @Test
     void givenDependenciesDeclared_whenBuild_thenPluginCanAccessModulePath(@TempDir Path path) throws Exception {
-        var implementation = new GeneratedDependency("implementation").install(path);
-        var test = new GeneratedDependency("test").install(path);
+        installSuperParent(path);
+        var implementation = new GeneratedDependency(gsonAdapter, "implementation").install(path);
+        var test = new GeneratedDependency(gsonAdapter, "test").install(path);
 
         module.build(
             conveyorJson(
                 path,
                 Map.of(),
-                List.of(new GeneratedConveyorPlugin("plugin").install(path)),
+                List.of(new GeneratedConveyorPlugin(gsonAdapter, "plugin").install(path)),
                 Map.of(
                     implementation, DependencyScope.IMPLEMENTATION,
                     test, DependencyScope.TEST
@@ -350,13 +383,14 @@ final class BuildProjectUseCaseTests {
     @Test
     void givenProjectDirectoryProperty_whenBuild_thenProjectBuiltInSpecifiedDirectory(@TempDir Path path)
         throws Exception {
+        installSuperParent(path);
         var project = Files.createDirectory(path.resolve("project"));
 
         var buildFiles = module.build(
             conveyorJson(
                 path,
                 Map.of("conveyor.project.directory", project.toString()),
-                new GeneratedConveyorPlugin("plugin").install(path)
+                new GeneratedConveyorPlugin(gsonAdapter, "plugin").install(path)
             ),
             Stage.COMPILE
         );
@@ -371,6 +405,7 @@ final class BuildProjectUseCaseTests {
     void givenRelativeProjectDirectoryProperty_whenBuild_thenProjectDirectoryIsRelativeToWorkingDirectory(
         @TempDir Path path
     ) throws Exception {
+        installSuperParent(path);
         var project = Files.createDirectory(path.resolve("project"));
 
         var buildFiles = module.build(
@@ -380,7 +415,7 @@ final class BuildProjectUseCaseTests {
                     "conveyor.project.directory",
                     Paths.get("").toAbsolutePath().relativize(project).toString()
                 ),
-                new GeneratedConveyorPlugin("plugin").install(path)
+                new GeneratedConveyorPlugin(gsonAdapter, "plugin").install(path)
             ),
             Stage.COMPILE
         );
@@ -395,13 +430,14 @@ final class BuildProjectUseCaseTests {
     void givenProjectBuildDirectoryProperty_whenBuild_thenProjectBuiltInSpecifiedDirectory(
         @TempDir Path path
     ) throws Exception {
+        installSuperParent(path);
         var build = path.resolve("build");
 
         var buildFiles = module.build(
             conveyorJson(
                 path,
                 Map.of("conveyor.project.build.directory", build.toString()),
-                new GeneratedConveyorPlugin("plugin").install(path)
+                new GeneratedConveyorPlugin(gsonAdapter, "plugin").install(path)
             ),
             Stage.COMPILE
         );
@@ -416,6 +452,7 @@ final class BuildProjectUseCaseTests {
     void givenRelativeProjectBuildDirectoryProperty_whenBuild_thenProjectBuildDirectoryIsRelativeToProjectDirectory(
         @TempDir Path path
     ) throws Exception {
+        installSuperParent(path);
         var project = path.resolve("project");
 
         var buildFiles = module.build(
@@ -425,7 +462,7 @@ final class BuildProjectUseCaseTests {
                     "conveyor.project.directory", project.toString(),
                     "conveyor.project.build.directory", "./build"
                 ),
-                new GeneratedConveyorPlugin("plugin").install(path)
+                new GeneratedConveyorPlugin(gsonAdapter, "plugin").install(path)
             ),
             Stage.COMPILE
         );
@@ -434,6 +471,39 @@ final class BuildProjectUseCaseTests {
             .contains(
                 new BuildFile(project.resolve("build").resolve("plugin-1-run"), BuildFileType.ARTIFACT)
             );
+    }
+
+    @Test
+    void givenNoParentDeclared_whenBuild_thenProjectInheritedPluginsFromSuperParent(@TempDir Path path)
+        throws Exception {
+        installSuperParent(path, new GeneratedConveyorPlugin(gsonAdapter, "plugin").install(path));
+
+        var buildFiles = module.build(
+            conveyorJson(path),
+            Stage.COMPILE
+        );
+
+        assertThat(buildFiles.byType(BuildFileType.ARTIFACT))
+            .contains(
+                new BuildFile(defaultBuildDirectory(path).resolve("plugin-1-run"), BuildFileType.ARTIFACT)
+            );
+    }
+
+    private void installSuperParent(Path path, GeneratedArtifactDefinition... plugins) throws IOException {
+        gsonAdapter.write(
+            path.resolve("super-parent-1.json"),
+            new ProjectDefinition(
+                "super-parent",
+                1,
+                new NoExplicitParent(),
+                null,
+                Map.of(),
+                Stream.of(plugins)
+                    .map(definition -> new PluginDefinition(definition.name(), definition.version(), Map.of()))
+                    .toList(),
+                List.of()
+            )
+        );
     }
 
     private Collection<Path> modulePath(Path path) throws IOException {
@@ -470,7 +540,7 @@ final class BuildProjectUseCaseTests {
             dependencies.entrySet()
                 .stream()
                 .map(entry ->
-                    new ProjectDependencyDefinition(
+                    new DependencyDefinition(
                         entry.getKey().name(),
                         entry.getKey().version(),
                         entry.getValue()
@@ -484,11 +554,11 @@ final class BuildProjectUseCaseTests {
         Path path,
         Map<String, String> properties,
         Collection<PluginDefinition> plugins,
-        Collection<ProjectDependencyDefinition> dependencies
+        Collection<DependencyDefinition> dependencies
     ) {
         return conveyorJson(
             path,
-            new ProjectDefinition("project", 1, path, properties, plugins, dependencies)
+            new ProjectDefinition("project", 1, null, path, properties, plugins, dependencies)
         );
     }
 
