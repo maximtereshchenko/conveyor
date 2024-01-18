@@ -8,13 +8,14 @@ import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskBinding;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -54,9 +55,18 @@ final class Project {
     }
 
     Collection<PluginDefinition> plugins() {
-        var all = new ArrayList<>(parent.plugins());
-        all.addAll(projectDefinition.plugins());
-        return List.copyOf(all);
+        var indexed = parent.plugins()
+            .stream()
+            .collect(Collectors.toMap(PluginDefinition::name, Function.identity()));
+        for (var pluginDefinition : projectDefinition.plugins()) {
+            var declared = indexed.get(pluginDefinition.name());
+            if (declared == null) {
+                indexed.put(pluginDefinition.name(), pluginDefinition);
+            } else {
+                indexed.put(pluginDefinition.name(), merge(declared, pluginDefinition));
+            }
+        }
+        return List.copyOf(indexed.values());
     }
 
     ProjectDefinition definition() {
@@ -76,6 +86,12 @@ final class Project {
                 (buildFiles, task) -> task.execute(buildFiles),
                 (first, second) -> first
             );
+    }
+
+    private PluginDefinition merge(PluginDefinition declared, PluginDefinition pluginDefinition) {
+        var copy = new HashMap<>(declared.configuration());
+        copy.putAll(pluginDefinition.configuration());
+        return new PluginDefinition(declared.name(), pluginDefinition.version(), copy);
     }
 
     private Set<Path> pluginsModulePath() {

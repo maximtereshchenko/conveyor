@@ -14,11 +14,29 @@ final class GeneratedConveyorPlugin extends GeneratedArtifact {
     GeneratedConveyorPlugin(
         GsonAdapter gsonAdapter,
         String name,
+        int version,
         Stage stage,
         GeneratedArtifactDefinition... dependencies
     ) {
-        super(gsonAdapter, name, 1, List.of(dependencies));
+        super(gsonAdapter, name, version, List.of(dependencies));
         this.stage = stage;
+    }
+
+    GeneratedConveyorPlugin(
+        GsonAdapter gsonAdapter,
+        String name,
+        int version
+    ) {
+        this(gsonAdapter, name, version, Stage.COMPILE);
+    }
+
+    GeneratedConveyorPlugin(
+        GsonAdapter gsonAdapter,
+        String name,
+        Stage stage,
+        GeneratedArtifactDefinition... dependencies
+    ) {
+        this(gsonAdapter, name, 1, stage, dependencies);
     }
 
     GeneratedConveyorPlugin(GsonAdapter gsonAdapter, String name, GeneratedArtifactDefinition... dependencies) {
