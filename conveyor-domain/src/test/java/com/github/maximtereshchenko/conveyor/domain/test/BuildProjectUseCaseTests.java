@@ -506,7 +506,65 @@ final class BuildProjectUseCaseTests {
             );
     }
 
-    private void installSuperParent(Path path, GeneratedArtifactDefinition... plugins) throws IOException {
+    @Test
+    void givenPluginDeclaredInChildWithDifferentConfigurationValue_whenBuild_thenValueInChildShouldTakePrecedence(
+        @TempDir Path path
+    ) throws Exception {
+        installSuperParent(
+            path,
+            Map.of("key", "parent-value"),
+            new GeneratedConveyorPlugin(gsonAdapter, "plugin").install(path)
+        );
+
+        module.build(
+            conveyorJson(
+                path,
+                Map.of(),
+                List.of(new PluginDefinition("plugin", 1, Map.of("key", "child-value"))),
+                List.of()
+            ),
+            Stage.COMPILE
+        );
+
+        assertThat(defaultBuildDirectory(path).resolve("plugin-1-configuration"))
+            .content(StandardCharsets.UTF_8)
+            .isEqualTo("key=child-value");
+    }
+
+    @Test
+    void givenPluginDeclaredInChildWithAdditionalConfiguration_whenBuild_thenPluginConfigurationShouldBeMerged(
+        @TempDir Path path
+    ) throws Exception {
+        installSuperParent(
+            path,
+            Map.of("parent-key", "value"),
+            new GeneratedConveyorPlugin(gsonAdapter, "plugin").install(path)
+        );
+
+        module.build(
+            conveyorJson(
+                path,
+                Map.of(),
+                List.of(new PluginDefinition("plugin", 1, Map.of("child-key", "value"))),
+                List.of()
+            ),
+            Stage.COMPILE
+        );
+
+        assertThat(defaultBuildDirectory(path).resolve("plugin-1-configuration"))
+            .content(StandardCharsets.UTF_8)
+            .containsIgnoringNewLines("parent-key=value", "child-key=value");
+    }
+
+    private void installSuperParent(Path path, GeneratedArtifactDefinition... plugins) {
+        installSuperParent(path, Map.of(), plugins);
+    }
+
+    private void installSuperParent(
+        Path path,
+        Map<String, String> configuration,
+        GeneratedArtifactDefinition... plugins
+    ) {
         gsonAdapter.write(
             path.resolve("super-parent-1.json"),
             new ProjectDefinition(
@@ -516,7 +574,7 @@ final class BuildProjectUseCaseTests {
                 null,
                 Map.of(),
                 Stream.of(plugins)
-                    .map(definition -> new PluginDefinition(definition.name(), definition.version(), Map.of()))
+                    .map(definition -> new PluginDefinition(definition.name(), definition.version(), configuration))
                     .toList(),
                 List.of()
             )
