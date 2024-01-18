@@ -4,8 +4,6 @@ import com.github.maximtereshchenko.conveyor.api.port.ArtifactDefinition;
 import com.github.maximtereshchenko.conveyor.api.port.PluginDefinition;
 import com.github.maximtereshchenko.conveyor.api.port.ProjectDefinition;
 import com.github.maximtereshchenko.conveyor.api.port.ProjectDependencyDefinition;
-import com.github.maximtereshchenko.conveyor.api.port.StoredArtifactDefinition;
-import com.github.maximtereshchenko.conveyor.api.port.StoredDependencyDefinition;
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -55,7 +53,7 @@ final class Dependencies {
         Collection<? extends ArtifactDefinition> definitions
     ) {
         return definitions.stream()
-            .map(repository::storedArtifactDefinition)
+            .map(repository::projectDefinition)
             .reduce(
                 original,
                 (dependencies, definition) ->
@@ -71,10 +69,10 @@ final class Dependencies {
         return Set.copyOf(modulePath);
     }
 
-    private Dependencies with(ArtifactDefinition affectedBy, StoredArtifactDefinition storedArtifactDefinition) {
+    private Dependencies with(ArtifactDefinition affectedBy, ProjectDefinition projectDefinition) {
         var copy = new ArrayList<>(artifacts);
-        copy.add(new Dependency(affectedBy, storedArtifactDefinition));
-        return new Dependencies(projectDefinition, copy);
+        copy.add(new Dependency(affectedBy, projectDefinition));
+        return new Dependencies(this.projectDefinition, copy);
     }
 
     private int effectiveVersion(String name) {
@@ -99,12 +97,12 @@ final class Dependencies {
     private static final class Dependency extends Artifact {
 
         private final ArtifactDefinition affectedBy;
-        private final StoredArtifactDefinition storedArtifactDefinition;
+        private final ProjectDefinition projectDefinition;
 
-        Dependency(ArtifactDefinition affectedBy, StoredArtifactDefinition storedArtifactDefinition) {
-            super(storedArtifactDefinition);
+        Dependency(ArtifactDefinition affectedBy, ProjectDefinition projectDefinition) {
+            super(projectDefinition);
             this.affectedBy = affectedBy;
-            this.storedArtifactDefinition = storedArtifactDefinition;
+            this.projectDefinition = projectDefinition;
         }
 
         @Override
@@ -114,9 +112,9 @@ final class Dependencies {
 
         @Override
         Set<String> dependsOn() {
-            return storedArtifactDefinition.dependencies()
+            return projectDefinition.dependencies()
                 .stream()
-                .map(StoredDependencyDefinition::name)
+                .map(ProjectDependencyDefinition::name)
                 .collect(Collectors.toSet());
         }
 

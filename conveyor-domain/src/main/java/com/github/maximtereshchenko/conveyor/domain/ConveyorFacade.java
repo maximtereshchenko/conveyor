@@ -5,7 +5,6 @@ import com.github.maximtereshchenko.conveyor.api.exception.CouldNotFindProjectDe
 import com.github.maximtereshchenko.conveyor.api.port.PluginDefinition;
 import com.github.maximtereshchenko.conveyor.api.port.ProjectDefinition;
 import com.github.maximtereshchenko.conveyor.api.port.ProjectDefinitionReader;
-import com.github.maximtereshchenko.conveyor.api.port.StoredArtifactDefinitionReader;
 import com.github.maximtereshchenko.conveyor.common.api.BuildFiles;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
@@ -23,16 +22,11 @@ import java.util.stream.Collectors;
 public final class ConveyorFacade implements ConveyorModule {
 
     private final ProjectDefinitionReader projectDefinitionReader;
-    private final StoredArtifactDefinitionReader storedArtifactDefinitionReader;
     private final ModuleLoader moduleLoader = new ModuleLoader();
     private final Pattern interpolationPattern = Pattern.compile("\\$\\{([^}]+)}");
 
-    public ConveyorFacade(
-        ProjectDefinitionReader projectDefinitionReader,
-        StoredArtifactDefinitionReader storedArtifactDefinitionReader
-    ) {
+    public ConveyorFacade(ProjectDefinitionReader projectDefinitionReader) {
         this.projectDefinitionReader = projectDefinitionReader;
-        this.storedArtifactDefinitionReader = storedArtifactDefinitionReader;
     }
 
     @Override
@@ -43,7 +37,7 @@ public final class ConveyorFacade implements ConveyorModule {
         var projectDefinition = projectDefinitionReader.projectDefinition(projectDefinitionPath);
         var repository = new DirectoryRepository(
             projectDefinitionPath.getParent().resolve(projectDefinition.repository()),
-            storedArtifactDefinitionReader
+            projectDefinitionReader
         );
         return executeTasks(projectDefinitionPath, stage, repository, projectDefinition);
     }

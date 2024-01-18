@@ -30,7 +30,7 @@ import org.junit.jupiter.api.io.TempDir;
 final class BuildProjectUseCaseTests {
 
     private final GsonAdapter gsonAdapter = new GsonAdapter();
-    private final ConveyorModule module = new ConveyorFacade(gsonAdapter, gsonAdapter);
+    private final ConveyorModule module = new ConveyorFacade(gsonAdapter);
 
     @Test
     void givenNoProjectDefinition_whenBuild_thenCouldNotFindProjectDefinitionReturned(@TempDir Path path) {
