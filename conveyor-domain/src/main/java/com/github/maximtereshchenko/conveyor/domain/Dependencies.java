@@ -40,9 +40,9 @@ final class Dependencies {
     ) {
         return dependencies(
             repository,
-            new Dependencies(project, List.of(new DependenciesRoot(project.definition(), Set.of(scopes)))),
+            new Dependencies(project, List.of(new DependenciesRoot(project, Set.of(scopes)))),
             project.definition(),
-            project.definition().dependencies()
+            project.dependencies()
         );
     }
 
@@ -145,12 +145,12 @@ final class Dependencies {
 
     private static final class DependenciesRoot extends Artifact {
 
-        private final ProjectDefinition projectDefinition;
+        private final Project project;
         private final Set<DependencyScope> scopes;
 
-        DependenciesRoot(ProjectDefinition projectDefinition, Set<DependencyScope> scopes) {
-            super(projectDefinition);
-            this.projectDefinition = projectDefinition;
+        DependenciesRoot(Project project, Set<DependencyScope> scopes) {
+            super(project.definition());
+            this.project = project;
             this.scopes = scopes;
         }
 
@@ -161,7 +161,7 @@ final class Dependencies {
 
         @Override
         Set<String> dependsOn() {
-            return projectDefinition.dependencies()
+            return project.dependencies()
                 .stream()
                 .filter(definition -> scopes.contains(definition.scope()))
                 .map(DependencyDefinition::name)

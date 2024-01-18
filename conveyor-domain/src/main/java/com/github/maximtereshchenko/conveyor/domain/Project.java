@@ -1,5 +1,6 @@
 package com.github.maximtereshchenko.conveyor.domain;
 
+import com.github.maximtereshchenko.conveyor.api.port.DependencyDefinition;
 import com.github.maximtereshchenko.conveyor.api.port.PluginDefinition;
 import com.github.maximtereshchenko.conveyor.api.port.ProjectDefinition;
 import com.github.maximtereshchenko.conveyor.api.port.ProjectDefinitionReader;
@@ -52,6 +53,16 @@ final class Project {
             projectDefinition,
             repository
         );
+    }
+
+    Collection<DependencyDefinition> dependencies() {
+        var indexed = parent.dependencies()
+            .stream()
+            .collect(Collectors.toMap(DependencyDefinition::name, Function.identity()));
+        for (var dependencyDefinition : projectDefinition.dependencies()) {
+            indexed.put(dependencyDefinition.name(), dependencyDefinition);
+        }
+        return List.copyOf(indexed.values());
     }
 
     Collection<PluginDefinition> plugins() {
