@@ -1,14 +1,11 @@
 package com.github.maximtereshchenko.conveyor.domain.test;
 
-import com.github.maximtereshchenko.conveyor.api.port.DependencyDefinition;
-import com.github.maximtereshchenko.conveyor.api.port.ProjectDefinition;
-import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
-import com.github.maximtereshchenko.conveyor.gson.GsonAdapter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UncheckedIOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -17,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
@@ -30,86 +26,41 @@ import javax.tools.SimpleJavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 
-abstract class GeneratedArtifact {
+final class JarBuilder {
 
-    private final GsonAdapter gsonAdapter;
     private final String name;
     private final int version;
-    private final Collection<GeneratedArtifactDefinition> dependencies;
-    private final Collection<GeneratedArtifactDefinition> testDependencies;
+    private final String classSourceCode;
+    private final String moduleInfoSourceCode;
 
-    GeneratedArtifact(
-        GsonAdapter gsonAdapter,
-        String name,
-        int version,
-        Collection<GeneratedArtifactDefinition> dependencies,
-        Collection<GeneratedArtifactDefinition> testDependencies
-    ) {
-        this.gsonAdapter = gsonAdapter;
+    JarBuilder(String name, int version, String classSourceCode, String moduleInfoSourceCode) {
         this.name = name;
         this.version = version;
-        this.dependencies = List.copyOf(dependencies);
-        this.testDependencies = List.copyOf(testDependencies);
+        this.classSourceCode = classSourceCode;
+        this.moduleInfoSourceCode = moduleInfoSourceCode;
     }
 
-    final String name() {
-        return name;
+    Path install(Path path) {
+        var jar = path.resolve("%s-%d.jar".formatted(name, version));
+        writeJar(jar, compiled(path));
+        return jar;
     }
 
-    final int version() {
-        return version;
+    private String modulePath(Path path) {
+        try (var entries = Files.list(path)) {
+            return Stream.concat(
+                    Stream.of(System.getProperty("jdk.module.path")),
+                    entries.filter(Files::isRegularFile)
+                        .filter(file -> file.getFileName().toString().endsWith(".jar"))
+                        .map(Path::toString)
+                )
+                .collect(Collectors.joining(":"));
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
-    final Collection<GeneratedArtifactDefinition> dependencies() {
-        return dependencies;
-    }
-
-    final GeneratedArtifactDefinition install(Path directory) throws IOException {
-        var fileName = "%s-%d".formatted(name, version);
-        var jarPath = directory.resolve(fileName + ".jar");
-        writeJar(jarPath, compiled());
-        gsonAdapter.write(
-            directory.resolve(fileName + ".json"),
-            new ProjectDefinition(
-                name,
-                version,
-                null,
-                null,
-                Map.of(),
-                List.of(),
-                Stream.concat(
-                        dependencies.stream()
-                            .map(definition -> dependencyDefinition(definition, DependencyScope.IMPLEMENTATION)),
-                        testDependencies.stream()
-                            .map(definition -> dependencyDefinition(definition, DependencyScope.TEST))
-                    )
-                    .toList()
-            )
-        );
-        return new GeneratedArtifactDefinition(
-            packageName(),
-            packageName() + '.' + className(),
-            name,
-            version,
-            jarPath
-        );
-    }
-
-    abstract String className();
-
-    abstract String classSourceCode();
-
-    abstract String moduleInfoSourceCode();
-
-    final String packageName() {
-        return name.replace("-", "");
-    }
-
-    private DependencyDefinition dependencyDefinition(GeneratedArtifactDefinition definition, DependencyScope scope) {
-        return new DependencyDefinition(definition.name(), definition.version(), scope);
-    }
-
-    private void writeJar(Path path, Collection<FileObject> compiled) throws IOException {
+    private void writeJar(Path path, Collection<FileObject> compiled) {
         try (var zipOutputStream = new ZipOutputStream(Files.newOutputStream(path))) {
             for (var fileObject : compiled) {
                 zipOutputStream.putNextEntry(new ZipEntry(fileObject.toUri().toString()));
@@ -118,41 +69,46 @@ abstract class GeneratedArtifact {
                 }
                 zipOutputStream.closeEntry();
             }
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
     }
 
-    private StandardJavaFileManager standardJavaFileManager(JavaCompiler compiler) {
-        return compiler.getStandardFileManager(null, Locale.ROOT, StandardCharsets.UTF_8);
-    }
-
-    private Collection<FileObject> compiled() {
+    private Collection<FileObject> compiled(Path path) {
         var compiler = ToolProvider.getSystemJavaCompiler();
         var fileManager = new InMemoryFileManager(standardJavaFileManager(compiler));
         compiler.getTask(
                 null,
                 fileManager,
                 null,
-                List.of("--module-path", modulePath()),
+                List.of("--module-path", modulePath(path)),
                 List.of(),
                 List.of(
-                    new StringJavaFileObject(packageName(), className() + ".java", classSourceCode()),
-                    new StringJavaFileObject("", "module-info.java", moduleInfoSourceCode())
+                    new StringJavaFileObject(packageName(), className() + ".java", classSourceCode),
+                    new StringJavaFileObject("", "module-info.java", moduleInfoSourceCode)
                 )
             )
             .call();
         return fileManager.compiled();
     }
 
-    private String modulePath() {
-        var defaultModulePath = System.getProperty("jdk.module.path");
-        if (dependencies.isEmpty()) {
-            return defaultModulePath;
-        }
-        return defaultModulePath +
-            dependencies.stream()
-                .map(GeneratedArtifactDefinition::jar)
-                .map(Path::toString)
-                .collect(Collectors.joining(":", ":", ""));
+    private String packageName() {
+        var packageNameWithColon = classSourceCode.split(System.lineSeparator())[0]
+            .substring("package ".length());
+        return packageNameWithColon.substring(0, packageNameWithColon.length() - 1);
+    }
+
+    private String className() {
+        return Stream.of(classSourceCode.split(System.lineSeparator()))
+            .filter(line -> line.startsWith("public final class "))
+            .map(line -> line.substring("public final class ".length()))
+            .map(line -> line.split(" ")[0])
+            .findAny()
+            .orElseThrow();
+    }
+
+    private StandardJavaFileManager standardJavaFileManager(JavaCompiler compiler) {
+        return compiler.getStandardFileManager(null, Locale.ROOT, StandardCharsets.UTF_8);
     }
 
     private static final class InMemoryFileManager extends ForwardingJavaFileManager<StandardJavaFileManager> {

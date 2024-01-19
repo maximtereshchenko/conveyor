@@ -1,57 +1,58 @@
 package com.github.maximtereshchenko.conveyor.domain.test;
 
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
-import com.github.maximtereshchenko.conveyor.gson.GsonAdapter;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
+import java.util.Locale;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-final class GeneratedConveyorPlugin extends GeneratedArtifact {
+final class ConveyorPluginSourceCodeBuilder {
 
+    private final String name;
+    private final int version;
     private final Stage stage;
+    private final Collection<String> dependencyClasses;
 
-    GeneratedConveyorPlugin(
-        GsonAdapter gsonAdapter,
+    private ConveyorPluginSourceCodeBuilder(
         String name,
         int version,
         Stage stage,
-        Collection<GeneratedArtifactDefinition> dependencies,
-        Collection<GeneratedArtifactDefinition> testDependencies
+        Collection<String> dependencyClasses
     ) {
-        super(gsonAdapter, name, version, dependencies, testDependencies);
+        this.name = name;
+        this.version = version;
         this.stage = stage;
+        this.dependencyClasses = List.copyOf(dependencyClasses);
     }
 
-    GeneratedConveyorPlugin(
-        GsonAdapter gsonAdapter,
-        String name,
-        Stage stage,
-        GeneratedArtifactDefinition... dependencies
-    ) {
-        this(gsonAdapter, name, 1, stage, List.of(dependencies), List.of());
+    ConveyorPluginSourceCodeBuilder(ProjectDefinitionBuilder builder) {
+        this(builder.name(), builder.version(), Stage.COMPILE, List.of());
     }
 
-    GeneratedConveyorPlugin(
-        GsonAdapter gsonAdapter,
-        String name,
-        int version
-    ) {
-        this(gsonAdapter, name, version, Stage.COMPILE, List.of(), List.of());
+    String fullyQualifiedName() {
+        return normalizedName() + '.' + normalizedName();
     }
 
-    GeneratedConveyorPlugin(GsonAdapter gsonAdapter, String name, GeneratedArtifactDefinition... dependencies) {
-        this(gsonAdapter, name, Stage.COMPILE, dependencies);
+    ConveyorPluginSourceCodeBuilder dependency(String dependencyClass) {
+        var copy = new ArrayList<>(dependencyClasses);
+        copy.add(dependencyClass);
+        return new ConveyorPluginSourceCodeBuilder(name, version, stage, copy);
     }
 
-    @Override
-    String className() {
-        return "ConveyorPluginImpl";
+    ConveyorPluginSourceCodeBuilder name(String name) {
+        return new ConveyorPluginSourceCodeBuilder(name, version, stage, dependencyClasses);
     }
 
-    @Override
-    String classSourceCode() {
+    ConveyorPluginSourceCodeBuilder version(int version) {
+        return new ConveyorPluginSourceCodeBuilder(name, version, stage, dependencyClasses);
+    }
+
+    ConveyorPluginSourceCodeBuilder stage(Stage stage) {
+        return new ConveyorPluginSourceCodeBuilder(name, version, stage, dependencyClasses);
+    }
+
+    String build() {
         return """
             package %s;
             import com.github.maximtereshchenko.conveyor.common.api.*;
@@ -62,7 +63,7 @@ final class GeneratedConveyorPlugin extends GeneratedArtifact {
             import java.util.*;
             import java.util.concurrent.*;
             import java.util.stream.*;
-            public final class ConveyorPluginImpl implements ConveyorPlugin {
+            public final class %s implements ConveyorPlugin {
                 private final Stage stage = Stage.%s;
                 private final String fullName = "%s-%d";
                 @Override
@@ -140,41 +141,21 @@ final class GeneratedConveyorPlugin extends GeneratedArtifact {
             }
             """
             .formatted(
-                packageName(),
+                normalizedName(),
+                normalizedName(),
                 stage.toString(),
-                name(), version(),
-                name(),
+                name, version,
+                normalizedName(),
                 dependencyUsages()
             );
     }
 
-    @Override
-    String moduleInfoSourceCode() {
-        return new ModuleInfoSourceCode(
-            packageName(),
-            Stream.concat(
-                    Stream.of(
-                        "com.github.maximtereshchenko.conveyor.plugin.api",
-                        "com.github.maximtereshchenko.conveyor.common.api"
-                    ),
-                    dependencies()
-                        .stream()
-                        .map(GeneratedArtifactDefinition::moduleName)
-                )
-                .toList(),
-            Map.of(
-                "com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin",
-                packageName() + '.' + className()
-            ),
-            List.of()
-        )
-            .toString();
+    private String normalizedName() {
+        return name.toLowerCase(Locale.ROOT).replace("-", "");
     }
 
     private String dependencyUsages() {
-        return dependencies()
-            .stream()
-            .map(GeneratedArtifactDefinition::className)
+        return dependencyClasses.stream()
             .map("new %s(project.buildDirectory());"::formatted)
             .collect(Collectors.joining());
     }
