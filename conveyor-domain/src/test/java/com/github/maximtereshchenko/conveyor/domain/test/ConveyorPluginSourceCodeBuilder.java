@@ -145,7 +145,7 @@ final class ConveyorPluginSourceCodeBuilder {
                 normalizedName(),
                 stage.toString(),
                 name, version,
-                normalizedName(),
+                name,
                 dependencyUsages()
             );
     }

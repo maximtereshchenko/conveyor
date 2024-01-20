@@ -7,6 +7,6 @@ public record PluginDefinition(String name, int version, Map<String, String> con
     implements ArtifactDefinition {
 
     public PluginDefinition {
-        configuration = Objects.requireNonNullElse(configuration, Map.of());
+        configuration = Map.copyOf(Objects.requireNonNullElse(configuration, Map.of()));
     }
 }
