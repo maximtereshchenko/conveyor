@@ -90,6 +90,11 @@ final class CleanConveyorPluginTests {
         return new ConveyorProject() {
 
             @Override
+            public String name() {
+                return "project";
+            }
+
+            @Override
             public Path projectDirectory() {
                 return null;
             }

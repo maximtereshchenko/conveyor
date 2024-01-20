@@ -29,6 +29,12 @@ public final class BuildFiles {
         return new BuildFiles(copy);
     }
 
+    public BuildFiles with(BuildFiles buildFiles) {
+        var copy = new ArrayList<>(files);
+        copy.addAll(buildFiles.files);
+        return new BuildFiles(copy);
+    }
+
     @Override
     public boolean equals(Object object) {
         if (this == object) {

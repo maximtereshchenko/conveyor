@@ -11,6 +11,7 @@ public record ProjectDefinition(
     String name,
     int version,
     ParentDefinition parent,
+    Collection<Path> subprojects,
     Path repository,
     Map<String, String> properties,
     Collection<PluginDefinition> plugins,
@@ -19,6 +20,7 @@ public record ProjectDefinition(
 
     public ProjectDefinition {
         parent = Objects.requireNonNullElse(parent, new NoExplicitParent());
+        subprojects = List.copyOf(Objects.requireNonNullElse(subprojects, List.of()));
         repository = Objects.requireNonNullElse(repository, Paths.get(""));
         properties = Map.copyOf(Objects.requireNonNullElse(properties, Map.of()));
         plugins = List.copyOf(Objects.requireNonNullElse(plugins, List.of()));

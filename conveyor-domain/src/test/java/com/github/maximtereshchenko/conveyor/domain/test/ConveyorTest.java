@@ -5,6 +5,7 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Instant;
 import java.util.Collection;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -21,6 +22,14 @@ abstract class ConveyorTest {
                 .stream()
                 .map(Paths::get)
                 .toList();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    Instant instant(Path path) {
+        try {
+            return Instant.parse(Files.readString(path));
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

@@ -8,6 +8,9 @@ import com.github.maximtereshchenko.conveyor.api.port.PluginDefinition;
 import com.github.maximtereshchenko.conveyor.api.port.ProjectDefinition;
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 import com.github.maximtereshchenko.conveyor.gson.GsonAdapter;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,6 +26,7 @@ final class ProjectDefinitionBuilder implements ArtifactBuilder {
     private final String name;
     private final int version;
     private final Function<Path, ParentDefinition> parentFunction;
+    private final Collection<ProjectDefinitionBuilder> subprojects;
     private final Map<String, String> properties;
     private final Collection<Function<Path, PluginDefinition>> plugins;
     private final Collection<Function<Path, DependencyDefinition>> dependencies;
@@ -33,6 +37,7 @@ final class ProjectDefinitionBuilder implements ArtifactBuilder {
         String name,
         int version,
         Function<Path, ParentDefinition> parentFunction,
+        Collection<ProjectDefinitionBuilder> subprojects,
         Map<String, String> properties,
         Collection<Function<Path, PluginDefinition>> plugins,
         Collection<Function<Path, DependencyDefinition>> dependencies,
@@ -42,6 +47,7 @@ final class ProjectDefinitionBuilder implements ArtifactBuilder {
         this.name = name;
         this.version = version;
         this.parentFunction = parentFunction;
+        this.subprojects = List.copyOf(subprojects);
         this.properties = Map.copyOf(properties);
         this.plugins = List.copyOf(plugins);
         this.dependencies = List.copyOf(dependencies);
@@ -54,6 +60,7 @@ final class ProjectDefinitionBuilder implements ArtifactBuilder {
             name,
             1,
             path -> new NoExplicitParent(),
+            List.of(),
             Map.of(),
             List.of(),
             List.of(),
@@ -89,6 +96,7 @@ final class ProjectDefinitionBuilder implements ArtifactBuilder {
                 name,
                 version,
                 parentFunction.apply(path),
+                installedSubproject(path),
                 path,
                 properties,
                 plugins.stream()
@@ -108,6 +116,7 @@ final class ProjectDefinitionBuilder implements ArtifactBuilder {
             name,
             version,
             parentFunction,
+            subprojects,
             properties,
             plugins,
             dependencies,
@@ -121,6 +130,7 @@ final class ProjectDefinitionBuilder implements ArtifactBuilder {
             name,
             version,
             parentFunction,
+            subprojects,
             properties,
             plugins,
             dependencies,
@@ -134,6 +144,23 @@ final class ProjectDefinitionBuilder implements ArtifactBuilder {
             name,
             version,
             (path) -> parent(builder, path),
+            subprojects,
+            properties,
+            plugins,
+            dependencies,
+            fileNameFunction
+        );
+    }
+
+    ProjectDefinitionBuilder subproject(ProjectDefinitionBuilder builder) {
+        var copy = new ArrayList<>(subprojects);
+        copy.add(builder);
+        return new ProjectDefinitionBuilder(
+            gsonAdapter,
+            name,
+            version,
+            parentFunction,
+            copy,
             properties,
             plugins,
             dependencies,
@@ -149,6 +176,7 @@ final class ProjectDefinitionBuilder implements ArtifactBuilder {
             name,
             version,
             parentFunction,
+            subprojects,
             copy,
             plugins,
             dependencies,
@@ -162,6 +190,7 @@ final class ProjectDefinitionBuilder implements ArtifactBuilder {
             name,
             version,
             parentFunction,
+            subprojects,
             properties,
             plugins,
             dependencies,
@@ -181,6 +210,7 @@ final class ProjectDefinitionBuilder implements ArtifactBuilder {
             name,
             version,
             parentFunction,
+            subprojects,
             properties,
             copy,
             dependencies,
@@ -200,11 +230,27 @@ final class ProjectDefinitionBuilder implements ArtifactBuilder {
             name,
             version,
             parentFunction,
+            subprojects,
             properties,
             plugins,
             copy,
             fileNameFunction
         );
+    }
+
+    private Collection<Path> installedSubproject(Path path) {
+        return subprojects.stream()
+            .map(subproject -> subproject.install(directory(path.resolve(subproject.name()))))
+            .map(Path::getParent)
+            .toList();
+    }
+
+    private Path directory(Path path) {
+        try {
+            return Files.createDirectory(path);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     private PluginDefinition pluginDefinition(

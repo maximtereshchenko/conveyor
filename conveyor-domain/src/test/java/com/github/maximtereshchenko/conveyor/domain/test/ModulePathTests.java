@@ -44,11 +44,11 @@ final class ModulePathTests extends ConveyorTest {
         assertThat(buildFiles.byType(BuildFileType.ARTIFACT))
             .contains(
                 new BuildFile(
-                    defaultBuildDirectory(path).resolve("first-plugin-1-run"),
+                    defaultBuildDirectory(path).resolve("project-first-plugin-1-run"),
                     BuildFileType.ARTIFACT
                 ),
                 new BuildFile(
-                    defaultBuildDirectory(path).resolve("second-plugin-1-run"),
+                    defaultBuildDirectory(path).resolve("project-second-plugin-1-run"),
                     BuildFileType.ARTIFACT
                 )
             );
@@ -84,7 +84,7 @@ final class ModulePathTests extends ConveyorTest {
         assertThat(buildFiles.byType(BuildFileType.ARTIFACT))
             .contains(
                 new BuildFile(
-                    defaultBuildDirectory(path).resolve("plugin-1-run"),
+                    defaultBuildDirectory(path).resolve("project-plugin-1-run"),
                     BuildFileType.ARTIFACT
                 )
             );
@@ -148,11 +148,11 @@ final class ModulePathTests extends ConveyorTest {
         assertThat(buildFiles.byType(BuildFileType.ARTIFACT))
             .contains(
                 new BuildFile(
-                    defaultBuildDirectory(path).resolve("first-plugin-1-run"),
+                    defaultBuildDirectory(path).resolve("project-first-plugin-1-run"),
                     BuildFileType.ARTIFACT
                 ),
                 new BuildFile(
-                    defaultBuildDirectory(path).resolve("second-plugin-1-run"),
+                    defaultBuildDirectory(path).resolve("project-second-plugin-1-run"),
                     BuildFileType.ARTIFACT
                 )
             );
@@ -225,9 +225,9 @@ final class ModulePathTests extends ConveyorTest {
             Stage.COMPILE
         );
 
-        assertThat(modulePath(defaultBuildDirectory(path).resolve("plugin-1-module-path-implementation")))
+        assertThat(modulePath(defaultBuildDirectory(path).resolve("project-plugin-1-module-path-implementation")))
             .containsExactly(path.resolve("implementation-1.jar"));
-        assertThat(modulePath(defaultBuildDirectory(path).resolve("plugin-1-module-path-test")))
+        assertThat(modulePath(defaultBuildDirectory(path).resolve("project-plugin-1-module-path-test")))
             .containsExactly(path.resolve("test-1.jar"));
     }
 
@@ -254,9 +254,9 @@ final class ModulePathTests extends ConveyorTest {
         );
 
         var testJar = path.resolve("test-1.jar");
-        assertThat(modulePath(defaultBuildDirectory(path).resolve("plugin-1-module-path-implementation")))
+        assertThat(modulePath(defaultBuildDirectory(path).resolve("project-plugin-1-module-path-implementation")))
             .doesNotContain(testJar);
-        assertThat(modulePath(defaultBuildDirectory(path).resolve("plugin-1-module-path-test")))
+        assertThat(modulePath(defaultBuildDirectory(path).resolve("project-plugin-1-module-path-test")))
             .doesNotContain(testJar);
     }
 }

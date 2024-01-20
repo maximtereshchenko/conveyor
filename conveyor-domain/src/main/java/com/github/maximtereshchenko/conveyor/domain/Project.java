@@ -13,4 +13,6 @@ interface Project extends ArtifactDefinition {
     Collection<DependencyDefinition> dependencies();
 
     Map<String, String> properties();
+
+    Collection<Project> subprojects();
 }

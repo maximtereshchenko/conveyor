@@ -26,6 +26,6 @@ public final class ConveyorFacade implements ConveyorModule {
             throw new CouldNotFindProjectDefinition(projectDefinitionPath);
         }
         return projectFactory.projectToBuild(projectDefinitionPath)
-            .executeTasks(moduleLoader, interpolationService, stage);
+            .build(moduleLoader, interpolationService, stage);
     }
 }

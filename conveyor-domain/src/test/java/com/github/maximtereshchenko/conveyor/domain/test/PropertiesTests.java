@@ -36,7 +36,7 @@ final class PropertiesTests extends ConveyorTest {
 
         assertThat(buildFiles.byType(BuildFileType.ARTIFACT))
             .contains(
-                new BuildFile(defaultBuildDirectory(project).resolve("plugin-1-run"), BuildFileType.ARTIFACT)
+                new BuildFile(defaultBuildDirectory(project).resolve("project-plugin-1-run"), BuildFileType.ARTIFACT)
             );
     }
 
@@ -62,7 +62,7 @@ final class PropertiesTests extends ConveyorTest {
 
         assertThat(buildFiles.byType(BuildFileType.ARTIFACT))
             .contains(
-                new BuildFile(defaultBuildDirectory(project).resolve("plugin-1-run"), BuildFileType.ARTIFACT)
+                new BuildFile(defaultBuildDirectory(project).resolve("project-plugin-1-run"), BuildFileType.ARTIFACT)
             );
     }
 
@@ -85,7 +85,7 @@ final class PropertiesTests extends ConveyorTest {
 
         assertThat(buildFiles.byType(BuildFileType.ARTIFACT))
             .contains(
-                new BuildFile(build.resolve("plugin-1-run"), BuildFileType.ARTIFACT)
+                new BuildFile(build.resolve("project-plugin-1-run"), BuildFileType.ARTIFACT)
             );
     }
 
@@ -109,7 +109,7 @@ final class PropertiesTests extends ConveyorTest {
 
         assertThat(buildFiles.byType(BuildFileType.ARTIFACT))
             .contains(
-                new BuildFile(project.resolve("build").resolve("plugin-1-run"), BuildFileType.ARTIFACT)
+                new BuildFile(project.resolve("build").resolve("project-plugin-1-run"), BuildFileType.ARTIFACT)
             );
     }
 
@@ -132,7 +132,7 @@ final class PropertiesTests extends ConveyorTest {
             Stage.COMPILE
         );
 
-        assertThat(defaultBuildDirectory(path).resolve("plugin-1-configuration"))
+        assertThat(defaultBuildDirectory(path).resolve("project-plugin-1-configuration"))
             .content(StandardCharsets.UTF_8)
             .isEqualTo("property=value-suffix");
     }

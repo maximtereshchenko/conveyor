@@ -10,14 +10,17 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-final class ChildProject implements Project {
+final class Subproject implements Project {
 
-    private final Project parent;
+    private final Collection<Project> subprojects;
     private final ProjectDefinition projectDefinition;
+    private Project parent;
 
-    ChildProject(Project parent, ProjectDefinition projectDefinition) {
+    Subproject(Project parent, Collection<Project> subprojects, ProjectDefinition projectDefinition) {
         this.parent = parent;
+        this.subprojects = List.copyOf(subprojects);
         this.projectDefinition = projectDefinition;
+        subprojects.forEach(subproject -> ((Subproject) subproject).parent = this);
     }
 
     @Override
@@ -35,6 +38,11 @@ final class ChildProject implements Project {
         var copy = new HashMap<>(parent.properties());
         copy.putAll(projectDefinition.properties());
         return Map.copyOf(copy);
+    }
+
+    @Override
+    public Collection<Project> subprojects() {
+        return subprojects;
     }
 
     @Override
