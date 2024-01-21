@@ -3,11 +3,12 @@ package com.github.maximtereshchenko.conveyor.domain.test;
 import com.github.maximtereshchenko.conveyor.api.ConveyorModule;
 import com.github.maximtereshchenko.conveyor.domain.ConveyorFacade;
 import com.github.maximtereshchenko.conveyor.gson.GsonAdapter;
-import java.util.function.Supplier;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolver;
+
+import java.util.function.Supplier;
 
 final class ConveyorExtension implements ParameterResolver {
 

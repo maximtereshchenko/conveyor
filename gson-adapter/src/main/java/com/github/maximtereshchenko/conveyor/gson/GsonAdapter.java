@@ -6,6 +6,7 @@ import com.github.maximtereshchenko.conveyor.api.port.ProjectDefinitionReader;
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;

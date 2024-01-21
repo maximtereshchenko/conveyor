@@ -3,6 +3,7 @@ package com.github.maximtereshchenko.conveyor.domain.test;
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import com.github.maximtereshchenko.conveyor.gson.GsonAdapter;
+
 import java.nio.file.Path;
 
 final class ConveyorPluginBuilder implements ArtifactBuilder {

@@ -2,6 +2,7 @@ package com.github.maximtereshchenko.conveyor.domain.test;
 
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 import com.github.maximtereshchenko.conveyor.gson.GsonAdapter;
+
 import java.nio.file.Path;
 import java.util.Locale;
 
@@ -31,13 +32,13 @@ final class DependencyBuilder implements ArtifactBuilder {
     }
 
     @Override
-    public int version() {
-        return projectDefinitionBuilder.version();
+    public String name() {
+        return projectDefinitionBuilder.name();
     }
 
     @Override
-    public String name() {
-        return projectDefinitionBuilder.name();
+    public int version() {
+        return projectDefinitionBuilder.version();
     }
 
     @Override

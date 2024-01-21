@@ -1,22 +1,18 @@
 package com.github.maximtereshchenko.conveyor.plugin.clean;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import com.github.maximtereshchenko.conveyor.common.api.BuildFile;
-import com.github.maximtereshchenko.conveyor.common.api.BuildFileType;
-import com.github.maximtereshchenko.conveyor.common.api.BuildFiles;
-import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
-import com.github.maximtereshchenko.conveyor.common.api.Stage;
-import com.github.maximtereshchenko.conveyor.common.api.Step;
+import com.github.maximtereshchenko.conveyor.common.api.*;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorProject;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskBinding;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Set;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 final class CleanConveyorPluginTests {
 

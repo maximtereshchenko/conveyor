@@ -3,15 +3,8 @@ package com.github.maximtereshchenko.conveyor.gson;
 import com.github.maximtereshchenko.conveyor.api.port.NoExplicitParent;
 import com.github.maximtereshchenko.conveyor.api.port.ParentDefinition;
 import com.github.maximtereshchenko.conveyor.api.port.ParentProjectDefinition;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSerializer;
+import com.google.gson.*;
+
 import java.lang.reflect.Type;
 
 final class ParentDefinitionAdapter implements JsonSerializer<ParentDefinition>, JsonDeserializer<ParentDefinition> {

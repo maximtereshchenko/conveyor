@@ -1,5 +1,7 @@
 package com.github.maximtereshchenko.conveyor.domain.test;
 
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
@@ -7,7 +9,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.Collection;
-import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(ConveyorExtension.class)
 abstract class ConveyorTest {

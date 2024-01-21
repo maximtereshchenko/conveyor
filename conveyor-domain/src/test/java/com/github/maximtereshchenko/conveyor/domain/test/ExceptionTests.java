@@ -1,13 +1,14 @@
 package com.github.maximtereshchenko.conveyor.domain.test;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
 import com.github.maximtereshchenko.conveyor.api.ConveyorModule;
 import com.github.maximtereshchenko.conveyor.api.exception.CouldNotFindProjectDefinition;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
-import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+
+import java.nio.file.Path;
+
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 final class ExceptionTests extends ConveyorTest {
 

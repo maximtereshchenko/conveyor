@@ -1,6 +1,7 @@
 package com.github.maximtereshchenko.conveyor.domain;
 
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
+
 import java.lang.module.ModuleFinder;
 import java.nio.file.Path;
 import java.util.ServiceLoader;

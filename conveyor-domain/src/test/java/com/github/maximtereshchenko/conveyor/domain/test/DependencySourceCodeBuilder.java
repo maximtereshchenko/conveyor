@@ -42,21 +42,21 @@ final class DependencySourceCodeBuilder {
 
     String build() {
         return """
-            package %s;
-            import java.io.*;
-            import java.nio.file.*;
-            public final class %s {
-                public %s(Path dir) {
-                    %s
-                    try {
-                        var path = dir.resolve("%s-%d");
-                        if (!Files.exists(path)) Files.createFile(path);
-                    } catch (IOException e) {
-                        throw new UncheckedIOException(e);
-                    }
-                }
-            }
-            """
+               package %s;
+               import java.io.*;
+               import java.nio.file.*;
+               public final class %s {
+                   public %s(Path dir) {
+                       %s
+                       try {
+                           var path = dir.resolve("%s-%d");
+                           if (!Files.exists(path)) Files.createFile(path);
+                       } catch (IOException e) {
+                           throw new UncheckedIOException(e);
+                       }
+                   }
+               }
+               """
             .formatted(
                 normalizedName(),
                 normalizedName(),
