@@ -25,7 +25,12 @@ public final class ConveyorFacade implements ConveyorModule {
         if (!Files.exists(projectDefinitionPath)) {
             throw new CouldNotFindProjectDefinition(projectDefinitionPath);
         }
-        return projectFactory.projectToBuild(projectDefinitionPath)
-            .build(moduleLoader, interpolationService, stage);
+        return projectFactory.localProjects(projectDefinitionPath)
+            .stream()
+            .reduce(
+                new BuildFiles(),
+                (buildFiles, project) -> buildFiles.with(project.build(moduleLoader, interpolationService, stage)),
+                new PickSecond<>()
+            );
     }
 }

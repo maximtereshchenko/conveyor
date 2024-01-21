@@ -17,20 +17,16 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-final class ProjectToBuild implements ConveyorProject {
+final class LocalProject implements ConveyorProject {
 
-    private final Path projectDefinitionPath;
     private final Project project;
     private final DirectoryRepository repository;
+    private final Path projectDefinitionPath;
 
-    ProjectToBuild(
-        Path projectDefinitionPath,
-        Project project,
-        DirectoryRepository repository
-    ) {
-        this.projectDefinitionPath = projectDefinitionPath;
+    LocalProject(Project project, DirectoryRepository repository, Path projectDefinitionPath) {
         this.project = project;
         this.repository = repository;
+        this.projectDefinitionPath = projectDefinitionPath;
     }
 
     @Override
@@ -72,24 +68,6 @@ final class ProjectToBuild implements ConveyorProject {
     }
 
     public BuildFiles build(ModuleLoader moduleLoader, InterpolationService interpolationService, Stage stage) {
-        return project.subprojects()
-            .stream()
-            .map(subproject ->
-                new ProjectToBuild(
-                    projectDefinitionPath.getParent().resolve(subproject.name()).resolve("conveyor.json"),
-                    subproject,
-                    repository
-                )
-            )
-            .reduce(
-                executeTasks(moduleLoader, interpolationService, stage),
-                (buildFiles, projectToBuild) ->
-                    buildFiles.with(projectToBuild.executeTasks(moduleLoader, interpolationService, stage)),
-                (first, second) -> first
-            );
-    }
-
-    BuildFiles executeTasks(ModuleLoader moduleLoader, InterpolationService interpolationService, Stage stage) {
         return moduleLoader.conveyorPlugins(pluginsModulePath())
             .stream()
             .map(plugin -> plugin.bindings(this, pluginConfiguration(plugin.name(), interpolationService)))
@@ -100,7 +78,7 @@ final class ProjectToBuild implements ConveyorProject {
             .reduce(
                 new BuildFiles(),
                 (buildFiles, task) -> task.execute(buildFiles),
-                (first, second) -> first
+                new PickSecond<>()
             );
     }
 

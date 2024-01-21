@@ -8,11 +8,9 @@ import java.util.Map;
 
 interface Project extends ArtifactDefinition {
 
+    Map<String, String> properties();
+
     Collection<PluginDefinition> plugins();
 
     Collection<DependencyDefinition> dependencies();
-
-    Map<String, String> properties();
-
-    Collection<Project> subprojects();
 }

@@ -16,15 +16,18 @@ import java.util.stream.Stream;
 
 final class Dependencies {
 
-    private final Project project;
+    private final ArtifactDefinition root;
     private final Collection<Artifact> artifacts;
 
-    private Dependencies(Project project, Collection<Artifact> artifacts) {
-        this.project = project;
+    private Dependencies(ArtifactDefinition root, Collection<Artifact> artifacts) {
+        this.root = root;
         this.artifacts = List.copyOf(artifacts);
     }
 
-    static Dependencies forPlugins(DirectoryRepository repository, Project project) {
+    static Dependencies forPlugins(
+        DirectoryRepository repository,
+        Project project
+    ) {
         return dependencies(
             repository,
             new Dependencies(project, List.of(new PluginsRoot(project))),
@@ -40,7 +43,10 @@ final class Dependencies {
     ) {
         return dependencies(
             repository,
-            new Dependencies(project, List.of(new DependenciesRoot(project, Set.of(scopes)))),
+            new Dependencies(
+                project,
+                List.of(new DependenciesRoot(project, Set.of(scopes)))
+            ),
             project,
             project.dependencies()
         );
@@ -67,20 +73,20 @@ final class Dependencies {
                             .toList()
                     )
                         .with(parent, definition),
-                (first, second) -> first
+                new PickSecond<>()
             );
     }
 
     Set<ArtifactDefinition> modulePath() {
-        var modulePath = new HashSet<>(modulePath(project.name(), project.version()));
-        modulePath.remove(project);
+        var modulePath = new HashSet<>(modulePath(root.name(), root.version()));
+        modulePath.remove(root);
         return Set.copyOf(modulePath);
     }
 
     private Dependencies with(ArtifactDefinition affectedBy, ProjectDefinition projectDefinition) {
         var copy = new ArrayList<>(artifacts);
         copy.add(new Dependency(affectedBy, projectDefinition));
-        return new Dependencies(project, copy);
+        return new Dependencies(root, copy);
     }
 
     private int effectiveVersion(String name) {

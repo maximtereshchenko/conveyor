@@ -5,22 +5,21 @@ import com.github.maximtereshchenko.conveyor.api.port.PluginDefinition;
 import com.github.maximtereshchenko.conveyor.api.port.ProjectDefinition;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 final class Subproject implements Project {
 
-    private final Collection<Project> subprojects;
+    private final Project parent;
     private final ProjectDefinition projectDefinition;
-    private Project parent;
 
-    Subproject(Project parent, Collection<Project> subprojects, ProjectDefinition projectDefinition) {
+    Subproject(Project parent, ProjectDefinition projectDefinition) {
         this.parent = parent;
-        this.subprojects = List.copyOf(subprojects);
         this.projectDefinition = projectDefinition;
-        subprojects.forEach(subproject -> ((Subproject) subproject).parent = this);
     }
 
     @Override
@@ -41,35 +40,32 @@ final class Subproject implements Project {
     }
 
     @Override
-    public Collection<Project> subprojects() {
-        return subprojects;
-    }
-
-    @Override
     public Collection<PluginDefinition> plugins() {
-        var indexed = parent.plugins()
-            .stream()
-            .collect(Collectors.toMap(PluginDefinition::name, Function.identity()));
-        for (var pluginDefinition : projectDefinition.plugins()) {
-            var declared = indexed.get(pluginDefinition.name());
-            if (declared == null) {
-                indexed.put(pluginDefinition.name(), pluginDefinition);
-            } else {
-                indexed.put(pluginDefinition.name(), merge(declared, pluginDefinition));
-            }
-        }
-        return List.copyOf(indexed.values());
+        return merge(parent.plugins(), projectDefinition.plugins(), PluginDefinition::name, this::merge);
     }
 
     @Override
     public Collection<DependencyDefinition> dependencies() {
-        var indexed = parent.dependencies()
+        return merge(
+            parent.dependencies(),
+            projectDefinition.dependencies(),
+            DependencyDefinition::name,
+            new PickSecond<>()
+        );
+    }
+
+    private <T> Collection<T> merge(
+        Collection<T> first,
+        Collection<T> second,
+        Function<T, String> classifier,
+        BinaryOperator<T> combiner
+    ) {
+        return Stream.concat(first.stream(), second.stream())
+            .collect(Collectors.groupingBy(classifier, Collectors.reducing(combiner)))
+            .values()
             .stream()
-            .collect(Collectors.toMap(DependencyDefinition::name, Function.identity()));
-        for (var dependencyDefinition : projectDefinition.dependencies()) {
-            indexed.put(dependencyDefinition.name(), dependencyDefinition);
-        }
-        return List.copyOf(indexed.values());
+            .flatMap(Optional::stream)
+            .toList();
     }
 
     private PluginDefinition merge(PluginDefinition declared, PluginDefinition pluginDefinition) {

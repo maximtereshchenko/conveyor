@@ -23,7 +23,7 @@ final class InterpolationService {
                 value,
                 (current, matchResult) ->
                     current.replace(matchResult.group(), properties.getOrDefault(matchResult.group(1), "")),
-                (first, second) -> first
+                new PickSecond<>()
             );
     }
 }
