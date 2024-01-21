@@ -60,7 +60,7 @@ final class LocalProject implements ConveyorProject {
 
     @Override
     public Set<Path> modulePath(DependencyScope... scopes) {
-        return Dependencies.forDependencies(repository, project, scopes)
+        return Dependencies.from(repository, project, project.dependencies(Set.of(scopes)))
             .modulePath()
             .stream()
             .map(repository::artifact)
@@ -83,7 +83,7 @@ final class LocalProject implements ConveyorProject {
     }
 
     private Set<Path> pluginsModulePath() {
-        return Dependencies.forPlugins(repository, project)
+        return Dependencies.from(repository, project, project.plugins())
             .modulePath()
             .stream()
             .map(repository::artifact)

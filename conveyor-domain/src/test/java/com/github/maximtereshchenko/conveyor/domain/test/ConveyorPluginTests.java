@@ -38,7 +38,7 @@ final class ConveyorPluginTests extends ConveyorTest {
         assertThat(
             module.build(
                 factory.conveyorJson()
-                    .plugin(factory.plugin())
+                    .plugin(factory.pluginBuilder())
                     .install(path),
                 Stage.COMPILE
             )
@@ -72,7 +72,7 @@ final class ConveyorPluginTests extends ConveyorTest {
         assertThat(
             module.build(
                 factory.conveyorJson()
-                    .plugin(factory.plugin())
+                    .plugin(factory.pluginBuilder())
                     .install(path),
                 Stage.CLEAN
             )
@@ -91,7 +91,7 @@ final class ConveyorPluginTests extends ConveyorTest {
         module.build(
             factory.conveyorJson()
                 .plugin(
-                    factory.plugin(),
+                    factory.pluginBuilder(),
                     Map.of("property", "value")
                 )
                 .install(path),
@@ -113,7 +113,7 @@ final class ConveyorPluginTests extends ConveyorTest {
 
         module.build(
             factory.conveyorJson()
-                .plugin(factory.plugin())
+                .plugin(factory.pluginBuilder())
                 .install(path),
             Stage.COMPILE
         );
@@ -136,12 +136,12 @@ final class ConveyorPluginTests extends ConveyorTest {
         module.build(
             factory.conveyorJson()
                 .plugin(
-                    factory.plugin()
+                    factory.pluginBuilder()
                         .name("clean")
                         .stage(Stage.CLEAN)
                 )
                 .plugin(
-                    factory.plugin()
+                    factory.pluginBuilder()
                         .name("compile")
                         .stage(Stage.COMPILE)
                 )

@@ -25,15 +25,15 @@ final class ModulePathTests extends ConveyorTest {
         var buildFiles = module.build(
             factory.conveyorJson()
                 .plugin(
-                    factory.plugin()
+                    factory.pluginBuilder()
                         .name("first-plugin")
-                        .dependency(factory.dependency())
+                        .dependency(factory.dependencyBuilder())
                 )
                 .plugin(
-                    factory.plugin()
+                    factory.pluginBuilder()
                         .name("second-plugin")
                         .dependency(
-                            factory.dependency()
+                            factory.dependencyBuilder()
                                 .version(2)
                         )
                 )
@@ -68,11 +68,11 @@ final class ModulePathTests extends ConveyorTest {
         var buildFiles = module.build(
             factory.conveyorJson()
                 .plugin(
-                    factory.plugin()
+                    factory.pluginBuilder()
                         .dependency(
-                            factory.dependency()
+                            factory.dependencyBuilder()
                                 .dependency(
-                                    factory.dependency()
+                                    factory.dependencyBuilder()
                                         .name("transitive")
                                 )
                         )
@@ -103,8 +103,8 @@ final class ModulePathTests extends ConveyorTest {
 
         var conveyorJson = factory.conveyorJson()
             .plugin(
-                factory.plugin()
-                    .dependency(factory.project("test"), DependencyScope.TEST)
+                factory.pluginBuilder()
+                    .dependency(factory.projectBuilder("test"), DependencyScope.TEST)
             )
             .install(path);
 
@@ -118,14 +118,14 @@ final class ModulePathTests extends ConveyorTest {
         ArtifactFactory factory
     ) {
         factory.superParent().install(path);
-        var transitive = factory.project("transitive");
-        var commonDependency = factory.dependency()
+        var transitive = factory.projectBuilder("transitive");
+        var commonDependency = factory.dependencyBuilder()
             .name("common-dependency");
 
         var buildFiles = module.build(
             factory.conveyorJson()
                 .plugin(
-                    factory.plugin()
+                    factory.pluginBuilder()
                         .name("first-plugin")
                         .dependency(
                             commonDependency.version(1)
@@ -133,10 +133,10 @@ final class ModulePathTests extends ConveyorTest {
                         )
                 )
                 .plugin(
-                    factory.plugin()
+                    factory.pluginBuilder()
                         .name("second-plugin")
                         .dependency(
-                            factory.dependency()
+                            factory.dependencyBuilder()
                                 .name("dependency")
                                 .dependency(commonDependency.version(2))
                         )
@@ -168,22 +168,22 @@ final class ModulePathTests extends ConveyorTest {
         ArtifactFactory factory
     ) {
         factory.superParent().install(path);
-        var shouldNotBeUpdated = factory.dependency()
+        var shouldNotBeUpdated = factory.dependencyBuilder()
             .name("should-not-be-updated");
-        var canAffectVersions = factory.dependency()
+        var canAffectVersions = factory.dependencyBuilder()
             .name("can-affect-versions");
 
         module.build(
             factory.conveyorJson()
                 .plugin(
-                    factory.plugin()
+                    factory.pluginBuilder()
                         .dependency(shouldNotBeUpdated.version(1))
                         .dependency(
                             canAffectVersions.version(1)
                                 .dependency(shouldNotBeUpdated.version(2))
                         )
                         .dependency(
-                            factory.dependency()
+                            factory.dependencyBuilder()
                                 .name("will-remove-dependency")
                                 .dependency(canAffectVersions.version(2))
                         )
@@ -210,14 +210,14 @@ final class ModulePathTests extends ConveyorTest {
 
         module.build(
             factory.conveyorJson()
-                .plugin(factory.plugin())
+                .plugin(factory.pluginBuilder())
                 .dependency(
-                    factory.dependency()
+                    factory.dependencyBuilder()
                         .name("implementation"),
                     DependencyScope.IMPLEMENTATION
                 )
                 .dependency(
-                    factory.dependency()
+                    factory.dependencyBuilder()
                         .name("test"),
                     DependencyScope.TEST
                 )
@@ -241,11 +241,11 @@ final class ModulePathTests extends ConveyorTest {
 
         module.build(
             factory.conveyorJson()
-                .plugin(factory.plugin())
+                .plugin(factory.pluginBuilder())
                 .dependency(
-                    factory.dependency()
+                    factory.dependencyBuilder()
                         .dependency(
-                            factory.project("test"),
+                            factory.projectBuilder("test"),
                             DependencyScope.TEST
                         )
                 )
@@ -258,5 +258,36 @@ final class ModulePathTests extends ConveyorTest {
             .doesNotContain(testJar);
         assertThat(modulePath(defaultBuildDirectory(path).resolve("project-plugin-1-module-path-test")))
             .doesNotContain(testJar);
+    }
+
+    @Test
+    void givenDependencyWithTestScope_whenBuild_thenDependencyDidNotAffectImplementationScope(
+        @TempDir Path path,
+        ConveyorModule module,
+        ArtifactFactory factory
+    ) {
+        factory.superParent().install(path);
+        var shouldNotBeUpdated = factory.dependencyBuilder()
+            .name("should-no-be-updated");
+
+        module.build(
+            factory.conveyorJson()
+                .plugin(factory.pluginBuilder())
+                .dependency(
+                    shouldNotBeUpdated.version(1),
+                    DependencyScope.IMPLEMENTATION
+                )
+                .dependency(
+                    factory.dependencyBuilder()
+                        .name("test")
+                        .dependency(shouldNotBeUpdated.version(2)),
+                    DependencyScope.TEST
+                )
+                .install(path),
+            Stage.COMPILE
+        );
+
+        assertThat(modulePath(defaultBuildDirectory(path).resolve("project-plugin-1-module-path-implementation")))
+            .containsExactly(path.resolve("should-no-be-updated-1.jar"));
     }
 }

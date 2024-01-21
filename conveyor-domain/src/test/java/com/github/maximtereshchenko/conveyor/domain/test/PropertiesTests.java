@@ -29,7 +29,7 @@ final class PropertiesTests extends ConveyorTest {
         var buildFiles = module.build(
             factory.conveyorJson()
                 .property("conveyor.project.directory", project.toString())
-                .plugin(factory.plugin())
+                .plugin(factory.pluginBuilder())
                 .install(path),
             Stage.COMPILE
         );
@@ -55,7 +55,7 @@ final class PropertiesTests extends ConveyorTest {
                     "conveyor.project.directory",
                     Paths.get("").toAbsolutePath().relativize(project).toString()
                 )
-                .plugin(factory.plugin())
+                .plugin(factory.pluginBuilder())
                 .install(path),
             Stage.COMPILE
         );
@@ -78,7 +78,7 @@ final class PropertiesTests extends ConveyorTest {
         var buildFiles = module.build(
             factory.conveyorJson()
                 .property("conveyor.project.build.directory", build.toString())
-                .plugin(factory.plugin())
+                .plugin(factory.pluginBuilder())
                 .install(path),
             Stage.COMPILE
         );
@@ -102,7 +102,7 @@ final class PropertiesTests extends ConveyorTest {
             factory.conveyorJson()
                 .property("conveyor.project.directory", project.toString())
                 .property("conveyor.project.build.directory", "./build")
-                .plugin(factory.plugin())
+                .plugin(factory.pluginBuilder())
                 .install(path),
             Stage.COMPILE
         );
@@ -125,7 +125,7 @@ final class PropertiesTests extends ConveyorTest {
             factory.conveyorJson()
                 .property("property", "value")
                 .plugin(
-                    factory.plugin(),
+                    factory.pluginBuilder(),
                     Map.of("property", "${property}-suffix")
                 )
                 .install(path),
