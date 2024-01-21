@@ -10,6 +10,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -259,5 +260,65 @@ final class InheritanceTests extends ConveyorTest {
                         .resolve("subproject-plugin-1-run")
                 )
             );
+    }
+
+    @Test
+    void givenMultipleSubprojects_whenBuild_thenSubprojectsBuiltInOrder(
+        @TempDir Path path,
+        ConveyorModule module,
+        ArtifactFactory factory
+    ) {
+        factory.superParent().install(path);
+
+        module.build(
+            factory.conveyorJson()
+                .name("project")
+                .subproject(
+                    factory.conveyorJson()
+                        .name("subproject-1")
+                        .subproject(
+                            factory.conveyorJson()
+                                .name("subproject-1-a")
+                        )
+                        .subproject(
+                            factory.conveyorJson()
+                                .name("subproject-1-b")
+                        )
+                )
+                .subproject(
+                    factory.conveyorJson()
+                        .name("subproject-2")
+                        .subproject(
+                            factory.conveyorJson()
+                                .name("subproject-2-a")
+                        )
+                        .subproject(
+                            factory.conveyorJson()
+                                .name("subproject-2-b")
+                        )
+                )
+                .plugin(factory.pluginBuilder())
+                .install(path),
+            Stage.COMPILE
+        );
+
+        var subproject1Directory = path.resolve("subproject-1");
+        var subproject2Directory = path.resolve("subproject-2");
+        assertThat(
+            List.of(
+                instant(defaultBuildDirectory(path).resolve("project-plugin-1-run")),
+                instant(defaultBuildDirectory(subproject1Directory).resolve("subproject-1-plugin-1-run")),
+                instant(defaultBuildDirectory(subproject1Directory.resolve("subproject-1-a"))
+                    .resolve("subproject-1-a-plugin-1-run")),
+                instant(defaultBuildDirectory(subproject1Directory.resolve("subproject-1-b"))
+                    .resolve("subproject-1-b-plugin-1-run")),
+                instant(defaultBuildDirectory(subproject2Directory).resolve("subproject-2-plugin-1-run")),
+                instant(defaultBuildDirectory(subproject2Directory.resolve("subproject-2-a"))
+                    .resolve("subproject-2-a-plugin-1-run")),
+                instant(defaultBuildDirectory(subproject2Directory.resolve("subproject-2-b"))
+                    .resolve("subproject-2-b-plugin-1-run"))
+            )
+        )
+            .isSorted();
     }
 }
