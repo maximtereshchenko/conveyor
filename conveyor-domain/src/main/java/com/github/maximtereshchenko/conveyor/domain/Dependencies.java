@@ -1,174 +1,146 @@
 package com.github.maximtereshchenko.conveyor.domain;
 
-import com.github.maximtereshchenko.conveyor.api.port.ArtifactDefinition;
-import com.github.maximtereshchenko.conveyor.api.port.DependencyDefinition;
-import com.github.maximtereshchenko.conveyor.api.port.ProjectDefinition;
-import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
-
+import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 final class Dependencies {
 
-    private final ArtifactDefinition root;
-    private final Collection<Artifact> artifacts;
+    private final Map<String, TreeSet<ArtifactRelation>> relations;
 
-    private Dependencies(ArtifactDefinition root, Collection<Artifact> artifacts) {
-        this.root = root;
-        this.artifacts = List.copyOf(artifacts);
+    private Dependencies(Map<String, TreeSet<ArtifactRelation>> relations) {
+        this.relations = relations;
     }
 
-    static Dependencies from(
-        DirectoryRepository repository,
-        Project project,
-        Collection<? extends ArtifactDefinition> artifactDefinitions
-    ) {
-        return dependencies(
-            repository,
-            new Dependencies(
-                project,
-                List.of(new Root(project, artifactDefinitions))
-            ),
-            project,
-            artifactDefinitions
-        );
+    private Dependencies() {
+        this(Map.of());
     }
 
-    private static Dependencies dependencies(
-        DirectoryRepository repository,
-        Dependencies original,
-        ArtifactDefinition parent,
-        Collection<? extends ArtifactDefinition> definitions
-    ) {
-        return definitions.stream()
-            .map(repository::projectDefinition)
-            .reduce(
-                original,
-                (dependencies, definition) ->
-                    dependencies(
-                        repository,
-                        dependencies,
-                        definition,
-                        definition.dependencies()
-                            .stream()
-                            .filter(dependencyDefinition -> dependencyDefinition.scope() != DependencyScope.TEST)
-                            .toList()
-                    )
-                        .with(parent, definition),
-                new PickSecond<>()
-            );
-    }
-
-    Set<ArtifactDefinition> modulePath() {
-        var modulePath = new HashSet<>(modulePath(root.name(), root.version()));
-        modulePath.remove(root);
-        return Set.copyOf(modulePath);
-    }
-
-    private Dependencies with(ArtifactDefinition affectedBy, ProjectDefinition projectDefinition) {
-        var copy = new ArrayList<>(artifacts);
-        copy.add(new Dependency(affectedBy, projectDefinition));
-        return new Dependencies(root, copy);
-    }
-
-    private int effectiveVersion(String name) {
+    static Dependencies from(Collection<Artifact> artifacts) {
         return artifacts.stream()
-            .filter(artifact -> artifact.hasName(name))
-            .sorted(Comparator.comparingInt(Artifact::version).reversed())
-            .filter(artifact -> artifact.canBeUsed(this))
-            .map(Artifact::version)
-            .findAny()
-            .orElseThrow();
+            .map(Root::new)
+            .reduce(new Dependencies(), Dependencies::with, new PickSecond<>());
     }
 
-    private Set<ArtifactDefinition> modulePath(String name, int version) {
-        return artifacts.stream()
-            .filter(newRelation -> newRelation.hasName(name))
-            .filter(newRelation -> newRelation.version() == version)
-            .findAny()
-            .orElseThrow()
-            .modulePath(this);
+    Set<Path> modulePath() {
+        return relations.keySet()
+            .stream()
+            .map(this::resolved)
+            .flatMap(Optional::stream)
+            .map(Artifact::modulePath)
+            .collect(Collectors.toSet());
     }
 
-    private static final class Dependency extends Artifact {
+    private Map<String, TreeSet<ArtifactRelation>> deepCopy() {
+        var copy = new HashMap<String, TreeSet<ArtifactRelation>>();
+        for (var entry : relations.entrySet()) {
+            copy.put(entry.getKey(), new TreeSet<>(entry.getValue()));
+        }
+        return copy;
+    }
 
-        private final ArtifactDefinition affectedBy;
-        private final ProjectDefinition projectDefinition;
+    private Optional<Artifact> resolved(String name) {
+        return relations.get(name)
+            .stream()
+            .map(relation -> relation.resolved(this))
+            .flatMap(Optional::stream)
+            .findFirst();
+    }
 
-        Dependency(ArtifactDefinition affectedBy, ProjectDefinition projectDefinition) {
-            super(projectDefinition);
-            this.affectedBy = affectedBy;
-            this.projectDefinition = projectDefinition;
+    private Dependencies with(ArtifactRelation artifactRelation) {
+        var deepCopy = deepCopy();
+        walkArtifactTree(artifactRelation, deepCopy);
+        return new Dependencies(deepCopy);
+    }
+
+    private void walkArtifactTree(ArtifactRelation relation, Map<String, TreeSet<ArtifactRelation>> collected) {
+        collected.computeIfAbsent(relation.name(), key -> new TreeSet<>()).add(relation);
+        for (var edge : relation.edges()) {
+            walkArtifactTree(edge, collected);
+        }
+    }
+
+    private static final class Edge extends ArtifactRelation {
+
+        private final Artifact requirement;
+
+        Edge(Artifact requirement, Artifact artifact) {
+            super(artifact);
+            this.requirement = requirement;
         }
 
         @Override
-        public boolean canBeUsed(Dependencies dependencies) {
-            return dependencies.effectiveVersion(affectedBy.name()) == affectedBy.version();
+        Optional<Artifact> resolved(Dependencies dependencies) {
+            if (isRequirementResolved(dependencies)) {
+                return Optional.of(artifact());
+            }
+            return Optional.empty();
+        }
+
+        private boolean isRequirementResolved(Dependencies dependencies) {
+            return dependencies.resolved(requirement.name())
+                .map(requirement::equals)
+                .orElse(Boolean.FALSE);
+        }
+    }
+
+    private static final class Root extends ArtifactRelation {
+
+        Root(Artifact artifact) {
+            super(artifact);
         }
 
         @Override
-        Set<String> dependsOn() {
-            return projectDefinition.dependencies()
+        Optional<Artifact> resolved(Dependencies dependencies) {
+            return Optional.of(artifact());
+        }
+    }
+
+    private abstract static class ArtifactRelation implements Comparable<ArtifactRelation> {
+
+        private final Artifact artifact;
+
+        ArtifactRelation(Artifact artifact) {
+            this.artifact = artifact;
+        }
+
+        @Override
+        public int compareTo(ArtifactRelation artifactRelation) {
+            return Integer.compare(artifactRelation.artifact().version(), artifact.version());
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(artifact);
+        }
+
+        @Override
+        public boolean equals(Object object) {
+            if (this == object) {
+                return true;
+            }
+            if (object == null || getClass() != object.getClass()) {
+                return false;
+            }
+            var that = (ArtifactRelation) object;
+            return Objects.equals(artifact, that.artifact);
+        }
+
+        abstract Optional<Artifact> resolved(Dependencies dependencies);
+
+        Artifact artifact() {
+            return artifact;
+        }
+
+        String name() {
+            return artifact.name();
+        }
+
+        Collection<Edge> edges() {
+            return artifact.dependencies()
                 .stream()
-                .filter(dependencyDefinition -> dependencyDefinition.scope() != DependencyScope.TEST)
-                .map(DependencyDefinition::name)
-                .collect(Collectors.toSet());
-        }
-
-    }
-
-    private static final class Root extends Artifact {
-
-        private final Collection<ArtifactDefinition> dependencies;
-
-        Root(Project project, Collection<? extends ArtifactDefinition> dependencies) {
-            super(project);
-            this.dependencies = List.copyOf(dependencies);
-        }
-
-        @Override
-        boolean canBeUsed(Dependencies dependencies) {
-            return true;
-        }
-
-        @Override
-        Set<String> dependsOn() {
-            return dependencies.stream()
-                .map(ArtifactDefinition::name)
-                .collect(Collectors.toSet());
-        }
-    }
-
-    private abstract static class Artifact {
-
-        private final ArtifactDefinition artifactDefinition;
-
-        Artifact(ArtifactDefinition artifactDefinition) {
-            this.artifactDefinition = artifactDefinition;
-        }
-
-        boolean hasName(String name) {
-            return artifactDefinition.name().equals(name);
-        }
-
-        int version() {
-            return artifactDefinition.version();
-        }
-
-        abstract boolean canBeUsed(Dependencies dependencies);
-
-        abstract Set<String> dependsOn();
-
-        Set<ArtifactDefinition> modulePath(Dependencies dependencies) {
-            return Stream.concat(
-                    Stream.of(artifactDefinition),
-                    dependsOn()
-                        .stream()
-                        .map(name -> dependencies.modulePath(name, dependencies.effectiveVersion(name)))
-                        .flatMap(Collection::stream)
-                )
-                .collect(Collectors.toSet());
+                .map(dependency -> new Edge(artifact, dependency))
+                .toList();
         }
     }
 }

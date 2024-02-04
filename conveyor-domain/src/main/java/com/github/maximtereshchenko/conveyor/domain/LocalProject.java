@@ -1,5 +1,6 @@
 package com.github.maximtereshchenko.conveyor.domain;
 
+import com.github.maximtereshchenko.conveyor.api.port.ArtifactDefinition;
 import com.github.maximtereshchenko.conveyor.api.port.PluginDefinition;
 import com.github.maximtereshchenko.conveyor.common.api.BuildFiles;
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
@@ -16,7 +17,6 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 final class LocalProject implements ConveyorProject {
 
@@ -61,11 +61,7 @@ final class LocalProject implements ConveyorProject {
 
     @Override
     public Set<Path> modulePath(DependencyScope... scopes) {
-        return Dependencies.from(repository, project, project.dependencies(Set.of(scopes)))
-            .modulePath()
-            .stream()
-            .map(repository::artifact)
-            .collect(Collectors.toSet());
+        return modulePath(project.dependencies(Set.of(scopes)));
     }
 
     public BuildFiles build(ModuleLoader moduleLoader, InterpolationService interpolationService, Stage stage) {
@@ -84,11 +80,16 @@ final class LocalProject implements ConveyorProject {
     }
 
     private Set<Path> pluginsModulePath() {
-        return Dependencies.from(repository, project, project.plugins())
-            .modulePath()
-            .stream()
-            .map(repository::artifact)
-            .collect(Collectors.toSet());
+        return modulePath(project.plugins());
+    }
+
+    private Set<Path> modulePath(Collection<? extends ArtifactDefinition> artifactDefinitions) {
+        return Dependencies.from(
+                artifactDefinitions.stream()
+                    .map(definition -> new Artifact(definition, repository))
+                    .toList()
+            )
+            .modulePath();
     }
 
     private Map<String, String> pluginConfiguration(String name, InterpolationService interpolationService) {
