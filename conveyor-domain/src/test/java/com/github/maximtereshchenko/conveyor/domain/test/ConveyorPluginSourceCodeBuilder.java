@@ -99,7 +99,7 @@ final class ConveyorPluginSourceCodeBuilder {
                    }
                    private BuildFiles writeInstant(BuildFiles buildFiles, Path path) {
                        sleep();
-                       return buildFiles.with(new BuildFile(write(path), BuildFileType.ARTIFACT));
+                       return buildFiles.with(write(path), BuildFileType.ARTIFACT);
                    }
                    private void sleep() {
                        try {

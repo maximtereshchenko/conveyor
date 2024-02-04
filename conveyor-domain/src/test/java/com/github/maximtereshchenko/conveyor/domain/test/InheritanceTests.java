@@ -1,7 +1,6 @@
 package com.github.maximtereshchenko.conveyor.domain.test;
 
 import com.github.maximtereshchenko.conveyor.api.ConveyorModule;
-import com.github.maximtereshchenko.conveyor.common.api.BuildFile;
 import com.github.maximtereshchenko.conveyor.common.api.BuildFileType;
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
@@ -27,15 +26,13 @@ final class InheritanceTests extends ConveyorTest {
             .plugin(factory.pluginBuilder())
             .install(path);
 
-        var buildFiles = module.build(
+        var projectBuildFiles = module.build(
             factory.conveyorJson().install(path),
             Stage.COMPILE
         );
 
-        assertThat(buildFiles.byType(BuildFileType.ARTIFACT))
-            .contains(
-                new BuildFile(defaultBuildDirectory(path).resolve("project-plugin-1-run"), BuildFileType.ARTIFACT)
-            );
+        assertThat(projectBuildFiles.byType("project", BuildFileType.ARTIFACT))
+            .contains(defaultBuildDirectory(path).resolve("project-plugin-1-run"));
     }
 
     @Test
@@ -49,17 +46,15 @@ final class InheritanceTests extends ConveyorTest {
             .plugin(plugin.version(2))
             .install(path);
 
-        var buildFiles = module.build(
+        var projectBuildFiles = module.build(
             factory.conveyorJson()
                 .plugin(plugin.version(1))
                 .install(path),
             Stage.COMPILE
         );
 
-        assertThat(buildFiles.byType(BuildFileType.ARTIFACT))
-            .contains(
-                new BuildFile(defaultBuildDirectory(path).resolve("project-plugin-1-run"), BuildFileType.ARTIFACT)
-            );
+        assertThat(projectBuildFiles.byType("project", BuildFileType.ARTIFACT))
+            .contains(defaultBuildDirectory(path).resolve("project-plugin-1-run"));
     }
 
     @Test
@@ -205,7 +200,7 @@ final class InheritanceTests extends ConveyorTest {
             .property("key", "value")
             .install(path);
 
-        var buildFiles = module.build(
+        var projectBuildFiles = module.build(
             factory.conveyorJson()
                 .parent(
                     factory.projectBuilder("parent")
@@ -222,10 +217,8 @@ final class InheritanceTests extends ConveyorTest {
             Stage.COMPILE
         );
 
-        assertThat(buildFiles.byType(BuildFileType.ARTIFACT))
-            .contains(
-                new BuildFile(defaultBuildDirectory(path).resolve("project-plugin-1-run"), BuildFileType.ARTIFACT)
-            );
+        assertThat(projectBuildFiles.byType("project", BuildFileType.ARTIFACT))
+            .contains(defaultBuildDirectory(path).resolve("project-plugin-1-run"));
         assertThat(defaultBuildDirectory(path).resolve("project-plugin-1-configuration"))
             .content(StandardCharsets.UTF_8)
             .isEqualTo("key=value");

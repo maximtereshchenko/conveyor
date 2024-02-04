@@ -1,9 +1,7 @@
 package com.github.maximtereshchenko.conveyor.domain.test;
 
 import com.github.maximtereshchenko.conveyor.api.ConveyorModule;
-import com.github.maximtereshchenko.conveyor.common.api.BuildFile;
 import com.github.maximtereshchenko.conveyor.common.api.BuildFileType;
-import com.github.maximtereshchenko.conveyor.common.api.BuildFiles;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -24,8 +22,11 @@ final class ConveyorPluginTests extends ConveyorTest {
     ) {
         factory.superParent().install(path);
 
-        assertThat(module.build(factory.conveyorJson().install(path), Stage.COMPILE))
-            .isEqualTo(new BuildFiles());
+        assertThat(
+            module.build(factory.conveyorJson().install(path), Stage.COMPILE)
+                .byType("project", BuildFileType.ARTIFACT)
+        )
+            .isEmpty();
     }
 
     @Test
@@ -38,27 +39,17 @@ final class ConveyorPluginTests extends ConveyorTest {
 
         assertThat(
             module.build(
-                factory.conveyorJson()
-                    .plugin(factory.pluginBuilder())
-                    .install(path),
-                Stage.COMPILE
-            )
-        )
-            .isEqualTo(
-                new BuildFiles(
-                    new BuildFile(
-                        defaultBuildDirectory(path).resolve("project-plugin-1-prepared"),
-                        BuildFileType.ARTIFACT
-                    ),
-                    new BuildFile(
-                        defaultBuildDirectory(path).resolve("project-plugin-1-run"),
-                        BuildFileType.ARTIFACT
-                    ),
-                    new BuildFile(
-                        defaultBuildDirectory(path).resolve("project-plugin-1-finalized"),
-                        BuildFileType.ARTIFACT
-                    )
+                    factory.conveyorJson()
+                        .plugin(factory.pluginBuilder())
+                        .install(path),
+                    Stage.COMPILE
                 )
+                .byType("project", BuildFileType.ARTIFACT)
+        )
+            .contains(
+                defaultBuildDirectory(path).resolve("project-plugin-1-prepared"),
+                defaultBuildDirectory(path).resolve("project-plugin-1-run"),
+                defaultBuildDirectory(path).resolve("project-plugin-1-finalized")
             );
     }
 
@@ -72,13 +63,14 @@ final class ConveyorPluginTests extends ConveyorTest {
 
         assertThat(
             module.build(
-                factory.conveyorJson()
-                    .plugin(factory.pluginBuilder())
-                    .install(path),
-                Stage.CLEAN
-            )
+                    factory.conveyorJson()
+                        .plugin(factory.pluginBuilder())
+                        .install(path),
+                    Stage.CLEAN
+                )
+                .byType("project", BuildFileType.ARTIFACT)
         )
-            .isEqualTo(new BuildFiles());
+            .isEmpty();
     }
 
     @Test
