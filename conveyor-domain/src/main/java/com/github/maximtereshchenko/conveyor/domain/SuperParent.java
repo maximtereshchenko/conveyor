@@ -1,7 +1,7 @@
 package com.github.maximtereshchenko.conveyor.domain;
 
 import com.github.maximtereshchenko.conveyor.api.port.ArtifactDefinition;
-import com.github.maximtereshchenko.conveyor.api.port.DependencyDefinition;
+import com.github.maximtereshchenko.conveyor.api.port.ExternalDependencyDefinition;
 import com.github.maximtereshchenko.conveyor.api.port.PluginDefinition;
 import com.github.maximtereshchenko.conveyor.api.port.ProjectDefinition;
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
@@ -43,11 +43,16 @@ final class SuperParent implements Project {
     }
 
     @Override
-    public Collection<DependencyDefinition> dependencies(Set<DependencyScope> scopes) {
-        return projectDefinition.dependencies()
+    public Collection<ExternalDependencyDefinition> dependencies(Set<DependencyScope> scopes) {
+        return projectDefinition.externalDependencies()
             .stream()
             .filter(dependencyDefinition -> scopes.contains(dependencyDefinition.scope()))
             .toList();
+    }
+
+    @Override
+    public boolean dependsOn(String project) {
+        return false;
     }
 
     private static final class SuperParentArtifactDefinition implements ArtifactDefinition {

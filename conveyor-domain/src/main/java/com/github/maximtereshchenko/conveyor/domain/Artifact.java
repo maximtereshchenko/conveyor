@@ -28,7 +28,7 @@ final class Artifact implements ArtifactDefinition {
 
     Collection<Artifact> dependencies() {
         return repository.projectDefinition(artifactDefinition)
-            .dependencies()
+            .externalDependencies()
             .stream()
             .filter(dependencyDefinition -> dependencyDefinition.scope() != DependencyScope.TEST)
             .map(dependencyDefinition -> new Artifact(dependencyDefinition, repository))

@@ -210,6 +210,22 @@ final class ProjectDefinitionBuilder implements ArtifactBuilder {
         );
     }
 
+    ProjectDefinitionBuilder dependency(String project) {
+        var copy = new ArrayList<>(dependencies);
+        copy.add((path) -> new LocalProjectDependencyDefinition(project));
+        return new ProjectDefinitionBuilder(
+            gsonAdapter,
+            name,
+            version,
+            parentFunction,
+            subprojects,
+            properties,
+            plugins,
+            copy,
+            fileNameFunction
+        );
+    }
+
     ProjectDefinitionBuilder dependency(ArtifactBuilder builder) {
         return dependency(builder, DependencyScope.IMPLEMENTATION);
     }
@@ -256,7 +272,7 @@ final class ProjectDefinitionBuilder implements ArtifactBuilder {
 
     private DependencyDefinition dependencyDefinition(Path path, ArtifactBuilder builder, DependencyScope scope) {
         builder.install(path);
-        return new DependencyDefinition(builder.name(), builder.version(), scope);
+        return new ExternalDependencyDefinition(builder.name(), builder.version(), scope);
     }
 
     private ParentDefinition parent(ProjectDefinitionBuilder builder, Path path) {

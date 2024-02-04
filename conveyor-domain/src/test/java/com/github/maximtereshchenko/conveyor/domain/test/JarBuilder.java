@@ -66,7 +66,14 @@ final class JarBuilder {
     private Collection<FileObject> compiled(Path path) {
         var compiler = ToolProvider.getSystemJavaCompiler();
         var fileManager = new InMemoryFileManager(standardJavaFileManager(compiler));
-        compiler.getTask(
+        if (!compile(path, compiler, fileManager)) {
+            throw new IllegalStateException("Could not compile");
+        }
+        return fileManager.compiled();
+    }
+
+    private boolean compile(Path path, JavaCompiler compiler, InMemoryFileManager fileManager) {
+        return compiler.getTask(
                 null,
                 fileManager,
                 null,
@@ -78,7 +85,6 @@ final class JarBuilder {
                 )
             )
             .call();
-        return fileManager.compiled();
     }
 
     private String packageName() {

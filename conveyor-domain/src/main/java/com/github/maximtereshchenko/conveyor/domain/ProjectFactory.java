@@ -3,7 +3,6 @@ package com.github.maximtereshchenko.conveyor.domain;
 import com.github.maximtereshchenko.conveyor.api.port.*;
 
 import java.nio.file.Path;
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -23,10 +22,22 @@ final class ProjectFactory {
             repository,
             projectDefinition,
             project(repository, projectDefinition.parent())
-        );
+        )
+            .sorted(this::comparedByMutualDependency)
+            .toList();
     }
 
-    private List<LocalProject> localProjects(
+    private int comparedByMutualDependency(LocalProject first, LocalProject second) {
+        if (first.dependsOn(second)) {
+            return 1;
+        }
+        if (second.dependsOn(first)) {
+            return -1;
+        }
+        return 0;
+    }
+
+    private Stream<LocalProject> localProjects(
         Path projectDefinitionPath,
         DirectoryRepository repository,
         ProjectDefinition projectDefinition,
@@ -34,21 +45,19 @@ final class ProjectFactory {
     ) {
         var current = new Subproject(parent, projectDefinition);
         return Stream.concat(
-                Stream.of(new LocalProject(current, repository, projectDefinitionPath)),
-                projectDefinition.subprojects()
-                    .stream()
-                    .map(path -> projectDefinitionPath.getParent().resolve(path).resolve("conveyor.json"))
-                    .map(conveyorJson ->
-                        localProjects(
-                            conveyorJson,
-                            repository,
-                            reader.projectDefinition(conveyorJson),
-                            current
-                        )
+            Stream.of(new LocalProject(current, repository, projectDefinitionPath)),
+            projectDefinition.subprojects()
+                .stream()
+                .map(path -> projectDefinitionPath.getParent().resolve(path).resolve("conveyor.json"))
+                .flatMap(conveyorJson ->
+                    localProjects(
+                        conveyorJson,
+                        repository,
+                        reader.projectDefinition(conveyorJson),
+                        current
                     )
-                    .flatMap(Collection::stream)
-            )
-            .toList();
+                )
+        );
     }
 
     private Project project(DirectoryRepository repository, ParentDefinition parentDefinition) {

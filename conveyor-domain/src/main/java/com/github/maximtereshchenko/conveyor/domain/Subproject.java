@@ -1,6 +1,7 @@
 package com.github.maximtereshchenko.conveyor.domain;
 
-import com.github.maximtereshchenko.conveyor.api.port.DependencyDefinition;
+import com.github.maximtereshchenko.conveyor.api.port.ExternalDependencyDefinition;
+import com.github.maximtereshchenko.conveyor.api.port.LocalProjectDependencyDefinition;
 import com.github.maximtereshchenko.conveyor.api.port.PluginDefinition;
 import com.github.maximtereshchenko.conveyor.api.port.ProjectDefinition;
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
@@ -51,14 +52,25 @@ final class Subproject implements Project {
     }
 
     @Override
-    public Collection<DependencyDefinition> dependencies(Set<DependencyScope> scopes) {
+    public Collection<ExternalDependencyDefinition> dependencies(Set<DependencyScope> scopes) {
         return merge(
             parent.dependencies(scopes),
-            projectDefinition.dependencies(),
+            projectDefinition.externalDependencies(),
             dependency -> scopes.contains(dependency.scope()),
-            DependencyDefinition::name,
+            ExternalDependencyDefinition::name,
             new PickSecond<>()
         );
+    }
+
+    @Override
+    public boolean dependsOn(String project) {
+        for (var dependency : projectDefinition.dependencies()) {
+            if (dependency instanceof LocalProjectDependencyDefinition definition &&
+                definition.name().equals(project)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private <T> Collection<T> merge(

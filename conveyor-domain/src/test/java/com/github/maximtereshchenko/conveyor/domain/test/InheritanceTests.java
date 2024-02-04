@@ -314,4 +314,41 @@ final class InheritanceTests extends ConveyorTest {
         )
             .isSorted();
     }
+
+    @Test
+    void givenProjectDependsOnOtherProject_whenBuild_thenDependantProjectIsBuildAfterItsDependency(
+        @TempDir Path path,
+        ConveyorModule module,
+        ArtifactFactory factory
+    ) {
+        factory.superParent().install(path);
+
+        module.build(
+            factory.conveyorJson()
+                .name("project")
+                .plugin(factory.pluginBuilder())
+                .subproject(
+                    factory.conveyorJson()
+                        .name("subproject-1")
+                        .dependency("subproject-2")
+                )
+                .subproject(
+                    factory.conveyorJson()
+                        .name("subproject-2")
+                )
+                .install(path),
+            Stage.COMPILE
+        );
+
+        assertThat(
+            List.of(
+                instant(defaultBuildDirectory(path).resolve("project-plugin-1-run")),
+                instant(defaultBuildDirectory(path.resolve("subproject-2"))
+                    .resolve("subproject-2-plugin-1-run")),
+                instant(defaultBuildDirectory(path.resolve("subproject-1"))
+                    .resolve("subproject-1-plugin-1-run"))
+            )
+        )
+            .isSorted();
+    }
 }
