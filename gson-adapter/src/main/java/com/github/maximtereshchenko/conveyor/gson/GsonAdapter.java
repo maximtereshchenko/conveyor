@@ -1,9 +1,6 @@
 package com.github.maximtereshchenko.conveyor.gson;
 
-import com.github.maximtereshchenko.conveyor.api.port.DependencyDefinition;
-import com.github.maximtereshchenko.conveyor.api.port.ParentDefinition;
-import com.github.maximtereshchenko.conveyor.api.port.ProjectDefinition;
-import com.github.maximtereshchenko.conveyor.api.port.ProjectDefinitionReader;
+import com.github.maximtereshchenko.conveyor.api.port.*;
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -13,19 +10,28 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public final class GsonAdapter implements ProjectDefinitionReader {
+public final class GsonAdapter implements DefinitionReader {
 
     private final Gson gson = new GsonBuilder()
         .registerTypeHierarchyAdapter(Path.class, new PathTypeAdapter())
-        .registerTypeHierarchyAdapter(ParentDefinition.class, new ParentDefinitionAdapter())
+        .registerTypeHierarchyAdapter(TemplateDefinition.class, new ParentDefinitionAdapter())
         .registerTypeHierarchyAdapter(DependencyDefinition.class, new DependencyDefinitionAdapter())
         .registerTypeAdapter(DependencyScope.class, new DependencyScopeAdapter())
         .create();
 
     @Override
-    public ProjectDefinition projectDefinition(Path path) {
+    public SchematicDefinition schematicDefinition(Path path) {
         try (var reader = Files.newBufferedReader(path)) {
-            return gson.fromJson(reader, ProjectDefinition.class);
+            return gson.fromJson(reader, SchematicDefinition.class);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    @Override
+    public ManualDefinition manualDefinition(Path path) {
+        try (var reader = Files.newBufferedReader(path)) {
+            return gson.fromJson(reader, ManualDefinition.class);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

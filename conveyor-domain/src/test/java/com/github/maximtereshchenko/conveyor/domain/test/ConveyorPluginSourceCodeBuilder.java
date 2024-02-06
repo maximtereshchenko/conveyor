@@ -72,34 +72,36 @@ final class ConveyorPluginSourceCodeBuilder {
                        return "%s";
                    }
                    @Override
-                   public Collection<ConveyorTaskBinding> bindings(ConveyorProject project, Map<String, String> configuration) {
+                   public List<ConveyorTaskBinding> bindings(ConveyorProperties properties, Map<String, String> configuration) {
                        return List.of(
                            new ConveyorTaskBinding(
                                stage,
                                Step.PREPARE,
-                               (buildFiles) -> writeInstant(
-                                   buildFiles,
-                                   project.buildDirectory().resolve("%%s-%%s-prepared".formatted(project.name(), fullName))
+                               (dependencies, products) -> writeInstant(
+                                   products,
+                                   properties.constructionDirectory(),
+                                   "%%s-%%s-prepared".formatted(properties.schematicName(), fullName)
                                )
                            ),
                            new ConveyorTaskBinding(
                                stage,
                                Step.FINALIZE,
-                               (buildFiles) -> writeInstant(
-                                   buildFiles,
-                                   project.buildDirectory().resolve("%%s-%%s-finalized".formatted(project.name(), fullName))
+                               (dependencies, products) -> writeInstant(
+                                   products,
+                                   properties.constructionDirectory(),
+                                   "%%s-%%s-finalized".formatted(properties.schematicName(), fullName)
                                )
                            ),
                            new ConveyorTaskBinding(
                                stage,
                                Step.RUN,
-                               (buildFiles) -> execute(buildFiles, project, configuration)
+                               (dependencies, products) -> execute(dependencies, products, properties, configuration)
                            )
                        );
                    }
-                   private BuildFiles writeInstant(BuildFiles buildFiles, Path path) {
+                   private Products writeInstant(Products products, Path directory, String name) {
                        sleep();
-                       return buildFiles.with(write(path), BuildFileType.ARTIFACT);
+                       return products.with(write(directory, name), ProductType.MODULE_COMPONENT);
                    }
                    private void sleep() {
                        try {
@@ -108,28 +110,36 @@ final class ConveyorPluginSourceCodeBuilder {
                            Thread.currentThread().interrupt();
                        }
                    }
-                   private BuildFiles execute(BuildFiles buildFiles, ConveyorProject project, Map<String, String> configuration) {
+                   private Products execute(ConveyorSchematicDependencies dependencies, Products products, ConveyorProperties properties, Map<String, String> configuration) {
                        %s
                        write(
-                           project.buildDirectory().resolve("%%s-%%s-configuration".formatted(project.name(), fullName)),
+                           properties.constructionDirectory(),
+                           "%%s-%%s-configuration".formatted(properties.schematicName(), fullName),
                            toString(configuration.entrySet())
                        );
                        write(
-                           project.buildDirectory().resolve("%%s-%%s-module-path-implementation".formatted(project.name(), fullName)),
-                           toString(project.modulePath(DependencyScope.IMPLEMENTATION))
+                           properties.constructionDirectory(),
+                           "%%s-%%s-module-path-implementation".formatted(properties.schematicName(), fullName),
+                           toString(dependencies.modulePath(DependencyScope.IMPLEMENTATION))
                        );
                        write(
-                           project.buildDirectory().resolve("%%s-%%s-module-path-test".formatted(project.name(), fullName)),
-                           toString(project.modulePath(DependencyScope.TEST))
+                           properties.constructionDirectory(),
+                           "%%s-%%s-module-path-test".formatted(properties.schematicName(), fullName),
+                           toString(dependencies.modulePath(DependencyScope.TEST))
                        );
-                       return writeInstant(buildFiles, project.buildDirectory().resolve("%%s-%%s-run".formatted(project.name(), fullName)));
+                       return writeInstant(
+                            products,
+                            properties.constructionDirectory(),
+                            "%%s-%%s-run".formatted(properties.schematicName(), fullName)
+                       )
+                       .with(properties.discoveryDirectory(), ProductType.MODULE);
                    }
-                   private Path write(Path path) {
-                       return write(path, Instant.now().toString());
+                   private Path write(Path directory, String name) {
+                       return write(directory, name, Instant.now().toString());
                    }
-                   private Path write(Path path, String content) {
+                   private Path write(Path directory, String name, String content) {
                        try {
-                           return Files.writeString(path, content).toAbsolutePath().normalize();
+                           return Files.writeString(Files.createDirectories(directory).resolve(name), content).toAbsolutePath().normalize();
                        } catch (IOException e) {
                            throw new UncheckedIOException(e);
                        }
@@ -157,7 +167,7 @@ final class ConveyorPluginSourceCodeBuilder {
 
     private String dependencyUsages() {
         return dependencyClasses.stream()
-            .map("new %s(project.buildDirectory());"::formatted)
+            .map("new %s(properties.constructionDirectory());"::formatted)
             .collect(Collectors.joining());
     }
 }

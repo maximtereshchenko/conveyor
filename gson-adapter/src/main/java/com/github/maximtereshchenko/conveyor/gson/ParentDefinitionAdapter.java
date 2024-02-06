@@ -1,19 +1,20 @@
 package com.github.maximtereshchenko.conveyor.gson;
 
-import com.github.maximtereshchenko.conveyor.api.port.NoExplicitParent;
-import com.github.maximtereshchenko.conveyor.api.port.ParentDefinition;
-import com.github.maximtereshchenko.conveyor.api.port.ParentProjectDefinition;
+import com.github.maximtereshchenko.conveyor.api.port.ManualTemplateDefinition;
+import com.github.maximtereshchenko.conveyor.api.port.NoExplicitTemplate;
+import com.github.maximtereshchenko.conveyor.api.port.TemplateDefinition;
 import com.google.gson.*;
 
 import java.lang.reflect.Type;
 
-final class ParentDefinitionAdapter implements JsonSerializer<ParentDefinition>, JsonDeserializer<ParentDefinition> {
+final class ParentDefinitionAdapter implements JsonSerializer<TemplateDefinition>,
+    JsonDeserializer<TemplateDefinition> {
 
     @Override
-    public JsonElement serialize(ParentDefinition src, Type typeOfSrc, JsonSerializationContext context) {
+    public JsonElement serialize(TemplateDefinition src, Type typeOfSrc, JsonSerializationContext context) {
         return switch (src) {
-            case NoExplicitParent ignored -> JsonNull.INSTANCE;
-            case ParentProjectDefinition definition -> {
+            case NoExplicitTemplate ignored -> JsonNull.INSTANCE;
+            case ManualTemplateDefinition definition -> {
                 var jsonObject = new JsonObject();
                 jsonObject.add("name", new JsonPrimitive(definition.name()));
                 jsonObject.add("version", new JsonPrimitive(definition.version()));
@@ -23,9 +24,9 @@ final class ParentDefinitionAdapter implements JsonSerializer<ParentDefinition>,
     }
 
     @Override
-    public ParentDefinition deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+    public TemplateDefinition deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
         throws JsonParseException {
         var jsonObject = json.getAsJsonObject();
-        return new ParentProjectDefinition(jsonObject.get("name").getAsString(), jsonObject.get("version").getAsInt());
+        return new ManualTemplateDefinition(jsonObject.get("name").getAsString(), jsonObject.get("version").getAsInt());
     }
 }

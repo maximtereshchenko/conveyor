@@ -1,8 +1,8 @@
 package com.github.maximtereshchenko.conveyor.domain.test;
 
 import com.github.maximtereshchenko.conveyor.api.ConveyorModule;
-import com.github.maximtereshchenko.conveyor.common.api.BuildFileType;
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
+import com.github.maximtereshchenko.conveyor.common.api.ProductType;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -20,9 +20,9 @@ final class ModulePathTests extends ConveyorTest {
         ConveyorModule module,
         ArtifactFactory factory
     ) {
-        factory.superParent().install(path);
+        factory.superManual().install(path);
 
-        var projectBuildFiles = module.build(
+        var projectBuildFiles = module.construct(
             factory.conveyorJson()
                 .plugin(
                     factory.pluginBuilder()
@@ -41,7 +41,7 @@ final class ModulePathTests extends ConveyorTest {
             Stage.COMPILE
         );
 
-        assertThat(projectBuildFiles.byType("project", BuildFileType.ARTIFACT))
+        assertThat(projectBuildFiles.byType("project", ProductType.MODULE_COMPONENT))
             .contains(
                 defaultBuildDirectory(path).resolve("project-first-plugin-1-run"),
                 defaultBuildDirectory(path).resolve("project-second-plugin-1-run")
@@ -57,9 +57,9 @@ final class ModulePathTests extends ConveyorTest {
         ConveyorModule module,
         ArtifactFactory factory
     ) {
-        factory.superParent().install(path);
+        factory.superManual().install(path);
 
-        var projectBuildFiles = module.build(
+        var projectBuildFiles = module.construct(
             factory.conveyorJson()
                 .plugin(
                     factory.pluginBuilder()
@@ -75,7 +75,7 @@ final class ModulePathTests extends ConveyorTest {
             Stage.COMPILE
         );
 
-        assertThat(projectBuildFiles.byType("project", BuildFileType.ARTIFACT))
+        assertThat(projectBuildFiles.byType("project", ProductType.MODULE_COMPONENT))
             .contains(defaultBuildDirectory(path).resolve("project-plugin-1-run"));
         assertThat(defaultBuildDirectory(path))
             .isDirectoryContaining("glob:**dependency-1")
@@ -88,7 +88,7 @@ final class ModulePathTests extends ConveyorTest {
         ConveyorModule module,
         ArtifactFactory factory
     ) {
-        factory.superParent().install(path);
+        factory.superManual().install(path);
 
         var conveyorJson = factory.conveyorJson()
             .plugin(
@@ -97,7 +97,7 @@ final class ModulePathTests extends ConveyorTest {
             )
             .install(path);
 
-        assertThatCode(() -> module.build(conveyorJson, Stage.COMPILE)).doesNotThrowAnyException();
+        assertThatCode(() -> module.construct(conveyorJson, Stage.COMPILE)).doesNotThrowAnyException();
     }
 
     @Test
@@ -106,12 +106,12 @@ final class ModulePathTests extends ConveyorTest {
         ConveyorModule module,
         ArtifactFactory factory
     ) {
-        factory.superParent().install(path);
+        factory.superManual().install(path);
         var transitive = factory.projectBuilder("transitive");
         var commonDependency = factory.dependencyBuilder()
             .name("common-dependency");
 
-        var projectBuildFiles = module.build(
+        var projectBuildFiles = module.construct(
             factory.conveyorJson()
                 .plugin(
                     factory.pluginBuilder()
@@ -134,7 +134,7 @@ final class ModulePathTests extends ConveyorTest {
             Stage.COMPILE
         );
 
-        assertThat(projectBuildFiles.byType("project", BuildFileType.ARTIFACT))
+        assertThat(projectBuildFiles.byType("project", ProductType.MODULE_COMPONENT))
             .contains(
                 defaultBuildDirectory(path).resolve("project-first-plugin-1-run"),
                 defaultBuildDirectory(path).resolve("project-second-plugin-1-run")
@@ -150,13 +150,13 @@ final class ModulePathTests extends ConveyorTest {
         ConveyorModule module,
         ArtifactFactory factory
     ) {
-        factory.superParent().install(path);
+        factory.superManual().install(path);
         var shouldNotBeUpdated = factory.dependencyBuilder()
             .name("should-not-be-updated");
         var canAffectVersions = factory.dependencyBuilder()
             .name("can-affect-versions");
 
-        module.build(
+        module.construct(
             factory.conveyorJson()
                 .plugin(
                     factory.pluginBuilder()
@@ -189,9 +189,9 @@ final class ModulePathTests extends ConveyorTest {
         ConveyorModule module,
         ArtifactFactory factory
     ) {
-        factory.superParent().install(path);
+        factory.superManual().install(path);
 
-        module.build(
+        module.construct(
             factory.conveyorJson()
                 .plugin(factory.pluginBuilder())
                 .dependency(
@@ -220,9 +220,9 @@ final class ModulePathTests extends ConveyorTest {
         ConveyorModule module,
         ArtifactFactory factory
     ) {
-        factory.superParent().install(path);
+        factory.superManual().install(path);
 
-        module.build(
+        module.construct(
             factory.conveyorJson()
                 .plugin(factory.pluginBuilder())
                 .dependency(
@@ -249,11 +249,11 @@ final class ModulePathTests extends ConveyorTest {
         ConveyorModule module,
         ArtifactFactory factory
     ) {
-        factory.superParent().install(path);
+        factory.superManual().install(path);
         var shouldNotBeUpdated = factory.dependencyBuilder()
             .name("should-no-be-updated");
 
-        module.build(
+        module.construct(
             factory.conveyorJson()
                 .plugin(factory.pluginBuilder())
                 .dependency(

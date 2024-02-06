@@ -4,7 +4,6 @@ include("conveyor-domain")
 include("conveyor-plugin-api")
 include("gson-adapter")
 include("conveyor-common-api")
-include("clean-conveyor-plugin")
 dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {

@@ -17,7 +17,7 @@ final class ProjectDefinitionBuilder implements ArtifactBuilder {
     private final GsonAdapter gsonAdapter;
     private final String name;
     private final int version;
-    private final Function<Path, ParentDefinition> parentFunction;
+    private final Function<Path, TemplateDefinition> parentFunction;
     private final Collection<ProjectDefinitionBuilder> subprojects;
     private final Map<String, String> properties;
     private final Collection<Function<Path, PluginDefinition>> plugins;
@@ -28,7 +28,7 @@ final class ProjectDefinitionBuilder implements ArtifactBuilder {
         GsonAdapter gsonAdapter,
         String name,
         int version,
-        Function<Path, ParentDefinition> parentFunction,
+        Function<Path, TemplateDefinition> parentFunction,
         Collection<ProjectDefinitionBuilder> subprojects,
         Map<String, String> properties,
         Collection<Function<Path, PluginDefinition>> plugins,
@@ -51,7 +51,7 @@ final class ProjectDefinitionBuilder implements ArtifactBuilder {
             gsonAdapter,
             name,
             1,
-            path -> new NoExplicitParent(),
+            path -> new ManualTemplateDefinition("super-manual", 1),
             List.of(),
             Map.of(),
             List.of(),
@@ -62,11 +62,13 @@ final class ProjectDefinitionBuilder implements ArtifactBuilder {
 
     static ProjectDefinitionBuilder conveyorJson(GsonAdapter gsonAdapter) {
         return empty(gsonAdapter, "project")
-            .fileName("conveyor.json");
+            .fileName("conveyor.json")
+            .noParent();
     }
 
-    static ProjectDefinitionBuilder superParent(GsonAdapter gsonAdapter) {
-        return empty(gsonAdapter, "super-parent");
+    static ProjectDefinitionBuilder superManual(GsonAdapter gsonAdapter) {
+        return empty(gsonAdapter, "super-manual")
+            .noParent();
     }
 
     @Override
@@ -84,7 +86,7 @@ final class ProjectDefinitionBuilder implements ArtifactBuilder {
         var json = path.resolve(fileNameFunction.apply(name, version));
         gsonAdapter.write(
             json,
-            new ProjectDefinition(
+            new SchematicDefinition(
                 name,
                 version,
                 parentFunction.apply(path),
@@ -136,6 +138,20 @@ final class ProjectDefinitionBuilder implements ArtifactBuilder {
             name,
             version,
             (path) -> parent(builder, path),
+            subprojects,
+            properties,
+            plugins,
+            dependencies,
+            fileNameFunction
+        );
+    }
+
+    ProjectDefinitionBuilder noParent() {
+        return new ProjectDefinitionBuilder(
+            gsonAdapter,
+            name,
+            version,
+            (path) -> new NoExplicitTemplate(),
             subprojects,
             properties,
             plugins,
@@ -212,7 +228,7 @@ final class ProjectDefinitionBuilder implements ArtifactBuilder {
 
     ProjectDefinitionBuilder dependency(String project) {
         var copy = new ArrayList<>(dependencies);
-        copy.add((path) -> new LocalProjectDependencyDefinition(project));
+        copy.add((path) -> new SchematicDependencyDefinition(project, DependencyScope.IMPLEMENTATION));
         return new ProjectDefinitionBuilder(
             gsonAdapter,
             name,
@@ -249,7 +265,6 @@ final class ProjectDefinitionBuilder implements ArtifactBuilder {
     private Collection<Path> installedSubproject(Path path) {
         return subprojects.stream()
             .map(subproject -> subproject.install(directory(path.resolve(subproject.name()))))
-            .map(Path::getParent)
             .toList();
     }
 
@@ -272,11 +287,11 @@ final class ProjectDefinitionBuilder implements ArtifactBuilder {
 
     private DependencyDefinition dependencyDefinition(Path path, ArtifactBuilder builder, DependencyScope scope) {
         builder.install(path);
-        return new ExternalDependencyDefinition(builder.name(), builder.version(), scope);
+        return new ArtifactDependencyDefinition(builder.name(), builder.version(), scope);
     }
 
-    private ParentDefinition parent(ProjectDefinitionBuilder builder, Path path) {
+    private TemplateDefinition parent(ProjectDefinitionBuilder builder, Path path) {
         builder.install(path);
-        return new ParentProjectDefinition(builder.name, builder.version);
+        return new ManualTemplateDefinition(builder.name, builder.version);
     }
 }

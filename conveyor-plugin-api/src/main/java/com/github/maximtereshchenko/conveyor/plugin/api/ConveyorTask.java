@@ -1,8 +1,8 @@
 package com.github.maximtereshchenko.conveyor.plugin.api;
 
-import com.github.maximtereshchenko.conveyor.common.api.BuildFiles;
+import com.github.maximtereshchenko.conveyor.common.api.Products;
 
 public interface ConveyorTask {
 
-    BuildFiles execute(BuildFiles buildFiles);
+    Products execute(ConveyorSchematicDependencies dependencies, Products products);
 }

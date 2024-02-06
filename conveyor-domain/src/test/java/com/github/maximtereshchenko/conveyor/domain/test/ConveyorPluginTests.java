@@ -1,7 +1,7 @@
 package com.github.maximtereshchenko.conveyor.domain.test;
 
 import com.github.maximtereshchenko.conveyor.api.ConveyorModule;
-import com.github.maximtereshchenko.conveyor.common.api.BuildFileType;
+import com.github.maximtereshchenko.conveyor.common.api.ProductType;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -20,11 +20,11 @@ final class ConveyorPluginTests extends ConveyorTest {
         ConveyorModule module,
         ArtifactFactory factory
     ) {
-        factory.superParent().install(path);
+        factory.superManual().install(path);
 
         assertThat(
-            module.build(factory.conveyorJson().install(path), Stage.COMPILE)
-                .byType("project", BuildFileType.ARTIFACT)
+            module.construct(factory.conveyorJson().install(path), Stage.COMPILE)
+                .byType("project", ProductType.MODULE_COMPONENT)
         )
             .isEmpty();
     }
@@ -35,16 +35,16 @@ final class ConveyorPluginTests extends ConveyorTest {
         ConveyorModule module,
         ArtifactFactory factory
     ) {
-        factory.superParent().install(path);
+        factory.superManual().install(path);
 
         assertThat(
-            module.build(
+            module.construct(
                     factory.conveyorJson()
                         .plugin(factory.pluginBuilder())
                         .install(path),
                     Stage.COMPILE
                 )
-                .byType("project", BuildFileType.ARTIFACT)
+                .byType("project", ProductType.MODULE_COMPONENT)
         )
             .contains(
                 defaultBuildDirectory(path).resolve("project-plugin-1-prepared"),
@@ -59,16 +59,16 @@ final class ConveyorPluginTests extends ConveyorTest {
         ConveyorModule module,
         ArtifactFactory factory
     ) {
-        factory.superParent().install(path);
+        factory.superManual().install(path);
 
         assertThat(
-            module.build(
+            module.construct(
                     factory.conveyorJson()
                         .plugin(factory.pluginBuilder())
                         .install(path),
                     Stage.CLEAN
                 )
-                .byType("project", BuildFileType.ARTIFACT)
+                .byType("project", ProductType.MODULE_COMPONENT)
         )
             .isEmpty();
     }
@@ -79,9 +79,9 @@ final class ConveyorPluginTests extends ConveyorTest {
         ConveyorModule module,
         ArtifactFactory factory
     ) {
-        factory.superParent().install(path);
+        factory.superManual().install(path);
 
-        module.build(
+        module.construct(
             factory.conveyorJson()
                 .plugin(
                     factory.pluginBuilder(),
@@ -102,9 +102,9 @@ final class ConveyorPluginTests extends ConveyorTest {
         ConveyorModule module,
         ArtifactFactory factory
     ) {
-        factory.superParent().install(path);
+        factory.superManual().install(path);
 
-        module.build(
+        module.construct(
             factory.conveyorJson()
                 .plugin(factory.pluginBuilder())
                 .install(path),
@@ -124,9 +124,9 @@ final class ConveyorPluginTests extends ConveyorTest {
         ConveyorModule module,
         ArtifactFactory factory
     ) {
-        factory.superParent().install(path);
+        factory.superManual().install(path);
 
-        module.build(
+        module.construct(
             factory.conveyorJson()
                 .plugin(
                     factory.pluginBuilder()

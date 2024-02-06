@@ -75,6 +75,14 @@ final class ConveyorPluginBuilder implements ArtifactBuilder {
         );
     }
 
+    ConveyorPluginBuilder parent(ProjectDefinitionBuilder projectDefinitionBuilder) {
+        return new ConveyorPluginBuilder(
+            projectDefinitionBuilder.parent(projectDefinitionBuilder),
+            conveyorPluginSourceCodeBuilder,
+            moduleInfoSourceCodeBuilder
+        );
+    }
+
     ConveyorPluginBuilder stage(Stage stage) {
         return new ConveyorPluginBuilder(
             projectDefinitionBuilder,
