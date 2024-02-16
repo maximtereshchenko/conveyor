@@ -17,7 +17,7 @@ final class ConveyorExtension implements ParameterResolver {
     @Override
     public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
         var type = parameterContext.getParameter().getType();
-        return type == ConveyorModule.class || type == ArtifactFactory.class;
+        return type == ConveyorModule.class || type == BuilderFactory.class;
     }
 
     @Override
@@ -26,7 +26,7 @@ final class ConveyorExtension implements ParameterResolver {
         if (parameterContext.getParameter().getType() == ConveyorModule.class) {
             return get(extensionContext, ConveyorModule.class, () -> new ConveyorFacade(gsonAdapter));
         }
-        return get(extensionContext, ArtifactFactory.class, () -> new ArtifactFactory(gsonAdapter));
+        return get(extensionContext, BuilderFactory.class, () -> new BuilderFactory(gsonAdapter));
     }
 
     private <T> T get(ExtensionContext context, Class<T> type, Supplier<T> creator) {

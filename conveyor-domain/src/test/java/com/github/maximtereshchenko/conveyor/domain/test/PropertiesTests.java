@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 
@@ -19,111 +18,129 @@ final class PropertiesTests extends ConveyorTest {
     void givenProjectDirectoryProperty_whenBuild_thenProjectBuiltInSpecifiedDirectory(
         @TempDir Path path,
         ConveyorModule module,
-        ArtifactFactory factory
-    )
-        throws Exception {
-        factory.superManual().install(path);
-        var project = Files.createDirectory(path.resolve("project"));
+        BuilderFactory factory
+    ) {
+        factory.repositoryBuilder()
+            .superManual()
+            .manual(builder -> builder.name("plugin").version(1))
+            .jar("instant-conveyor-plugin", builder -> builder.name("plugin").version(1))
+            .install(path);
+        var project = path.resolve("project");
 
         var projectBuildFiles = module.construct(
-            factory.conveyorJson()
+            factory.schematicBuilder()
+                .repository(path)
                 .property("conveyor.discovery.directory", project.toString())
-                .plugin(factory.pluginBuilder())
+                .plugin("plugin", 1, Map.of())
                 .install(path),
             Stage.COMPILE
         );
 
         assertThat(projectBuildFiles.byType("project", ProductType.MODULE_COMPONENT))
-            .contains(defaultBuildDirectory(project).resolve("project-plugin-1-run"));
+            .contains(defaultConstructionDirectory(project).resolve("plugin-run"));
     }
 
     @Test
     void givenRelativeProjectDirectoryProperty_whenBuild_thenProjectDirectoryIsRelativeToWorkingDirectory(
         @TempDir Path path,
         ConveyorModule module,
-        ArtifactFactory factory
-    ) throws Exception {
-        factory.superManual().install(path);
-        var project = Files.createDirectory(path.resolve("project"));
+        BuilderFactory factory
+    ) {
+        factory.repositoryBuilder()
+            .superManual()
+            .manual(builder -> builder.name("plugin").version(1))
+            .jar("instant-conveyor-plugin", builder -> builder.name("plugin").version(1))
+            .install(path);
+        var project = path.resolve("project");
 
         var projectBuildFiles = module.construct(
-            factory.conveyorJson()
-                .property(
-                    "conveyor.discovery.directory",
-                    path.relativize(project).toString()
-                )
-                .plugin(factory.pluginBuilder())
+            factory.schematicBuilder()
+                .repository(path)
+                .property("conveyor.discovery.directory", path.relativize(project).toString())
+                .plugin("plugin", 1, Map.of())
                 .install(path),
             Stage.COMPILE
         );
 
         assertThat(projectBuildFiles.byType("project", ProductType.MODULE_COMPONENT))
-            .contains(defaultBuildDirectory(project).resolve("project-plugin-1-run"));
+            .contains(defaultConstructionDirectory(project).resolve("plugin-run"));
     }
 
     @Test
     void givenProjectBuildDirectoryProperty_whenBuild_thenProjectBuiltInSpecifiedDirectory(
         @TempDir Path path,
         ConveyorModule module,
-        ArtifactFactory factory
+        BuilderFactory factory
     ) {
-        factory.superManual().install(path);
+        factory.repositoryBuilder()
+            .superManual()
+            .manual(builder -> builder.name("plugin").version(1))
+            .jar("instant-conveyor-plugin", builder -> builder.name("plugin").version(1))
+            .install(path);
         var build = path.resolve("build");
 
         var projectBuildFiles = module.construct(
-            factory.conveyorJson()
+            factory.schematicBuilder()
+                .repository(path)
                 .property("conveyor.construction.directory", build.toString())
-                .plugin(factory.pluginBuilder())
+                .plugin("plugin", 1, Map.of())
                 .install(path),
             Stage.COMPILE
         );
 
         assertThat(projectBuildFiles.byType("project", ProductType.MODULE_COMPONENT))
-            .contains(build.resolve("project-plugin-1-run"));
+            .contains(build.resolve("plugin-run"));
     }
 
     @Test
     void givenRelativeProjectBuildDirectoryProperty_whenBuild_thenProjectBuildDirectoryIsRelativeToProjectDirectory(
         @TempDir Path path,
         ConveyorModule module,
-        ArtifactFactory factory
+        BuilderFactory factory
     ) {
-        factory.superManual().install(path);
+        factory.repositoryBuilder()
+            .superManual()
+            .manual(builder -> builder.name("plugin").version(1))
+            .jar("instant-conveyor-plugin", builder -> builder.name("plugin").version(1))
+            .install(path);
         var project = path.resolve("project");
 
         var projectBuildFiles = module.construct(
-            factory.conveyorJson()
+            factory.schematicBuilder()
+                .repository(path)
                 .property("conveyor.discovery.directory", project.toString())
                 .property("conveyor.construction.directory", "./build")
-                .plugin(factory.pluginBuilder())
+                .plugin("plugin", 1, Map.of())
                 .install(path),
             Stage.COMPILE
         );
 
         assertThat(projectBuildFiles.byType("project", ProductType.MODULE_COMPONENT))
-            .contains(project.resolve("build").resolve("project-plugin-1-run"));
+            .contains(project.resolve("build").resolve("plugin-run"));
     }
 
     @Test
     void givenProperty_whenBuild_thenPropertyInterpolatedIntoPluginConfiguration(
         @TempDir Path path,
         ConveyorModule module,
-        ArtifactFactory factory
+        BuilderFactory factory
     ) {
-        factory.superManual().install(path);
+        factory.repositoryBuilder()
+            .superManual()
+            .manual(builder -> builder.name("plugin").version(1))
+            .jar("configuration-conveyor-plugin", builder -> builder.name("plugin").version(1))
+            .install(path);
 
         module.construct(
-            factory.conveyorJson()
+            factory.schematicBuilder()
+                .repository(path)
                 .property("property", "value")
-                .plugin(
-                    factory.pluginBuilder(),
-                    Map.of("property", "${property}-suffix")
-                )
+                .plugin("plugin", 1, Map.of("property", "${property}-suffix"))
                 .install(path),
             Stage.COMPILE
         );
 
-        assertThat(defaultBuildDirectory(path).resolve("project-plugin-1-configuration"))
+        assertThat(defaultConstructionDirectory(path).resolve("configuration"))
             .content(StandardCharsets.UTF_8)
             .isEqualTo("property=value-suffix");
     }

@@ -25,9 +25,10 @@ final class Properties {
         var schematicNameKey = "conveyor.schematic.name";
         var discoveryDirectoryKey = "conveyor.discovery.directory";
         var constructionDirectoryKey = "conveyor.construction.directory";
-        var schematicDefinitionDirectory = path.getParent();
+        var schematicDefinitionDirectory = path.getParent().normalize();
         var discoveryDirectory = map.value(discoveryDirectoryKey)
             .map(schematicDefinitionDirectory::resolve)
+            .map(Path::normalize)
             .orElse(schematicDefinitionDirectory);
         return new ConveyorProperties(
             map.with(schematicNameKey, schematicName)
@@ -38,6 +39,7 @@ final class Properties {
                             map.value(constructionDirectoryKey)
                                 .orElse(".conveyor")
                         )
+                        .normalize()
                         .toString()
                 )
                 .mutable(),
