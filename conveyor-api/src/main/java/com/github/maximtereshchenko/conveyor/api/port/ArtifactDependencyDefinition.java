@@ -5,7 +5,7 @@ import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 import java.util.Objects;
 
 public record ArtifactDependencyDefinition(String name, int version, DependencyScope scope)
-    implements DependencyDefinition, ArtifactDefinition {
+    implements DependencyDefinition {
 
     public ArtifactDependencyDefinition {
         scope = Objects.requireNonNullElse(scope, DependencyScope.IMPLEMENTATION);

@@ -2,7 +2,7 @@ package com.github.maximtereshchenko.conveyor.domain.test;
 
 import com.github.maximtereshchenko.conveyor.api.ConveyorModule;
 import com.github.maximtereshchenko.conveyor.domain.ConveyorFacade;
-import com.github.maximtereshchenko.conveyor.gson.GsonAdapter;
+import com.github.maximtereshchenko.conveyor.gson.JacksonAdapter;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
 import org.junit.jupiter.api.extension.ParameterContext;
@@ -22,7 +22,7 @@ final class ConveyorExtension implements ParameterResolver {
 
     @Override
     public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
-        var gsonAdapter = get(extensionContext, GsonAdapter.class, GsonAdapter::new);
+        var gsonAdapter = get(extensionContext, JacksonAdapter.class, JacksonAdapter::configured);
         if (parameterContext.getParameter().getType() == ConveyorModule.class) {
             return get(extensionContext, ConveyorModule.class, () -> new ConveyorFacade(gsonAdapter));
         }

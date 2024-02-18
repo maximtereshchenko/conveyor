@@ -9,5 +9,5 @@ dependencies {
     testImplementation(libs.junit.jupiter)
     testImplementation(libs.junit.jupiter.engine)
     testImplementation(libs.assertj.core)
-    testImplementation(project(":gson-adapter"))
+    testImplementation(project(":jackson-adapter"))
 }

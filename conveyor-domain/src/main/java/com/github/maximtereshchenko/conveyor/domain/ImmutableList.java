@@ -13,11 +13,6 @@ final class ImmutableList<T> implements ImmutableCollection<T> {
         this.list = List.copyOf(collection);
     }
 
-    @SafeVarargs
-    ImmutableList(T... elements) {
-        this(List.of(elements));
-    }
-
     @Override
     public Stream<T> stream() {
         return list.stream();

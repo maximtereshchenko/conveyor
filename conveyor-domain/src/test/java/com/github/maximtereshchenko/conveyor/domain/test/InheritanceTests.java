@@ -85,7 +85,7 @@ final class InheritanceTests extends ConveyorTest {
 
         assertThat(defaultConstructionDirectory(path).resolve("configuration"))
             .content(StandardCharsets.UTF_8)
-            .isEqualTo("key=value");
+            .contains("key=value");
     }
 
     @Test
@@ -271,6 +271,7 @@ final class InheritanceTests extends ConveyorTest {
                 .inclusion(
                     factory.schematicBuilder()
                         .name("subproject")
+                        .repository(path)
                         .install(subproject)
                 )
                 .plugin("plugin", 1, Map.of())
@@ -307,14 +308,17 @@ final class InheritanceTests extends ConveyorTest {
                 .inclusion(
                     factory.schematicBuilder()
                         .name("subproject-1")
+                        .repository(path)
                         .inclusion(
                             factory.schematicBuilder()
                                 .name("subproject-1-a")
+                                .repository(path)
                                 .install(subproject1a)
                         )
                         .inclusion(
                             factory.schematicBuilder()
                                 .name("subproject-1-b")
+                                .repository(path)
                                 .install(subproject1b)
                         )
                         .install(subproject1)
@@ -322,14 +326,17 @@ final class InheritanceTests extends ConveyorTest {
                 .inclusion(
                     factory.schematicBuilder()
                         .name("subproject-2")
+                        .repository(path)
                         .inclusion(
                             factory.schematicBuilder()
                                 .name("subproject-2-a")
+                                .repository(path)
                                 .install(subproject2a)
                         )
                         .inclusion(
                             factory.schematicBuilder()
                                 .name("subproject-2-b")
+                                .repository(path)
                                 .install(subproject2b)
                         )
                         .install(subproject2)
@@ -375,12 +382,14 @@ final class InheritanceTests extends ConveyorTest {
                 .inclusion(
                     factory.schematicBuilder()
                         .name("subproject-1")
+                        .repository(path)
                         .schematicDependency("subproject-2", DependencyScope.IMPLEMENTATION)
                         .install(subproject1)
                 )
                 .inclusion(
                     factory.schematicBuilder()
                         .name("subproject-2")
+                        .repository(path)
                         .install(subproject2)
                 )
                 .install(path),
@@ -417,18 +426,20 @@ final class InheritanceTests extends ConveyorTest {
             factory.schematicBuilder()
                 .name("project")
                 .repository(path)
-                .plugin("dependencies", 1, Map.of())
-                .inclusion(
-                    factory.schematicBuilder()
-                        .name("dependant")
-                        .schematicDependency("dependency", DependencyScope.IMPLEMENTATION)
-                        .install(dependant)
-                )
                 .inclusion(
                     factory.schematicBuilder()
                         .name("dependency")
+                        .repository(path)
                         .plugin("directory", 1, Map.of())
                         .install(dependency)
+                )
+                .inclusion(
+                    factory.schematicBuilder()
+                        .name("dependant")
+                        .repository(path)
+                        .schematicDependency("dependency", DependencyScope.IMPLEMENTATION)
+                        .plugin("dependencies", 1, Map.of())
+                        .install(dependant)
                 )
                 .install(path),
             Stage.COMPILE

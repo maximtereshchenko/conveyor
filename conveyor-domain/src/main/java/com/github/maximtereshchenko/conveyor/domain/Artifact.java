@@ -8,7 +8,7 @@ interface Artifact {
 
     int version();
 
-    Dependencies dependencies();
+    ImmutableSet<Artifact> dependencies();
 
     Path modulePath();
 }

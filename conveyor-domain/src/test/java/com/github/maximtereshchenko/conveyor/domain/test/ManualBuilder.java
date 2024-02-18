@@ -2,25 +2,22 @@ package com.github.maximtereshchenko.conveyor.domain.test;
 
 import com.github.maximtereshchenko.conveyor.api.port.*;
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
-import com.github.maximtereshchenko.conveyor.gson.GsonAdapter;
+import com.github.maximtereshchenko.conveyor.gson.JacksonAdapter;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 final class ManualBuilder {
 
-    private final GsonAdapter gsonAdapter;
+    private final JacksonAdapter gsonAdapter;
     private final ManualDefinition manualDefinition;
 
-    private ManualBuilder(GsonAdapter gsonAdapter, ManualDefinition manualDefinition) {
+    private ManualBuilder(JacksonAdapter gsonAdapter, ManualDefinition manualDefinition) {
         this.gsonAdapter = gsonAdapter;
         this.manualDefinition = manualDefinition;
     }
 
-    ManualBuilder(GsonAdapter gsonAdapter) {
+    ManualBuilder(JacksonAdapter gsonAdapter) {
         this(
             gsonAdapter,
             new ManualDefinition(
@@ -88,7 +85,7 @@ final class ManualBuilder {
 
     ManualBuilder plugin(String name, int version, Map<String, String> configuration) {
         var copy = new ArrayList<>(manualDefinition.plugins());
-        copy.add(new PluginDefinition(name, version, configuration));
+        copy.add(new PluginDefinition(name, OptionalInt.of(version), configuration));
         return new ManualBuilder(
             gsonAdapter,
             new ManualDefinition(

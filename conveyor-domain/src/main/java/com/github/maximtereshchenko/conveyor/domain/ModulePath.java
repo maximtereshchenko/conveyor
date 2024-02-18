@@ -1,5 +1,6 @@
 package com.github.maximtereshchenko.conveyor.domain;
 
+
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Optional;
@@ -16,13 +17,13 @@ final class ModulePath {
         this(new ImmutableMap<>());
     }
 
-    static ModulePath from(ImmutableCollection<? extends Artifact> artifacts) {
+    static ModulePath from(ImmutableSet<Artifact> artifacts) {
         return artifacts.stream()
             .map(Root::new)
             .reduce(new ModulePath(), ModulePath::with, new PickSecond<>());
     }
 
-    ImmutableSet<Path> modulePath() {
+    ImmutableSet<Path> resolved() {
         return relations.keys()
             .stream()
             .map(this::resolved)

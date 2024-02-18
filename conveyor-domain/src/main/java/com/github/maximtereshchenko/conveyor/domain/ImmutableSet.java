@@ -15,8 +15,9 @@ final class ImmutableSet<T> implements ImmutableCollection<T> {
         this(new ImmutableList<>(set));
     }
 
-    ImmutableSet() {
-        this(new ImmutableList<>());
+    @SafeVarargs
+    ImmutableSet(T... elements) {
+        this(Set.of(elements));
     }
 
     @Override

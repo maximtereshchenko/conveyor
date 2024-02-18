@@ -4,8 +4,15 @@ import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorProperties;
 
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 final class Properties {
+
+    private static final String SCHEMATIC_NAME_KEY = "conveyor.schematic.name";
+    private static final String CONVEYOR_DISCOVERY_DIRECTORY_KEY = "conveyor.discovery.directory";
+    private static final String CONVEYOR_CONSTRUCTION_DIRECTORY_KEY = "conveyor.construction.directory";
+    private static final Pattern INTERPOLATION_PATTERN = Pattern.compile("\\$\\{([^}]+)}");
 
     private final ImmutableMap<String, String> map;
 
@@ -13,47 +20,53 @@ final class Properties {
         this.map = map;
     }
 
-    Properties(Map<String, String> map) {
-        this(new ImmutableMap<>(map));
-    }
-
     Properties() {
         this(new ImmutableMap<>());
     }
 
-    ConveyorProperties conveyorProperties(Path path, String schematicName) {
-        var schematicNameKey = "conveyor.schematic.name";
-        var discoveryDirectoryKey = "conveyor.discovery.directory";
-        var constructionDirectoryKey = "conveyor.construction.directory";
-        var schematicDefinitionDirectory = path.getParent().normalize();
-        var discoveryDirectory = map.value(discoveryDirectoryKey)
+    Properties withDefaults(String schematicName, Path path) {
+        var schematicDefinitionDirectory = path.getParent();
+        var discoveryDirectory = map.value(CONVEYOR_DISCOVERY_DIRECTORY_KEY)
             .map(schematicDefinitionDirectory::resolve)
             .map(Path::normalize)
             .orElse(schematicDefinitionDirectory);
-        return new ConveyorProperties(
-            map.with(schematicNameKey, schematicName)
-                .with(discoveryDirectoryKey, discoveryDirectory.toString())
+        return new Properties(
+            map.with(SCHEMATIC_NAME_KEY, schematicName)
+                .with(CONVEYOR_DISCOVERY_DIRECTORY_KEY, discoveryDirectory.toString())
                 .with(
-                    constructionDirectoryKey,
+                    CONVEYOR_CONSTRUCTION_DIRECTORY_KEY,
                     discoveryDirectory.resolve(
-                            map.value(constructionDirectoryKey)
+                            map.value(CONVEYOR_CONSTRUCTION_DIRECTORY_KEY)
                                 .orElse(".conveyor")
                         )
                         .normalize()
                         .toString()
                 )
-                .mutable(),
-            schematicNameKey,
-            discoveryDirectoryKey,
-            constructionDirectoryKey
         );
     }
 
-    String value(String key) {
-        return map.value(key).orElse("");
+    ConveyorProperties conveyorProperties() {
+        return new ConveyorProperties(
+            map.stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)),
+            SCHEMATIC_NAME_KEY,
+            CONVEYOR_DISCOVERY_DIRECTORY_KEY,
+            CONVEYOR_CONSTRUCTION_DIRECTORY_KEY
+        );
     }
 
-    Properties override(Properties properties) {
-        return new Properties(map.withAll(properties.map));
+    String interpolated(String value) {
+        return INTERPOLATION_PATTERN.matcher(value)
+            .results()
+            .reduce(
+                value,
+                (current, matchResult) ->
+                    current.replace(matchResult.group(), map.value(matchResult.group(1)).orElseThrow()),
+                new PickSecond<>()
+            );
+    }
+
+    Properties override(Properties base) {
+        return new Properties(base.map.withAll(map));
     }
 }

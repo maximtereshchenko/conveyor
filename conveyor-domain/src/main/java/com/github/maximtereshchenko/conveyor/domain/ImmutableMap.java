@@ -29,8 +29,8 @@ final class ImmutableMap<K, V> {
         return new ImmutableMap<>(copy);
     }
 
-    boolean containsKey(K key) {
-        return map.containsKey(key);
+    ImmutableMap<K, V> computeIfAbsent(K key, Supplier<V> supplier) {
+        return compute(key, supplier, value -> value);
     }
 
     Optional<V> value(K key) {
@@ -49,10 +49,6 @@ final class ImmutableMap<K, V> {
 
     ImmutableCollection<V> values() {
         return new ImmutableList<>(map.values());
-    }
-
-    Map<K, V> mutable() {
-        return new HashMap<>(map);
     }
 
     ImmutableMap<K, V> withAll(ImmutableMap<K, V> immutableMap) {
