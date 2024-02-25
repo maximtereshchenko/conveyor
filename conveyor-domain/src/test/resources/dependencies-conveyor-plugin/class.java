@@ -55,7 +55,7 @@ public final class ${normalizedName} implements ConveyorPlugin {
             .collect(Collectors.joining(System.lineSeparator()));
     }
 
-    private Path write(Path path, String content){
+    private Path write(Path path, String content) {
         try {
             Files.createDirectories(path.getParent());
             return Files.writeString(path, content);

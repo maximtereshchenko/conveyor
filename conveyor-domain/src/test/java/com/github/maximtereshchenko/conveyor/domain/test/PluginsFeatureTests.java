@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 final class PluginsFeatureTests extends ConveyorTest {
 
     @Test
-    void givenPluginDefined_whenBuildToStage_thenPluginCanUseProperties(
+    void givenPluginDefined_whenConstructToStage_thenPropertiesAreUsedInPlugin(
         @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
@@ -50,7 +50,7 @@ final class PluginsFeatureTests extends ConveyorTest {
     }
 
     @Test
-    void givenProperty_whenBuildToStage_thenPropertyIsInterpolatedIntoPluginConfiguration(
+    void givenProperty_whenConstructToStage_thenPropertyIsInterpolatedIntoPluginConfiguration(
         @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
@@ -77,7 +77,7 @@ final class PluginsFeatureTests extends ConveyorTest {
     }
 
     @Test
-    void givenPluginDefined_whenBuildToStage_thenPluginCanUseConfiguration(
+    void givenPluginDefined_whenConstructToStage_thenConfigurationIsUsedInPlugin(
         @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
@@ -107,17 +107,16 @@ final class PluginsFeatureTests extends ConveyorTest {
             );
     }
 
-    //TODO enabled is not a boolean (json schema)
     @Test
-    void givenPluginIsDisabled_whenBuildToStage_thenPluginTasksAreNotExecuted(
+    void givenPluginIsDisabled_whenConstructToStage_thenPluginTasksAreNotExecuted(
         @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
             .superManual()
-            .manual(builder -> builder.name("product").version(1))
-            .jar("product", builder -> builder.name("product").version(1))
+            .manual(builder -> builder.name("construction-directory").version(1))
+            .jar("construction-directory", builder -> builder.name("construction-directory").version(1))
             .install(path);
 
         var schematicProducts = module.construct(
@@ -125,7 +124,7 @@ final class PluginsFeatureTests extends ConveyorTest {
                 .name("project")
                 .version(1)
                 .repository(path)
-                .plugin("product", 1, Map.of("enabled", "false"))
+                .plugin("construction-directory", 1, Map.of("enabled", "false"))
                 .install(path),
             Stage.COMPILE
         );
@@ -134,7 +133,7 @@ final class PluginsFeatureTests extends ConveyorTest {
     }
 
     @Test
-    void givenPluginRequiresDependency_whenBuildToStage_thenPluginCanUseDependency(
+    void givenPluginRequiresDependency_whenConstructToStage_thenDependencyIsUsed(
         @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
@@ -167,7 +166,7 @@ final class PluginsFeatureTests extends ConveyorTest {
     }
 
     @Test
-    void givenPluginRequireTransitiveDependency_whenBuildToStage_thenTransitiveDependencyIsUsed(
+    void givenPluginRequireTransitiveDependency_whenConstructToStage_thenTransitiveDependencyIsUsed(
         @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
@@ -207,7 +206,7 @@ final class PluginsFeatureTests extends ConveyorTest {
     }
 
     @Test
-    void givenPluginManualDeclareTestDependency_whenBuildToStage_thenThatDependencyIsNotUsed(
+    void givenPluginManualDeclareTestDependency_whenConstructToStage_thenThatDependencyIsNotUsed(
         @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
@@ -240,7 +239,7 @@ final class PluginsFeatureTests extends ConveyorTest {
     }
 
     @Test
-    void givenTestDependencyRequireHigherVersion_whenBuildToStage_thenDependencyIsUsedWithLowerVersion(
+    void givenTestDependencyRequireHigherVersion_whenConstructToStage_thenDependencyIsUsedWithLowerVersion(
         @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
@@ -280,7 +279,7 @@ final class PluginsFeatureTests extends ConveyorTest {
     }
 
     @Test
-    void givenPluginsRequireCommonDependency_whenBuildToStage_thenDependencyIsUsedWithHighestVersion(
+    void givenPluginsRequireCommonDependency_whenConstructToStage_thenDependencyIsUsedWithHighestVersion(
         @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
@@ -321,7 +320,7 @@ final class PluginsFeatureTests extends ConveyorTest {
     }
 
     @Test
-    void givenHighestDependencyVersionRequiredByExcludedDependency_whenBuildToStage_thenDependencyIsUsedWithLowerVersion(
+    void givenHighestDependencyVersionRequiredByExcludedDependency_whenConstructToStage_thenDependencyIsUsedWithLowerVersion(
         @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
@@ -377,7 +376,7 @@ final class PluginsFeatureTests extends ConveyorTest {
     }
 
     @Test
-    void givenTemplateWithPlugins_whenBuildToStage_thenSchematicInheritsPlugins(
+    void givenTemplateWithPlugins_whenConstructToStage_thenSchematicInheritsPlugins(
         @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
@@ -387,10 +386,10 @@ final class PluginsFeatureTests extends ConveyorTest {
             .manual(builder ->
                 builder.name("template")
                     .version(1)
-                    .plugin("product", 1, Map.of())
+                    .plugin("construction-directory", 1, Map.of())
             )
-            .manual(builder -> builder.name("product").version(1))
-            .jar("product", builder -> builder.name("product").version(1))
+            .manual(builder -> builder.name("construction-directory").version(1))
+            .jar("construction-directory", builder -> builder.name("construction-directory").version(1))
             .install(path);
 
         var schematicProducts = module.construct(
@@ -408,7 +407,7 @@ final class PluginsFeatureTests extends ConveyorTest {
     }
 
     @Test
-    void givenSchematicDeclareInheritedPluginWithDifferentVersion_whenBuildToStage_thenOverriddenPluginVersionIsUsed(
+    void givenSchematicDeclareInheritedPluginWithDifferentVersion_whenConstructToStage_thenOverriddenPluginVersionIsUsed(
         @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
@@ -418,11 +417,11 @@ final class PluginsFeatureTests extends ConveyorTest {
             .manual(builder ->
                 builder.name("template")
                     .version(1)
-                    .plugin("product", 1, Map.of())
+                    .plugin("construction-directory", 1, Map.of())
             )
-            .manual(builder -> builder.name("product").version(1))
-            .manual(builder -> builder.name("product").version(2))
-            .jar("product", builder -> builder.name("product").version(2))
+            .manual(builder -> builder.name("construction-directory").version(1))
+            .manual(builder -> builder.name("construction-directory").version(2))
+            .jar("construction-directory", builder -> builder.name("construction-directory").version(2))
             .install(path);
 
         var schematicProducts = module.construct(
@@ -431,7 +430,7 @@ final class PluginsFeatureTests extends ConveyorTest {
                 .version(1)
                 .repository(path)
                 .template("template", 1)
-                .plugin("product", 2, Map.of())
+                .plugin("construction-directory", 2, Map.of())
                 .install(path),
             Stage.COMPILE
         );
@@ -441,7 +440,7 @@ final class PluginsFeatureTests extends ConveyorTest {
     }
 
     @Test
-    void givenSchematicDeclareInheritedPluginWithSameConfiguration_whenBuildToStage_thenOverriddenConfigurationIsUsed(
+    void givenSchematicDeclareInheritedPluginWithSameConfiguration_whenConstructToStage_thenOverriddenConfigurationIsUsed(
         @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
@@ -478,7 +477,7 @@ final class PluginsFeatureTests extends ConveyorTest {
     }
 
     @Test
-    void givenSchematicDeclareInheritedPluginWithEmptyConfigurationValue_whenBuildToStage_thenConfigurationDoesNotContainKey(
+    void givenSchematicDeclareInheritedPluginWithEmptyConfigurationValue_whenConstructToStage_thenConfigurationDoesNotContainKey(
         @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
@@ -511,7 +510,7 @@ final class PluginsFeatureTests extends ConveyorTest {
     }
 
     @Test
-    void givenPluginConfiguration_whenBuildToStage_thenConfigurationIsMergedWithInherited(
+    void givenPluginConfiguration_whenConstructToStage_thenConfigurationIsMergedWithInherited(
         @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory

@@ -17,7 +17,7 @@ public final class ${normalizedName} implements ConveyorPlugin {
     }
 
     @Override
-    public List<ConveyorTaskBinding> bindings(ConveyorProperties properties, Map<String, String> configuration){
+    public List<ConveyorTaskBinding> bindings(ConveyorProperties properties, Map<String, String> configuration) {
         var stage = Stage.valueOf(configuration.getOrDefault("stage", "COMPILE"));
         return List.of(
             new ConveyorTaskBinding(

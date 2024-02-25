@@ -36,7 +36,7 @@ public final class ConveyorProperties {
         return path(constructionDirectoryKey);
     }
 
-    public Stream<Map.Entry<String,String>> stream(){
+    public Stream<Map.Entry<String, String>> stream() {
         return properties.entrySet().stream();
     }
 
