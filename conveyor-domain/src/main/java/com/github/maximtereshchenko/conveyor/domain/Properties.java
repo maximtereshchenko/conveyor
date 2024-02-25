@@ -48,7 +48,8 @@ final class Properties {
     ConveyorProperties conveyorProperties() {
         return new ConveyorProperties(
             map.stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)),
+                .filter(entry -> !entry.getValue().isBlank())
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> interpolated(entry.getValue()))),
             SCHEMATIC_NAME_KEY,
             CONVEYOR_DISCOVERY_DIRECTORY_KEY,
             CONVEYOR_CONSTRUCTION_DIRECTORY_KEY
@@ -61,7 +62,12 @@ final class Properties {
             .reduce(
                 value,
                 (current, matchResult) ->
-                    current.replace(matchResult.group(), map.value(matchResult.group(1)).orElseThrow()),
+                    current.replace(
+                        matchResult.group(),
+                        map.value(matchResult.group(1))
+                            .map(this::interpolated)
+                            .orElseThrow()
+                    ),
                 new PickSecond<>()
             );
     }
