@@ -46,3 +46,11 @@ A build tool for Java projects
     * The property `conveyor.construction.directory` defines the directory, where plugins should place created products.
       It is relative to the discovery directory
     * Properties can be templated with other properties using `${property.key}` syntax
+* Dependencies
+    * Dependencies are defined in a manual or a schematic with a name, a version and an optional scope: IMPLEMENTATION (
+      default) or TEST
+    * Each dependency should come with a manual
+    * Dependencies are inherited from a manual or a schematic used as a template
+    * Version and scope of the inherited dependency can be overridden
+    * Schematic can define a dependency on other schematic with a name and an optional scope. In such case the product
+      from this schematic of type MODULE will be used in module path

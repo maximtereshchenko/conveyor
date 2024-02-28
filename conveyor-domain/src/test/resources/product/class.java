@@ -3,6 +3,7 @@ package ${normalizedName};
 import com.github.maximtereshchenko.conveyor.common.api.*;
 import com.github.maximtereshchenko.conveyor.plugin.api.*;
 
+import java.nio.file.*;
 import java.util.*;
 
 public final class ${normalizedName} implements ConveyorPlugin {
@@ -18,7 +19,7 @@ public final class ${normalizedName} implements ConveyorPlugin {
             new ConveyorTaskBinding(
                 Stage.COMPILE,
                 Step.RUN,
-                (dependencies, products) -> products.with(properties.constructionDirectory(), ProductType.MODULE)
+                (dependencies, products) -> products.with(Paths.get(configuration.get("path")), ProductType.MODULE)
             )
         );
     }

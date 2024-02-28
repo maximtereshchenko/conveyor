@@ -2,7 +2,6 @@ package com.github.maximtereshchenko.conveyor.domain.test;
 
 import com.github.maximtereshchenko.conveyor.api.ConveyorModule;
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
-import com.github.maximtereshchenko.conveyor.common.api.ProductType;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -115,21 +114,28 @@ final class PluginsFeatureTests extends ConveyorTest {
     ) {
         factory.repositoryBuilder()
             .superManual()
-            .manual(builder -> builder.name("construction-directory").version(1))
-            .jar("construction-directory", builder -> builder.name("construction-directory").version(1))
+            .manual(builder -> builder.name("instant").version(1))
+            .jar("instant", builder -> builder.name("instant").version(1))
             .install(path);
 
-        var schematicProducts = module.construct(
+        module.construct(
             factory.schematicBuilder()
                 .name("project")
                 .version(1)
                 .repository(path)
-                .plugin("construction-directory", 1, Map.of("enabled", "false"))
+                .plugin(
+                    "instant",
+                    1,
+                    Map.of(
+                        "enabled", "false",
+                        "instant", "COMPILE-RUN"
+                    )
+                )
                 .install(path),
             Stage.COMPILE
         );
 
-        assertThat(schematicProducts.byType("project", ProductType.MODULE)).isEmpty();
+        assertThat(defaultConstructionDirectory(path).resolve("instant")).doesNotExist();
     }
 
     @Test
@@ -386,13 +392,13 @@ final class PluginsFeatureTests extends ConveyorTest {
             .manual(builder ->
                 builder.name("template")
                     .version(1)
-                    .plugin("construction-directory", 1, Map.of())
+                    .plugin("instant", 1, Map.of("instant", "COMPILE-RUN"))
             )
-            .manual(builder -> builder.name("construction-directory").version(1))
-            .jar("construction-directory", builder -> builder.name("construction-directory").version(1))
+            .manual(builder -> builder.name("instant").version(1))
+            .jar("instant", builder -> builder.name("instant").version(1))
             .install(path);
 
-        var schematicProducts = module.construct(
+        module.construct(
             factory.schematicBuilder()
                 .name("project")
                 .version(1)
@@ -402,8 +408,7 @@ final class PluginsFeatureTests extends ConveyorTest {
             Stage.COMPILE
         );
 
-        assertThat(schematicProducts.byType("project", ProductType.MODULE))
-            .containsExactly(defaultConstructionDirectory(path));
+        assertThat(defaultConstructionDirectory(path).resolve("instant")).exists();
     }
 
     @Test
@@ -417,26 +422,25 @@ final class PluginsFeatureTests extends ConveyorTest {
             .manual(builder ->
                 builder.name("template")
                     .version(1)
-                    .plugin("construction-directory", 1, Map.of())
+                    .plugin("instant", 1, Map.of())
             )
-            .manual(builder -> builder.name("construction-directory").version(1))
-            .manual(builder -> builder.name("construction-directory").version(2))
-            .jar("construction-directory", builder -> builder.name("construction-directory").version(2))
+            .manual(builder -> builder.name("instant").version(1))
+            .manual(builder -> builder.name("instant").version(2))
+            .jar("instant", builder -> builder.name("instant").version(2))
             .install(path);
 
-        var schematicProducts = module.construct(
+        module.construct(
             factory.schematicBuilder()
                 .name("project")
                 .version(1)
                 .repository(path)
                 .template("template", 1)
-                .plugin("construction-directory", 2, Map.of())
+                .plugin("instant", 2, Map.of("instant", "COMPILE-RUN"))
                 .install(path),
             Stage.COMPILE
         );
 
-        assertThat(schematicProducts.byType("project", ProductType.MODULE))
-            .containsExactly(defaultConstructionDirectory(path));
+        assertThat(defaultConstructionDirectory(path).resolve("instant")).exists();
     }
 
     @Test
