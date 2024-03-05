@@ -15,6 +15,10 @@ abstract class ConveyorTest {
         return path.resolve(".conveyor");
     }
 
+    Path conveyorJson(Path path) {
+        return path.resolve("conveyor.json");
+    }
+
     Instant instant(Path path) {
         try {
             return Instant.parse(Files.readString(path));

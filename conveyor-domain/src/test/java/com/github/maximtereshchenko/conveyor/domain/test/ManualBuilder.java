@@ -4,6 +4,9 @@ import com.github.maximtereshchenko.conveyor.api.port.*;
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 import com.github.maximtereshchenko.conveyor.gson.JacksonAdapter;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
@@ -32,7 +35,7 @@ final class ManualBuilder {
     }
 
     ManualBuilder noTemplate() {
-        return template(new NoExplicitTemplate());
+        return template(new NoExplicitlyDefinedTemplate());
     }
 
     ManualBuilder template(String name, int version) {
@@ -116,13 +119,18 @@ final class ManualBuilder {
     }
 
     void install(Path directory) {
-        gsonAdapter.write(
-            directory.resolve("%s-%d.json".formatted(manualDefinition.name(), manualDefinition.version())),
-            manualDefinition
-        );
+        try {
+            gsonAdapter.write(
+                Files.createDirectories(directory)
+                    .resolve("%s-%d.json".formatted(manualDefinition.name(), manualDefinition.version())),
+                manualDefinition
+            );
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
-    private ManualBuilder template(TemplateDefinition templateDefinition) {
+    private ManualBuilder template(TemplateForManualDefinition templateDefinition) {
         return new ManualBuilder(
             gsonAdapter,
             new ManualDefinition(

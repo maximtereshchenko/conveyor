@@ -2,6 +2,7 @@ package com.github.maximtereshchenko.conveyor.gson;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.github.maximtereshchenko.conveyor.api.port.*;
 
 import java.io.IOException;
@@ -19,8 +20,10 @@ public final class JacksonAdapter implements DefinitionReader {
 
     public static JacksonAdapter configured() {
         var module = new SimpleModule();
-        module.addSerializer(NoExplicitTemplate.class, new NoExplicitTemplateSerializer());
-        module.addDeserializer(TemplateDefinition.class, new TemplateDefinitionDeserializer());
+        module.addSerializer(Path.class, new ToStringSerializer());
+        module.addSerializer(NoExplicitlyDefinedTemplate.class, new NoExplicitTemplateSerializer());
+        module.addDeserializer(TemplateForSchematicDefinition.class, new TemplateForSchematicDefinitionDeserializer());
+        module.addDeserializer(TemplateForManualDefinition.class, new TemplateForManualDefinitionDeserializer());
         module.addDeserializer(DependencyDefinition.class, new DependencyDefinitionDeserializer());
         return new JacksonAdapter(
             new ObjectMapper()

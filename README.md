@@ -5,16 +5,17 @@ A build tool for Java projects
 # Features
 
 * Schematic
-    * This is a definition of a project to package
+    * This is a definition of a project to construct
+    * A schematic can be constructed up to the specified stage: CLEAN, COMPILE, TEST, ARCHIVE or PUBLISH
 * Manual
-    * This is a definition of an already packaged artifact
+    * This is a definition of an already archived artifact
 * Module path
     * Given the same dependency is required but with different versions, the highest version wins taken into account the
       presence of the dependency requiring that version in the result module path
 * Plugins
     * Plugins are defined in a manual or a schematic with a name, an optional version and an optional configuration in a
       form of key-value pairs
-    * Plugins are packaged in a JAR and exported via Java module system
+    * Plugins are archived in a JAR and exported via Java module system
     * Plugins are loaded via Java module system from a module layer containing required dependencies from the plugin's
       manual
     * Given properties and the configuration from the schematic, plugin produces zero or more tasks bound to a stage and
@@ -54,3 +55,21 @@ A build tool for Java projects
     * Version and scope of the inherited dependency can be overridden
     * Schematic can define a dependency on other schematic with a name and an optional scope. In such case the product
       from this schematic of type MODULE will be used in module path
+* Inheritance
+    * A schematic inherits properties, plugins and dependencies from a manual used as a template. It is defined with a
+      name and a version
+    * A schematic inherits properties, plugins, dependencies and repositories from another schematic used as a template.
+      It is defined with a path to the file with the schematic
+    * If a schematic does not have an explicitly defined template, then a schematic from `conveyor.json` file located in
+      the parent directory will be used. If such schematic does not exist, then manual with `super-manual` name and
+      version `1` will be used
+    * A schematic has zero or more inclusions. It will be used as a template for included schematics
+    * A schematic is constructed before its inclusions
+    * A schematic is constructed after its schematic template
+    * A schematic is constructed before other schematics, which require it as a dependency
+    * A schematic is constructed up to the specified stage or ARCHIVE, whichever is higher, if it is required as a
+      dependency for other schematic
+    * Schematics are constructed in depth-first order
+    * Schematics to be constructed depend on the initial targeted schematic. The targeted schematic will be constructed
+      together with its schematic templates, inclusions and also with other schematics and their schematic templates, on
+      which targeted schematic depends either directly or transitively

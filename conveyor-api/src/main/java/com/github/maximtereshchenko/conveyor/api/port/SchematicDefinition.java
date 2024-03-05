@@ -6,7 +6,7 @@ import java.util.*;
 public record SchematicDefinition(
     String name,
     int version,
-    TemplateDefinition template,
+    TemplateForSchematicDefinition template,
     List<Path> inclusions,
     Optional<Path> repository,
     Map<String, String> properties,
@@ -15,7 +15,7 @@ public record SchematicDefinition(
 ) {
 
     public SchematicDefinition {
-        template = Objects.requireNonNullElse(template, new NoExplicitTemplate());
+        template = Objects.requireNonNullElse(template, new NoExplicitlyDefinedTemplate());
         inclusions = List.copyOf(Objects.requireNonNullElse(inclusions, List.of()));
         properties = Map.copyOf(Objects.requireNonNullElse(properties, Map.of()));
         plugins = List.copyOf(Objects.requireNonNullElse(plugins, List.of()));

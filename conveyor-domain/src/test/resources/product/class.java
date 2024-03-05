@@ -17,7 +17,7 @@ public final class ${normalizedName} implements ConveyorPlugin {
     public List<ConveyorTaskBinding> bindings(ConveyorProperties properties, Map<String, String> configuration) {
         return List.of(
             new ConveyorTaskBinding(
-                Stage.COMPILE,
+                Stage.ARCHIVE,
                 Step.RUN,
                 (dependencies, products) -> products.with(Paths.get(configuration.get("path")), ProductType.MODULE)
             )

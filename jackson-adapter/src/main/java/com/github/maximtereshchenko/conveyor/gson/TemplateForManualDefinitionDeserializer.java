@@ -6,22 +6,25 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.github.maximtereshchenko.conveyor.api.port.ManualTemplateDefinition;
-import com.github.maximtereshchenko.conveyor.api.port.NoExplicitTemplate;
-import com.github.maximtereshchenko.conveyor.api.port.TemplateDefinition;
+import com.github.maximtereshchenko.conveyor.api.port.NoExplicitlyDefinedTemplate;
+import com.github.maximtereshchenko.conveyor.api.port.TemplateForManualDefinition;
+import com.github.maximtereshchenko.conveyor.api.port.TemplateForSchematicDefinition;
 
 import java.io.IOException;
 
-final class TemplateDefinitionDeserializer extends StdDeserializer<TemplateDefinition> {
+final class TemplateForManualDefinitionDeserializer extends StdDeserializer<TemplateForManualDefinition> {
 
-    TemplateDefinitionDeserializer() {
-        super(TemplateDefinition.class);
+    TemplateForManualDefinitionDeserializer() {
+        super(TemplateForSchematicDefinition.class);
     }
 
     @Override
-    public TemplateDefinition deserialize(JsonParser jsonParser, DeserializationContext deserializationContext)
-        throws IOException {
+    public TemplateForManualDefinition deserialize(
+        JsonParser jsonParser,
+        DeserializationContext deserializationContext
+    ) throws IOException {
         if (jsonParser.currentToken() == JsonToken.VALUE_NULL) {
-            return new NoExplicitTemplate();
+            return new NoExplicitlyDefinedTemplate();
         }
         JsonNode node = jsonParser.readValueAsTree();
         return new ManualTemplateDefinition(node.get("name").asText(), node.get("version").intValue());

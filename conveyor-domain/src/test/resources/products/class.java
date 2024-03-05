@@ -19,7 +19,7 @@ public final class ${normalizedName} implements ConveyorPlugin {
     public List<ConveyorTaskBinding> bindings(ConveyorProperties properties, Map<String, String> configuration) {
         return List.of(
             new ConveyorTaskBinding(
-                Stage.COMPILE,
+                Stage.PUBLISH,
                 Step.RUN,
                 (dependencies, products) -> execute(products, properties.constructionDirectory().resolve("products"))
             )

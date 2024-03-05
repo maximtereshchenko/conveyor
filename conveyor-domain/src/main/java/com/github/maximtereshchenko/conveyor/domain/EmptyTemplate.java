@@ -25,4 +25,14 @@ final class EmptyTemplate implements Template {
     public Dependencies dependencies(Repository repository, SchematicProducts schematicProducts) {
         return new Dependencies();
     }
+
+    @Override
+    public Optional<Schematic> root() {
+        return Optional.empty();
+    }
+
+    @Override
+    public boolean inheritsFrom(Schematic schematic) {
+        return false;
+    }
 }

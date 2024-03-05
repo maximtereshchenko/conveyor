@@ -6,7 +6,6 @@ import com.github.maximtereshchenko.conveyor.api.port.DefinitionReader;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 
 import java.nio.file.Path;
-import java.util.stream.Stream;
 
 public final class ConveyorFacade implements ConveyorModule {
 
@@ -18,31 +17,6 @@ public final class ConveyorFacade implements ConveyorModule {
 
     @Override
     public SchematicProducts construct(Path path, Stage stage) {
-        return schematics(Schematic.from(definitionReader, path))
-            .reduce(
-                new SchematicProducts(),
-                (aggregated, schematic) -> schematic.construct(schematic.repository().orElseThrow(), aggregated, stage),
-                new PickSecond<>()
-            );
-    }
-
-    private Stream<Schematic> schematics(Schematic schematic) {
-        return Stream.concat(
-                Stream.of(schematic),
-                schematic.inclusions()
-                    .stream()
-                    .flatMap(this::schematics)
-            )
-            .sorted(this::comparedByMutualDependency);
-    }
-
-    private int comparedByMutualDependency(Schematic first, Schematic second) {
-        if (first.dependsOn(second)) {
-            return 1;
-        }
-        if (second.dependsOn(first)) {
-            return -1;
-        }
-        return 0;
+        return Schematics.from(Schematic.from(definitionReader, path)).construct(stage);
     }
 }
