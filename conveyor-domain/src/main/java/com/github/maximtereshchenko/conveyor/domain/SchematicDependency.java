@@ -32,12 +32,12 @@ final class SchematicDependency implements Dependency {
     }
 
     @Override
-    public Artifact artifact(Repository repository) {
+    public Artifact artifact(Repositories repositories) {
         return new SchematicArtifact(
             schematicDependencyDefinition,
             schematicProducts,
             definitionReader,
-            repository
+            repositories
         );
     }
 }

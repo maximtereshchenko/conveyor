@@ -8,12 +8,12 @@ final class PackagedArtifact implements Artifact {
 
     private final String name;
     private final int version;
-    private final Repository repository;
+    private final Repositories repositories;
 
-    PackagedArtifact(String name, int version, Repository repository) {
+    PackagedArtifact(String name, int version, Repositories repositories) {
         this.name = name;
         this.version = version;
-        this.repository = repository;
+        this.repositories = repositories;
     }
 
     @Override
@@ -28,16 +28,16 @@ final class PackagedArtifact implements Artifact {
 
     @Override
     public ImmutableSet<Artifact> dependencies() {
-        return repository.manualDefinition(name, version)
+        return repositories.manualDefinition(name, version)
             .dependencies()
             .stream()
             .filter(definition -> definition.scope() != DependencyScope.TEST)
-            .map(definition -> new PackagedArtifact(definition.name(), definition.version(), repository))
+            .map(definition -> new PackagedArtifact(definition.name(), definition.version(), repositories))
             .collect(new ImmutableSetCollector<>());
     }
 
     @Override
     public Path modulePath() {
-        return repository.path(name, version);
+        return repositories.path(name, version);
     }
 }

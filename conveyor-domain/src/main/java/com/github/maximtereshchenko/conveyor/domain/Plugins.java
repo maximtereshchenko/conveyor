@@ -34,12 +34,12 @@ final class Plugins {
 
     Products executeTasks(
         Products products,
-        Repository repository,
+        Repositories repositories,
         Properties properties,
         Dependencies dependencies,
         Stage stage
     ) {
-        return conveyorPlugins(repository)
+        return conveyorPlugins(repositories)
             .filter(conveyorPlugin -> isEnabled(conveyorPlugin.name()))
             .flatMap(conveyorPlugin -> bindings(properties, conveyorPlugin))
             .filter(binding -> isBeforeOrEqual(binding, stage))
@@ -48,7 +48,7 @@ final class Plugins {
             .reduce(
                 products,
                 (aggregated, task) -> task.execute(
-                    scopes -> dependencies.modulePath(repository, new ImmutableSet<>(scopes)),
+                    scopes -> dependencies.modulePath(repositories, new ImmutableSet<>(scopes)),
                     aggregated
                 ),
                 new PickSecond<>()
@@ -81,17 +81,17 @@ final class Plugins {
             .stream();
     }
 
-    private Stream<ConveyorPlugin> conveyorPlugins(Repository repository) {
-        return ServiceLoader.load(moduleLayer(modulePath(repository)), ConveyorPlugin.class)
+    private Stream<ConveyorPlugin> conveyorPlugins(Repositories repositories) {
+        return ServiceLoader.load(moduleLayer(modulePath(repositories)), ConveyorPlugin.class)
             .stream()
             .map(ServiceLoader.Provider::get);
     }
 
-    private ImmutableSet<Path> modulePath(Repository repository) {
+    private ImmutableSet<Path> modulePath(Repositories repositories) {
         return ModulePath.from(
                 indexed.values()
                     .stream()
-                    .map(plugin -> plugin.artifact(repository))
+                    .map(plugin -> plugin.artifact(repositories))
                     .collect(new ImmutableSetCollector<>())
             )
             .resolved();

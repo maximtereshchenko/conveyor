@@ -8,5 +8,5 @@ interface Dependency {
 
     boolean in(ImmutableSet<DependencyScope> scopes);
 
-    Artifact artifact(Repository repository);
+    Artifact artifact(Repositories repositories);
 }

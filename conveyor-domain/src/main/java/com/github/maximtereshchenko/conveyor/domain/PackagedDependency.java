@@ -22,11 +22,11 @@ final class PackagedDependency implements Dependency {
     }
 
     @Override
-    public Artifact artifact(Repository repository) {
+    public Artifact artifact(Repositories repositories) {
         return new PackagedArtifact(
             artifactDependencyDefinition.name(),
             artifactDependencyDefinition.version(),
-            repository
+            repositories
         );
     }
 }

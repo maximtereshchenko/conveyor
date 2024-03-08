@@ -12,5 +12,5 @@ interface Plugin {
 
     Plugin override(Plugin base);
 
-    Artifact artifact(Repository repository);
+    Artifact artifact(Repositories repositories);
 }

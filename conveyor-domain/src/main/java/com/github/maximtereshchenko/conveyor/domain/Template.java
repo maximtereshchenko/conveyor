@@ -6,13 +6,13 @@ import java.util.Optional;
 
 interface Template {
 
-    Optional<Repository> repository();
+    Repositories repositories();
 
-    Properties properties(Repository repository);
+    Properties properties(Repositories repositories);
 
-    Plugins plugins(Repository repository);
+    Plugins plugins(Repositories repositories);
 
-    Dependencies dependencies(Repository repository, SchematicProducts schematicProducts);
+    Dependencies dependencies(Repositories repositories, SchematicProducts schematicProducts);
 
     Optional<Schematic> root();
 

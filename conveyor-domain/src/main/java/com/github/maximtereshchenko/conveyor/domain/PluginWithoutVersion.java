@@ -36,7 +36,7 @@ final class PluginWithoutVersion implements Plugin {
     }
 
     @Override
-    public Artifact artifact(Repository repository) {
+    public Artifact artifact(Repositories repositories) {
         throw new IllegalStateException();
     }
 }

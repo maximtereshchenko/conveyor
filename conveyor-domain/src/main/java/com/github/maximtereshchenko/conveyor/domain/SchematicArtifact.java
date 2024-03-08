@@ -15,18 +15,18 @@ final class SchematicArtifact implements Artifact {
     private final SchematicDependencyDefinition schematicDependencyDefinition;
     private final SchematicProducts schematicProducts;
     private final DefinitionReader definitionReader;
-    private final Repository repository;
+    private final Repositories repositories;
 
     SchematicArtifact(
         SchematicDependencyDefinition schematicDependencyDefinition,
         SchematicProducts schematicProducts,
         DefinitionReader definitionReader,
-        Repository repository
+        Repositories repositories
     ) {
         this.schematicDependencyDefinition = schematicDependencyDefinition;
         this.schematicProducts = schematicProducts;
         this.definitionReader = definitionReader;
-        this.repository = repository;
+        this.repositories = repositories;
     }
 
     @Override
@@ -48,9 +48,9 @@ final class SchematicArtifact implements Artifact {
             .map(definition ->
                 switch (definition) {
                     case ArtifactDependencyDefinition artifact ->
-                        new PackagedArtifact(artifact.name(), artifact.version(), repository);
+                        new PackagedArtifact(artifact.name(), artifact.version(), repositories);
                     case SchematicDependencyDefinition schematic ->
-                        new SchematicArtifact(schematic, schematicProducts, definitionReader, repository);
+                        new SchematicArtifact(schematic, schematicProducts, definitionReader, repositories);
                 }
             )
             .collect(new ImmutableSetCollector<>());
