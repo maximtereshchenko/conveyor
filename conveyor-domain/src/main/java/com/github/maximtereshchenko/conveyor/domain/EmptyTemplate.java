@@ -12,6 +12,11 @@ final class EmptyTemplate implements Template {
     }
 
     @Override
+    public SchematicProperties schematicProperties() {
+        return new SchematicProperties();
+    }
+
+    @Override
     public Properties properties(Repositories repositories) {
         return new Properties();
     }

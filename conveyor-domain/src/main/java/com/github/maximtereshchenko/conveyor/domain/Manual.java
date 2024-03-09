@@ -26,6 +26,11 @@ final class Manual extends Definition {
     }
 
     @Override
+    public SchematicProperties schematicProperties() {
+        return new SchematicProperties();
+    }
+
+    @Override
     public Properties properties(Repositories repositories) {
         var manualDefinition = manualDefinition(repositories);
         return properties(manualDefinition.properties())

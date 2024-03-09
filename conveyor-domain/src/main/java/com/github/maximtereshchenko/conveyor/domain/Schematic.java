@@ -74,10 +74,22 @@ final class Schematic extends Definition {
         return Repositories.from(
                 schematicDefinition.repositories()
                     .stream()
-                    .map(repositoryDefinition -> new Repository(repositoryDefinition, definitionReader()))
+                    .map(repositoryDefinition ->
+                        new Repository(
+                            repositoryDefinition,
+                            schematicProperties().discoveryDirectory(path),
+                            definitionReader()
+                        )
+                    )
                     .collect(new ImmutableSetCollector<>())
             )
             .override(template.repositories());
+    }
+
+    @Override
+    public SchematicProperties schematicProperties() {
+        return SchematicProperties.from(new ImmutableMap<>(schematicDefinition.properties()))
+            .override(template.schematicProperties());
     }
 
     @Override
@@ -137,9 +149,7 @@ final class Schematic extends Definition {
     }
 
     boolean requires(Schematic schematic, Schematics schematics) {
-        return template.equals(schematic) ||
-               template.inheritsFrom(schematic) ||
-               dependsOn(schematic, schematics);
+        return inheritsFrom(schematic) || dependsOn(schematic, schematics);
     }
 
     boolean dependsOn(Schematic schematic, Schematics schematics) {
@@ -161,7 +171,9 @@ final class Schematic extends Definition {
                 .executeTasks(
                     new Products().with(path, ProductType.SCHEMATIC_DEFINITION),
                     repositories,
-                    properties(repositories).withDefaults(schematicDefinition.name(), path),
+                    schematicProperties()
+                        .properties(schematicDefinition.name(), path)
+                        .override(properties(repositories)),
                     dependencies(repositories, schematicProducts),
                     stage
                 )
