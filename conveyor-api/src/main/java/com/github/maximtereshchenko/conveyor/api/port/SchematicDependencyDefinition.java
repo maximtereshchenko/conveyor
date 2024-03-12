@@ -2,11 +2,10 @@ package com.github.maximtereshchenko.conveyor.api.port;
 
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 
-import java.util.Objects;
+import java.util.Optional;
 
-public record SchematicDependencyDefinition(String schematic, DependencyScope scope) implements DependencyDefinition {
+public sealed interface SchematicDependencyDefinition permits DependencyOnArtifactDefinition,
+    DependencyOnSchematicDefinition {
 
-    public SchematicDependencyDefinition {
-        scope = Objects.requireNonNullElse(scope, DependencyScope.IMPLEMENTATION);
-    }
+    Optional<DependencyScope> scope();
 }

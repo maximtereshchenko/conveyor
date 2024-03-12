@@ -30,6 +30,7 @@ final class SchematicBuilder {
                 List.of(),
                 List.of(),
                 Map.of(),
+                new PreferencesDefinition(),
                 List.of(),
                 List.of()
             )
@@ -46,6 +47,7 @@ final class SchematicBuilder {
                 schematicDefinition.inclusions(),
                 schematicDefinition.repositories(),
                 schematicDefinition.properties(),
+                schematicDefinition.preferences(),
                 schematicDefinition.plugins(),
                 schematicDefinition.dependencies()
             )
@@ -62,6 +64,7 @@ final class SchematicBuilder {
                 schematicDefinition.inclusions(),
                 schematicDefinition.repositories(),
                 schematicDefinition.properties(),
+                schematicDefinition.preferences(),
                 schematicDefinition.plugins(),
                 schematicDefinition.dependencies()
             )
@@ -78,7 +81,7 @@ final class SchematicBuilder {
 
     SchematicBuilder repository(String name, Path path, boolean enabled) {
         var copy = new ArrayList<>(schematicDefinition.repositories());
-        copy.add(new RepositoryDefinition(name, path, enabled));
+        copy.add(new RepositoryDefinition(name, path, Optional.of(enabled)));
         return new SchematicBuilder(
             gsonAdapter,
             new SchematicDefinition(
@@ -88,6 +91,7 @@ final class SchematicBuilder {
                 schematicDefinition.inclusions(),
                 copy,
                 schematicDefinition.properties(),
+                schematicDefinition.preferences(),
                 schematicDefinition.plugins(),
                 schematicDefinition.dependencies()
             )
@@ -106,6 +110,7 @@ final class SchematicBuilder {
                 copy,
                 schematicDefinition.repositories(),
                 schematicDefinition.properties(),
+                schematicDefinition.preferences(),
                 schematicDefinition.plugins(),
                 schematicDefinition.dependencies()
             )
@@ -113,11 +118,11 @@ final class SchematicBuilder {
     }
 
     SchematicBuilder plugin(String name, Map<String, String> configuration) {
-        return plugin(new PluginDefinition(name, OptionalInt.empty(), configuration));
+        return plugin(new PluginDefinition(name, Optional.empty(), configuration));
     }
 
     SchematicBuilder plugin(String name, int version, Map<String, String> configuration) {
-        return plugin(new PluginDefinition(name, OptionalInt.of(version), configuration));
+        return plugin(new PluginDefinition(name, Optional.of(version), configuration));
     }
 
     SchematicBuilder plugin(PluginDefinition pluginDefinition) {
@@ -132,6 +137,7 @@ final class SchematicBuilder {
                 schematicDefinition.inclusions(),
                 schematicDefinition.repositories(),
                 schematicDefinition.properties(),
+                schematicDefinition.preferences(),
                 copy,
                 schematicDefinition.dependencies()
             )
@@ -139,11 +145,11 @@ final class SchematicBuilder {
     }
 
     SchematicBuilder schematicDependency(String name, DependencyScope scope) {
-        return dependency(new SchematicDependencyDefinition(name, scope));
+        return dependency(new DependencyOnSchematicDefinition(name, Optional.of(scope)));
     }
 
     SchematicBuilder dependency(String name, int version, DependencyScope scope) {
-        return dependency(new ArtifactDependencyDefinition(name, version, scope));
+        return dependency(new DependencyOnArtifactDefinition(name, Optional.of(version), Optional.of(scope)));
     }
 
     SchematicBuilder property(String key, String value) {
@@ -158,6 +164,7 @@ final class SchematicBuilder {
                 schematicDefinition.inclusions(),
                 schematicDefinition.repositories(),
                 copy,
+                schematicDefinition.preferences(),
                 schematicDefinition.plugins(),
                 schematicDefinition.dependencies()
             )
@@ -175,6 +182,25 @@ final class SchematicBuilder {
         }
     }
 
+    SchematicBuilder preference(String name, int version) {
+        var copy = new ArrayList<>(schematicDefinition.preferences().artifacts());
+        copy.add(new ArtifactPreferenceDefinition(name, version));
+        return new SchematicBuilder(
+            gsonAdapter,
+            new SchematicDefinition(
+                schematicDefinition.name(),
+                schematicDefinition.version(),
+                schematicDefinition.template(),
+                schematicDefinition.inclusions(),
+                schematicDefinition.repositories(),
+                schematicDefinition.properties(),
+                new PreferencesDefinition(schematicDefinition.preferences().inclusions(), copy),
+                schematicDefinition.plugins(),
+                schematicDefinition.dependencies()
+            )
+        );
+    }
+
     private SchematicBuilder template(TemplateForSchematicDefinition templateDefinition) {
         return new SchematicBuilder(
             gsonAdapter,
@@ -185,13 +211,14 @@ final class SchematicBuilder {
                 schematicDefinition.inclusions(),
                 schematicDefinition.repositories(),
                 schematicDefinition.properties(),
+                schematicDefinition.preferences(),
                 schematicDefinition.plugins(),
                 schematicDefinition.dependencies()
             )
         );
     }
 
-    private SchematicBuilder dependency(DependencyDefinition dependencyDefinition) {
+    private SchematicBuilder dependency(SchematicDependencyDefinition dependencyDefinition) {
         var copy = new ArrayList<>(schematicDefinition.dependencies());
         copy.add(dependencyDefinition);
         return new SchematicBuilder(
@@ -203,6 +230,7 @@ final class SchematicBuilder {
                 schematicDefinition.inclusions(),
                 schematicDefinition.repositories(),
                 schematicDefinition.properties(),
+                schematicDefinition.preferences(),
                 schematicDefinition.plugins(),
                 copy
             )

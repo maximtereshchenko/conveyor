@@ -7,9 +7,9 @@ import com.github.maximtereshchenko.conveyor.api.port.NoExplicitlyDefinedTemplat
 
 import java.io.IOException;
 
-final class NoExplicitTemplateSerializer extends StdSerializer<NoExplicitlyDefinedTemplate> {
+final class NoExplicitlyDefinedTemplateSerializer extends StdSerializer<NoExplicitlyDefinedTemplate> {
 
-    NoExplicitTemplateSerializer() {
+    NoExplicitlyDefinedTemplateSerializer() {
         super(NoExplicitlyDefinedTemplate.class);
     }
 

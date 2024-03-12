@@ -1,43 +1,74 @@
 package com.github.maximtereshchenko.conveyor.domain;
 
 import com.github.maximtereshchenko.conveyor.api.SchematicProducts;
-import com.github.maximtereshchenko.conveyor.api.port.DefinitionReader;
-import com.github.maximtereshchenko.conveyor.api.port.SchematicDependencyDefinition;
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
+import com.github.maximtereshchenko.conveyor.common.api.ProductType;
 
-final class SchematicDependency implements Dependency {
+import java.nio.file.Path;
+import java.util.Set;
 
-    private final SchematicDependencyDefinition schematicDependencyDefinition;
+final class SchematicDependency extends DependentArtifact<DependencyModel> implements Dependency {
+
+    private final SchematicDependencyModel schematicDependencyModel;
     private final SchematicProducts schematicProducts;
-    private final DefinitionReader definitionReader;
+    private final ModelFactory modelFactory;
+    private final Repositories repositories;
+    private final Preferences preferences;
 
     SchematicDependency(
-        SchematicDependencyDefinition schematicDependencyDefinition,
+        SchematicDependencyModel schematicDependencyModel,
         SchematicProducts schematicProducts,
-        DefinitionReader definitionReader
+        ModelFactory modelFactory,
+        Repositories repositories,
+        Preferences preferences
     ) {
-        this.schematicDependencyDefinition = schematicDependencyDefinition;
+        this.schematicDependencyModel = schematicDependencyModel;
         this.schematicProducts = schematicProducts;
-        this.definitionReader = definitionReader;
+        this.modelFactory = modelFactory;
+        this.repositories = repositories;
+        this.preferences = preferences;
     }
 
     @Override
     public String name() {
-        return schematicDependencyDefinition.schematic();
+        return schematicDependencyModel.name();
     }
 
     @Override
-    public boolean in(ImmutableSet<DependencyScope> scopes) {
-        return scopes.contains(schematicDependencyDefinition.scope());
+    public int version() {
+        return fullSchematicHierarchy().version();
     }
 
     @Override
-    public Artifact artifact(Repositories repositories) {
-        return new SchematicArtifact(
-            schematicDependencyDefinition,
-            schematicProducts,
-            definitionReader,
-            repositories
-        );
+    public Path path() {
+        return product(ProductType.MODULE);
+    }
+
+    @Override
+    public DependencyScope scope() {
+        return schematicDependencyModel.scope().orElse(DependencyScope.IMPLEMENTATION);
+    }
+
+    @Override
+    Set<DependencyModel> dependencyModels() {
+        return fullSchematicHierarchy().dependencies();
+    }
+
+    @Override
+    Dependency dependency(DependencyModel dependencyModel) {
+        return switch (dependencyModel) {
+            case ArtifactDependencyModel model ->
+                new TransitiveDependency(model, modelFactory, preferences, repositories);
+            case SchematicDependencyModel model ->
+                new SchematicDependency(model, schematicProducts, modelFactory, repositories, preferences);
+        };
+    }
+
+    private FullSchematicHierarchy fullSchematicHierarchy() {
+        return modelFactory.fullSchematicHierarchy(product(ProductType.SCHEMATIC_DEFINITION), repositories);
+    }
+
+    private Path product(ProductType productType) {
+        return schematicProducts.byType(schematicDependencyModel.name(), productType).iterator().next();
     }
 }

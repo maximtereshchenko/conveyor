@@ -10,19 +10,16 @@ final class Properties {
 
     private static final Pattern INTERPOLATION_PATTERN = Pattern.compile("\\$\\{([^}]+)}");
 
-    private final ImmutableMap<String, String> map;
+    private final Map<String, String> all;
 
-    Properties(ImmutableMap<String, String> map) {
-        this.map = map;
-    }
-
-    Properties() {
-        this(new ImmutableMap<>());
+    Properties(Map<String, String> all) {
+        this.all = all;
     }
 
     ConveyorProperties conveyorProperties() {
         return new ConveyorProperties(
-            map.stream()
+            all.entrySet()
+                .stream()
                 .filter(entry -> !entry.getValue().isBlank())
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> interpolated(entry.getValue()))),
             SchematicPropertyKey.NAME.fullName(),
@@ -39,15 +36,9 @@ final class Properties {
                 (current, matchResult) ->
                     current.replace(
                         matchResult.group(),
-                        map.value(matchResult.group(1))
-                            .map(this::interpolated)
-                            .orElseThrow()
+                        interpolated(all.get(matchResult.group(1)))
                     ),
-                new PickSecond<>()
+                (a, b) -> a
             );
-    }
-
-    Properties override(Properties base) {
-        return new Properties(base.map.withAll(map));
     }
 }

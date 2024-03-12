@@ -13,8 +13,9 @@ public record SchematicDefinition(
     List<Path> inclusions,
     Collection<RepositoryDefinition> repositories,
     Map<String, String> properties,
+    PreferencesDefinition preferences,
     Collection<PluginDefinition> plugins,
-    Collection<DependencyDefinition> dependencies
+    Collection<SchematicDependencyDefinition> dependencies
 ) {
 
     public SchematicDefinition {
@@ -22,6 +23,7 @@ public record SchematicDefinition(
         inclusions = List.copyOf(Objects.requireNonNullElse(inclusions, List.of()));
         repositories = List.copyOf(Objects.requireNonNullElse(repositories, List.of()));
         properties = Map.copyOf(Objects.requireNonNullElse(properties, Map.of()));
+        preferences = Objects.requireNonNullElse(preferences, new PreferencesDefinition());
         plugins = List.copyOf(Objects.requireNonNullElse(plugins, List.of()));
         dependencies = List.copyOf(Objects.requireNonNullElse(dependencies, List.of()));
     }

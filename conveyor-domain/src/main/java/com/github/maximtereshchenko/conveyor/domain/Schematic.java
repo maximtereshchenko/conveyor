@@ -1,198 +1,184 @@
 package com.github.maximtereshchenko.conveyor.domain;
 
 import com.github.maximtereshchenko.conveyor.api.SchematicProducts;
-import com.github.maximtereshchenko.conveyor.api.port.*;
+import com.github.maximtereshchenko.conveyor.api.port.DefinitionReader;
 import com.github.maximtereshchenko.conveyor.common.api.ProductType;
 import com.github.maximtereshchenko.conveyor.common.api.Products;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Objects;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
+import java.util.stream.Collectors;
 
-final class Schematic extends Definition {
+final class Schematic {
 
-    private final Template template;
-    private final SchematicDefinition schematicDefinition;
-    private final Path path;
+    private final PartialSchematicHierarchy partialSchematicHierarchy;
+    private final DefinitionReader definitionReader;
+    private final ModelFactory modelFactory;
 
     Schematic(
+        PartialSchematicHierarchy partialSchematicHierarchy,
         DefinitionReader definitionReader,
-        Template template,
-        SchematicDefinition schematicDefinition,
-        Path path
+        ModelFactory modelFactory
     ) {
-        super(definitionReader);
-        this.template = template;
-        this.schematicDefinition = schematicDefinition;
-        this.path = path;
-    }
-
-    static Schematic from(DefinitionReader definitionReader, Path path) {
-        return from(
-            definitionReader,
-            templateDefinition -> switch (templateDefinition) {
-                case ManualTemplateDefinition definition ->
-                    new Manual(definitionReader, definition.name(), definition.version());
-                case SchematicPathTemplateDefinition definition -> from(definitionReader, definition.path());
-                case NoExplicitlyDefinedTemplate ignored -> defaultTemplate(definitionReader, path);
-            },
-            path
-        );
-    }
-
-    static Schematic from(DefinitionReader definitionReader, Template template, Path path) {
-        return from(definitionReader, templateDefinition -> template, path);
-    }
-
-    private static Template defaultTemplate(DefinitionReader definitionReader, Path path) {
-        var defaultSchematicTemplatePath = path.getParent().getParent().resolve("conveyor.json");
-        if (Files.exists(defaultSchematicTemplatePath)) {
-            return from(definitionReader, defaultSchematicTemplatePath);
-        }
-        return Manual.superManual(definitionReader);
-    }
-
-    private static Schematic from(
-        DefinitionReader definitionReader,
-        Function<TemplateForSchematicDefinition, Template> templateFunction,
-        Path path
-    ) {
-        var schematicDefinition = definitionReader.schematicDefinition(path);
-        return new Schematic(
-            definitionReader,
-            templateFunction.apply(schematicDefinition.template()),
-            schematicDefinition,
-            path
-        );
-    }
-
-    @Override
-    public Repositories repositories() {
-        return Repositories.from(
-                schematicDefinition.repositories()
-                    .stream()
-                    .map(repositoryDefinition ->
-                        new Repository(
-                            repositoryDefinition,
-                            schematicProperties().discoveryDirectory(path),
-                            definitionReader()
-                        )
-                    )
-                    .collect(new ImmutableSetCollector<>())
-            )
-            .override(template.repositories());
-    }
-
-    @Override
-    public SchematicProperties schematicProperties() {
-        return SchematicProperties.from(new ImmutableMap<>(schematicDefinition.properties()))
-            .override(template.schematicProperties());
-    }
-
-    @Override
-    public Properties properties(Repositories repositories) {
-        return properties(schematicDefinition.properties())
-            .override(template.properties(repositories));
-    }
-
-    @Override
-    public Plugins plugins(Repositories repositories) {
-        return plugins(schematicDefinition.plugins())
-            .override(template.plugins(repositories));
-    }
-
-    @Override
-    public Dependencies dependencies(Repositories repositories, SchematicProducts schematicProducts) {
-        return dependencies(schematicDefinition.dependencies(), schematicProducts)
-            .override(template.dependencies(repositories, schematicProducts));
-    }
-
-    @Override
-    public Optional<Schematic> root() {
-        return template.root().or(() -> Optional.of(this));
-    }
-
-    @Override
-    public boolean inheritsFrom(Schematic schematic) {
-        return template.equals(schematic) || template.inheritsFrom(schematic);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(path);
-    }
-
-    @Override
-    public boolean equals(Object object) {
-        if (this == object) {
-            return true;
-        }
-        if (object == null || getClass() != object.getClass()) {
-            return false;
-        }
-        var schematic = (Schematic) object;
-        return Objects.equals(path, schematic.path);
+        this.partialSchematicHierarchy = partialSchematicHierarchy;
+        this.definitionReader = definitionReader;
+        this.modelFactory = modelFactory;
     }
 
     String name() {
-        return schematicDefinition.name();
+        return partialSchematicHierarchy.name();
     }
 
-    ImmutableList<Schematic> inclusions() {
-        return schematicDefinition.inclusions()
-            .stream()
-            .map(inclusion -> Schematic.from(definitionReader(), this, inclusion))
-            .collect(new ImmutableListCollector<>());
+    boolean locatedAt(Path path) {
+        return partialSchematicHierarchy.path().equals(path);
     }
 
-    boolean requires(Schematic schematic, Schematics schematics) {
-        return inheritsFrom(schematic) || dependsOn(schematic, schematics);
+    boolean inheritsFrom(Schematic schematic) {
+        return partialSchematicHierarchy.inheritsFrom(schematic.partialSchematicHierarchy);
     }
 
     boolean dependsOn(Schematic schematic, Schematics schematics) {
-        return schematicDefinition.dependencies()
+        return partialSchematicHierarchy.dependencies()
             .stream()
-            .map(this::schematicDependencyDefinition)
+            .map(this::schematicDependencyModel)
             .flatMap(Optional::stream)
-            .map(SchematicDependencyDefinition::schematic)
-            .anyMatch(name ->
-                name.equals(schematic.name()) ||
-                schematics.findByName(name).dependsOn(schematic, schematics)
+            .anyMatch(schematicDependencyModel ->
+                schematicDependencyModel.name().equals(schematic.name()) ||
+                schematics.haveDependencyBetween(schematicDependencyModel.name(), schematic)
             );
     }
 
-    SchematicProducts construct(Repositories repositories, SchematicProducts schematicProducts, Stage stage) {
-        return schematicProducts.with(
-            schematicDefinition.name(),
-            plugins(repositories)
-                .executeTasks(
-                    new Products().with(path, ProductType.SCHEMATIC_DEFINITION),
+    SchematicProducts construct(SchematicProducts schematicProducts, Stage stage) {
+        var repositories = repositories();
+        var fullSchematicHierarchy = modelFactory.fullSchematicHierarchy(partialSchematicHierarchy, repositories);
+        var preferences = preferences(fullSchematicHierarchy);
+        return schematicProducts
+            .with(
+                fullSchematicHierarchy.name(),
+                plugins(
+                    fullSchematicHierarchy,
+                    properties(fullSchematicHierarchy),
+                    preferences,
                     repositories,
-                    schematicProperties()
-                        .properties(schematicDefinition.name(), path)
-                        .override(properties(repositories)),
-                    dependencies(repositories, schematicProducts),
-                    stage
+                    dependencies(fullSchematicHierarchy, preferences, repositories, schematicProducts)
                 )
+                    .executeTasks(
+                        new Products()
+                            .with(fullSchematicHierarchy.path(), ProductType.SCHEMATIC_DEFINITION),
+                        stage
+                    )
+            );
+    }
+
+    private Dependencies dependencies(
+        FullSchematicHierarchy fullSchematicHierarchy,
+        Preferences preferences,
+        Repositories repositories,
+        SchematicProducts schematicProducts
+    ) {
+        return new Dependencies(
+            fullSchematicHierarchy.dependencies()
+                .stream()
+                .map(dependencyModel -> dependency(dependencyModel, preferences, repositories, schematicProducts))
+                .collect(Collectors.toSet())
         );
     }
 
-    boolean contains(Schematic schematic) {
-        return equals(schematic) ||
-               inclusions()
-                   .stream()
-                   .anyMatch(inclusion -> inclusion.contains(schematic));
+    private Dependency dependency(
+        DependencyModel dependencyModel,
+        Preferences preferences,
+        Repositories repositories,
+        SchematicProducts schematicProducts
+    ) {
+        return switch (dependencyModel) {
+            case ArtifactDependencyModel model -> new DirectDependency(model, modelFactory, preferences, repositories);
+            case SchematicDependencyModel model ->
+                new SchematicDependency(model, schematicProducts, modelFactory, repositories, preferences);
+        };
     }
 
-    private Optional<SchematicDependencyDefinition> schematicDependencyDefinition(
-        DependencyDefinition dependencyDefinition
-    ) {
-        if (dependencyDefinition instanceof SchematicDependencyDefinition definition) {
-            return Optional.of(definition);
+    private Optional<SchematicDependencyModel> schematicDependencyModel(DependencyModel dependencyModel) {
+        if (dependencyModel instanceof SchematicDependencyModel model) {
+            return Optional.of(model);
         }
         return Optional.empty();
+    }
+
+    private Repositories repositories() {
+        return new Repositories(
+            partialSchematicHierarchy.repositories()
+                .stream()
+                .map(repositoryModel -> repository(repositoryModel, partialSchematicHierarchy.path()))
+                .collect(Collectors.toSet())
+        );
+    }
+
+    private Repository repository(RepositoryModel repositoryModel, Path path) {
+        if (repositoryModel.enabled().orElse(Boolean.TRUE)) {
+            return new EnabledRepository(path.getParent().resolve(repositoryModel.path()), definitionReader);
+        }
+        return new DisabledRepository();
+    }
+
+    private Plugins plugins(
+        FullSchematicHierarchy fullSchematicHierarchy,
+        Properties properties,
+        Preferences preferences,
+        Repositories repositories,
+        Dependencies dependencies
+    ) {
+        return new Plugins(
+            fullSchematicHierarchy.plugins()
+                .stream()
+                .map(pluginModel -> new Plugin(pluginModel, properties, modelFactory, preferences, repositories))
+                .collect(Collectors.toSet()),
+            properties,
+            dependencies
+        );
+    }
+
+    private Properties properties(FullSchematicHierarchy fullSchematicHierarchy) {
+        var properties = new HashMap<>(fullSchematicHierarchy.properties());
+        properties.put(SchematicPropertyKey.NAME.fullName(), fullSchematicHierarchy.name());
+        put(
+            properties,
+            SchematicPropertyKey.DISCOVERY_DIRECTORY,
+            fullSchematicHierarchy.path(),
+            ""
+        );
+        put(
+            properties,
+            SchematicPropertyKey.CONSTRUCTION_DIRECTORY,
+            fullSchematicHierarchy.path(),
+            ".conveyor"
+        );
+        return new Properties(properties);
+    }
+
+    private Preferences preferences(FullSchematicHierarchy fullSchematicHierarchy) {
+        return new Preferences(
+            fullSchematicHierarchy.preferences()
+                .artifacts()
+                .stream()
+                .collect(Collectors.toMap(ArtifactPreferenceModel::name, ArtifactPreferenceModel::version))
+        );
+    }
+
+    private void put(
+        Map<String, String> properties,
+        SchematicPropertyKey schematicPropertyKey,
+        Path path,
+        String defaultRelativePath
+    ) {
+        properties.put(
+            schematicPropertyKey.fullName(),
+            path.getParent()
+                .resolve(properties.getOrDefault(schematicPropertyKey.fullName(), defaultRelativePath))
+                .normalize()
+                .toString()
+        );
     }
 }

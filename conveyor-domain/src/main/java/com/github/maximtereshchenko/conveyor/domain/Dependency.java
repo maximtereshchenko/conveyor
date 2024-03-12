@@ -2,11 +2,7 @@ package com.github.maximtereshchenko.conveyor.domain;
 
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 
-interface Dependency {
+interface Dependency extends Artifact {
 
-    String name();
-
-    boolean in(ImmutableSet<DependencyScope> scopes);
-
-    Artifact artifact(Repositories repositories);
+    DependencyScope scope();
 }

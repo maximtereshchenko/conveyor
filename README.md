@@ -9,9 +9,13 @@ A build tool for Java projects
     * A schematic can be constructed up to the specified stage: CLEAN, COMPILE, TEST, ARCHIVE or PUBLISH
 * Manual
     * This is a definition of an already archived artifact
+    * It is a subset of schematic
 * Dependency version resolution
     * Given the same dependency is required but with different versions, the highest version wins taken into account the
       presence of the dependency requiring that version in the result module path
+    * Preferences are defined in a manual or a schematic with a name and a version
+    * Transitive dependencies are used with versions defined in preferences. If preferences do not contain the
+      dependency, the version defined in a manual requiring this dependency is used
 * Plugins
     * Plugins are defined in a manual or a schematic with a name, an optional version and an optional configuration in a
       form of key-value pairs
@@ -45,7 +49,7 @@ A build tool for Java projects
     * The property `conveyor.discovery.directory` defines the directory, where plugins should find files to work with.
       It is relative to the directory, where the schematic definition is located
     * The property `conveyor.construction.directory` defines the directory, where plugins should place created products.
-      It is relative to the discovery directory
+      It is relative to the directory, where the schematic definition is located
     * Properties can be templated with other properties using `${property.key}` syntax
 * Dependencies
     * Dependencies are defined in a manual or a schematic with a name, a version and an optional scope: IMPLEMENTATION (
@@ -76,7 +80,8 @@ A build tool for Java projects
 * Repositories
     * Repositories are defined in a schematic with a name, a path to the directory containing artifacts and manuals and
       an optional `enabled` flag
-    * The path to the directory containing artifacts and manuals is relative to the discovery directory
+    * The path to the directory containing artifacts and manuals is relative to the directory, where the schematic
+      definition is located
     * Repositories are inherited from a schematic used as a template
     * The path can be overridden in a schematic
     * A repository can be disabled with the `enabled` flag equal to `false`

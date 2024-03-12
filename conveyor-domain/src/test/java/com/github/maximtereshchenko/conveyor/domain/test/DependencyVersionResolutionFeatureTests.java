@@ -291,4 +291,42 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
             .hasLineCount(5)
             .contains("first-1", "second-1", "should-not-be-affected-1", "exclude-affecting-1", "will-affect-2");
     }
+
+    @Test
+    void givenPreferencesContainTransitiveDependency_whenConstructToStage_thenTransitiveDependencyVersionIsFromPreferences(
+        @TempDir Path path,
+        ConveyorModule module,
+        BuilderFactory factory
+    ) {
+        factory.repositoryBuilder()
+            .superManual()
+            .manual(builder -> builder.name("dependencies").version(1))
+            .jar("dependencies", builder -> builder.name("dependencies").version(1))
+            .manual(builder ->
+                builder.name("dependency")
+                    .version(1)
+                    .dependency("transitive", 1, DependencyScope.IMPLEMENTATION)
+            )
+            .jar("dependency", builder -> builder.name("dependency").version(1))
+            .manual(builder -> builder.name("transitive").version(2))
+            .jar("dependency", builder -> builder.name("transitive").version(2))
+            .install(path);
+
+        module.construct(
+            factory.schematicBuilder()
+                .name("project")
+                .version(1)
+                .repository("main", path, true)
+                .plugin("dependencies", 1, Map.of())
+                .preference("transitive", 2)
+                .dependency("dependency", 1, DependencyScope.IMPLEMENTATION)
+                .install(path),
+            Stage.COMPILE
+        );
+
+        assertThat(defaultConstructionDirectory(path).resolve("dependencies"))
+            .content()
+            .hasLineCount(2)
+            .contains("dependency-1", "transitive-2");
+    }
 }

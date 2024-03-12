@@ -189,13 +189,13 @@ final class PropertiesFeatureTests extends ConveyorTest {
             Stage.COMPILE
         );
 
-        assertThat(defaultConstructionDirectory(project).resolve("properties"))
+        assertThat(defaultConstructionDirectory(path).resolve("properties"))
             .content()
             .hasLineCount(3)
             .contains(
                 "conveyor.schematic.name=project",
                 "conveyor.discovery.directory=" + project,
-                "conveyor.construction.directory=" + defaultConstructionDirectory(project)
+                "conveyor.construction.directory=" + defaultConstructionDirectory(path)
             );
     }
 
@@ -222,14 +222,13 @@ final class PropertiesFeatureTests extends ConveyorTest {
             Stage.COMPILE
         );
 
-        var project = path.resolve("project");
-        assertThat(defaultConstructionDirectory(project).resolve("properties"))
+        assertThat(defaultConstructionDirectory(path).resolve("properties"))
             .content()
             .hasLineCount(3)
             .contains(
                 "conveyor.schematic.name=project",
-                "conveyor.discovery.directory=" + project,
-                "conveyor.construction.directory=" + defaultConstructionDirectory(project)
+                "conveyor.discovery.directory=" + path.resolve("project"),
+                "conveyor.construction.directory=" + defaultConstructionDirectory(path)
             );
     }
 
@@ -268,7 +267,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
     }
 
     @Test
-    void givenRelativeConstructionDirectoryProperty_whenConstructToStage_thenConstructionDirectoryResolvedRelativeToDiscoveryDirectory(
+    void givenRelativeConstructionDirectoryProperty_whenConstructToStage_thenConstructionDirectoryResolvedRelativeToSchematicDefinitionDirectory(
         @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory

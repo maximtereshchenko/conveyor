@@ -1,6 +1,7 @@
 package com.github.maximtereshchenko.conveyor.domain;
 
 import java.nio.file.Path;
+import java.util.Set;
 
 interface Artifact {
 
@@ -8,7 +9,7 @@ interface Artifact {
 
     int version();
 
-    ImmutableSet<Artifact> dependencies();
+    Path path();
 
-    Path modulePath();
+    Set<Artifact> dependencies();
 }

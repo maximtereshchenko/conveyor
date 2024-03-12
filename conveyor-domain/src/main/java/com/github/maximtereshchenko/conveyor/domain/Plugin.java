@@ -1,16 +1,67 @@
 package com.github.maximtereshchenko.conveyor.domain;
 
-interface Plugin {
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
-    String name();
+final class Plugin extends StoredArtifact<ArtifactDependencyModel> {
 
-    int version();
+    private static final String ENABLED_CONFIGURATION_KEY = "enabled";
 
-    boolean isEnabled();
+    private final PluginModel pluginModel;
+    private final Properties properties;
+    private final ModelFactory modelFactory;
+    private final Preferences preferences;
 
-    Configuration configuration();
+    Plugin(
+        PluginModel pluginModel,
+        Properties properties,
+        ModelFactory modelFactory,
+        Preferences preferences,
+        Repositories repositories
+    ) {
+        super(repositories);
+        this.pluginModel = pluginModel;
+        this.properties = properties;
+        this.modelFactory = modelFactory;
+        this.preferences = preferences;
+    }
 
-    Plugin override(Plugin base);
+    @Override
+    public String name() {
+        return pluginModel.name();
+    }
 
-    Artifact artifact(Repositories repositories);
+    @Override
+    public int version() {
+        return pluginModel.version()
+            .or(() -> preferences.version(pluginModel.name()))
+            .orElseThrow();
+    }
+
+    @Override
+    Set<ArtifactDependencyModel> dependencyModels() {
+        return modelFactory.manualHierarchy(pluginModel.name(), version(), repositories()).dependencies();
+    }
+
+    @Override
+    Dependency dependency(ArtifactDependencyModel dependencyModel) {
+        return new TransitiveDependency(dependencyModel, modelFactory, preferences, repositories());
+    }
+
+    boolean isEnabled() {
+        return Boolean.parseBoolean(configuration().get(ENABLED_CONFIGURATION_KEY));
+    }
+
+    Map<String, String> configuration() {
+        var configuration = new HashMap<String, String>();
+        for (var entry : pluginModel.configuration().entrySet()) {
+            if (entry.getValue().isBlank()) {
+                continue;
+            }
+            configuration.put(entry.getKey(), properties.interpolated(entry.getValue()));
+        }
+        configuration.putIfAbsent(ENABLED_CONFIGURATION_KEY, "true");
+        return configuration;
+    }
 }

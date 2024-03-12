@@ -10,13 +10,15 @@ public record ManualDefinition(
     int version,
     TemplateForManualDefinition template,
     Map<String, String> properties,
+    PreferencesDefinition preferences,
     Collection<PluginDefinition> plugins,
-    Collection<ArtifactDependencyDefinition> dependencies
+    Collection<ManualDependencyDefinition> dependencies
 ) {
 
     public ManualDefinition {
         template = Objects.requireNonNullElse(template, new NoExplicitlyDefinedTemplate());
         properties = Map.copyOf(Objects.requireNonNullElse(properties, Map.of()));
+        preferences = Objects.requireNonNullElse(preferences, new PreferencesDefinition());
         plugins = List.copyOf(Objects.requireNonNullElse(plugins, List.of()));
         dependencies = List.copyOf(Objects.requireNonNullElse(dependencies, List.of()));
     }

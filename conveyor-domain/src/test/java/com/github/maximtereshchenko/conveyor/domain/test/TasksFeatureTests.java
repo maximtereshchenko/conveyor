@@ -298,10 +298,7 @@ final class TasksFeatureTests extends ConveyorTest {
         assertThat(defaultConstructionDirectory(path).resolve("products"))
             .content()
             .hasLineCount(2)
-            .contains(
-                "SCHEMATIC_DEFINITION=" + schematicDefinition,
-                "MODULE=" + product
-            );
+            .contains("SCHEMATIC_DEFINITION=" + schematicDefinition, "MODULE=" + product);
     }
 
     private Instant instant(Path path, String fileName) {
