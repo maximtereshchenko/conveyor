@@ -28,7 +28,7 @@ abstract class ArtifactDependency extends StoredArtifact<ArtifactDependencyModel
     }
 
     @Override
-    public int version() {
+    public SemanticVersion version() {
         return version(artifactDependencyModel, preferences);
     }
 
@@ -47,5 +47,5 @@ abstract class ArtifactDependency extends StoredArtifact<ArtifactDependencyModel
         return new TransitiveDependency(dependencyModel, modelFactory, preferences, repositories());
     }
 
-    abstract int version(ArtifactDependencyModel artifactDependencyModel, Preferences preferences);
+    abstract SemanticVersion version(ArtifactDependencyModel artifactDependencyModel, Preferences preferences);
 }

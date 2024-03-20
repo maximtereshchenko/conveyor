@@ -31,7 +31,7 @@ final class TemplateForSchematicDefinitionDeserializer extends StdDeserializer<T
         var name = node.get("name");
         var version = node.get("version");
         if (name != null && version != null) {
-            return new ManualTemplateDefinition(name.asText(), version.intValue());
+            return new ManualTemplateDefinition(name.asText(), version.asText());
         }
         return new SchematicPathTemplateDefinition(Paths.get(node.get("path").asText()));
     }

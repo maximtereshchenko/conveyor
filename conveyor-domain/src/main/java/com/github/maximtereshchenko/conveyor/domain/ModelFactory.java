@@ -22,7 +22,7 @@ final class ModelFactory {
             .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-    ManualHierarchy manualHierarchy(String name, int version, Repositories repositories) {
+    ManualHierarchy manualHierarchy(String name, SemanticVersion version, Repositories repositories) {
         return manualHierarchy(name, version, repositories, ManualHierarchy::new);
     }
 
@@ -47,7 +47,7 @@ final class ModelFactory {
 
     private ManualHierarchy manualHierarchy(
         String name,
-        int version,
+        SemanticVersion version,
         Repositories repositories,
         Function<StandaloneManualModel, ManualHierarchy> combiner
     ) {

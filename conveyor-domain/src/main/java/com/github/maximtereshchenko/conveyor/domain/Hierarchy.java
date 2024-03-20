@@ -21,7 +21,7 @@ abstract class Hierarchy<T extends TemplateModel, D extends DependencyModel, M e
     }
 
     @Override
-    public int version() {
+    public SemanticVersion version() {
         return models.getLast().version();
     }
 

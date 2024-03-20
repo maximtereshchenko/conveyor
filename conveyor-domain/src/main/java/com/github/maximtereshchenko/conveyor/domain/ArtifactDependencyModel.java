@@ -4,7 +4,7 @@ import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 
 import java.util.Optional;
 
-record ArtifactDependencyModel(String name, Optional<Integer> version, Optional<DependencyScope> scope)
+record ArtifactDependencyModel(String name, Optional<SemanticVersion> version, Optional<DependencyScope> scope)
     implements DependencyModel {
 
     @Override

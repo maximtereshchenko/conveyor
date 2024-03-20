@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-record PluginModel(String name, Optional<Integer> version, Map<String, String> configuration) {
+record PluginModel(String name, Optional<SemanticVersion> version, Map<String, String> configuration) {
 
     PluginModel override(PluginModel base) {
         var copy = new HashMap<>(base.configuration());

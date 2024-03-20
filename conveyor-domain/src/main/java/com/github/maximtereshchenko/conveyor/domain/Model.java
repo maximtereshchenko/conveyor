@@ -7,7 +7,7 @@ interface Model<T extends TemplateModel, D extends DependencyModel> {
 
     String name();
 
-    int version();
+    SemanticVersion version();
 
     T template();
 

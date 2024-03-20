@@ -32,12 +32,12 @@ final class DependencyDefinitionDeserializer extends StdDeserializer<SchematicDe
         return new DependencyOnSchematicDefinition(schematic.asText(), scope);
     }
 
-    private Optional<Integer> version(JsonNode node) {
+    private Optional<String> version(JsonNode node) {
         var version = node.get("version");
         if (version == null || version.isNull()) {
             return Optional.empty();
         }
-        return Optional.of(version.intValue());
+        return Optional.of(version.textValue());
     }
 
     private Optional<DependencyScope> scope(JsonNode node) {

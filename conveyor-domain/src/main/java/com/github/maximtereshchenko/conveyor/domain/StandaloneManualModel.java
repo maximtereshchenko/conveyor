@@ -21,15 +21,15 @@ final class StandaloneManualModel
     }
 
     @Override
-    public int version() {
-        return manualDefinition.version();
+    public SemanticVersion version() {
+        return new SemanticVersion(manualDefinition.version());
     }
 
     @Override
     public ManualTemplateModel template() {
         return switch (manualDefinition.template()) {
             case ManualTemplateDefinition definition ->
-                new OtherManualTemplateModel(definition.name(), definition.version());
+                new OtherManualTemplateModel(definition.name(), new SemanticVersion(definition.version()));
             case NoExplicitlyDefinedTemplate ignored -> new NoTemplateModel();
         };
     }
@@ -58,7 +58,7 @@ final class StandaloneManualModel
     ArtifactDependencyModel dependencyModel(ManualDependencyDefinition dependencyDefinition) {
         return new ArtifactDependencyModel(
             dependencyDefinition.name(),
-            Optional.of(dependencyDefinition.version()),
+            Optional.of(new SemanticVersion(dependencyDefinition.version())),
             Optional.of(dependencyDefinition.scope())
         );
     }

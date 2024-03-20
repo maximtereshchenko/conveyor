@@ -33,7 +33,7 @@ final class Plugin extends StoredArtifact<ArtifactDependencyModel> {
     }
 
     @Override
-    public int version() {
+    public SemanticVersion version() {
         return pluginModel.version()
             .or(() -> preferences.version(pluginModel.name()))
             .orElseThrow();

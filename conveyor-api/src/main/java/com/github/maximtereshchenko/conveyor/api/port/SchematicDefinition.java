@@ -8,7 +8,7 @@ import java.util.Objects;
 
 public record SchematicDefinition(
     String name,
-    int version,
+    String version,
     TemplateForSchematicDefinition template,
     List<Path> inclusions,
     Collection<RepositoryDefinition> repositories,

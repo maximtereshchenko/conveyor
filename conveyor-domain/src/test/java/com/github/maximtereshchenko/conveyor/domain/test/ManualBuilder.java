@@ -25,8 +25,8 @@ final class ManualBuilder {
             gsonAdapter,
             new ManualDefinition(
                 "",
-                0,
-                new ManualTemplateDefinition("super-manual", 1),
+                "",
+                new ManualTemplateDefinition("super-manual", "1.0.0"),
                 Map.of(),
                 new PreferencesDefinition(),
                 List.of(),
@@ -54,7 +54,7 @@ final class ManualBuilder {
         );
     }
 
-    ManualBuilder version(int version) {
+    ManualBuilder version(String version) {
         return new ManualBuilder(
             gsonAdapter,
             new ManualDefinition(
@@ -86,7 +86,7 @@ final class ManualBuilder {
         );
     }
 
-    ManualBuilder plugin(String name, int version, Map<String, String> configuration) {
+    ManualBuilder plugin(String name, String version, Map<String, String> configuration) {
         var copy = new ArrayList<>(manualDefinition.plugins());
         copy.add(new PluginDefinition(name, Optional.of(version), configuration));
         return new ManualBuilder(
@@ -103,7 +103,7 @@ final class ManualBuilder {
         );
     }
 
-    ManualBuilder dependency(String name, int version, DependencyScope scope) {
+    ManualBuilder dependency(String name, String version, DependencyScope scope) {
         var copy = new ArrayList<>(manualDefinition.dependencies());
         copy.add(new ManualDependencyDefinition(name, version, scope));
         return new ManualBuilder(
@@ -124,7 +124,7 @@ final class ManualBuilder {
         try {
             gsonAdapter.write(
                 Files.createDirectories(directory)
-                    .resolve("%s-%d.json".formatted(manualDefinition.name(), manualDefinition.version())),
+                    .resolve("%s-%s.json".formatted(manualDefinition.name(), manualDefinition.version())),
                 manualDefinition
             );
         } catch (IOException e) {
@@ -132,7 +132,7 @@ final class ManualBuilder {
         }
     }
 
-    ManualBuilder preference(String name, int version) {
+    ManualBuilder preference(String name, String version) {
         var copy = new ArrayList<>(manualDefinition.preferences().artifacts());
         copy.add(new ArtifactPreferenceDefinition(name, version));
         return new ManualBuilder(
@@ -149,7 +149,7 @@ final class ManualBuilder {
         );
     }
 
-    ManualBuilder preferenceInclusion(String name, int version) {
+    ManualBuilder preferenceInclusion(String name, String version) {
         var copy = new ArrayList<>(manualDefinition.preferences().inclusions());
         copy.add(new PreferencesInclusionDefinition(name, version));
         return new ManualBuilder(

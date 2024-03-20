@@ -15,11 +15,11 @@ final class Repositories {
         this.all = all;
     }
 
-    ManualDefinition manualDefinition(String name, int version) {
+    ManualDefinition manualDefinition(String name, SemanticVersion version) {
         return find(repository -> repository.manualDefinition(name, version));
     }
 
-    Path path(String name, int version) {
+    Path path(String name, SemanticVersion version) {
         return find(repository -> repository.path(name, version));
     }
 

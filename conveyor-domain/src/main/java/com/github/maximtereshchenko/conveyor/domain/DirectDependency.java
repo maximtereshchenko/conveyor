@@ -12,7 +12,7 @@ final class DirectDependency extends ArtifactDependency {
     }
 
     @Override
-    int version(ArtifactDependencyModel artifactDependencyModel, Preferences preferences) {
+    SemanticVersion version(ArtifactDependencyModel artifactDependencyModel, Preferences preferences) {
         return artifactDependencyModel.version()
             .or(() -> preferences.version(artifactDependencyModel.name()))
             .orElseThrow();

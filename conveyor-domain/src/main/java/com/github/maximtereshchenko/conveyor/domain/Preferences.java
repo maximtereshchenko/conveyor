@@ -5,13 +5,13 @@ import java.util.Optional;
 
 final class Preferences {
 
-    private final Map<String, Integer> versions;
+    private final Map<String, SemanticVersion> versions;
 
-    Preferences(Map<String, Integer> versions) {
+    Preferences(Map<String, SemanticVersion> versions) {
         this.versions = versions;
     }
 
-    Optional<Integer> version(String name) {
+    Optional<SemanticVersion> version(String name) {
         return Optional.ofNullable(versions.get(name));
     }
 }
