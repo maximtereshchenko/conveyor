@@ -1,7 +1,6 @@
 package com.github.maximtereshchenko.conveyor.domain;
 
 import java.nio.file.Path;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -56,10 +55,5 @@ final class ManualHierarchyAdapter implements SchematicModel<TemplateModel> {
     @Override
     public Set<RepositoryModel> repositories() {
         return Set.of();
-    }
-
-    @Override
-    public LinkedHashSet<Path> inclusions() {
-        return new LinkedHashSet<>();
     }
 }

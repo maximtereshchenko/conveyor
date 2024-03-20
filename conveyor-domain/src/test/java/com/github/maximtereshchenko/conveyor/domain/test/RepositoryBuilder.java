@@ -2,10 +2,7 @@ package com.github.maximtereshchenko.conveyor.domain.test;
 
 import com.github.maximtereshchenko.conveyor.gson.JacksonAdapter;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -54,18 +51,6 @@ final class RepositoryBuilder {
             configuration.apply(new JarBuilder(path(templateDirectory)))
                 .install(path)
         );
-        return new RepositoryBuilder(gsonAdapter, copy);
-    }
-
-    RepositoryBuilder emptyJar(String name, int version) {
-        var copy = new ArrayList<>(installations);
-        copy.add(path -> {
-            try {
-                Files.createFile(path.resolve("%s-%d.jar".formatted(name, version)));
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            }
-        });
         return new RepositoryBuilder(gsonAdapter, copy);
     }
 

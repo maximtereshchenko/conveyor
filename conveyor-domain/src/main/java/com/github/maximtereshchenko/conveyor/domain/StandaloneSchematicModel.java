@@ -58,11 +58,6 @@ final class StandaloneSchematicModel
     }
 
     @Override
-    public LinkedHashSet<Path> inclusions() {
-        return new LinkedHashSet<>(schematicDefinition.inclusions());
-    }
-
-    @Override
     public int hashCode() {
         return Objects.hash(schematicDefinition, path);
     }
@@ -78,6 +73,10 @@ final class StandaloneSchematicModel
         var that = (StandaloneSchematicModel) object;
         return Objects.equals(schematicDefinition, that.schematicDefinition) &&
                Objects.equals(path, that.path);
+    }
+
+    LinkedHashSet<Path> inclusions() {
+        return new LinkedHashSet<>(schematicDefinition.inclusions());
     }
 
     @Override

@@ -26,10 +26,5 @@ abstract class SchematicHierarchy<T extends TemplateModel, R extends TemplateMod
     public Set<RepositoryModel> repositories() {
         return reduce(SchematicModel::repositories, RepositoryModel::name, RepositoryModel::override);
     }
-
-    @Override
-    public LinkedHashSet<Path> inclusions() {
-        return models().getLast().inclusions();
-    }
 }
 
