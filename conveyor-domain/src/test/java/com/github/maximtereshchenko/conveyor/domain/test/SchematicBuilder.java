@@ -125,31 +125,16 @@ final class SchematicBuilder {
         return plugin(new PluginDefinition(name, Optional.of(version), configuration));
     }
 
-    SchematicBuilder plugin(PluginDefinition pluginDefinition) {
-        var copy = new ArrayList<>(schematicDefinition.plugins());
-        copy.add(pluginDefinition);
-        return new SchematicBuilder(
-            gsonAdapter,
-            new SchematicDefinition(
-                schematicDefinition.name(),
-                schematicDefinition.version(),
-                schematicDefinition.template(),
-                schematicDefinition.inclusions(),
-                schematicDefinition.repositories(),
-                schematicDefinition.properties(),
-                schematicDefinition.preferences(),
-                copy,
-                schematicDefinition.dependencies()
-            )
-        );
-    }
-
     SchematicBuilder schematicDependency(String name, DependencyScope scope) {
         return dependency(new DependencyOnSchematicDefinition(name, Optional.of(scope)));
     }
 
     SchematicBuilder dependency(String name, int version, DependencyScope scope) {
         return dependency(new DependencyOnArtifactDefinition(name, Optional.of(version), Optional.of(scope)));
+    }
+
+    SchematicBuilder dependency(String name, DependencyScope scope) {
+        return dependency(new DependencyOnArtifactDefinition(name, Optional.empty(), Optional.of(scope)));
     }
 
     SchematicBuilder property(String key, String value) {
@@ -196,6 +181,44 @@ final class SchematicBuilder {
                 schematicDefinition.properties(),
                 new PreferencesDefinition(schematicDefinition.preferences().inclusions(), copy),
                 schematicDefinition.plugins(),
+                schematicDefinition.dependencies()
+            )
+        );
+    }
+
+    SchematicBuilder preferenceInclusion(String name, int version) {
+        var copy = new ArrayList<>(schematicDefinition.preferences().inclusions());
+        copy.add(new PreferencesInclusionDefinition(name, version));
+        return new SchematicBuilder(
+            gsonAdapter,
+            new SchematicDefinition(
+                schematicDefinition.name(),
+                schematicDefinition.version(),
+                schematicDefinition.template(),
+                schematicDefinition.inclusions(),
+                schematicDefinition.repositories(),
+                schematicDefinition.properties(),
+                new PreferencesDefinition(copy, schematicDefinition.preferences().artifacts()),
+                schematicDefinition.plugins(),
+                schematicDefinition.dependencies()
+            )
+        );
+    }
+
+    private SchematicBuilder plugin(PluginDefinition pluginDefinition) {
+        var copy = new ArrayList<>(schematicDefinition.plugins());
+        copy.add(pluginDefinition);
+        return new SchematicBuilder(
+            gsonAdapter,
+            new SchematicDefinition(
+                schematicDefinition.name(),
+                schematicDefinition.version(),
+                schematicDefinition.template(),
+                schematicDefinition.inclusions(),
+                schematicDefinition.repositories(),
+                schematicDefinition.properties(),
+                schematicDefinition.preferences(),
+                copy,
                 schematicDefinition.dependencies()
             )
         );

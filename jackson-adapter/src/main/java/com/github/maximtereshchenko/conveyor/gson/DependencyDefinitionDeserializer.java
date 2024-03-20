@@ -34,7 +34,7 @@ final class DependencyDefinitionDeserializer extends StdDeserializer<SchematicDe
 
     private Optional<Integer> version(JsonNode node) {
         var version = node.get("version");
-        if (version == null) {
+        if (version == null || version.isNull()) {
             return Optional.empty();
         }
         return Optional.of(version.intValue());

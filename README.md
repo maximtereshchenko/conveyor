@@ -14,8 +14,14 @@ A build tool for Java projects
     * Given the same dependency is required but with different versions, the highest version wins taken into account the
       presence of the dependency requiring that version in the result module path
     * Preferences are defined in a manual or a schematic with a name and a version
+    * Plugins are used with defined version. If plugin does not define its version, then version defined in preferences
+      is used
+    * Direct dependencies are used with defined version. If dependency does not define its version, then version defined
+      in preferences is used
     * Transitive dependencies are used with versions defined in preferences. If preferences do not contain the
       dependency, the version defined in a manual requiring this dependency is used
+    * Preferences can be imported from a manual by defining that manual with a name and a version as the inclusion in
+      preferences
 * Plugins
     * Plugins are defined in a manual or a schematic with a name, an optional version and an optional configuration in a
       form of key-value pairs
@@ -46,14 +52,16 @@ A build tool for Java projects
     * Inherited property can be removed in the schematic by assigning empty string to the key
     * The property `conveyor.schematic.name` can be used to interpolate the schematic's name. This property cannot be
       overridden
+    * The property `conveyor.schematic.version` can be used to interpolate the schematic's version. This property cannot
+      be overridden
     * The property `conveyor.discovery.directory` defines the directory, where plugins should find files to work with.
       It is relative to the directory, where the schematic definition is located
     * The property `conveyor.construction.directory` defines the directory, where plugins should place created products.
       It is relative to the directory, where the schematic definition is located
     * Properties can be templated with other properties using `${property.key}` syntax
 * Dependencies
-    * Dependencies are defined in a manual or a schematic with a name, a version and an optional scope: IMPLEMENTATION (
-      default) or TEST
+    * Dependencies are defined in a manual or a schematic with a name, an optional version and an optional scope:
+      IMPLEMENTATION (default) or TEST
     * Each dependency should come with a manual
     * Dependencies are inherited from a manual or a schematic used as a template
     * Version and scope of the inherited dependency can be overridden

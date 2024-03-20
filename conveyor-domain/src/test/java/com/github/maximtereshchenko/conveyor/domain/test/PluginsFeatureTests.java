@@ -39,9 +39,10 @@ final class PluginsFeatureTests extends ConveyorTest {
 
         assertThat(defaultConstructionDirectory(path).resolve("properties"))
             .content()
-            .hasLineCount(4)
+            .hasLineCount(5)
             .contains(
                 "conveyor.schematic.name=project",
+                "conveyor.schematic.version=1",
                 "conveyor.discovery.directory=" + path,
                 "conveyor.construction.directory=" + defaultConstructionDirectory(path),
                 "user.defined.property=value"

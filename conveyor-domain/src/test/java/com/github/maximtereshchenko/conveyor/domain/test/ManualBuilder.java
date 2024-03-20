@@ -132,6 +132,40 @@ final class ManualBuilder {
         }
     }
 
+    ManualBuilder preference(String name, int version) {
+        var copy = new ArrayList<>(manualDefinition.preferences().artifacts());
+        copy.add(new ArtifactPreferenceDefinition(name, version));
+        return new ManualBuilder(
+            gsonAdapter,
+            new ManualDefinition(
+                manualDefinition.name(),
+                manualDefinition.version(),
+                manualDefinition.template(),
+                manualDefinition.properties(),
+                new PreferencesDefinition(manualDefinition.preferences().inclusions(), copy),
+                manualDefinition.plugins(),
+                manualDefinition.dependencies()
+            )
+        );
+    }
+
+    ManualBuilder preferenceInclusion(String name, int version) {
+        var copy = new ArrayList<>(manualDefinition.preferences().inclusions());
+        copy.add(new PreferencesInclusionDefinition(name, version));
+        return new ManualBuilder(
+            gsonAdapter,
+            new ManualDefinition(
+                manualDefinition.name(),
+                manualDefinition.version(),
+                manualDefinition.template(),
+                manualDefinition.properties(),
+                new PreferencesDefinition(copy, manualDefinition.preferences().artifacts()),
+                manualDefinition.plugins(),
+                manualDefinition.dependencies()
+            )
+        );
+    }
+
     private ManualBuilder template(TemplateForManualDefinition templateDefinition) {
         return new ManualBuilder(
             gsonAdapter,
