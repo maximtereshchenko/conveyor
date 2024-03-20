@@ -16,11 +16,13 @@ import java.util.stream.Stream;
 final class Plugins {
 
     private final Set<Plugin> all;
+    private final ModulePathFactory modulePathFactory;
     private final Properties properties;
     private final Dependencies dependencies;
 
-    Plugins(Set<Plugin> all, Properties properties, Dependencies dependencies) {
+    Plugins(Set<Plugin> all, ModulePathFactory modulePathFactory, Properties properties, Dependencies dependencies) {
         this.all = all;
+        this.modulePathFactory = modulePathFactory;
         this.properties = properties;
         this.dependencies = dependencies;
     }
@@ -53,7 +55,7 @@ final class Plugins {
     }
 
     private Stream<ConveyorPlugin> conveyorPlugins() {
-        return ServiceLoader.load(moduleLayer(ModulePath.from(all).resolved()), ConveyorPlugin.class)
+        return ServiceLoader.load(moduleLayer(modulePathFactory.modulePath(all)), ConveyorPlugin.class)
             .stream()
             .map(ServiceLoader.Provider::get);
     }
