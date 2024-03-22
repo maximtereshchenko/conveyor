@@ -14,19 +14,22 @@ final class SchematicDependency extends DependentArtifact<DependencyModel> imple
     private final ModelFactory modelFactory;
     private final Repositories repositories;
     private final Preferences preferences;
+    private final Properties properties;
 
     SchematicDependency(
         SchematicDependencyModel schematicDependencyModel,
         SchematicProducts schematicProducts,
         ModelFactory modelFactory,
         Repositories repositories,
-        Preferences preferences
+        Preferences preferences,
+        Properties properties
     ) {
         this.schematicDependencyModel = schematicDependencyModel;
         this.schematicProducts = schematicProducts;
         this.modelFactory = modelFactory;
         this.repositories = repositories;
         this.preferences = preferences;
+        this.properties = properties;
     }
 
     @Override
@@ -57,10 +60,15 @@ final class SchematicDependency extends DependentArtifact<DependencyModel> imple
     @Override
     Dependency dependency(DependencyModel dependencyModel) {
         return switch (dependencyModel) {
-            case ArtifactDependencyModel model ->
-                new TransitiveDependency(model, modelFactory, preferences, repositories);
+            case ArtifactDependencyModel model -> new TransitiveDependency(
+                model,
+                modelFactory,
+                new Properties(fullSchematicHierarchy().properties()),
+                preferences,
+                repositories
+            );
             case SchematicDependencyModel model ->
-                new SchematicDependency(model, schematicProducts, modelFactory, repositories, preferences);
+                new SchematicDependency(model, schematicProducts, modelFactory, repositories, preferences, properties);
         };
     }
 

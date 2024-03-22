@@ -5,16 +5,24 @@ final class TransitiveDependency extends ArtifactDependency {
     TransitiveDependency(
         ArtifactDependencyModel artifactDependencyModel,
         ModelFactory modelFactory,
+        Properties properties,
         Preferences preferences,
         Repositories repositories
     ) {
-        super(artifactDependencyModel, modelFactory, preferences, repositories);
+        super(artifactDependencyModel, modelFactory, properties, preferences, repositories);
     }
 
     @Override
-    SemanticVersion version(ArtifactDependencyModel artifactDependencyModel, Preferences preferences) {
+    SemanticVersion version(
+        ArtifactDependencyModel artifactDependencyModel,
+        Properties properties,
+        Preferences preferences
+    ) {
         return preferences.version(artifactDependencyModel.name())
-            .or(artifactDependencyModel::version)
+            .or(() -> artifactDependencyModel.version()
+                .map(properties::interpolated)
+                .map(SemanticVersion::new)
+            )
             .orElseThrow();
     }
 }

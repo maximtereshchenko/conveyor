@@ -517,4 +517,174 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
             .hasLineCount(2)
             .contains("dependency-1.0.0", "common-" + higher);
     }
+
+    @Test
+    void givenInterpolatedArtifactDependencyVersion_whenConstructToStage_thenDependencyWithVersionFromPropertyIsUsed(
+        @TempDir Path path,
+        ConveyorModule module,
+        BuilderFactory factory
+    ) {
+        factory.repositoryBuilder()
+            .superManual()
+            .manual(builder -> builder.name("dependencies").version("1.0.0"))
+            .jar("dependencies", builder -> builder.name("dependencies").version("1.0.0"))
+            .manual(builder -> builder.name("dependency").version("1.0.0"))
+            .jar("dependency", builder -> builder.name("dependency").version("1.0.0"))
+            .install(path);
+
+        module.construct(
+            factory.schematicBuilder()
+                .name("project")
+                .version("1.0.0")
+                .repository("main", path, true)
+                .property("dependency.version", "1.0.0")
+                .plugin("dependencies", "1.0.0", Map.of())
+                .dependency("dependency", "${dependency.version}", DependencyScope.IMPLEMENTATION)
+                .install(path),
+            Stage.COMPILE
+        );
+
+        assertThat(defaultConstructionDirectory(path).resolve("dependencies"))
+            .content(StandardCharsets.UTF_8)
+            .isEqualTo("dependency-1.0.0");
+    }
+
+    @Test
+    void givenInterpolatedArtifactDependencyVersionInSchematicDependency_whenConstructToStage_thenDependencyWithVersionFromOtherSchematicPropertyIsUsed(
+        @TempDir Path path,
+        ConveyorModule module,
+        BuilderFactory factory
+    ) {
+        factory.repositoryBuilder()
+            .superManual()
+            .manual(builder -> builder.name("dependencies").version("1.0.0"))
+            .jar("dependencies", builder -> builder.name("dependencies").version("1.0.0"))
+            .manual(builder -> builder.name("product").version("1.0.0"))
+            .jar("product", builder -> builder.name("product").version("1.0.0"))
+            .manual(builder -> builder.name("library").version("1.0.0"))
+            .jar("dependency", builder -> builder.name("library").version("1.0.0"))
+            .jar("dependency", builder -> builder.name("dependency").version("1.0.0"))
+            .install(path);
+        var depends = path.resolve("depends");
+
+        module.construct(
+            factory.schematicBuilder()
+                .name("project")
+                .version("1.0.0")
+                .repository("main", path, true)
+                .inclusion(
+                    factory.schematicBuilder()
+                        .name("dependency")
+                        .version("1.0.0")
+                        .property("library.version", "1.0.0")
+                        .plugin(
+                            "product",
+                            "1.0.0",
+                            Map.of("path", path.resolve("dependency-1.0.0.jar").toString())
+                        )
+                        .dependency("library", "${library.version}", DependencyScope.IMPLEMENTATION)
+                        .install(path.resolve("dependency"))
+                )
+                .inclusion(
+                    factory.schematicBuilder()
+                        .name("depends")
+                        .version("1.0.0")
+                        .plugin("dependencies", "1.0.0", Map.of())
+                        .schematicDependency("dependency", DependencyScope.IMPLEMENTATION)
+                        .install(depends)
+                )
+                .install(path),
+            Stage.COMPILE
+        );
+
+        assertThat(defaultConstructionDirectory(depends).resolve("dependencies"))
+            .content(StandardCharsets.UTF_8)
+            .hasLineCount(2)
+            .contains("dependency-1.0.0", "library-1.0.0");
+    }
+
+    @Test
+    void givenInterpolatedPluginVersion_whenConstructToStage_thenPluginWithVersionFromPropertyIsUsed(
+        @TempDir Path path,
+        ConveyorModule module,
+        BuilderFactory factory
+    ) {
+        factory.repositoryBuilder()
+            .superManual()
+            .manual(builder -> builder.name("instant").version("1.0.0"))
+            .jar("instant", builder -> builder.name("instant").version("1.0.0"))
+            .install(path);
+
+        module.construct(
+            factory.schematicBuilder()
+                .name("project")
+                .version("1.0.0")
+                .repository("main", path, true)
+                .property("instant.version", "1.0.0")
+                .plugin("instant", "${instant.version}", Map.of("instant", "COMPILE-RUN"))
+                .install(path),
+            Stage.COMPILE
+        );
+
+        assertThat(defaultConstructionDirectory(path).resolve("instant")).exists();
+    }
+
+    @Test
+    void givenInterpolatedArtifactPreferenceVersion_whenConstructToStage_thenPluginWithVersionFromPropertyIsUsed(
+        @TempDir Path path,
+        ConveyorModule module,
+        BuilderFactory factory
+    ) {
+        factory.repositoryBuilder()
+            .superManual()
+            .manual(builder -> builder.name("instant").version("1.0.0"))
+            .jar("instant", builder -> builder.name("instant").version("1.0.0"))
+            .install(path);
+
+        module.construct(
+            factory.schematicBuilder()
+                .name("project")
+                .version("1.0.0")
+                .repository("main", path, true)
+                .property("instant.version", "1.0.0")
+                .preference("instant", "${instant.version}")
+                .plugin("instant", Map.of("instant", "COMPILE-RUN"))
+                .install(path),
+            Stage.COMPILE
+        );
+
+        assertThat(defaultConstructionDirectory(path).resolve("instant")).exists();
+    }
+
+    @Test
+    void givenInterpolatedPreferenceInclusionVersion_whenConstructToStage_thenPluginWithVersionFromPropertyIsUsed(
+        @TempDir Path path,
+        ConveyorModule module,
+        BuilderFactory factory
+    ) {
+        factory.repositoryBuilder()
+            .superManual()
+            .manual(builder -> builder.name("instant").version("1.0.0"))
+            .jar("instant", builder -> builder.name("instant").version("1.0.0"))
+            .manual(builder ->
+                builder.name("bom")
+                    .version("1.0.0")
+                    .preference("instant", "1.0.0")
+            )
+            .install(path);
+
+        module.construct(
+            factory.schematicBuilder()
+                .name("project")
+                .version("1.0.0")
+                .repository("main", path, true)
+                .property("bom.version", "1.0.0")
+                .preferenceInclusion("bom", "${bom.version}")
+                .plugin("instant", Map.of("instant", "COMPILE-RUN"))
+                .install(path),
+            Stage.COMPILE
+        );
+
+        assertThat(defaultConstructionDirectory(path).resolve("instant")).exists();
+    }
 }

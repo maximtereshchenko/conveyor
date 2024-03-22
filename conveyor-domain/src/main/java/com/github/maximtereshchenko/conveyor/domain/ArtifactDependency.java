@@ -8,17 +8,20 @@ abstract class ArtifactDependency extends StoredArtifact<ArtifactDependencyModel
 
     private final ArtifactDependencyModel artifactDependencyModel;
     private final ModelFactory modelFactory;
+    private final Properties properties;
     private final Preferences preferences;
 
     ArtifactDependency(
         ArtifactDependencyModel artifactDependencyModel,
         ModelFactory modelFactory,
+        Properties properties,
         Preferences preferences,
         Repositories repositories
     ) {
         super(repositories);
         this.artifactDependencyModel = artifactDependencyModel;
         this.modelFactory = modelFactory;
+        this.properties = properties;
         this.preferences = preferences;
     }
 
@@ -29,7 +32,7 @@ abstract class ArtifactDependency extends StoredArtifact<ArtifactDependencyModel
 
     @Override
     public SemanticVersion version() {
-        return version(artifactDependencyModel, preferences);
+        return version(artifactDependencyModel, properties, preferences);
     }
 
     @Override
@@ -44,8 +47,12 @@ abstract class ArtifactDependency extends StoredArtifact<ArtifactDependencyModel
 
     @Override
     Dependency dependency(ArtifactDependencyModel dependencyModel) {
-        return new TransitiveDependency(dependencyModel, modelFactory, preferences, repositories());
+        return new TransitiveDependency(dependencyModel, modelFactory, properties, preferences, repositories());
     }
 
-    abstract SemanticVersion version(ArtifactDependencyModel artifactDependencyModel, Preferences preferences);
+    abstract SemanticVersion version(
+        ArtifactDependencyModel artifactDependencyModel,
+        Properties properties,
+        Preferences preferences
+    );
 }

@@ -35,6 +35,8 @@ final class Plugin extends StoredArtifact<ArtifactDependencyModel> {
     @Override
     public SemanticVersion version() {
         return pluginModel.version()
+            .map(properties::interpolated)
+            .map(SemanticVersion::new)
             .or(() -> preferences.version(pluginModel.name()))
             .orElseThrow();
     }
@@ -46,7 +48,7 @@ final class Plugin extends StoredArtifact<ArtifactDependencyModel> {
 
     @Override
     Dependency dependency(ArtifactDependencyModel dependencyModel) {
-        return new TransitiveDependency(dependencyModel, modelFactory, preferences, repositories());
+        return new TransitiveDependency(dependencyModel, modelFactory, properties, preferences, repositories());
     }
 
     boolean isEnabled() {

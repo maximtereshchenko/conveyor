@@ -58,7 +58,7 @@ final class StandaloneManualModel
     ArtifactDependencyModel dependencyModel(ManualDependencyDefinition dependencyDefinition) {
         return new ArtifactDependencyModel(
             dependencyDefinition.name(),
-            Optional.of(new SemanticVersion(dependencyDefinition.version())),
+            Optional.of(dependencyDefinition.version()),
             Optional.of(dependencyDefinition.scope())
         );
     }

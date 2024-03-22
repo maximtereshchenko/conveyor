@@ -57,16 +57,17 @@ final class Schematic {
     SchematicProducts construct(SchematicProducts schematicProducts, Stage stage) {
         var repositories = repositories();
         var fullSchematicHierarchy = modelFactory.fullSchematicHierarchy(partialSchematicHierarchy, repositories);
-        var preferences = preferences(fullSchematicHierarchy, repositories);
+        var properties = properties(fullSchematicHierarchy);
+        var preferences = preferences(fullSchematicHierarchy, repositories, properties);
         return schematicProducts
             .with(
                 fullSchematicHierarchy.name(),
                 plugins(
                     fullSchematicHierarchy,
-                    properties(fullSchematicHierarchy),
+                    properties,
                     preferences,
                     repositories,
-                    dependencies(fullSchematicHierarchy, preferences, repositories, schematicProducts)
+                    dependencies(fullSchematicHierarchy, properties, preferences, repositories, schematicProducts)
                 )
                     .executeTasks(
                         new Products()
@@ -78,6 +79,7 @@ final class Schematic {
 
     private Dependencies dependencies(
         FullSchematicHierarchy fullSchematicHierarchy,
+        Properties properties,
         Preferences preferences,
         Repositories repositories,
         SchematicProducts schematicProducts
@@ -85,7 +87,9 @@ final class Schematic {
         return new Dependencies(
             fullSchematicHierarchy.dependencies()
                 .stream()
-                .map(dependencyModel -> dependency(dependencyModel, preferences, repositories, schematicProducts))
+                .map(dependencyModel ->
+                    dependency(dependencyModel, properties, preferences, repositories, schematicProducts)
+                )
                 .collect(Collectors.toSet()),
             modulePathFactory
         );
@@ -93,14 +97,16 @@ final class Schematic {
 
     private Dependency dependency(
         DependencyModel dependencyModel,
+        Properties properties,
         Preferences preferences,
         Repositories repositories,
         SchematicProducts schematicProducts
     ) {
         return switch (dependencyModel) {
-            case ArtifactDependencyModel model -> new DirectDependency(model, modelFactory, preferences, repositories);
+            case ArtifactDependencyModel model ->
+                new DirectDependency(model, modelFactory, properties, preferences, repositories);
             case SchematicDependencyModel model ->
-                new SchematicDependency(model, schematicProducts, modelFactory, repositories, preferences);
+                new SchematicDependency(model, schematicProducts, modelFactory, repositories, preferences, properties);
         };
     }
 
@@ -164,16 +170,27 @@ final class Schematic {
         return new Properties(properties);
     }
 
-    private Preferences preferences(FullSchematicHierarchy fullSchematicHierarchy, Repositories repositories) {
+    private Preferences preferences(
+        FullSchematicHierarchy fullSchematicHierarchy,
+        Repositories repositories,
+        Properties properties
+    ) {
         return new Preferences(
-            artifactPreferenceModels(fullSchematicHierarchy.preferences(), repositories)
-                .collect(Collectors.toMap(ArtifactPreferenceModel::name, ArtifactPreferenceModel::version))
+            artifactPreferenceModels(fullSchematicHierarchy.preferences(), repositories, properties)
+                .collect(
+                    Collectors.toMap(
+                        ArtifactPreferenceModel::name,
+                        artifactPreferenceModel ->
+                            new SemanticVersion(properties.interpolated(artifactPreferenceModel.version()))
+                    )
+                )
         );
     }
 
     private Stream<ArtifactPreferenceModel> artifactPreferenceModels(
         PreferencesModel preferencesModel,
-        Repositories repositories
+        Repositories repositories,
+        Properties properties
     ) {
         return Stream.concat(
             preferencesModel.inclusions()
@@ -181,12 +198,12 @@ final class Schematic {
                 .map(preferencesInclusionModel ->
                     modelFactory.manualHierarchy(
                         preferencesInclusionModel.name(),
-                        preferencesInclusionModel.version(),
+                        new SemanticVersion(properties.interpolated(preferencesInclusionModel.version())),
                         repositories
                     )
                 )
                 .map(Hierarchy::preferences)
-                .flatMap(model -> artifactPreferenceModels(model, repositories)),
+                .flatMap(model -> artifactPreferenceModels(model, repositories, properties)),
             preferencesModel.artifacts()
                 .stream()
         );
