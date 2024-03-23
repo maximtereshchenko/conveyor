@@ -1,6 +1,5 @@
 package com.github.maximtereshchenko.conveyor.domain;
 
-
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;

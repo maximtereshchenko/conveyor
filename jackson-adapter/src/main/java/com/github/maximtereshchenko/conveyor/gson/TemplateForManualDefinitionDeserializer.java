@@ -27,6 +27,9 @@ final class TemplateForManualDefinitionDeserializer extends StdDeserializer<Temp
             return new NoExplicitlyDefinedTemplate();
         }
         JsonNode node = jsonParser.readValueAsTree();
-        return new ManualTemplateDefinition(node.get("name").asText(), node.get("version").asText());
+        return new ManualTemplateDefinition(
+            node.get("name").asText(),
+            node.get("version").asText()
+        );
     }
 }

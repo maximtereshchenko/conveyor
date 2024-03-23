@@ -3,6 +3,8 @@ package com.github.maximtereshchenko.conveyor.domain.test;
 import com.github.maximtereshchenko.conveyor.api.ConveyorModule;
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
+import com.github.maximtereshchenko.conveyor.wiremock.junit5.WireMockRuntimeInfo;
+import com.github.maximtereshchenko.conveyor.wiremock.junit5.WireMockTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -12,6 +14,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@WireMockTest
 final class RepositoriesFeatureTests extends ConveyorTest {
 
     @Test
@@ -156,6 +159,55 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                 .version("1.0.0")
                 .repository("main", Paths.get("./temp/../repository"), true)
                 .plugin("instant", "1.0.0", Map.of("instant", "COMPILE-RUN"))
+                .install(path),
+            Stage.COMPILE
+        );
+
+        assertThat(defaultConstructionDirectory(path).resolve("instant")).exists();
+    }
+
+    @Test
+    void givenRemoteRepository_whenConstructToStage_thenArtifactDownloadedFromUrl(
+        @TempDir Path path,
+        ConveyorModule module,
+        BuilderFactory factory,
+        WireMockRuntimeInfo wireMockRuntimeInfo
+    ) {
+        var url = factory.remoteRepositoryBuilder(wireMockRuntimeInfo)
+            .artifact(builder ->
+                builder.groupId("com", "github", "maximtereshchenko", "conveyor")
+                    .artifactId("instant-conveyor-plugin")
+                    .version("1.0.0")
+                    .jar("instant")
+            )
+            .artifact(builder ->
+                builder.groupId("com", "github", "maximtereshchenko", "conveyor")
+                    .artifactId("instant-conveyor-plugin")
+                    .version("1.0.0")
+                    .pom(
+                        new PomModel(
+                            "com.github.maximtereshchenko.conveyor",
+                            "instant-conveyor-plugin",
+                            "1.0.0"
+                        )
+                    )
+            )
+            .url();
+        factory.repositoryBuilder()
+            .superManual()
+            .install(path);
+
+        module.construct(
+            factory.schematicBuilder()
+                .name("project")
+                .version("1.0.0")
+                .repository("local", path, true)
+                .repository("remote", url, true)
+                .plugin(
+                    "com.github.maximtereshchenko.conveyor:instant-conveyor-plugin",
+                    "1.0.0",
+                    Map.of("instant", "COMPILE-RUN")
+                )
                 .install(path),
             Stage.COMPILE
         );

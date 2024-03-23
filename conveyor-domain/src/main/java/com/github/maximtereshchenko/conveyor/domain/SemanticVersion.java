@@ -28,7 +28,10 @@ final class SemanticVersion implements Comparable<SemanticVersion> {
         if (comparedByPreReleaseVersion != 0) {
             return comparedByPreReleaseVersion;
         }
-        return compareByPreReleaseIdentifiers(thisPreReleaseIdentifiers, otherPreReleaseIdentifiers);
+        return compareByPreReleaseIdentifiers(
+            thisPreReleaseIdentifiers,
+            otherPreReleaseIdentifiers
+        );
     }
 
     @Override
@@ -60,7 +63,10 @@ final class SemanticVersion implements Comparable<SemanticVersion> {
         for (int i = 0; i < preReleaseIdentifiers.length && i < otherPreReleaseIdentifiers.length; i++) {
             var identifier = preReleaseIdentifiers[i];
             var otherIdentifier = otherPreReleaseIdentifiers[i];
-            var comparedNumericallyOrLexically = compareNumericallyOrLexically(identifier, otherIdentifier);
+            var comparedNumericallyOrLexically = compareNumericallyOrLexically(
+                identifier,
+                otherIdentifier
+            );
             if (comparedNumericallyOrLexically != 0) {
                 return comparedNumericallyOrLexically;
             }
@@ -72,7 +78,9 @@ final class SemanticVersion implements Comparable<SemanticVersion> {
         return number(identifier)
             .map(identifierNumber ->
                 number(otherIdentifier)
-                    .map(otherIdentifierNumber -> Integer.compare(identifierNumber, otherIdentifierNumber))
+                    .map(otherIdentifierNumber ->
+                        Integer.compare(identifierNumber, otherIdentifierNumber)
+                    )
                     .orElse(-1)
             )
             .orElseGet(() -> identifier.compareTo(otherIdentifier));
@@ -86,7 +94,10 @@ final class SemanticVersion implements Comparable<SemanticVersion> {
         }
     }
 
-    private int compareByPreReleaseVersion(String[] preReleaseIdentifiers, String[] otherPreReleaseIdentifiers) {
+    private int compareByPreReleaseVersion(
+        String[] preReleaseIdentifiers,
+        String[] otherPreReleaseIdentifiers
+    ) {
         if (preReleaseIdentifiers.length == 0 && otherPreReleaseIdentifiers.length != 0) {
             return 1;
         }

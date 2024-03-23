@@ -30,7 +30,12 @@ public final class ConveyorFacade implements ConveyorModule {
         var schematics = modelFactory.partialSchematicHierarchies(path)
             .stream()
             .map(partialSchematicHierarchy ->
-                new Schematic(partialSchematicHierarchy, definitionReader, modelFactory, modulePathFactory)
+                new Schematic(
+                    partialSchematicHierarchy,
+                    definitionReader,
+                    modelFactory,
+                    modulePathFactory
+                )
             )
             .collect(Collectors.toCollection(LinkedHashSet::new));
         return new Schematics(schematics, initial(schematics, path));

@@ -3,6 +3,7 @@ package com.github.maximtereshchenko.conveyor.domain.test;
 import javax.tools.*;
 import java.io.*;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -24,21 +25,37 @@ final class JarBuilder {
         this.values = Map.copyOf(values);
     }
 
-    JarBuilder(Path templateDirectory) {
-        this(templateDirectory, Map.of());
+    static JarBuilder from(String templateDirectory) {
+        return new JarBuilder(path(templateDirectory), Map.of());
+    }
+
+    private static Path path(String templateDirectory) {
+        try {
+            return Paths.get(
+                Objects.requireNonNull(
+                        Thread.currentThread()
+                            .getContextClassLoader()
+                            .getResource(templateDirectory)
+                    )
+                    .toURI()
+            );
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     JarBuilder name(String name) {
         return with("name", name)
-            .with("normalizedName", name.replace("-", ""));
+            .with("normalizedName", name.replaceAll("[-:.]", ""));
     }
 
     JarBuilder version(String version) {
         return with("version", String.valueOf(version));
     }
 
-    void install(Path path) {
-        try (var zipOutputStream = new ZipOutputStream(Files.newOutputStream(path.resolve(fileName())))) {
+    byte[] bytes() {
+        var byteArrayOutputStream = new ByteArrayOutputStream();
+        try (var zipOutputStream = new ZipOutputStream(byteArrayOutputStream)) {
             for (var fileObject : compiled()) {
                 zipOutputStream.putNextEntry(new ZipEntry(fileObject.toUri().toString()));
                 try (var inputStream = fileObject.openInputStream()) {
@@ -46,6 +63,15 @@ final class JarBuilder {
                 }
                 zipOutputStream.closeEntry();
             }
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+        return byteArrayOutputStream.toByteArray();
+    }
+
+    void install(Path path) {
+        try {
+            Files.write(path.resolve(fileName()), bytes());
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -81,7 +107,8 @@ final class JarBuilder {
         return fileManager.compiled();
     }
 
-    private boolean compile(JavaCompiler compiler, InMemoryFileManager fileManager) throws IOException {
+    private boolean compile(JavaCompiler compiler, InMemoryFileManager fileManager)
+        throws IOException {
         return compiler.getTask(
                 null,
                 fileManager,
@@ -95,7 +122,9 @@ final class JarBuilder {
                     ),
                     new StringJavaFileObject(
                         Paths.get("module-info.java"),
-                        interpolated(Files.readString(templateDirectory.resolve("module-info.java")))
+                        interpolated(
+                            Files.readString(templateDirectory.resolve("module-info.java"))
+                        )
                     )
                 )
             )
@@ -112,7 +141,8 @@ final class JarBuilder {
 
     private static final class InMemoryFileManager extends ForwardingJavaFileManager<StandardJavaFileManager> {
 
-        private final Collection<InMemoryJavaFileObject> inMemoryJavaFileObjects = new ArrayList<>();
+        private final Collection<InMemoryJavaFileObject> inMemoryJavaFileObjects =
+            new ArrayList<>();
 
         InMemoryFileManager(StandardJavaFileManager fileManager) {
             super(fileManager);

@@ -2,13 +2,10 @@ package com.github.maximtereshchenko.conveyor.domain.test;
 
 import com.github.maximtereshchenko.conveyor.gson.JacksonAdapter;
 
-import java.net.URISyntaxException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.UnaryOperator;
 
 final class RepositoryBuilder {
@@ -48,7 +45,7 @@ final class RepositoryBuilder {
     RepositoryBuilder jar(String templateDirectory, UnaryOperator<JarBuilder> configuration) {
         var copy = new ArrayList<>(installations);
         copy.add(path ->
-            configuration.apply(new JarBuilder(path(templateDirectory)))
+            configuration.apply(JarBuilder.from(templateDirectory))
                 .install(path)
         );
         return new RepositoryBuilder(gsonAdapter, copy);
@@ -56,21 +53,6 @@ final class RepositoryBuilder {
 
     void install(Path path) {
         installations.forEach(installation -> installation.install(path));
-    }
-
-    private Path path(String templateDirectory) {
-        try {
-            return Paths.get(
-                Objects.requireNonNull(
-                        Thread.currentThread()
-                            .getContextClassLoader()
-                            .getResource(templateDirectory)
-                    )
-                    .toURI()
-            );
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     @FunctionalInterface

@@ -5,8 +5,18 @@ import java.util.List;
 
 final class FullSchematicHierarchy extends SchematicHierarchy<NoTemplateModel, TemplateModel> {
 
-    FullSchematicHierarchy(ManualHierarchy manualHierarchy, PartialSchematicHierarchy partialSchematicHierarchy) {
-        super(new LinkedHashSet<>(List.of(new ManualHierarchyAdapter(manualHierarchy), partialSchematicHierarchy)));
+    FullSchematicHierarchy(
+        ManualHierarchy manualHierarchy,
+        PartialSchematicHierarchy partialSchematicHierarchy
+    ) {
+        super(
+            new LinkedHashSet<>(
+                List.of(
+                    new ManualHierarchyAdapter(manualHierarchy),
+                    partialSchematicHierarchy
+                )
+            )
+        );
     }
 
     @Override

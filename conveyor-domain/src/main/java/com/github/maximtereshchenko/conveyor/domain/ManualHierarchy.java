@@ -4,7 +4,9 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 final class ManualHierarchy extends
-    Hierarchy<NoTemplateModel, ArtifactDependencyModel, Model<ManualTemplateModel, ArtifactDependencyModel>> {
+    Hierarchy<NoTemplateModel,
+        ArtifactDependencyModel,
+        Model<ManualTemplateModel, ArtifactDependencyModel>> {
 
     private ManualHierarchy(LinkedHashSet<Model<ManualTemplateModel, ArtifactDependencyModel>> models) {
         super(models);
@@ -21,7 +23,11 @@ final class ManualHierarchy extends
 
     @Override
     public Set<ArtifactDependencyModel> dependencies() {
-        return reduce(Model::dependencies, ArtifactDependencyModel::name, ArtifactDependencyModel::override);
+        return reduce(
+            Model::dependencies,
+            ArtifactDependencyModel::name,
+            ArtifactDependencyModel::override
+        );
     }
 
     ManualHierarchy inheritedFrom(StandaloneManualModel standaloneManualModel) {

@@ -124,7 +124,12 @@ final class ManualBuilder {
         try {
             gsonAdapter.write(
                 Files.createDirectories(directory)
-                    .resolve("%s-%s.json".formatted(manualDefinition.name(), manualDefinition.version())),
+                    .resolve(
+                        "%s-%s.json".formatted(
+                            manualDefinition.name(),
+                            manualDefinition.version()
+                        )
+                    ),
                 manualDefinition
             );
         } catch (IOException e) {

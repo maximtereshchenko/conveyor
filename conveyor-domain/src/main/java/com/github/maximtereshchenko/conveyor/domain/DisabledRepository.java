@@ -8,12 +8,15 @@ import java.util.Optional;
 final class DisabledRepository implements Repository {
 
     @Override
-    public Optional<ManualDefinition> manualDefinition(String name, SemanticVersion version) {
+    public Optional<ManualDefinition> manualDefinition(
+        String name,
+        SemanticVersion semanticVersion
+    ) {
         return Optional.empty();
     }
 
     @Override
-    public Optional<Path> path(String name, SemanticVersion version) {
+    public Optional<Path> path(String name, SemanticVersion semanticVersion) {
         return Optional.empty();
     }
 }
