@@ -106,7 +106,6 @@ final class RemoteArtifactBuilder {
                 """.getBytes(StandardCharsets.UTF_8)
             );
             xmlMapper.writerWithDefaultPrettyPrinter().writeValue(byteArrayOutputStream, pomModel);
-
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

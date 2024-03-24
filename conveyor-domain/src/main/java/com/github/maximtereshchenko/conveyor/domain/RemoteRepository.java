@@ -1,8 +1,7 @@
 package com.github.maximtereshchenko.conveyor.domain;
 
-import com.github.maximtereshchenko.conveyor.api.port.ManualDefinition;
-import com.github.maximtereshchenko.conveyor.api.port.NoExplicitlyDefinedTemplate;
-import com.github.maximtereshchenko.conveyor.api.port.PreferencesDefinition;
+import com.github.maximtereshchenko.conveyor.api.port.*;
+import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,10 +10,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -74,18 +70,46 @@ final class RemoteRepository implements Repository {
                 name,
                 semanticVersion,
                 new ManualDefinition(
-                    xml.text("groupId") + ':' + xml.text("artifactId"),
-                    xml.text("version"),
-                    new NoExplicitlyDefinedTemplate(),
+                    name(xml),
+                    version(xml),
+                    template(xml),
                     Map.of(),
                     new PreferencesDefinition(),
                     List.of(),
-                    List.of()
+                    dependencies(xml)
                 )
             );
         } catch (Exception e) {
             throw new IllegalArgumentException(e);
         }
+    }
+
+    private Collection<ManualDependencyDefinition> dependencies(Xml xml) {
+        return xml.tags("dependencies")
+            .stream()
+            .map(dependencies -> dependencies.tags("dependency"))
+            .flatMap(Collection::stream)
+            .map(dependency ->
+                new ManualDependencyDefinition(
+                    name(dependency),
+                    version(xml),
+                    DependencyScope.IMPLEMENTATION
+                )
+            )
+            .toList();
+    }
+
+    private TemplateForManualDefinition template(Xml xml) {
+        return xml.tags("parent")
+            .stream()
+            .<TemplateForManualDefinition>map(parent ->
+                new ManualTemplateDefinition(
+                    parent.text("groupId") + ':' + parent.text("artifactId"),
+                    version(parent)
+                )
+            )
+            .findAny()
+            .orElseGet(NoExplicitlyDefinedTemplate::new);
     }
 
     private Optional<URI> absoluteUri(
@@ -132,5 +156,13 @@ final class RemoteRepository implements Repository {
                 .map(Objects::toString)
                 .collect(Collectors.joining("/", "/", ""))
         );
+    }
+
+    private String name(Xml xml) {
+        return xml.text("groupId") + ':' + xml.text("artifactId");
+    }
+
+    private String version(Xml xml) {
+        return xml.text("version");
     }
 }

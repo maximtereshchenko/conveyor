@@ -5,4 +5,5 @@ module com.github.maximtereshchenko.conveyor.jackson.dataformat.xml {
     exports com.github.maximtereshchenko.conveyor.jackson.dataformat.xml;
     exports com.github.maximtereshchenko.conveyor.jackson.databind;
     exports com.github.maximtereshchenko.conveyor.jackson.dataformat.xml.annotation;
+    exports com.github.maximtereshchenko.conveyor.jackson.annotation;
 }
