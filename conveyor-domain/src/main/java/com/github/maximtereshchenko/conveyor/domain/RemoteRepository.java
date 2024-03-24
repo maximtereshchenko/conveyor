@@ -7,13 +7,13 @@ import com.github.maximtereshchenko.conveyor.api.port.PreferencesDefinition;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -22,13 +22,13 @@ final class RemoteRepository implements Repository {
 
     private final URL url;
     private final XmlFactory xmlFactory;
-    private final HttpClient httpClient;
+    private final Http http;
     private final LocalDirectoryRepository cache;
 
-    RemoteRepository(URL url, XmlFactory xmlFactory, LocalDirectoryRepository cache) {
+    RemoteRepository(URL url, XmlFactory xmlFactory, Http http, LocalDirectoryRepository cache) {
         this.url = url;
         this.xmlFactory = xmlFactory;
-        this.httpClient = HttpClient.newHttpClient();
+        this.http = http;
         this.cache = cache;
     }
 
@@ -39,8 +39,8 @@ final class RemoteRepository implements Repository {
     ) {
         return cache.manualDefinition(name, semanticVersion)
             .or(() ->
-                uri(name, semanticVersion, "pom")
-                    .flatMap(this::inputStream)
+                absoluteUri(name, semanticVersion, "pom")
+                    .flatMap(http::get)
                     .map(inputStream -> manualDefinition(name, semanticVersion, inputStream))
             );
     }
@@ -49,8 +49,8 @@ final class RemoteRepository implements Repository {
     public Optional<Path> path(String name, SemanticVersion semanticVersion) {
         return cache.path(name, semanticVersion)
             .or(() ->
-                uri(name, semanticVersion, "jar")
-                    .flatMap(this::inputStream)
+                absoluteUri(name, semanticVersion, "jar")
+                    .flatMap(http::get)
                     .map(inputStream -> path(name, semanticVersion, inputStream))
             );
     }
@@ -88,47 +88,49 @@ final class RemoteRepository implements Repository {
         }
     }
 
-    private Optional<String> uri(String name, SemanticVersion semanticVersion, String classifier) {
+    private Optional<URI> absoluteUri(
+        String name,
+        SemanticVersion semanticVersion,
+        String classifier
+    ) {
         if (!name.contains(":")) {
             return Optional.empty();
         }
         var groupAndArtifact = name.split(":");
-        return Optional.of(
+        try {
+            return Optional.of(
+                url.toURI()
+                    .resolve(
+                        uri(
+                            List.of(groupAndArtifact[0].split("\\.")),
+                            groupAndArtifact[1],
+                            semanticVersion,
+                            classifier
+                        )
+                    )
+            );
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
+
+    private URI uri(
+        List<String> groupId,
+        String artifactId,
+        SemanticVersion semanticVersion,
+        String classifier
+    ) {
+        return URI.create(
             Stream.concat(
-                    Stream.of(groupAndArtifact[0].split("\\.")),
+                    groupId.stream(),
                     Stream.of(
-                        groupAndArtifact[1],
+                        artifactId,
                         semanticVersion,
-                        "%s-%s.%s".formatted(groupAndArtifact[1], semanticVersion, classifier)
+                        "%s-%s.%s".formatted(artifactId, semanticVersion, classifier)
                     )
                 )
-                .map(Object::toString)
+                .map(Objects::toString)
                 .collect(Collectors.joining("/", "/", ""))
         );
-    }
-
-    private Optional<InputStream> inputStream(String uri) {
-        var response = response(uri);
-        if (response.statusCode() != 200) {
-            return Optional.empty();
-        }
-        return Optional.of(response.body());
-    }
-
-    private HttpResponse<InputStream> response(String uri) {
-        try {
-            return httpClient.send(
-                HttpRequest.newBuilder()
-                    .GET()
-                    .uri(url.toURI().resolve(uri))
-                    .build(),
-                HttpResponse.BodyHandlers.ofInputStream()
-            );
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new IllegalArgumentException(e);
-        } catch (Exception e) {
-            throw new IllegalArgumentException(e);
-        }
     }
 }

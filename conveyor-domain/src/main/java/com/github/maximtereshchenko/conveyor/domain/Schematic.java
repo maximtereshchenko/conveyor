@@ -20,19 +20,21 @@ final class Schematic {
     private final ModelFactory modelFactory;
     private final ModulePathFactory modulePathFactory;
     private final XmlFactory xmlFactory;
+    private final Http http;
 
     Schematic(
         PartialSchematicHierarchy partialSchematicHierarchy,
         DefinitionTranslator definitionTranslator,
         ModelFactory modelFactory,
         ModulePathFactory modulePathFactory,
-        XmlFactory xmlFactory
+        XmlFactory xmlFactory, Http http
     ) {
         this.partialSchematicHierarchy = partialSchematicHierarchy;
         this.definitionTranslator = definitionTranslator;
         this.modelFactory = modelFactory;
         this.modulePathFactory = modulePathFactory;
         this.xmlFactory = xmlFactory;
+        this.http = http;
     }
 
     String name() {
@@ -173,6 +175,7 @@ final class Schematic {
             case RemoteRepositoryModel model -> new RemoteRepository(
                 model.url(),
                 xmlFactory,
+                http,
                 new LocalDirectoryRepository(
                     path.getParent().resolve(properties.remoteRepositoryCacheDirectory()),
                     definitionTranslator

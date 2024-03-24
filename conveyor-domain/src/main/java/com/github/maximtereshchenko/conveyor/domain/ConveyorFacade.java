@@ -15,12 +15,14 @@ public final class ConveyorFacade implements ConveyorModule {
     private final ModelFactory modelFactory;
     private final ModulePathFactory modulePathFactory;
     private final XmlFactory xmlFactory;
+    private final Http http;
 
     public ConveyorFacade(DefinitionTranslator definitionTranslator) {
         this.definitionTranslator = definitionTranslator;
         this.modelFactory = new ModelFactory(definitionTranslator);
         this.modulePathFactory = new ModulePathFactory();
         this.xmlFactory = XmlFactory.newInstance();
+        this.http = new Http();
     }
 
     @Override
@@ -37,7 +39,8 @@ public final class ConveyorFacade implements ConveyorModule {
                     definitionTranslator,
                     modelFactory,
                     modulePathFactory,
-                    xmlFactory
+                    xmlFactory,
+                    http
                 )
             )
             .collect(Collectors.toCollection(LinkedHashSet::new));
