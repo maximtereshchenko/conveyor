@@ -192,6 +192,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                             "com.github.maximtereshchenko.conveyor",
                             "instant-conveyor-plugin",
                             "1.0.0",
+                            null,
                             List.of()
                         )
                     )
@@ -244,6 +245,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                             "com.github.maximtereshchenko.conveyor",
                             "instant-conveyor-plugin",
                             "1.0.0",
+                            null,
                             List.of()
                         )
                     )
@@ -297,6 +299,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                             "com.github.maximtereshchenko.conveyor",
                             "instant-conveyor-plugin",
                             "1.0.0",
+                            null,
                             List.of()
                         )
                     )
@@ -352,6 +355,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                             "com.github.maximtereshchenko.conveyor",
                             "instant-conveyor-plugin",
                             "1.0.0",
+                            null,
                             List.of()
                         )
                     )
@@ -410,6 +414,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                             "com.github.maximtereshchenko.conveyor",
                             "instant-conveyor-plugin",
                             "1.0.0",
+                            null,
                             List.of()
                         )
                     )
@@ -424,6 +429,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                             "com.github.maximtereshchenko.conveyor",
                             "parent",
                             "1.0.0",
+                            null,
                             List.of(
                                 new PomModel.Dependency(
                                     "com.github.maximtereshchenko.conveyor",
@@ -450,6 +456,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                             "com.github.maximtereshchenko.conveyor",
                             "dependency",
                             "1.0.0",
+                            null,
                             List.of()
                         )
                     )
@@ -475,6 +482,93 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         );
 
         assertThat(defaultConstructionDirectory(path).resolve("module-path"))
+            .content()
+            .isEqualTo("com.github.maximtereshchenko.conveyor:dependency-1.0.0");
+    }
+
+    @Test
+    @ExtendWith(WireMockExtension.class)
+    void givenManualDefinitionFromRemoteRepository_whenConstructToStage_thenPreferencesAreTranslated(
+        @TempDir Path path,
+        ConveyorModule module,
+        BuilderFactory factory,
+        WireMockRuntimeInfo wireMockRuntimeInfo
+    ) {
+        var url = factory.remoteRepositoryBuilder(wireMockRuntimeInfo)
+            .artifact(builder ->
+                builder.groupId("com", "github", "maximtereshchenko", "conveyor")
+                    .artifactId("bom")
+                    .version("1.0.0")
+                    .pom(
+                        new PomModel(
+                            null,
+                            "com.github.maximtereshchenko.conveyor",
+                            "bom",
+                            "1.0.0",
+                            new PomModel.DependencyManagement(
+                                List.of(
+                                    new PomModel.Dependency(
+                                        "com.github.maximtereshchenko.conveyor",
+                                        "dependency",
+                                        "1.0.0"
+                                    )
+                                )
+                            ),
+                            List.of()
+                        )
+                    )
+            )
+            .artifact(builder ->
+                builder.groupId("com", "github", "maximtereshchenko", "conveyor")
+                    .artifactId("dependency")
+                    .version("1.0.0")
+                    .jar("dependency")
+            )
+            .artifact(builder ->
+                builder.groupId("com", "github", "maximtereshchenko", "conveyor")
+                    .artifactId("dependency")
+                    .version("1.0.0")
+                    .pom(
+                        new PomModel(
+                            null,
+                            "com.github.maximtereshchenko.conveyor",
+                            "dependency",
+                            "1.0.0",
+                            null,
+                            List.of()
+                        )
+                    )
+            )
+            .url();
+        factory.repositoryBuilder()
+            .superManual()
+            .manual(builder -> builder.name("dependencies").version("1.0.0"))
+            .jar(
+                "dependencies",
+                builder -> builder.name("dependencies").version("1.0.0")
+            )
+            .install(path);
+
+        module.construct(
+            factory.schematicBuilder()
+                .name("project")
+                .version("1.0.0")
+                .repository("local", path, true)
+                .repository("remote", url, true)
+                .preferenceInclusion(
+                    "com.github.maximtereshchenko.conveyor:bom",
+                    "1.0.0"
+                )
+                .plugin("dependencies", "1.0.0", Map.of())
+                .dependency(
+                    "com.github.maximtereshchenko.conveyor:dependency",
+                    DependencyScope.IMPLEMENTATION
+                )
+                .install(path),
+            Stage.COMPILE
+        );
+
+        assertThat(defaultConstructionDirectory(path).resolve("dependencies"))
             .content()
             .isEqualTo("com.github.maximtereshchenko.conveyor:dependency-1.0.0");
     }

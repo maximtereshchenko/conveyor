@@ -74,7 +74,10 @@ final class RemoteRepository implements Repository {
                     version(xml),
                     template(xml),
                     Map.of(),
-                    new PreferencesDefinition(),
+                    new PreferencesDefinition(
+                        List.of(),
+                        artifacts(xml)
+                    ),
                     List.of(),
                     dependencies(xml)
                 )
@@ -82,6 +85,17 @@ final class RemoteRepository implements Repository {
         } catch (Exception e) {
             throw new IllegalArgumentException(e);
         }
+    }
+
+    private Collection<ArtifactPreferenceDefinition> artifacts(Xml xml) {
+        return xml.tags("dependencyManagement")
+            .stream()
+            .map(dependencyManagement -> dependencyManagement.tags("dependencies"))
+            .flatMap(Collection::stream)
+            .map(dependencies -> dependencies.tags("dependency"))
+            .flatMap(Collection::stream)
+            .map(dependency -> new ArtifactPreferenceDefinition(name(dependency), version(xml)))
+            .toList();
     }
 
     private Collection<ManualDependencyDefinition> dependencies(Xml xml) {
