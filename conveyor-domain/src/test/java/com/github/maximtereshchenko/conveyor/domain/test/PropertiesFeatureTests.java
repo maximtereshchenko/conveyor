@@ -43,12 +43,13 @@ final class PropertiesFeatureTests extends ConveyorTest {
 
         assertThat(defaultConstructionDirectory(path).resolve("properties"))
             .content()
-            .hasLineCount(6)
+            .hasLineCount(7)
             .contains(
                 "conveyor.schematic.name=project",
                 "conveyor.schematic.version=1",
                 "conveyor.discovery.directory=" + path,
                 "conveyor.construction.directory=" + defaultConstructionDirectory(path),
+                "conveyor.repository.remote.cache.directory=" + defaultCacheDirectory(path),
                 "template.key=template.value",
                 "key=value"
             );
@@ -85,12 +86,13 @@ final class PropertiesFeatureTests extends ConveyorTest {
 
         assertThat(defaultConstructionDirectory(path).resolve("properties"))
             .content()
-            .hasLineCount(5)
+            .hasLineCount(6)
             .contains(
                 "conveyor.schematic.name=project",
                 "conveyor.schematic.version=1",
                 "conveyor.discovery.directory=" + path,
                 "conveyor.construction.directory=" + defaultConstructionDirectory(path),
+                "conveyor.repository.remote.cache.directory=" + defaultCacheDirectory(path),
                 "key=value"
             );
     }
@@ -126,12 +128,13 @@ final class PropertiesFeatureTests extends ConveyorTest {
 
         assertThat(defaultConstructionDirectory(path).resolve("properties"))
             .content()
-            .hasLineCount(4)
+            .hasLineCount(5)
             .contains(
                 "conveyor.schematic.name=project",
                 "conveyor.schematic.version=1",
                 "conveyor.discovery.directory=" + path,
-                "conveyor.construction.directory=" + defaultConstructionDirectory(path)
+                "conveyor.construction.directory=" + defaultConstructionDirectory(path),
+                "conveyor.repository.remote.cache.directory=" + defaultCacheDirectory(path)
             );
     }
 
@@ -160,12 +163,13 @@ final class PropertiesFeatureTests extends ConveyorTest {
 
         assertThat(defaultConstructionDirectory(path).resolve("properties"))
             .content()
-            .hasLineCount(4)
+            .hasLineCount(5)
             .contains(
                 "conveyor.schematic.name=project",
                 "conveyor.schematic.version=1",
                 "conveyor.discovery.directory=" + path,
-                "conveyor.construction.directory=" + defaultConstructionDirectory(path)
+                "conveyor.construction.directory=" + defaultConstructionDirectory(path),
+                "conveyor.repository.remote.cache.directory=" + defaultCacheDirectory(path)
             );
     }
 
@@ -195,12 +199,13 @@ final class PropertiesFeatureTests extends ConveyorTest {
 
         assertThat(defaultConstructionDirectory(path).resolve("properties"))
             .content()
-            .hasLineCount(4)
+            .hasLineCount(5)
             .contains(
                 "conveyor.schematic.name=project",
                 "conveyor.schematic.version=1",
                 "conveyor.discovery.directory=" + project,
-                "conveyor.construction.directory=" + defaultConstructionDirectory(path)
+                "conveyor.construction.directory=" + defaultConstructionDirectory(path),
+                "conveyor.repository.remote.cache.directory=" + defaultCacheDirectory(path)
             );
     }
 
@@ -229,12 +234,13 @@ final class PropertiesFeatureTests extends ConveyorTest {
 
         assertThat(defaultConstructionDirectory(path).resolve("properties"))
             .content()
-            .hasLineCount(4)
+            .hasLineCount(5)
             .contains(
                 "conveyor.schematic.name=project",
                 "conveyor.schematic.version=1",
                 "conveyor.discovery.directory=" + path.resolve("project"),
-                "conveyor.construction.directory=" + defaultConstructionDirectory(path)
+                "conveyor.construction.directory=" + defaultConstructionDirectory(path),
+                "conveyor.repository.remote.cache.directory=" + defaultCacheDirectory(path)
             );
     }
 
@@ -264,12 +270,13 @@ final class PropertiesFeatureTests extends ConveyorTest {
 
         assertThat(construction.resolve("properties"))
             .content()
-            .hasLineCount(4)
+            .hasLineCount(5)
             .contains(
                 "conveyor.schematic.name=project",
                 "conveyor.schematic.version=1",
                 "conveyor.discovery.directory=" + path,
-                "conveyor.construction.directory=" + construction
+                "conveyor.construction.directory=" + construction,
+                "conveyor.repository.remote.cache.directory=" + defaultCacheDirectory(path)
             );
     }
 
@@ -299,12 +306,13 @@ final class PropertiesFeatureTests extends ConveyorTest {
         var construction = path.resolve("construction");
         assertThat(construction.resolve("properties"))
             .content()
-            .hasLineCount(4)
+            .hasLineCount(5)
             .contains(
                 "conveyor.schematic.name=project",
                 "conveyor.schematic.version=1",
                 "conveyor.discovery.directory=" + path,
-                "conveyor.construction.directory=" + construction
+                "conveyor.construction.directory=" + construction,
+                "conveyor.repository.remote.cache.directory=" + defaultCacheDirectory(path)
             );
     }
 
@@ -334,12 +342,13 @@ final class PropertiesFeatureTests extends ConveyorTest {
 
         assertThat(defaultConstructionDirectory(path).resolve("properties"))
             .content()
-            .hasLineCount(6)
+            .hasLineCount(7)
             .contains(
                 "conveyor.schematic.name=project",
                 "conveyor.schematic.version=1",
                 "conveyor.discovery.directory=" + path,
                 "conveyor.construction.directory=" + defaultConstructionDirectory(path),
+                "conveyor.repository.remote.cache.directory=" + defaultCacheDirectory(path),
                 "key=interpolated",
                 "templated=interpolated-suffix"
             );

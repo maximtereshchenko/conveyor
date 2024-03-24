@@ -10,7 +10,7 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public final class JacksonAdapter implements DefinitionReader {
+public final class JacksonAdapter implements DefinitionTranslator {
 
     private final ObjectMapper objectMapper;
 
@@ -53,6 +53,11 @@ public final class JacksonAdapter implements DefinitionReader {
     @Override
     public ManualDefinition manualDefinition(Path path) {
         return read(path, ManualDefinition.class);
+    }
+
+    @Override
+    public void write(ManualDefinition manualDefinition, Path path) {
+        write(path, manualDefinition);
     }
 
     public void write(Path path, Object object) {

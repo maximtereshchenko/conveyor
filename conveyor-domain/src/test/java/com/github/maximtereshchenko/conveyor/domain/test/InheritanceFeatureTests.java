@@ -45,12 +45,13 @@ final class InheritanceFeatureTests extends ConveyorTest {
 
         assertThat(defaultConstructionDirectory(path).resolve("properties"))
             .content()
-            .hasLineCount(5)
+            .hasLineCount(6)
             .contains(
                 "conveyor.schematic.name=project",
                 "conveyor.schematic.version=1",
                 "conveyor.discovery.directory=" + path,
                 "conveyor.construction.directory=" + defaultConstructionDirectory(path),
+                "conveyor.repository.remote.cache.directory=" + defaultCacheDirectory(path),
                 "template.key=value"
             );
     }
@@ -187,12 +188,13 @@ final class InheritanceFeatureTests extends ConveyorTest {
 
         assertThat(defaultConstructionDirectory(project).resolve("properties"))
             .content()
-            .hasLineCount(5)
+            .hasLineCount(6)
             .contains(
                 "conveyor.schematic.name=project",
                 "conveyor.schematic.version=1",
                 "conveyor.discovery.directory=" + project,
                 "conveyor.construction.directory=" + defaultConstructionDirectory(project),
+                "conveyor.repository.remote.cache.directory=" + defaultCacheDirectory(path),
                 "template.key=value"
             );
     }
@@ -425,12 +427,13 @@ final class InheritanceFeatureTests extends ConveyorTest {
 
         assertThat(defaultConstructionDirectory(included).resolve("properties"))
             .content()
-            .hasLineCount(5)
+            .hasLineCount(6)
             .contains(
                 "conveyor.schematic.name=included",
                 "conveyor.schematic.version=1",
                 "conveyor.discovery.directory=" + included,
                 "conveyor.construction.directory=" + defaultConstructionDirectory(included),
+                "conveyor.repository.remote.cache.directory=" + defaultCacheDirectory(path),
                 "template.key=value"
             );
     }

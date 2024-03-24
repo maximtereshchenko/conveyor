@@ -1,5 +1,6 @@
 package com.github.maximtereshchenko.conveyor.domain;
 
+import java.nio.file.Path;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -25,9 +26,13 @@ final class PartialSchematicHierarchy
         };
     }
 
-    public PartialSchematicHierarchy inheritedFrom(StandaloneSchematicModel standaloneSchematicModel) {
+    PartialSchematicHierarchy inheritedFrom(StandaloneSchematicModel standaloneSchematicModel) {
         var copy = new LinkedHashSet<>(models());
         copy.addFirst(standaloneSchematicModel);
         return new PartialSchematicHierarchy(copy);
+    }
+
+    Path rootPath() {
+        return models().getFirst().path();
     }
 }

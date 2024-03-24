@@ -1,7 +1,7 @@
 package com.github.maximtereshchenko.conveyor.domain;
 
 import com.github.maximtereshchenko.conveyor.api.SchematicProducts;
-import com.github.maximtereshchenko.conveyor.api.port.DefinitionReader;
+import com.github.maximtereshchenko.conveyor.api.port.DefinitionTranslator;
 import com.github.maximtereshchenko.conveyor.common.api.ProductType;
 import com.github.maximtereshchenko.conveyor.common.api.Products;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
@@ -16,17 +16,17 @@ import java.util.stream.Stream;
 final class Schematic {
 
     private final PartialSchematicHierarchy partialSchematicHierarchy;
-    private final DefinitionReader definitionReader;
+    private final DefinitionTranslator definitionTranslator;
     private final ModelFactory modelFactory;
     private final ModulePathFactory modulePathFactory;
 
     Schematic(
         PartialSchematicHierarchy partialSchematicHierarchy,
-        DefinitionReader definitionReader,
+        DefinitionTranslator definitionTranslator,
         ModelFactory modelFactory, ModulePathFactory modulePathFactory
     ) {
         this.partialSchematicHierarchy = partialSchematicHierarchy;
-        this.definitionReader = definitionReader;
+        this.definitionTranslator = definitionTranslator;
         this.modelFactory = modelFactory;
         this.modulePathFactory = modulePathFactory;
     }
@@ -55,7 +55,7 @@ final class Schematic {
     }
 
     SchematicProducts construct(SchematicProducts schematicProducts, Stage stage) {
-        var repositories = repositories();
+        var repositories = repositories(properties(partialSchematicHierarchy));
         var fullSchematicHierarchy = modelFactory.fullSchematicHierarchy(
             partialSchematicHierarchy,
             repositories
@@ -138,30 +138,41 @@ final class Schematic {
         return Optional.empty();
     }
 
-    private Repositories repositories() {
+    private Repositories repositories(Properties properties) {
         return new Repositories(
             partialSchematicHierarchy.repositories()
                 .stream()
                 .map(repositoryModel ->
                     repository(
                         repositoryModel,
-                        partialSchematicHierarchy.path()
+                        partialSchematicHierarchy.path(),
+                        properties
                     )
                 )
                 .collect(Collectors.toSet())
         );
     }
 
-    private Repository repository(RepositoryModel repositoryModel, Path path) {
+    private Repository repository(
+        RepositoryModel repositoryModel,
+        Path path,
+        Properties properties
+    ) {
         if (!repositoryModel.enabled().orElse(Boolean.TRUE)) {
             return new DisabledRepository();
         }
         return switch (repositoryModel) {
             case LocalDirectoryRepositoryModel model -> new LocalDirectoryRepository(
                 path.getParent().resolve(model.path()),
-                definitionReader
+                definitionTranslator
             );
-            case RemoteRepositoryModel model -> new RemoteRepository(model.url(), path.getParent());
+            case RemoteRepositoryModel model -> new RemoteRepository(
+                model.url(),
+                new LocalDirectoryRepository(
+                    path.getParent().resolve(properties.remoteRepositoryCacheDirectory()),
+                    definitionTranslator
+                )
+            );
         };
     }
 
@@ -191,24 +202,35 @@ final class Schematic {
         );
     }
 
-    private Properties properties(FullSchematicHierarchy fullSchematicHierarchy) {
-        var properties = new HashMap<>(fullSchematicHierarchy.properties());
-        properties.put(SchematicPropertyKey.NAME.fullName(), fullSchematicHierarchy.name());
+    private <T extends TemplateModel, R extends TemplateModel> Properties properties(
+        SchematicHierarchy<T, R> schematicHierarchy
+    ) {
+        var properties = new HashMap<>(schematicHierarchy.properties());
         properties.put(
-            SchematicPropertyKey.VERSION.fullName(),
-            String.valueOf(fullSchematicHierarchy.version())
+            ConveyorPropertyKey.SCHEMATIC_NAME.fullName(),
+            schematicHierarchy.name()
+        );
+        properties.put(
+            ConveyorPropertyKey.SCHEMATIC_VERSION.fullName(),
+            String.valueOf(schematicHierarchy.version())
         );
         put(
             properties,
-            SchematicPropertyKey.DISCOVERY_DIRECTORY,
-            fullSchematicHierarchy.path(),
+            ConveyorPropertyKey.DISCOVERY_DIRECTORY,
+            schematicHierarchy.path(),
             ""
         );
         put(
             properties,
-            SchematicPropertyKey.CONSTRUCTION_DIRECTORY,
-            fullSchematicHierarchy.path(),
+            ConveyorPropertyKey.CONSTRUCTION_DIRECTORY,
+            schematicHierarchy.path(),
             ".conveyor"
+        );
+        put(
+            properties,
+            ConveyorPropertyKey.REMOTE_REPOSITORY_CACHE_DIRECTORY,
+            partialSchematicHierarchy.rootPath(),
+            ".conveyor-modules"
         );
         return new Properties(properties);
     }
@@ -254,7 +276,7 @@ final class Schematic {
 
     private void put(
         Map<String, String> properties,
-        SchematicPropertyKey schematicPropertyKey,
+        ConveyorPropertyKey schematicPropertyKey,
         Path path,
         String defaultRelativePath
     ) {
