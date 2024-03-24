@@ -3,12 +3,7 @@ package com.github.maximtereshchenko.conveyor.domain;
 import com.github.maximtereshchenko.conveyor.api.port.ManualDefinition;
 import com.github.maximtereshchenko.conveyor.api.port.NoExplicitlyDefinedTemplate;
 import com.github.maximtereshchenko.conveyor.api.port.PreferencesDefinition;
-import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
 
-import javax.xml.XMLConstants;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
@@ -26,11 +21,13 @@ import java.util.stream.Stream;
 final class RemoteRepository implements Repository {
 
     private final URL url;
+    private final XmlFactory xmlFactory;
     private final HttpClient httpClient;
     private final LocalDirectoryRepository cache;
 
-    RemoteRepository(URL url, LocalDirectoryRepository cache) {
+    RemoteRepository(URL url, XmlFactory xmlFactory, LocalDirectoryRepository cache) {
         this.url = url;
+        this.xmlFactory = xmlFactory;
         this.httpClient = HttpClient.newHttpClient();
         this.cache = cache;
     }
@@ -72,14 +69,13 @@ final class RemoteRepository implements Repository {
         InputStream inputStream
     ) {
         try (inputStream) {
-            var document = document(inputStream);
-            document.getDocumentElement().normalize();
+            var xml = xmlFactory.xml(inputStream);
             return cache.stored(
                 name,
                 semanticVersion,
                 new ManualDefinition(
-                    single(document, "groupId") + ':' + single(document, "artifactId"),
-                    single(document, "version"),
+                    xml.text("groupId") + ':' + xml.text("artifactId"),
+                    xml.text("version"),
                     new NoExplicitlyDefinedTemplate(),
                     Map.of(),
                     new PreferencesDefinition(),
@@ -90,25 +86,6 @@ final class RemoteRepository implements Repository {
         } catch (Exception e) {
             throw new IllegalArgumentException(e);
         }
-    }
-
-    private Document document(InputStream inputStream)
-        throws ParserConfigurationException, IOException, SAXException {
-        var factory = DocumentBuilderFactory.newInstance();
-        factory.setAttribute(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-        factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-        factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
-        factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-        factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
-        factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
-        factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
-        factory.setXIncludeAware(false);
-        factory.setExpandEntityReferences(false);
-        return factory.newDocumentBuilder().parse(inputStream);
-    }
-
-    private String single(Document document, String tag) {
-        return document.getElementsByTagName(tag).item(0).getTextContent();
     }
 
     private Optional<String> uri(String name, SemanticVersion semanticVersion, String classifier) {

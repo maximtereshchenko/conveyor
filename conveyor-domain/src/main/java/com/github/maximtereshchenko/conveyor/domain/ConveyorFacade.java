@@ -14,11 +14,13 @@ public final class ConveyorFacade implements ConveyorModule {
     private final DefinitionTranslator definitionTranslator;
     private final ModelFactory modelFactory;
     private final ModulePathFactory modulePathFactory;
+    private final XmlFactory xmlFactory;
 
     public ConveyorFacade(DefinitionTranslator definitionTranslator) {
         this.definitionTranslator = definitionTranslator;
         this.modelFactory = new ModelFactory(definitionTranslator);
         this.modulePathFactory = new ModulePathFactory();
+        this.xmlFactory = XmlFactory.newInstance();
     }
 
     @Override
@@ -34,7 +36,8 @@ public final class ConveyorFacade implements ConveyorModule {
                     partialSchematicHierarchy,
                     definitionTranslator,
                     modelFactory,
-                    modulePathFactory
+                    modulePathFactory,
+                    xmlFactory
                 )
             )
             .collect(Collectors.toCollection(LinkedHashSet::new));
