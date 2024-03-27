@@ -3,19 +3,19 @@ package com.github.maximtereshchenko.conveyor.gson;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-import com.github.maximtereshchenko.conveyor.api.port.NoExplicitlyDefinedTemplate;
+import com.github.maximtereshchenko.conveyor.api.port.NoTemplate;
 
 import java.io.IOException;
 
-final class NoExplicitlyDefinedTemplateSerializer extends StdSerializer<NoExplicitlyDefinedTemplate> {
+final class NoExplicitlyDefinedTemplateSerializer extends StdSerializer<NoTemplate> {
 
     NoExplicitlyDefinedTemplateSerializer() {
-        super(NoExplicitlyDefinedTemplate.class);
+        super(NoTemplate.class);
     }
 
     @Override
     public void serialize(
-        NoExplicitlyDefinedTemplate definition,
+        NoTemplate definition,
         JsonGenerator jsonGenerator,
         SerializerProvider serializerProvider
     ) throws IOException {

@@ -1,7 +1,6 @@
 package com.github.maximtereshchenko.conveyor.domain.test;
 
 import com.github.maximtereshchenko.conveyor.api.ConveyorModule;
-import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import com.github.maximtereshchenko.conveyor.wiremock.junit5.WireMockExtension;
 import com.github.maximtereshchenko.conveyor.wiremock.junit5.WireMockRuntimeInfo;
@@ -11,7 +10,6 @@ import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -27,25 +25,31 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         var first = path.resolve("first");
         var second = path.resolve("second");
         factory.repositoryBuilder()
-            .superManual()
+            .schematicDefinition(factory.superManual())
             .install(first);
         factory.repositoryBuilder()
-            .manual(builder -> builder.name("instant").version("1.0.0"))
-            .jar("instant", builder -> builder.name("instant").version("1.0.0"))
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("instant")
+            )
+            .jar(
+                factory.jarBuilder("instant")
+            )
             .install(second);
         var project = path.resolve("project");
 
         module.construct(
-            factory.schematicBuilder()
+            factory.schematicDefinitionBuilder()
                 .name("template")
-                .version("1.0.0")
                 .repository("first", first, true)
                 .inclusion(
-                    factory.schematicBuilder()
-                        .name("project")
-                        .version("1.0.0")
+                    factory.schematicDefinitionBuilder()
                         .repository("second", second, true)
-                        .plugin("instant", "1.0.0", Map.of("instant", "COMPILE-RUN"))
+                        .plugin(
+                            "instant",
+                            "1.0.0",
+                            Map.of("instant", "COMPILE-RUN")
+                        )
                         .install(project)
                 )
                 .install(path),
@@ -63,27 +67,33 @@ final class RepositoriesFeatureTests extends ConveyorTest {
     ) {
         var templateRepository = path.resolve("template-repository");
         factory.repositoryBuilder()
-            .superManual()
+            .schematicDefinition(factory.superManual())
             .install(templateRepository);
         var projectRepository = path.resolve("project-repository");
         factory.repositoryBuilder()
-            .superManual()
-            .manual(builder -> builder.name("instant").version("1.0.0"))
-            .jar("instant", builder -> builder.name("instant").version("1.0.0"))
+            .schematicDefinition(factory.superManual())
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("instant")
+            )
+            .jar(
+                factory.jarBuilder("instant")
+            )
             .install(projectRepository);
         var project = path.resolve("project");
 
         module.construct(
-            factory.schematicBuilder()
+            factory.schematicDefinitionBuilder()
                 .name("template")
-                .version("1.0.0")
                 .repository("main", templateRepository, true)
                 .inclusion(
-                    factory.schematicBuilder()
-                        .name("project")
-                        .version("1.0.0")
+                    factory.schematicDefinitionBuilder()
                         .repository("main", projectRepository, true)
-                        .plugin("instant", "1.0.0", Map.of("instant", "COMPILE-RUN"))
+                        .plugin(
+                            "instant",
+                            "1.0.0",
+                            Map.of("instant", "COMPILE-RUN")
+                        )
                         .install(project)
                 )
                 .install(path),
@@ -101,36 +111,45 @@ final class RepositoriesFeatureTests extends ConveyorTest {
     ) {
         var templateRepository = path.resolve("template-repository");
         factory.repositoryBuilder()
-            .superManual()
-            .manual(builder -> builder.name("module-path").version("1.0.0"))
-            .jar("module-path", builder -> builder.name("module-path").version("1.0.0"))
+            .schematicDefinition(factory.superManual())
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("module-path")
+            )
+            .jar(
+                factory.jarBuilder("module-path")
+            )
             .install(templateRepository);
         var projectRepository = path.resolve("project-repository");
         factory.repositoryBuilder()
-            .superManual()
-            .manual(builder ->
-                builder.name("module-path")
-                    .version("1.0.0")
-                    .dependency("dependency", "1.0.0", DependencyScope.IMPLEMENTATION)
+            .schematicDefinition(factory.superManual())
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("module-path")
+                    .dependency("dependency")
             )
-            .jar("module-path", builder -> builder.name("module-path").version("1.0.0"))
-            .manual(builder -> builder.name("dependency").version("1.0.0"))
-            .jar("dependency", builder -> builder.name("dependency").version("1.0.0"))
+            .jar(
+                factory.jarBuilder("module-path")
+            )
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("dependency")
+            )
+            .jar(
+                factory.jarBuilder("dependency")
+            )
             .install(projectRepository);
         var project = path.resolve("project");
 
         module.construct(
-            factory.schematicBuilder()
+            factory.schematicDefinitionBuilder()
                 .name("template")
-                .version("1.0.0")
                 .repository("template-repository", templateRepository, true)
                 .inclusion(
-                    factory.schematicBuilder()
-                        .name("project")
-                        .version("1.0.0")
+                    factory.schematicDefinitionBuilder()
                         .repository("project-repository", projectRepository, true)
                         .repository("template-repository", templateRepository, false)
-                        .plugin("module-path", "1.0.0", Map.of())
+                        .plugin("module-path")
                         .install(project)
                 )
                 .install(path),
@@ -149,16 +168,19 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .superManual()
-            .manual(builder -> builder.name("instant").version("1.0.0"))
-            .jar("instant", builder -> builder.name("instant").version("1.0.0"))
+            .schematicDefinition(factory.superManual())
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("instant")
+            )
+            .jar(
+                factory.jarBuilder("instant")
+            )
             .install(path.resolve("repository"));
 
         module.construct(
-            factory.schematicBuilder()
-                .name("project")
-                .version("1.0.0")
-                .repository("main", Paths.get("./temp/../repository"), true)
+            factory.schematicDefinitionBuilder()
+                .repository(Paths.get("./temp/../repository"))
                 .plugin("instant", "1.0.0", Map.of("instant", "COMPILE-RUN"))
                 .install(path),
             Stage.COMPILE
@@ -175,41 +197,25 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         BuilderFactory factory,
         WireMockRuntimeInfo wireMockRuntimeInfo
     ) {
-        var url = factory.remoteRepositoryBuilder(wireMockRuntimeInfo)
-            .artifact(builder ->
-                builder.groupId("com", "github", "maximtereshchenko", "conveyor")
-                    .artifactId("instant-conveyor-plugin")
-                    .version("1.0.0")
-                    .jar("instant")
-            )
-            .artifact(builder ->
-                builder.groupId("com", "github", "maximtereshchenko", "conveyor")
-                    .artifactId("instant-conveyor-plugin")
-                    .version("1.0.0")
-                    .pom(
-                        new PomModel(
-                            null,
-                            "com.github.maximtereshchenko.conveyor",
-                            "instant-conveyor-plugin",
-                            "1.0.0",
-                            null,
-                            List.of()
-                        )
-                    )
-            )
-            .url();
         factory.repositoryBuilder()
-            .superManual()
+            .remoteJar(
+                factory.jarBuilder("instant")
+            )
+            .pom(
+                factory.pomBuilder()
+                    .artifactId("instant")
+            )
+            .install(wireMockRuntimeInfo.getWireMock());
+        factory.repositoryBuilder()
+            .schematicDefinition(factory.superManual())
             .install(path);
 
         module.construct(
-            factory.schematicBuilder()
-                .name("project")
-                .version("1.0.0")
+            factory.schematicDefinitionBuilder()
                 .repository("local", path, true)
-                .repository("remote", url, true)
+                .repository("remote", wireMockRuntimeInfo.getHttpBaseUrl(), true)
                 .plugin(
-                    "com.github.maximtereshchenko.conveyor:instant-conveyor-plugin",
+                    "instant",
                     "1.0.0",
                     Map.of("instant", "COMPILE-RUN")
                 )
@@ -228,39 +234,23 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         BuilderFactory factory,
         WireMockRuntimeInfo wireMockRuntimeInfo
     ) {
-        var url = factory.remoteRepositoryBuilder(wireMockRuntimeInfo)
-            .artifact(builder ->
-                builder.groupId("com", "github", "maximtereshchenko", "conveyor")
-                    .artifactId("instant-conveyor-plugin")
-                    .version("1.0.0")
-                    .jar("instant")
-            )
-            .artifact(builder ->
-                builder.groupId("com", "github", "maximtereshchenko", "conveyor")
-                    .artifactId("instant-conveyor-plugin")
-                    .version("1.0.0")
-                    .pom(
-                        new PomModel(
-                            null,
-                            "com.github.maximtereshchenko.conveyor",
-                            "instant-conveyor-plugin",
-                            "1.0.0",
-                            null,
-                            List.of()
-                        )
-                    )
-            )
-            .url();
         factory.repositoryBuilder()
-            .superManual()
+            .remoteJar(
+                factory.jarBuilder("instant")
+            )
+            .pom(
+                factory.pomBuilder()
+                    .artifactId("instant")
+            )
+            .install(wireMockRuntimeInfo.getWireMock());
+        factory.repositoryBuilder()
+            .schematicDefinition(factory.superManual())
             .install(path);
-        var schematic = factory.schematicBuilder()
-            .name("project")
-            .version("1.0.0")
+        var schematic = factory.schematicDefinitionBuilder()
             .repository("local", path, true)
-            .repository("remote", url, true)
+            .repository("remote", wireMockRuntimeInfo.getHttpBaseUrl(), true)
             .plugin(
-                "com.github.maximtereshchenko.conveyor:instant-conveyor-plugin",
+                "instant",
                 "1.0.0",
                 Map.of("instant", "COMPILE-RUN")
             )
@@ -269,9 +259,11 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         module.construct(schematic, Stage.COMPILE);
         module.construct(schematic, Stage.COMPILE);
 
-        assertThat(wireMockRuntimeInfo.getWireMock().getServeEvents()).hasSize(2);
+        assertThat(wireMockRuntimeInfo.getWireMock().getServeEvents())
+            .filteredOn(serveEvent -> serveEvent.getRequest().getUrl().contains("instant"))
+            .hasSize(2);
         assertThat(defaultCacheDirectory(path))
-            .isDirectoryContaining("glob:**instant-conveyor-plugin-1.0.0.{json,jar}");
+            .isDirectoryContaining("glob:**instant-1.0.0.{json,jar}");
     }
 
     @Test
@@ -282,43 +274,27 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         BuilderFactory factory,
         WireMockRuntimeInfo wireMockRuntimeInfo
     ) {
-        var url = factory.remoteRepositoryBuilder(wireMockRuntimeInfo)
-            .artifact(builder ->
-                builder.groupId("com", "github", "maximtereshchenko", "conveyor")
-                    .artifactId("instant-conveyor-plugin")
-                    .version("1.0.0")
-                    .jar("instant")
-            )
-            .artifact(builder ->
-                builder.groupId("com", "github", "maximtereshchenko", "conveyor")
-                    .artifactId("instant-conveyor-plugin")
-                    .version("1.0.0")
-                    .pom(
-                        new PomModel(
-                            null,
-                            "com.github.maximtereshchenko.conveyor",
-                            "instant-conveyor-plugin",
-                            "1.0.0",
-                            null,
-                            List.of()
-                        )
-                    )
-            )
-            .url();
         factory.repositoryBuilder()
-            .superManual()
+            .remoteJar(
+                factory.jarBuilder("instant")
+            )
+            .pom(
+                factory.pomBuilder()
+                    .artifactId("instant")
+            )
+            .install(wireMockRuntimeInfo.getWireMock());
+        factory.repositoryBuilder()
+            .schematicDefinition(factory.superManual())
             .install(path);
         var cache = path.resolve("cache");
 
         module.construct(
-            factory.schematicBuilder()
-                .name("project")
-                .version("1.0.0")
+            factory.schematicDefinitionBuilder()
                 .repository("local", path, true)
-                .repository("remote", url, true)
+                .repository("remote", wireMockRuntimeInfo.getHttpBaseUrl(), true)
                 .property("conveyor.repository.remote.cache.directory", cache.toString())
                 .plugin(
-                    "com.github.maximtereshchenko.conveyor:instant-conveyor-plugin",
+                    "instant",
                     "1.0.0",
                     Map.of("instant", "COMPILE-RUN")
                 )
@@ -327,7 +303,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         );
 
         assertThat(cache)
-            .isDirectoryContaining("glob:**instant-conveyor-plugin-1.0.0.{json,jar}");
+            .isDirectoryContaining("glob:**instant-1.0.0.{json,jar}");
     }
 
     @Test
@@ -338,42 +314,26 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         BuilderFactory factory,
         WireMockRuntimeInfo wireMockRuntimeInfo
     ) {
-        var url = factory.remoteRepositoryBuilder(wireMockRuntimeInfo)
-            .artifact(builder ->
-                builder.groupId("com", "github", "maximtereshchenko", "conveyor")
-                    .artifactId("instant-conveyor-plugin")
-                    .version("1.0.0")
-                    .jar("instant")
-            )
-            .artifact(builder ->
-                builder.groupId("com", "github", "maximtereshchenko", "conveyor")
-                    .artifactId("instant-conveyor-plugin")
-                    .version("1.0.0")
-                    .pom(
-                        new PomModel(
-                            null,
-                            "com.github.maximtereshchenko.conveyor",
-                            "instant-conveyor-plugin",
-                            "1.0.0",
-                            null,
-                            List.of()
-                        )
-                    )
-            )
-            .url();
         factory.repositoryBuilder()
-            .superManual()
+            .remoteJar(
+                factory.jarBuilder("instant")
+            )
+            .pom(
+                factory.pomBuilder()
+                    .artifactId("instant")
+            )
+            .install(wireMockRuntimeInfo.getWireMock());
+        factory.repositoryBuilder()
+            .schematicDefinition(factory.superManual())
             .install(path);
 
         module.construct(
-            factory.schematicBuilder()
-                .name("project")
-                .version("1.0.0")
+            factory.schematicDefinitionBuilder()
                 .repository("local", path, true)
-                .repository("remote", url, true)
+                .repository("remote", wireMockRuntimeInfo.getHttpBaseUrl(), true)
                 .property("conveyor.repository.remote.cache.directory", "./temp/../cache")
                 .plugin(
-                    "com.github.maximtereshchenko.conveyor:instant-conveyor-plugin",
+                    "instant",
                     "1.0.0",
                     Map.of("instant", "COMPILE-RUN")
                 )
@@ -382,7 +342,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         );
 
         assertThat(path.resolve("cache"))
-            .isDirectoryContaining("glob:**instant-conveyor-plugin-1.0.0.{json,jar}");
+            .isDirectoryContaining("glob:**instant-1.0.0.{json,jar}");
     }
 
     @Test
@@ -393,97 +353,44 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         BuilderFactory factory,
         WireMockRuntimeInfo wireMockRuntimeInfo
     ) {
-        var url = factory.remoteRepositoryBuilder(wireMockRuntimeInfo)
-            .artifact(builder ->
-                builder.groupId("com", "github", "maximtereshchenko", "conveyor")
-                    .artifactId("module-path-conveyor-plugin")
-                    .version("1.0.0")
-                    .jar("module-path")
-            )
-            .artifact(builder ->
-                builder.groupId("com", "github", "maximtereshchenko", "conveyor")
-                    .artifactId("module-path-conveyor-plugin")
-                    .version("1.0.0")
-                    .pom(
-                        new PomModel(
-                            new PomModel.Parent(
-                                "com.github.maximtereshchenko.conveyor",
-                                "parent",
-                                "1.0.0"
-                            ),
-                            "com.github.maximtereshchenko.conveyor",
-                            "instant-conveyor-plugin",
-                            "1.0.0",
-                            null,
-                            List.of()
-                        )
-                    )
-            )
-            .artifact(builder ->
-                builder.groupId("com", "github", "maximtereshchenko", "conveyor")
-                    .artifactId("parent")
-                    .version("1.0.0")
-                    .pom(
-                        new PomModel(
-                            null,
-                            "com.github.maximtereshchenko.conveyor",
-                            "parent",
-                            "1.0.0",
-                            null,
-                            List.of(
-                                new PomModel.Dependency(
-                                    "com.github.maximtereshchenko.conveyor",
-                                    "dependency",
-                                    "1.0.0"
-                                )
-                            )
-                        )
-                    )
-            )
-            .artifact(builder ->
-                builder.groupId("com", "github", "maximtereshchenko", "conveyor")
-                    .artifactId("dependency")
-                    .version("1.0.0")
-                    .jar("dependency")
-            )
-            .artifact(builder ->
-                builder.groupId("com", "github", "maximtereshchenko", "conveyor")
-                    .artifactId("dependency")
-                    .version("1.0.0")
-                    .pom(
-                        new PomModel(
-                            null,
-                            "com.github.maximtereshchenko.conveyor",
-                            "dependency",
-                            "1.0.0",
-                            null,
-                            List.of()
-                        )
-                    )
-            )
-            .url();
         factory.repositoryBuilder()
-            .superManual()
+            .remoteJar(
+                factory.jarBuilder("module-path")
+            )
+            .pom(
+                factory.pomBuilder()
+                    .artifactId("module-path")
+                    .parent("parent")
+            )
+            .pom(
+                factory.pomBuilder()
+                    .artifactId("parent")
+                    .dependency("dependency")
+            )
+            .remoteJar(
+                factory.jarBuilder("dependency")
+            )
+            .pom(
+                factory.pomBuilder()
+                    .artifactId("dependency")
+            )
+            .install(wireMockRuntimeInfo.getWireMock());
+        factory.repositoryBuilder()
+            .schematicDefinition(factory.superManual())
             .install(path);
 
         module.construct(
-            factory.schematicBuilder()
-                .name("project")
-                .version("1.0.0")
+            factory.schematicDefinitionBuilder()
                 .repository("local", path, true)
-                .repository("remote", url, true)
-                .plugin(
-                    "com.github.maximtereshchenko.conveyor:module-path-conveyor-plugin",
-                    "1.0.0",
-                    Map.of()
-                )
+                .repository("remote", wireMockRuntimeInfo.getHttpBaseUrl(), true)
+                .plugin("module-path")
                 .install(path),
             Stage.COMPILE
         );
 
         assertThat(defaultConstructionDirectory(path).resolve("module-path"))
             .content()
-            .isEqualTo("com.github.maximtereshchenko.conveyor:dependency-1.0.0");
+            .isEqualTo("dependency-1.0.0");
     }
 
     @Test
@@ -494,82 +401,44 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         BuilderFactory factory,
         WireMockRuntimeInfo wireMockRuntimeInfo
     ) {
-        var url = factory.remoteRepositoryBuilder(wireMockRuntimeInfo)
-            .artifact(builder ->
-                builder.groupId("com", "github", "maximtereshchenko", "conveyor")
-                    .artifactId("bom")
-                    .version("1.0.0")
-                    .pom(
-                        new PomModel(
-                            null,
-                            "com.github.maximtereshchenko.conveyor",
-                            "bom",
-                            "1.0.0",
-                            new PomModel.DependencyManagement(
-                                List.of(
-                                    new PomModel.Dependency(
-                                        "com.github.maximtereshchenko.conveyor",
-                                        "dependency",
-                                        "1.0.0"
-                                    )
-                                )
-                            ),
-                            List.of()
-                        )
-                    )
-            )
-            .artifact(builder ->
-                builder.groupId("com", "github", "maximtereshchenko", "conveyor")
-                    .artifactId("dependency")
-                    .version("1.0.0")
-                    .jar("dependency")
-            )
-            .artifact(builder ->
-                builder.groupId("com", "github", "maximtereshchenko", "conveyor")
-                    .artifactId("dependency")
-                    .version("1.0.0")
-                    .pom(
-                        new PomModel(
-                            null,
-                            "com.github.maximtereshchenko.conveyor",
-                            "dependency",
-                            "1.0.0",
-                            null,
-                            List.of()
-                        )
-                    )
-            )
-            .url();
         factory.repositoryBuilder()
-            .superManual()
-            .manual(builder -> builder.name("dependencies").version("1.0.0"))
+            .pom(
+                factory.pomBuilder()
+                    .artifactId("bom")
+                    .managedDependency("dependency", "1.0.0")
+            )
+            .remoteJar(
+                factory.jarBuilder("dependency")
+            )
+            .pom(
+                factory.pomBuilder()
+                    .artifactId("dependency")
+            )
+            .install(wireMockRuntimeInfo.getWireMock());
+        factory.repositoryBuilder()
+            .schematicDefinition(factory.superManual())
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("dependencies")
+            )
             .jar(
-                "dependencies",
-                builder -> builder.name("dependencies").version("1.0.0")
+                factory.jarBuilder("dependencies")
             )
             .install(path);
 
         module.construct(
-            factory.schematicBuilder()
-                .name("project")
-                .version("1.0.0")
+            factory.schematicDefinitionBuilder()
                 .repository("local", path, true)
-                .repository("remote", url, true)
-                .preferenceInclusion(
-                    "com.github.maximtereshchenko.conveyor:bom",
-                    "1.0.0"
-                )
-                .plugin("dependencies", "1.0.0", Map.of())
-                .dependency(
-                    "com.github.maximtereshchenko.conveyor:dependency",
-                    DependencyScope.IMPLEMENTATION
-                )
+                .repository("remote", wireMockRuntimeInfo.getHttpBaseUrl(), true)
+                .preferenceInclusion("bom", "1.0.0")
+                .plugin("dependencies")
+                .dependency("dependency")
                 .install(path),
             Stage.COMPILE
         );
 
         assertThat(defaultConstructionDirectory(path).resolve("dependencies"))
             .content()
-            .isEqualTo("com.github.maximtereshchenko.conveyor:dependency-1.0.0");
+            .isEqualTo("dependency-1.0.0");
     }
 }

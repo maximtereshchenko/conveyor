@@ -252,9 +252,12 @@ final class Schematic {
             artifactPreferenceModels(fullSchematicHierarchy.preferences(), repositories, properties)
                 .collect(
                     Collectors.toMap(
-                        ArtifactPreferenceModel::name,
                         artifactPreferenceModel ->
-                            new SemanticVersion(properties.interpolated(artifactPreferenceModel.version()))
+                            artifactPreferenceModel.group() + ':' + artifactPreferenceModel.name(),
+                        artifactPreferenceModel ->
+                            new SemanticVersion(
+                                properties.interpolated(artifactPreferenceModel.version())
+                            )
                     )
                 )
         );
@@ -270,6 +273,7 @@ final class Schematic {
                 .stream()
                 .map(preferencesInclusionModel ->
                     modelFactory.manualHierarchy(
+                        preferencesInclusionModel.group(),
                         preferencesInclusionModel.name(),
                         new SemanticVersion(properties.interpolated(preferencesInclusionModel.version())),
                         repositories

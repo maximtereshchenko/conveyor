@@ -7,7 +7,15 @@ import java.util.Optional;
 
 interface Repository {
 
-    Optional<ManualDefinition> manualDefinition(String name, SemanticVersion semanticVersion);
+    Optional<ManualDefinition> manualDefinition(
+        String group,
+        String name,
+        SemanticVersion semanticVersion
+    );
 
-    Optional<Path> path(String name, SemanticVersion semanticVersion);
+    Optional<Path> path(
+        String group,
+        String name,
+        SemanticVersion semanticVersion
+    );
 }

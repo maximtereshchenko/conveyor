@@ -9,6 +9,7 @@ final class DisabledRepository implements Repository {
 
     @Override
     public Optional<ManualDefinition> manualDefinition(
+        String group,
         String name,
         SemanticVersion semanticVersion
     ) {
@@ -16,7 +17,7 @@ final class DisabledRepository implements Repository {
     }
 
     @Override
-    public Optional<Path> path(String name, SemanticVersion semanticVersion) {
+    public Optional<Path> path(String group, String name, SemanticVersion semanticVersion) {
         return Optional.empty();
     }
 }

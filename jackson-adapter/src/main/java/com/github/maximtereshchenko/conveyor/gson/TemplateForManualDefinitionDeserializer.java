@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.github.maximtereshchenko.conveyor.api.port.ManualTemplateDefinition;
-import com.github.maximtereshchenko.conveyor.api.port.NoExplicitlyDefinedTemplate;
+import com.github.maximtereshchenko.conveyor.api.port.NoTemplate;
 import com.github.maximtereshchenko.conveyor.api.port.TemplateForManualDefinition;
 import com.github.maximtereshchenko.conveyor.api.port.TemplateForSchematicDefinition;
 
@@ -24,10 +24,11 @@ final class TemplateForManualDefinitionDeserializer extends StdDeserializer<Temp
         DeserializationContext deserializationContext
     ) throws IOException {
         if (jsonParser.currentToken() == JsonToken.VALUE_NULL) {
-            return new NoExplicitlyDefinedTemplate();
+            return new NoTemplate();
         }
         JsonNode node = jsonParser.readValueAsTree();
         return new ManualTemplateDefinition(
+            node.get("group").asText(),
             node.get("name").asText(),
             node.get("version").asText()
         );

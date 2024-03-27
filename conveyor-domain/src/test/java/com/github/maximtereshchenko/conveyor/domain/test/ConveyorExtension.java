@@ -29,18 +29,22 @@ final class ConveyorExtension implements ParameterResolver {
         ParameterContext parameterContext,
         ExtensionContext extensionContext
     ) {
-        var gsonAdapter = get(extensionContext, JacksonAdapter.class, JacksonAdapter::configured);
+        var jacksonAdapter = get(
+            extensionContext,
+            JacksonAdapter.class,
+            JacksonAdapter::configured
+        );
         if (parameterContext.getParameter().getType() == ConveyorModule.class) {
             return get(
                 extensionContext,
                 ConveyorModule.class,
-                () -> new ConveyorFacade(gsonAdapter)
+                () -> new ConveyorFacade(jacksonAdapter)
             );
         }
         return get(
             extensionContext,
             BuilderFactory.class,
-            () -> new BuilderFactory(gsonAdapter, new XmlMapper())
+            () -> new BuilderFactory(jacksonAdapter, new XmlMapper())
         );
     }
 

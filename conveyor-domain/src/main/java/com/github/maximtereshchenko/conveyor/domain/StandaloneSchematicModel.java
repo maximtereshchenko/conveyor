@@ -20,6 +20,11 @@ final class StandaloneSchematicModel
     }
 
     @Override
+    public String group() {
+        return schematicDefinition.group();
+    }
+
+    @Override
     public String name() {
         return schematicDefinition.name();
     }
@@ -33,10 +38,11 @@ final class StandaloneSchematicModel
     public SchematicTemplateModel template() {
         return switch (schematicDefinition.template()) {
             case ManualTemplateDefinition definition -> new OtherManualTemplateModel(
+                definition.group(),
                 definition.name(),
                 new SemanticVersion(definition.version())
             );
-            case NoExplicitlyDefinedTemplate ignored -> defaultTemplate();
+            case NoTemplate ignored -> defaultTemplate();
             case SchematicPathTemplateDefinition definition ->
                 new OtherSchematicTemplateModel(definition.path());
         };
@@ -115,12 +121,13 @@ final class StandaloneSchematicModel
     DependencyModel dependencyModel(SchematicDependencyDefinition dependencyDefinition) {
         return switch (dependencyDefinition) {
             case DependencyOnArtifactDefinition definition -> new ArtifactDependencyModel(
+                definition.group(),
                 definition.name(),
                 definition.version(),
                 definition.scope()
             );
             case DependencyOnSchematicDefinition definition ->
-                new SchematicDependencyModel(definition.schematic(), definition.scope());
+                new SchematicDependencyModel(group(), definition.schematic(), definition.scope());
         };
     }
 
@@ -129,6 +136,10 @@ final class StandaloneSchematicModel
         if (Files.exists(defaultSchematicTemplate)) {
             return new OtherSchematicTemplateModel(defaultSchematicTemplate);
         }
-        return new OtherManualTemplateModel("super-manual", new SemanticVersion("1.0.0"));
+        return new OtherManualTemplateModel(
+            "com.github.maximtereshchenko.conveyor",
+            "super-manual",
+            new SemanticVersion("1.0.0")
+        );
     }
 }

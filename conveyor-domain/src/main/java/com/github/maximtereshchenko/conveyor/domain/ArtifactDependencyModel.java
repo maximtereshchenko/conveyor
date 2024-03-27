@@ -5,6 +5,7 @@ import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 import java.util.Optional;
 
 record ArtifactDependencyModel(
+    String group,
     String name,
     Optional<String> version,
     Optional<DependencyScope> scope
@@ -14,6 +15,7 @@ record ArtifactDependencyModel(
     public ArtifactDependencyModel override(DependencyModel base) {
         return switch (base) {
             case ArtifactDependencyModel model -> new ArtifactDependencyModel(
+                group,
                 name,
                 version.or(model::version),
                 scope.or(model::scope)

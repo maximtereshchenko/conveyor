@@ -21,7 +21,9 @@ final class DirectDependency extends ArtifactDependency {
         return artifactDependencyModel.version()
             .map(properties::interpolated)
             .map(SemanticVersion::new)
-            .or(() -> preferences.version(artifactDependencyModel.name()))
+            .or(() ->
+                preferences.version(artifactDependencyModel.group(), artifactDependencyModel.name())
+            )
             .orElseThrow();
     }
 }

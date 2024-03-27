@@ -5,6 +5,8 @@ import java.util.Set;
 
 interface Model<T extends TemplateModel, D extends DependencyModel> {
 
+    String group();
+
     String name();
 
     SemanticVersion version();

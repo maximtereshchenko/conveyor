@@ -18,15 +18,17 @@ final class JarBuilder {
     private static final Pattern INTERPOLATION_PATTERN = Pattern.compile("\\$\\{([^}]+)}");
 
     private final Path templateDirectory;
-    private final Map<String, String> values;
+    private final Map<String, String> values = new HashMap<>();
 
-    private JarBuilder(Path templateDirectory, Map<String, String> values) {
+    private JarBuilder(Path templateDirectory) {
         this.templateDirectory = templateDirectory;
-        this.values = Map.copyOf(values);
     }
 
     static JarBuilder from(String templateDirectory) {
-        return new JarBuilder(path(templateDirectory), Map.of());
+        return new JarBuilder(path(templateDirectory))
+            .group("com.github.maximtereshchenko.conveyor")
+            .name(templateDirectory)
+            .version("1.0.0");
     }
 
     private static Path path(String templateDirectory) {
@@ -44,13 +46,46 @@ final class JarBuilder {
         }
     }
 
+    JarBuilder group(String group) {
+        values.put("group", group);
+        return this;
+    }
+
     JarBuilder name(String name) {
-        return with("name", name)
-            .with("normalizedName", name.replaceAll("[-:.]", ""));
+        values.put("name", name);
+        values.put("normalizedName", name.replaceAll("[-:.]", ""));
+        return this;
     }
 
     JarBuilder version(String version) {
-        return with("version", String.valueOf(version));
+        values.put("version", String.valueOf(version));
+        return this;
+    }
+
+    String group() {
+        return values.get("group");
+    }
+
+    String name() {
+        return values.get("name");
+    }
+
+    String version() {
+        return values.get("version");
+    }
+
+    void write(OutputStream outputStream) {
+        try (var zipOutputStream = new ZipOutputStream(outputStream)) {
+            for (var fileObject : compiled()) {
+                zipOutputStream.putNextEntry(new ZipEntry(fileObject.toUri().toString()));
+                try (var inputStream = fileObject.openInputStream()) {
+                    inputStream.transferTo(zipOutputStream);
+                }
+                zipOutputStream.closeEntry();
+            }
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     byte[] bytes() {
@@ -67,24 +102,6 @@ final class JarBuilder {
             throw new UncheckedIOException(e);
         }
         return byteArrayOutputStream.toByteArray();
-    }
-
-    void install(Path path) {
-        try {
-            Files.write(path.resolve(fileName()), bytes());
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-    }
-
-    private JarBuilder with(String key, String value) {
-        var copy = new HashMap<>(values);
-        copy.put(key, value);
-        return new JarBuilder(templateDirectory, copy);
-    }
-
-    private String fileName() {
-        return "%s-%s.jar".formatted(values.get("name"), values.get("version"));
     }
 
     private String interpolated(String original) {

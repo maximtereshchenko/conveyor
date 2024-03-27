@@ -12,7 +12,7 @@ abstract class StoredArtifact<T extends DependencyModel> extends DependentArtifa
 
     @Override
     public Path path() {
-        return repositories.path(name(), version());
+        return repositories.path(group(), name(), version());
     }
 
     Repositories repositories() {

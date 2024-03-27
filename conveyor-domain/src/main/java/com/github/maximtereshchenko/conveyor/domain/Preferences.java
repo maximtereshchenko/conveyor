@@ -11,7 +11,7 @@ final class Preferences {
         this.versions = versions;
     }
 
-    Optional<SemanticVersion> version(String name) {
-        return Optional.ofNullable(versions.get(name));
+    Optional<SemanticVersion> version(String group, String name) {
+        return Optional.ofNullable(versions.get(group + ':' + name));
     }
 }

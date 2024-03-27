@@ -2,27 +2,35 @@ package com.github.maximtereshchenko.conveyor.domain.test;
 
 import com.github.maximtereshchenko.conveyor.gson.JacksonAdapter;
 import com.github.maximtereshchenko.conveyor.jackson.dataformat.xml.XmlMapper;
-import com.github.maximtereshchenko.conveyor.wiremock.junit5.WireMockRuntimeInfo;
 
 final class BuilderFactory {
 
-    private final JacksonAdapter gsonAdapter;
+    private final JacksonAdapter jacksonAdapter;
     private final XmlMapper xmlMapper;
 
-    BuilderFactory(JacksonAdapter gsonAdapter, XmlMapper xmlMapper) {
-        this.gsonAdapter = gsonAdapter;
+    BuilderFactory(JacksonAdapter jacksonAdapter, XmlMapper xmlMapper) {
+        this.jacksonAdapter = jacksonAdapter;
         this.xmlMapper = xmlMapper;
     }
 
-    SchematicBuilder schematicBuilder() {
-        return new SchematicBuilder(gsonAdapter).name("project"); //TODO
-    }
-
     RepositoryBuilder repositoryBuilder() {
-        return new RepositoryBuilder(gsonAdapter);
+        return new RepositoryBuilder();
     }
 
-    RemoteRepositoryBuilder remoteRepositoryBuilder(WireMockRuntimeInfo wireMockRuntimeInfo) {
-        return new RemoteRepositoryBuilder(wireMockRuntimeInfo, xmlMapper);
+    PomBuilder pomBuilder() {
+        return new PomBuilder(xmlMapper);
+    }
+
+    JarBuilder jarBuilder(String templateDirectory) {
+        return JarBuilder.from(templateDirectory);
+    }
+
+    SchematicDefinitionBuilder schematicDefinitionBuilder() {
+        return new SchematicDefinitionBuilder(jacksonAdapter);
+    }
+
+    SchematicDefinitionBuilder superManual() {
+        return schematicDefinitionBuilder()
+            .name("super-manual");
     }
 }

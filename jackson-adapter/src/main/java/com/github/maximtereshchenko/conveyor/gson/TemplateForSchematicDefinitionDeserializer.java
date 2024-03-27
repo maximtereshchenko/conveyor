@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.github.maximtereshchenko.conveyor.api.port.ManualTemplateDefinition;
-import com.github.maximtereshchenko.conveyor.api.port.NoExplicitlyDefinedTemplate;
+import com.github.maximtereshchenko.conveyor.api.port.NoTemplate;
 import com.github.maximtereshchenko.conveyor.api.port.SchematicPathTemplateDefinition;
 import com.github.maximtereshchenko.conveyor.api.port.TemplateForSchematicDefinition;
 
@@ -25,13 +25,17 @@ final class TemplateForSchematicDefinitionDeserializer extends StdDeserializer<T
         DeserializationContext deserializationContext
     ) throws IOException {
         if (jsonParser.currentToken() == JsonToken.VALUE_NULL) {
-            return new NoExplicitlyDefinedTemplate();
+            return new NoTemplate();
         }
         JsonNode node = jsonParser.readValueAsTree();
         var name = node.get("name");
         var version = node.get("version");
         if (name != null && version != null) {
-            return new ManualTemplateDefinition(name.asText(), version.asText());
+            return new ManualTemplateDefinition(
+                node.get("group").asText(),
+                name.asText(),
+                version.asText()
+            );
         }
         return new SchematicPathTemplateDefinition(Paths.get(node.get("path").asText()));
     }

@@ -19,4 +19,5 @@ module com.github.maximtereshchenko.conveyor.wiremock {
     exports com.github.maximtereshchenko.conveyor.wiremock.http;
     exports com.github.maximtereshchenko.conveyor.wiremock.verification;
     exports com.github.maximtereshchenko.conveyor.wiremock.verification.diff;
+    exports com.github.maximtereshchenko.conveyor.wiremock.stubbing;
 }

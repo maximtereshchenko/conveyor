@@ -1,11 +1,13 @@
 package com.github.maximtereshchenko.conveyor.gson;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.github.maximtereshchenko.conveyor.api.port.*;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -22,7 +24,7 @@ public final class JacksonAdapter implements DefinitionTranslator {
         var module = new SimpleModule();
         module.addSerializer(Path.class, new ToStringSerializer());
         module.addSerializer(
-            NoExplicitlyDefinedTemplate.class,
+            NoTemplate.class,
             new NoExplicitlyDefinedTemplateSerializer()
         );
         module.addDeserializer(
@@ -42,6 +44,7 @@ public final class JacksonAdapter implements DefinitionTranslator {
             new ObjectMapper()
                 .registerModule(module)
                 .findAndRegisterModules()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
         );
     }
 
@@ -63,6 +66,14 @@ public final class JacksonAdapter implements DefinitionTranslator {
     public void write(Path path, Object object) {
         try (var writer = Files.newBufferedWriter(path)) {
             objectMapper.writeValue(writer, object);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    public void write(Object object, OutputStream outputStream) {
+        try {
+            objectMapper.writerWithDefaultPrettyPrinter().writeValue(outputStream, object);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
