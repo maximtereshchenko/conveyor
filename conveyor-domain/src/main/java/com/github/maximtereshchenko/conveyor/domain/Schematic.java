@@ -155,7 +155,8 @@ final class Schematic {
                         properties
                     )
                 )
-                .collect(Collectors.toSet())
+                .collect(Collectors.toSet()),
+            definitionTranslator
         );
     }
 
@@ -169,19 +170,22 @@ final class Schematic {
         }
         return switch (repositoryModel) {
             case LocalDirectoryRepositoryModel model -> new LocalDirectoryRepository(
-                path.getParent().resolve(model.path()),
-                definitionTranslator
+                absolutePath(path.getParent(), model.path())
             );
             case RemoteRepositoryModel model -> new RemoteRepository(
                 model.url(),
-                xmlFactory,
                 http,
+                xmlFactory,
+                definitionTranslator,
                 new LocalDirectoryRepository(
-                    path.getParent().resolve(properties.remoteRepositoryCacheDirectory()),
-                    definitionTranslator
+                    absolutePath(path.getParent(), properties.remoteRepositoryCacheDirectory())
                 )
             );
         };
+    }
+
+    private Path absolutePath(Path base, Path relative) {
+        return base.resolve(relative).normalize();
     }
 
     private Plugins plugins(

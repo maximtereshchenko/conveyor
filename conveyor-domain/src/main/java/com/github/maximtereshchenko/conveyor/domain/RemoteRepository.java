@@ -3,99 +3,86 @@ package com.github.maximtereshchenko.conveyor.domain;
 import com.github.maximtereshchenko.conveyor.api.port.*;
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UncheckedIOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 final class RemoteRepository implements Repository {
 
     private final URL url;
-    private final XmlFactory xmlFactory;
     private final Http http;
+    private final XmlFactory xmlFactory;
+    private final DefinitionTranslator definitionTranslator;
     private final LocalDirectoryRepository cache;
 
-    RemoteRepository(URL url, XmlFactory xmlFactory, Http http, LocalDirectoryRepository cache) {
+    RemoteRepository(
+        URL url,
+        Http http,
+        XmlFactory xmlFactory,
+        DefinitionTranslator definitionTranslator,
+        LocalDirectoryRepository cache
+    ) {
         this.url = url;
-        this.xmlFactory = xmlFactory;
         this.http = http;
+        this.xmlFactory = xmlFactory;
+        this.definitionTranslator = definitionTranslator;
         this.cache = cache;
     }
 
     @Override
-    public Optional<ManualDefinition> manualDefinition(
-        String group,
-        String name,
-        SemanticVersion semanticVersion
-    ) {
-        return cache.manualDefinition(group, name, semanticVersion)
-            .or(() ->
-                http.get(
-                    absoluteUri(group, name, semanticVersion, "pom"),
-                    inputStream -> manualDefinition(group, name, semanticVersion, inputStream)
-                )
-            );
+    public Optional<Path> path(URI uri, Classifier classifier) {
+        return cache.path(uri, classifier)
+            .or(() -> {
+                var absoluteUri = absoluteUri(uri);
+                if (classifier == Classifier.SCHEMATIC_DEFINITION) {
+                    http.get(
+                        URI.create(absoluteUri.toString().replace(".json", ".pom")),
+                        inputStream -> {
+                            var xml = xmlFactory.xml(inputStream);
+                            cache.stored(
+                                uri,
+                                outputStream -> definitionTranslator.write(
+                                    new SchematicDefinition(
+                                        xml.text("groupId"),
+                                        xml.text("artifactId"),
+                                        version(xml),
+                                        template(xml),
+                                        List.of(),
+                                        List.of(),
+                                        Map.of(),
+                                        new PreferencesDefinition(
+                                            List.of(),
+                                            artifacts(xml)
+                                        ),
+                                        List.of(),
+                                        dependencies(xml)
+                                    ),
+                                    outputStream
+                                )
+                            );
+                        }
+                    );
+                } else {
+                    http.get(
+                        absoluteUri,
+                        inputStream -> cache.stored(uri, inputStream::transferTo)
+                    );
+                }
+                return cache.path(uri, classifier);
+            });
     }
 
-    @Override
-    public Optional<Path> path(
-        String group,
-        String name,
-        SemanticVersion semanticVersion
-    ) {
-        return cache.path(group, name, semanticVersion)
-            .or(() ->
-                http.get(
-                    absoluteUri(group, name, semanticVersion, "jar"),
-                    inputStream -> path(group, name, semanticVersion, inputStream)
-                )
-            );
-    }
-
-    private Path path(
-        String group,
-        String name,
-        SemanticVersion semanticVersion,
-        InputStream inputStream
-    ) {
+    private URI absoluteUri(URI uri) {
         try {
-            return cache.storedJar(group, name, semanticVersion, inputStream.readAllBytes());
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
+            return url.toURI().resolve(uri);
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException(e);
         }
-    }
-
-    private ManualDefinition manualDefinition(
-        String group,
-        String name,
-        SemanticVersion semanticVersion,
-        InputStream inputStream
-    ) {
-        var xml = xmlFactory.xml(inputStream);
-        return cache.stored(
-            group,
-            name,
-            semanticVersion,
-            new ManualDefinition(
-                xml.text("groupId"),
-                xml.text("artifactId"),
-                version(xml),
-                template(xml),
-                Map.of(),
-                new PreferencesDefinition(
-                    List.of(),
-                    artifacts(xml)
-                ),
-                List.of(),
-                dependencies(xml)
-            )
-        );
     }
 
     private Collection<ArtifactPreferenceDefinition> artifacts(Xml xml) {
@@ -115,26 +102,26 @@ final class RemoteRepository implements Repository {
             .toList();
     }
 
-    private Collection<ManualDependencyDefinition> dependencies(Xml xml) {
+    private Collection<SchematicDependencyDefinition> dependencies(Xml xml) {
         return xml.tags("dependencies")
             .stream()
             .map(dependencies -> dependencies.tags("dependency"))
             .flatMap(Collection::stream)
-            .map(dependency ->
-                new ManualDependencyDefinition(
+            .<SchematicDependencyDefinition>map(dependency ->
+                new DependencyOnArtifactDefinition(
                     dependency.text("groupId"),
                     dependency.text("artifactId"),
-                    version(xml),
-                    DependencyScope.IMPLEMENTATION
+                    Optional.of(version(xml)),
+                    Optional.of(DependencyScope.IMPLEMENTATION)
                 )
             )
             .toList();
     }
 
-    private TemplateForManualDefinition template(Xml xml) {
+    private TemplateForSchematicDefinition template(Xml xml) {
         return xml.tags("parent")
             .stream()
-            .<TemplateForManualDefinition>map(parent ->
+            .<TemplateForSchematicDefinition>map(parent ->
                 new ManualTemplateDefinition(
                     parent.text("groupId"),
                     parent.text("artifactId"),
@@ -143,47 +130,6 @@ final class RemoteRepository implements Repository {
             )
             .findAny()
             .orElseGet(NoTemplate::new);
-    }
-
-    private URI absoluteUri(
-        String group,
-        String name,
-        SemanticVersion semanticVersion,
-        String classifier
-    ) {
-        try {
-            return url.toURI()
-                .resolve(
-                    uri(
-                        List.of(group.split("\\.")),
-                        name,
-                        semanticVersion,
-                        classifier
-                    )
-                );
-        } catch (URISyntaxException e) {
-            throw new IllegalArgumentException(e);
-        }
-    }
-
-    private URI uri(
-        List<String> groupId,
-        String artifactId,
-        SemanticVersion semanticVersion,
-        String classifier
-    ) {
-        return URI.create(
-            Stream.concat(
-                    groupId.stream(),
-                    Stream.of(
-                        artifactId,
-                        semanticVersion,
-                        "%s-%s.%s".formatted(artifactId, semanticVersion, classifier)
-                    )
-                )
-                .map(Objects::toString)
-                .collect(Collectors.joining("/", "/", ""))
-        );
     }
 
     private String version(Xml xml) {

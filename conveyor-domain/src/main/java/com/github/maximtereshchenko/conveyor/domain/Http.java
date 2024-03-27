@@ -7,20 +7,18 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.Optional;
-import java.util.function.Function;
 
 final class Http {
 
     private final HttpClient httpClient = HttpClient.newHttpClient();
 
-    <T> Optional<T> get(URI uri, Function<InputStream, T> function) {
+    void get(URI uri, IOConsumer<InputStream> consumer) {
         var response = getResponse(uri);
         if (response.statusCode() != 200) {
-            return Optional.empty();
+            return;
         }
         try (var inputStream = response.body()) {
-            return Optional.of(function.apply(inputStream));
+            consumer.accept(inputStream);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
