@@ -22,7 +22,6 @@ final class TasksFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("instant")
@@ -50,7 +49,6 @@ final class TasksFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("instant")
@@ -78,7 +76,6 @@ final class TasksFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("instant")
@@ -106,7 +103,6 @@ final class TasksFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("instant")
@@ -153,7 +149,6 @@ final class TasksFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("instant")
@@ -196,7 +191,6 @@ final class TasksFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("dependencies")
@@ -234,7 +228,6 @@ final class TasksFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("dependencies")
@@ -282,7 +275,6 @@ final class TasksFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("dependencies")
@@ -325,7 +317,6 @@ final class TasksFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("products")

@@ -2,7 +2,7 @@ package com.github.maximtereshchenko.conveyor.domain.test;
 
 import com.github.maximtereshchenko.conveyor.api.ConveyorModule;
 import com.github.maximtereshchenko.conveyor.domain.ConveyorFacade;
-import com.github.maximtereshchenko.conveyor.gson.JacksonAdapter;
+import com.github.maximtereshchenko.conveyor.jackson.JacksonAdapter;
 import com.github.maximtereshchenko.conveyor.jackson.dataformat.xml.XmlMapper;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace;

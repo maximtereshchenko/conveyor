@@ -2,7 +2,7 @@ package com.github.maximtereshchenko.conveyor.domain.test;
 
 import com.github.maximtereshchenko.conveyor.api.port.*;
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
-import com.github.maximtereshchenko.conveyor.gson.JacksonAdapter;
+import com.github.maximtereshchenko.conveyor.jackson.JacksonAdapter;
 
 import java.io.IOException;
 import java.io.OutputStream;

@@ -21,7 +21,6 @@ final class PluginsFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("properties")
@@ -60,7 +59,6 @@ final class PluginsFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("configuration")
@@ -96,7 +94,6 @@ final class PluginsFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("configuration")
@@ -134,7 +131,6 @@ final class PluginsFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("instant")
@@ -169,7 +165,6 @@ final class PluginsFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("module-path")
@@ -207,7 +202,6 @@ final class PluginsFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("module-path")
@@ -255,7 +249,6 @@ final class PluginsFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("module-path")
@@ -298,7 +291,6 @@ final class PluginsFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("template")
@@ -335,7 +327,6 @@ final class PluginsFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("template")
@@ -379,7 +370,6 @@ final class PluginsFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("template")
@@ -426,7 +416,6 @@ final class PluginsFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("template")
@@ -469,7 +458,6 @@ final class PluginsFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("template")

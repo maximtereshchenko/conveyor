@@ -19,7 +19,6 @@ final class PropertiesFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("template")
@@ -65,7 +64,6 @@ final class PropertiesFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("template")
@@ -110,7 +108,6 @@ final class PropertiesFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("template")
@@ -154,7 +151,6 @@ final class PropertiesFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("properties")
@@ -192,7 +188,6 @@ final class PropertiesFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("properties")
@@ -231,7 +226,6 @@ final class PropertiesFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("properties")
@@ -269,7 +263,6 @@ final class PropertiesFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("properties")
@@ -308,7 +301,6 @@ final class PropertiesFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("properties")
@@ -347,7 +339,6 @@ final class PropertiesFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("properties")
@@ -388,7 +379,6 @@ final class PropertiesFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("configuration")

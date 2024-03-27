@@ -74,13 +74,8 @@ A build tool for Java projects
     * Schematic can define a dependency on other schematic with a group, a name and an optional
       scope. In such case the product from this schematic of type MODULE will be used in module path
 * Inheritance
-    * A schematic inherits properties, plugins and dependencies from a manual used as a template. It
-      is defined with a group, a name and a version
     * A schematic inherits properties, plugins, dependencies and repositories from another schematic
-      used as a template. It is defined with a path to the file with the schematic
-    * If a schematic does not have an explicitly defined template, then a schematic
-      from `conveyor.json` file located in the parent directory will be used. If such schematic does
-      not exist, then manual with `super-manual` name and version `1` will be used
+      used as a template. It is defined with a group, a name and a version
     * A schematic has zero or more inclusions. It will be used as a template for included schematics
     * A schematic is constructed before its inclusions
     * A schematic is constructed after its schematic template

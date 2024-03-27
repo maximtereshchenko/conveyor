@@ -1,4 +1,4 @@
-package com.github.maximtereshchenko.conveyor.gson;
+package com.github.maximtereshchenko.conveyor.jackson;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
