@@ -21,6 +21,7 @@ record PomModel(
     String groupId,
     String artifactId,
     String version,
+    DependencyManagement dependencyManagement,
     @JacksonXmlProperty(localName = "dependency")
     @JacksonXmlElementWrapper(localName = "dependencies")
     Collection<Dependency> dependencies
@@ -31,6 +32,7 @@ record PomModel(
         String groupId,
         String artifactId,
         String version,
+        DependencyManagement dependencyManagement,
         Collection<Dependency> dependencies
     ) {
         this(
@@ -42,6 +44,7 @@ record PomModel(
             groupId,
             artifactId,
             version,
+            dependencyManagement,
             dependencies
         );
     }
@@ -49,4 +52,10 @@ record PomModel(
     record Parent(String groupId, String artifactId, String version) {}
 
     record Dependency(String groupId, String artifactId, String version) {}
+
+    record DependencyManagement(
+        @JacksonXmlProperty(localName = "dependency")
+        @JacksonXmlElementWrapper(localName = "dependencies")
+        Collection<Dependency> dependencies
+    ) {}
 }
