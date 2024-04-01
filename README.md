@@ -34,3 +34,15 @@ A build tool for Java projects
     * Tasks bound to the same stage are executed in step ascending order (PREPARE, RUN, FINALIZE)
     * Given schematic dependencies and products, task performs operations on the project and produces products to be
       used in subsequent tasks
+* Properties
+    * Properties are user-defined key-value pairs
+    * Properties are inherited from a manual or a schematic used as a template
+    * Inherited property can be overridden in a schematic
+    * Inherited property can be removed in the schematic by assigning empty string to the key
+    * The property `conveyor.schematic.name` can be used to interpolate the schematic's name. This property cannot be
+      overridden
+    * The property `conveyor.discovery.directory` defines the directory, where plugins should find files to work with.
+      It is relative to the directory, where the schematic definition is located
+    * The property `conveyor.construction.directory` defines the directory, where plugins should place created products.
+      It is relative to the discovery directory
+    * Properties can be templated with other properties using `${property.key}` syntax
