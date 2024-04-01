@@ -563,7 +563,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
     }
 
     @Test
-    void givenPreferenceInclusion_whenConstructToStage_thenPreferencesAreIncludedFromReferencedManual(
+    void givenPreferenceInclusion_whenConstructToStage_thenPreferencesAreIncludedFromReferencedSchematic(
         @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
@@ -793,6 +793,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                 .inclusion(
                     factory.schematicDefinitionBuilder()
                         .name("dependency")
+                        .template("project")
                         .property("library.version", "1.0.0")
                         .plugin(
                             "product",
@@ -819,8 +820,9 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                 .inclusion(
                     factory.schematicDefinitionBuilder()
                         .name("depends")
+                        .template("project")
                         .plugin("dependencies", "1.0.0", Map.of())
-                        .schematicDependency("dependency")
+                        .dependency("dependency")
                         .install(depends)
                 )
                 .install(path),

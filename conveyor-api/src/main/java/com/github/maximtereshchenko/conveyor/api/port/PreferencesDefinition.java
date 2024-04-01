@@ -1,12 +1,11 @@
 package com.github.maximtereshchenko.conveyor.api.port;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
 public record PreferencesDefinition(
-    Collection<PreferencesInclusionDefinition> inclusions,
-    Collection<ArtifactPreferenceDefinition> artifacts
+    List<PreferencesInclusionDefinition> inclusions,
+    List<ArtifactPreferenceDefinition> artifacts
 ) {
 
     public PreferencesDefinition {

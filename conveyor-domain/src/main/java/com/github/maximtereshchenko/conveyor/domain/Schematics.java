@@ -1,9 +1,12 @@
 package com.github.maximtereshchenko.conveyor.domain;
 
-import com.github.maximtereshchenko.conveyor.api.SchematicProducts;
+import com.github.maximtereshchenko.conveyor.common.api.Product;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 final class Schematics {
 
@@ -15,30 +18,25 @@ final class Schematics {
         this.initial = initial;
     }
 
-    boolean haveDependencyBetween(String name, Schematic schematic) {
-        return named(name).dependsOn(schematic, this);
+    void construct(Stage stage) {
+        var products = Set.<Product>of();
+        for (var schematic : schematicsInContructionOrder()) {
+            products = schematic.construct(products, stage(stage, schematic));
+        }
     }
 
-    SchematicProducts construct(Stage stage) {
+    Optional<Schematic> schematic(String group, String name) {
+        return all.stream()
+            .filter(schematic -> schematic.group().equals(group))
+            .filter(schematic -> schematic.name().equals(name))
+            .findAny();
+    }
+
+    private List<Schematic> schematicsInContructionOrder() {
         return all.stream()
             .filter(this::toBeConstructed)
             .sorted(this::comparedByMutualRequirement)
-            .reduce(
-                new SchematicProducts(),
-                (schematicProducts, schematic) ->
-                    schematic.construct(
-                        schematicProducts,
-                        stage(stage, schematic)
-                    ),
-                (a, b) -> a
-            );
-    }
-
-    private Schematic named(String name) {
-        return all.stream()
-            .filter(schematic -> schematic.name().equals(name))
-            .findAny()
-            .orElseThrow();
+            .toList();
     }
 
     private Stage stage(Stage stage, Schematic schematic) {

@@ -1,3 +1,3 @@
 package com.github.maximtereshchenko.conveyor.domain;
 
-sealed interface TemplateModel permits ManualTemplateModel, SchematicTemplateModel {}
+sealed interface TemplateModel permits NoTemplateModel, SchematicTemplateModel {}

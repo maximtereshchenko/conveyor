@@ -1,20 +1,21 @@
 package com.github.maximtereshchenko.conveyor.api.port;
 
-import java.util.Map;
+import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
+
 import java.util.Objects;
 import java.util.Optional;
 
-public record PluginDefinition(
+public record DependencyDefinition(
     String group,
     String name,
     Optional<String> version,
-    Map<String, String> configuration
+    Optional<DependencyScope> scope
 ) {
 
-    public PluginDefinition {
+    public DependencyDefinition {
         Objects.requireNonNull(group);
         Objects.requireNonNull(name);
         version = Objects.requireNonNullElse(version, Optional.empty());
-        configuration = Map.copyOf(Objects.requireNonNullElse(configuration, Map.of()));
+        scope = Objects.requireNonNullElse(scope, Optional.empty());
     }
 }

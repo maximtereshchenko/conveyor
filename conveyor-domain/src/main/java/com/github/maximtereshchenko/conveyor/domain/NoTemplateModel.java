@@ -1,3 +1,3 @@
 package com.github.maximtereshchenko.conveyor.domain;
 
-final class NoTemplateModel implements ManualTemplateModel, SchematicTemplateModel {}
+final class NoTemplateModel implements TemplateModel {}

@@ -1,13 +1,10 @@
 package com.github.maximtereshchenko.conveyor.api.port;
 
-import java.util.Objects;
-
-public final class NoTemplate
-    implements TemplateForSchematicDefinition, TemplateForManualDefinition {
+public final class NoTemplateDefinition implements TemplateDefinition {
 
     @Override
     public int hashCode() {
-        return Objects.hash();
+        return 0;
     }
 
     @Override

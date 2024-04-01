@@ -12,30 +12,38 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-final class RemoteRepository implements Repository {
+final class RemoteRepository extends UriRepository {
 
     private final URL url;
     private final Http http;
     private final XmlFactory xmlFactory;
-    private final DefinitionTranslator definitionTranslator;
+    private final SchematicDefinitionTranslator schematicDefinitionTranslator;
     private final LocalDirectoryRepository cache;
 
     RemoteRepository(
         URL url,
         Http http,
         XmlFactory xmlFactory,
-        DefinitionTranslator definitionTranslator,
+        SchematicDefinitionTranslator schematicDefinitionTranslator,
         LocalDirectoryRepository cache
     ) {
         this.url = url;
         this.http = http;
         this.xmlFactory = xmlFactory;
-        this.definitionTranslator = definitionTranslator;
+        this.schematicDefinitionTranslator = schematicDefinitionTranslator;
         this.cache = cache;
     }
 
     @Override
-    public Optional<Path> path(URI uri, Classifier classifier) {
+    String extension(Classifier classifier) {
+        return switch (classifier) {
+            case SCHEMATIC_DEFINITION -> "pom";
+            case MODULE -> "jar";
+        };
+    }
+
+    @Override
+    Optional<Path> path(URI uri, Classifier classifier) {
         return cache.path(uri, classifier)
             .or(() -> {
                 var absoluteUri = absoluteUri(uri);
@@ -46,7 +54,7 @@ final class RemoteRepository implements Repository {
                             var xml = xmlFactory.xml(inputStream);
                             cache.stored(
                                 uri,
-                                outputStream -> definitionTranslator.write(
+                                outputStream -> schematicDefinitionTranslator.write(
                                     new SchematicDefinition(
                                         xml.text("groupId"),
                                         xml.text("artifactId"),
@@ -85,7 +93,7 @@ final class RemoteRepository implements Repository {
         }
     }
 
-    private Collection<ArtifactPreferenceDefinition> artifacts(Xml xml) {
+    private List<ArtifactPreferenceDefinition> artifacts(Xml xml) {
         return xml.tags("dependencyManagement")
             .stream()
             .map(dependencyManagement -> dependencyManagement.tags("dependencies"))
@@ -102,13 +110,13 @@ final class RemoteRepository implements Repository {
             .toList();
     }
 
-    private Collection<SchematicDependencyDefinition> dependencies(Xml xml) {
+    private List<DependencyDefinition> dependencies(Xml xml) {
         return xml.tags("dependencies")
             .stream()
             .map(dependencies -> dependencies.tags("dependency"))
             .flatMap(Collection::stream)
-            .<SchematicDependencyDefinition>map(dependency ->
-                new DependencyOnArtifactDefinition(
+            .map(dependency ->
+                new DependencyDefinition(
                     dependency.text("groupId"),
                     dependency.text("artifactId"),
                     Optional.of(version(xml)),
@@ -118,18 +126,18 @@ final class RemoteRepository implements Repository {
             .toList();
     }
 
-    private TemplateForSchematicDefinition template(Xml xml) {
+    private TemplateDefinition template(Xml xml) {
         return xml.tags("parent")
             .stream()
-            .<TemplateForSchematicDefinition>map(parent ->
-                new ManualTemplateDefinition(
+            .<TemplateDefinition>map(parent ->
+                new SchematicTemplateDefinition(
                     parent.text("groupId"),
                     parent.text("artifactId"),
                     version(parent)
                 )
             )
             .findAny()
-            .orElseGet(NoTemplate::new);
+            .orElseGet(NoTemplateDefinition::new);
     }
 
     private String version(Xml xml) {

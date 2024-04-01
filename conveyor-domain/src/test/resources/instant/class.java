@@ -17,11 +17,11 @@ public final class ${normalizedName} implements ConveyorPlugin {
     }
 
     @Override
-    public List<ConveyorTaskBinding> bindings(ConveyorProperties properties, Map<String, String> configuration) {
+    public List<ConveyorTaskBinding> bindings(ConveyorSchematic schematic, Map<String, String> configuration) {
         return configuration.entrySet()
             .stream()
             .filter(entry -> !entry.getKey().equals("enabled"))
-            .map(entry -> binding(properties.constructionDirectory().resolve(entry.getKey()), entry.getValue()))
+            .map(entry -> binding(schematic.constructionDirectory().resolve(entry.getKey()), entry.getValue()))
             .toList();
     }
 
@@ -30,14 +30,14 @@ public final class ${normalizedName} implements ConveyorPlugin {
         return new ConveyorTaskBinding(
             Stage.valueOf(stageAndStep[0]),
             Step.valueOf(stageAndStep[1]),
-            (dependencies, products) -> execute(products, path)
+            (conveyorSchematic, products) -> execute(path)
         );
     }
 
-    private Products execute(Products products, Path path) {
+    private Set<Product> execute(Path path) {
         sleep();
         writeInstant(path);
-        return products;
+        return Set.of();
     }
 
     private void sleep() {

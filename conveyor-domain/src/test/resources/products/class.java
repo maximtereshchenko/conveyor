@@ -16,28 +16,24 @@ public final class ${normalizedName} implements ConveyorPlugin {
     }
 
     @Override
-    public List<ConveyorTaskBinding> bindings(ConveyorProperties properties, Map<String, String> configuration) {
+    public List<ConveyorTaskBinding> bindings(ConveyorSchematic schematic, Map<String, String> configuration) {
         return List.of(
             new ConveyorTaskBinding(
                 Stage.PUBLISH,
                 Step.RUN,
-                (dependencies, products) -> execute(products, properties.constructionDirectory().resolve("products"))
+                (conveyorSchematic, products) -> execute(products, schematic.constructionDirectory().resolve("products"))
             )
         );
     }
 
-    private Products execute(Products products, Path path) {
+    private Set<Product> execute(Set<Product> products, Path path) {
         write(path, products(products));
-        return products;
+        return Set.of();
     }
 
-    private String products(Products products) {
-        return Stream.of(ProductType.values())
-            .flatMap(productType ->
-                products.byType(productType)
-                    .stream()
-                    .map(path -> productType + "=" + path)
-            )
+    private String products(Set<Product> products) {
+        return products.stream()
+            .map(product -> product.type() + "=" + product.path())
             .collect(Collectors.joining(System.lineSeparator()));
     }
 

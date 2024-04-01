@@ -5,16 +5,17 @@ import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-abstract class Hierarchy
-    <T extends TemplateModel,
-        D extends DependencyModel,
-        M extends Model<? extends TemplateModel, D>>
-    implements Model<T, D> {
+final class HierarchicalSchematicModel<T extends SchematicModel> implements SchematicModel {
 
-    private final LinkedHashSet<? extends M> models;
+    private final LinkedHashSet<T> models;
 
-    Hierarchy(LinkedHashSet<? extends M> models) {
+    HierarchicalSchematicModel(LinkedHashSet<T> models) {
         this.models = models;
+    }
+
+    @SafeVarargs
+    HierarchicalSchematicModel(T... model) {
+        this(new LinkedHashSet<>(List.of(model)));
     }
 
     @Override
@@ -33,6 +34,11 @@ abstract class Hierarchy
     }
 
     @Override
+    public TemplateModel template() {
+        return models.getFirst().template();
+    }
+
+    @Override
     public Map<String, String> properties() {
         var properties = new HashMap<String, String>();
         for (var model : models) {
@@ -44,26 +50,31 @@ abstract class Hierarchy
     @Override
     public PreferencesModel preferences() {
         return models.stream()
-            .map(Model::preferences)
+            .map(SchematicModel::preferences)
             .reduce((first, second) -> second.override(first))
             .orElseThrow();
     }
 
     @Override
     public Set<PluginModel> plugins() {
-        return reduce(Model::plugins, PluginModel::name, PluginModel::override);
+        return reduce(SchematicModel::plugins, PluginModel::name, PluginModel::override);
     }
 
-    LinkedHashSet<M> models() {
+    @Override
+    public Set<DependencyModel> dependencies() {
+        return reduce(
+            SchematicModel::dependencies,
+            DependencyModel::name,
+            DependencyModel::override
+        );
+    }
+
+    LinkedHashSet<T> models() {
         return new LinkedHashSet<>(models);
     }
 
-    boolean inheritsFrom(Hierarchy<T, D, M> hierarchy) {
-        return models.containsAll(hierarchy.models());
-    }
-
     <O> Set<O> reduce(
-        Function<M, Set<O>> extractor,
+        Function<T, Set<O>> extractor,
         Function<O, String> classifier,
         BinaryOperator<O> reducer
     ) {
@@ -80,5 +91,15 @@ abstract class Hierarchy
                 )
                 .values()
         );
+    }
+
+    HierarchicalSchematicModel<T> inheritedFrom(T model) {
+        var copy = new LinkedHashSet<>(models);
+        copy.addFirst(model);
+        return new HierarchicalSchematicModel<>(copy);
+    }
+
+    boolean inheritsFrom(HierarchicalSchematicModel<T> hierarchicalSchematicModel) {
+        return models.containsAll(hierarchicalSchematicModel.models);
     }
 }

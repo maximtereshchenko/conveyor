@@ -195,6 +195,7 @@ final class DependenciesFeatureTests extends ConveyorTest {
                 .inclusion(
                     factory.schematicDefinitionBuilder()
                         .name("first")
+                        .template("project")
                         .plugin(
                             "product",
                             "1.0.0",
@@ -215,8 +216,9 @@ final class DependenciesFeatureTests extends ConveyorTest {
                 .inclusion(
                     factory.schematicDefinitionBuilder()
                         .name("second")
+                        .template("project")
                         .plugin("dependencies")
-                        .schematicDependency("first")
+                        .dependency("first")
                         .install(second)
                 )
                 .install(path),

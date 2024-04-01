@@ -16,25 +16,25 @@ public final class ${normalizedName} implements ConveyorPlugin {
     }
 
     @Override
-    public List<ConveyorTaskBinding> bindings(ConveyorProperties properties, Map<String, String> configuration) {
+    public List<ConveyorTaskBinding> bindings(ConveyorSchematic schematic, Map<String, String> configuration) {
         return List.of(
             new ConveyorTaskBinding(
                 Stage.COMPILE,
                 Step.RUN,
-                (dependencies, products) -> execute(products, properties, configuration)
+                (conveyorSchematic, products) -> execute(schematic, configuration)
             )
         );
     }
 
-    private Products execute(Products products, ConveyorProperties properties, Map<String, String> configuration) {
-        writeConfiguration(properties, configuration);
-        return products;
+    private Set<Product> execute(ConveyorSchematic schematic, Map<String, String> configuration) {
+        writeConfiguration(schematic, configuration);
+        return Set.of();
     }
 
-    private void writeConfiguration(ConveyorProperties properties, Map<String, String> configuration) {
+    private void writeConfiguration(ConveyorSchematic schematic, Map<String, String> configuration) {
         try {
             Files.writeString(
-                Files.createDirectories(properties.constructionDirectory()).resolve("configuration"),
+                Files.createDirectories(schematic.constructionDirectory()).resolve("configuration"),
                 configuration.entrySet()
                     .stream()
                     .map(Map.Entry::toString)

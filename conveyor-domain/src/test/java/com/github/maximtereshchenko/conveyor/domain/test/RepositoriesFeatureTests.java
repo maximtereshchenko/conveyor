@@ -43,6 +43,8 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                 .repository("first", first, true)
                 .inclusion(
                     factory.schematicDefinitionBuilder()
+                        .name("project")
+                        .template("template")
                         .repository("second", second, true)
                         .plugin(
                             "instant",
@@ -85,6 +87,8 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                 .repository("main", templateRepository, true)
                 .inclusion(
                     factory.schematicDefinitionBuilder()
+                        .name("project")
+                        .template("template")
                         .repository("main", projectRepository, true)
                         .plugin(
                             "instant",
@@ -142,6 +146,8 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                 .repository("template-repository", templateRepository, true)
                 .inclusion(
                     factory.schematicDefinitionBuilder()
+                        .name("project")
+                        .template("template")
                         .repository("project-repository", projectRepository, true)
                         .repository("template-repository", templateRepository, false)
                         .plugin("module-path")
@@ -337,7 +343,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
 
     @Test
     @ExtendWith(WireMockExtension.class)
-    void givenManualDefinitionFromRemoteRepository_whenConstructToStage_thenTemplateIsTranslated(
+    void givenSchematicDefinitionFromRemoteRepository_whenConstructToStage_thenTemplateIsTranslated(
         @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory,
@@ -384,7 +390,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
 
     @Test
     @ExtendWith(WireMockExtension.class)
-    void givenManualDefinitionFromRemoteRepository_whenConstructToStage_thenPreferencesAreTranslated(
+    void givenSchematicDefinitionFromRemoteRepository_whenConstructToStage_thenPreferencesAreTranslated(
         @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory,

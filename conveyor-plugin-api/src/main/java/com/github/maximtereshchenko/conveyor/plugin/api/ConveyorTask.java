@@ -1,8 +1,10 @@
 package com.github.maximtereshchenko.conveyor.plugin.api;
 
-import com.github.maximtereshchenko.conveyor.common.api.Products;
+import com.github.maximtereshchenko.conveyor.common.api.Product;
+
+import java.util.Set;
 
 public interface ConveyorTask {
 
-    Products execute(ConveyorSchematicDependencies dependencies, Products products);
+    Set<Product> execute(ConveyorSchematic schematic, Set<Product> products);
 }

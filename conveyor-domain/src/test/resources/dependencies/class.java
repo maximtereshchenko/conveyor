@@ -18,27 +18,26 @@ public final class ${normalizedName} implements ConveyorPlugin {
     }
 
     @Override
-    public List<ConveyorTaskBinding> bindings(ConveyorProperties properties, Map<String, String> configuration) {
+    public List<ConveyorTaskBinding> bindings(ConveyorSchematic schematic, Map<String, String> configuration) {
         return List.of(
             new ConveyorTaskBinding(
                 Stage.COMPILE,
                 Step.RUN,
-                (dependencies, products) -> execute(
-                    products,
-                    dependencies.modulePath(
+                (conveyorSchematic, products) -> execute(
+                    schematic.modulePath(
                         DependencyScope.valueOf(
                             configuration.getOrDefault("scope", "IMPLEMENTATION")
                         )
                     ),
-                    properties.constructionDirectory().resolve("dependencies")
+                    schematic.constructionDirectory().resolve("dependencies")
                 )
             )
         );
     }
 
-    private Products execute(Products products, Set<Path> paths, Path path) {
+    private Set<Product> execute(Set<Path> paths, Path path) {
         write(path, modulePath(paths));
-        return products;
+        return Set.of();
     }
 
     private String modulePath(Set<Path> paths) {

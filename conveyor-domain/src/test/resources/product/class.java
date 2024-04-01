@@ -14,12 +14,14 @@ public final class ${normalizedName} implements ConveyorPlugin {
     }
 
     @Override
-    public List<ConveyorTaskBinding> bindings(ConveyorProperties properties, Map<String, String> configuration) {
+    public List<ConveyorTaskBinding> bindings(ConveyorSchematic schematic, Map<String, String> configuration) {
         return List.of(
             new ConveyorTaskBinding(
                 Stage.ARCHIVE,
                 Step.RUN,
-                (dependencies, products) -> products.with(Paths.get(configuration.get("path")), ProductType.MODULE)
+                (conveyorSchematic, products) -> Set.of(
+                    schematic.product(Paths.get(configuration.get("path")), ProductType.MODULE)
+                )
             )
         );
     }

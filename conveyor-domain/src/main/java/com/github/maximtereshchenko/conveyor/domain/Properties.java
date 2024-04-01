@@ -1,12 +1,10 @@
 package com.github.maximtereshchenko.conveyor.domain;
 
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorProperties;
-
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 final class Properties {
 
@@ -16,23 +14,6 @@ final class Properties {
 
     Properties(Map<String, String> all) {
         this.all = all;
-    }
-
-    ConveyorProperties conveyorProperties() {
-        return new ConveyorProperties(
-            all.entrySet()
-                .stream()
-                .filter(entry -> !entry.getValue().isBlank())
-                .collect(
-                    Collectors.toMap(
-                        Map.Entry::getKey,
-                        entry -> interpolated(entry.getValue())
-                    )
-                ),
-            ConveyorPropertyKey.SCHEMATIC_NAME.fullName(),
-            ConveyorPropertyKey.DISCOVERY_DIRECTORY.fullName(),
-            ConveyorPropertyKey.CONSTRUCTION_DIRECTORY.fullName()
-        );
     }
 
     String interpolated(String value) {
@@ -50,6 +31,18 @@ final class Properties {
     }
 
     Path remoteRepositoryCacheDirectory() {
-        return Paths.get(all.get(ConveyorPropertyKey.REMOTE_REPOSITORY_CACHE_DIRECTORY.fullName()));
+        return path(SchematicPropertyKey.REMOTE_REPOSITORY_CACHE_DIRECTORY);
+    }
+
+    Path constructionDirectory() {
+        return path(SchematicPropertyKey.CONSTRUCTION_DIRECTORY);
+    }
+
+    Optional<String> value(String key) {
+        return Optional.ofNullable(interpolated(all.get(key)));
+    }
+
+    private Path path(SchematicPropertyKey schematicPropertyKey) {
+        return Paths.get(all.get(schematicPropertyKey.fullName()));
     }
 }

@@ -38,23 +38,19 @@ final class PropertiesFeatureTests extends ConveyorTest {
                 .repository("main", path, true)
                 .template("template")
                 .property("key", "value")
-                .plugin("properties")
+                .plugin(
+                    "properties",
+                    "1.0.0",
+                    Map.of("keys", "template.key,key")
+                )
                 .install(path),
             Stage.COMPILE
         );
 
         assertThat(defaultConstructionDirectory(path).resolve("properties"))
             .content()
-            .hasLineCount(7)
-            .contains(
-                "conveyor.schematic.name=project",
-                "conveyor.schematic.version=1",
-                "conveyor.discovery.directory=" + path,
-                "conveyor.construction.directory=" + defaultConstructionDirectory(path),
-                "conveyor.repository.remote.cache.directory=" + defaultCacheDirectory(path),
-                "template.key=template.value",
-                "key=value"
-            );
+            .hasLineCount(2)
+            .contains("template.key=template.value", "key=value");
     }
 
     @Test
@@ -83,22 +79,14 @@ final class PropertiesFeatureTests extends ConveyorTest {
                 .repository("main", path, true)
                 .template("template")
                 .property("key", "value")
-                .plugin("properties")
+                .plugin("properties", "1.0.0", Map.of("keys", "key"))
                 .install(path),
             Stage.COMPILE
         );
 
         assertThat(defaultConstructionDirectory(path).resolve("properties"))
             .content()
-            .hasLineCount(6)
-            .contains(
-                "conveyor.schematic.name=project",
-                "conveyor.schematic.version=1",
-                "conveyor.discovery.directory=" + path,
-                "conveyor.construction.directory=" + defaultConstructionDirectory(path),
-                "conveyor.repository.remote.cache.directory=" + defaultCacheDirectory(path),
-                "key=value"
-            );
+            .isEqualTo("key=value");
     }
 
     @Test
@@ -127,21 +115,14 @@ final class PropertiesFeatureTests extends ConveyorTest {
                 .repository("main", path, true)
                 .template("template")
                 .property("to.be.removed", "")
-                .plugin("properties")
+                .plugin("properties", "1.0.0", Map.of("keys", "to.be.removed"))
                 .install(path),
             Stage.COMPILE
         );
 
         assertThat(defaultConstructionDirectory(path).resolve("properties"))
             .content()
-            .hasLineCount(5)
-            .contains(
-                "conveyor.schematic.name=project",
-                "conveyor.schematic.version=1",
-                "conveyor.discovery.directory=" + path,
-                "conveyor.construction.directory=" + defaultConstructionDirectory(path),
-                "conveyor.repository.remote.cache.directory=" + defaultCacheDirectory(path)
-            );
+            .isEqualTo("to.be.removed=");
     }
 
     @Test
@@ -164,21 +145,18 @@ final class PropertiesFeatureTests extends ConveyorTest {
             factory.schematicDefinitionBuilder()
                 .repository("main", path, true)
                 .property("conveyor.schematic.name", "custom")
-                .plugin("properties")
+                .plugin(
+                    "properties",
+                    "1.0.0",
+                    Map.of("keys", "conveyor.schematic.name")
+                )
                 .install(path),
             Stage.COMPILE
         );
 
         assertThat(defaultConstructionDirectory(path).resolve("properties"))
             .content()
-            .hasLineCount(5)
-            .contains(
-                "conveyor.schematic.name=project",
-                "conveyor.schematic.version=1",
-                "conveyor.discovery.directory=" + path,
-                "conveyor.construction.directory=" + defaultConstructionDirectory(path),
-                "conveyor.repository.remote.cache.directory=" + defaultCacheDirectory(path)
-            );
+            .isEqualTo("conveyor.schematic.name=project");
     }
 
     @Test
@@ -202,21 +180,18 @@ final class PropertiesFeatureTests extends ConveyorTest {
             factory.schematicDefinitionBuilder()
                 .repository("main", path, true)
                 .property("conveyor.discovery.directory", project.toString())
-                .plugin("properties")
+                .plugin(
+                    "properties",
+                    "1.0.0",
+                    Map.of("keys", "conveyor.discovery.directory")
+                )
                 .install(path),
             Stage.COMPILE
         );
 
         assertThat(defaultConstructionDirectory(path).resolve("properties"))
             .content()
-            .hasLineCount(5)
-            .contains(
-                "conveyor.schematic.name=project",
-                "conveyor.schematic.version=1",
-                "conveyor.discovery.directory=" + project,
-                "conveyor.construction.directory=" + defaultConstructionDirectory(path),
-                "conveyor.repository.remote.cache.directory=" + defaultCacheDirectory(path)
-            );
+            .isEqualTo("conveyor.discovery.directory=" + project);
     }
 
     @Test
@@ -239,21 +214,18 @@ final class PropertiesFeatureTests extends ConveyorTest {
             factory.schematicDefinitionBuilder()
                 .repository("main", path, true)
                 .property("conveyor.discovery.directory", "./temp/../project")
-                .plugin("properties")
+                .plugin(
+                    "properties",
+                    "1.0.0",
+                    Map.of("keys", "conveyor.discovery.directory")
+                )
                 .install(path),
             Stage.COMPILE
         );
 
         assertThat(defaultConstructionDirectory(path).resolve("properties"))
             .content()
-            .hasLineCount(5)
-            .contains(
-                "conveyor.schematic.name=project",
-                "conveyor.schematic.version=1",
-                "conveyor.discovery.directory=" + path.resolve("project"),
-                "conveyor.construction.directory=" + defaultConstructionDirectory(path),
-                "conveyor.repository.remote.cache.directory=" + defaultCacheDirectory(path)
-            );
+            .isEqualTo("conveyor.discovery.directory=" + path.resolve("project"));
     }
 
     @Test
@@ -277,21 +249,18 @@ final class PropertiesFeatureTests extends ConveyorTest {
             factory.schematicDefinitionBuilder()
                 .repository("main", path, true)
                 .property("conveyor.construction.directory", construction.toString())
-                .plugin("properties")
+                .plugin(
+                    "properties",
+                    "1.0.0",
+                    Map.of("keys", "conveyor.construction.directory")
+                )
                 .install(path),
             Stage.COMPILE
         );
 
         assertThat(construction.resolve("properties"))
             .content()
-            .hasLineCount(5)
-            .contains(
-                "conveyor.schematic.name=project",
-                "conveyor.schematic.version=1",
-                "conveyor.discovery.directory=" + path,
-                "conveyor.construction.directory=" + construction,
-                "conveyor.repository.remote.cache.directory=" + defaultCacheDirectory(path)
-            );
+            .isEqualTo("conveyor.construction.directory=" + construction);
     }
 
     @Test
@@ -314,7 +283,11 @@ final class PropertiesFeatureTests extends ConveyorTest {
             factory.schematicDefinitionBuilder()
                 .repository("main", path, true)
                 .property("conveyor.construction.directory", "./temp/../construction")
-                .plugin("properties")
+                .plugin(
+                    "properties",
+                    "1.0.0",
+                    Map.of("keys", "conveyor.construction.directory")
+                )
                 .install(path),
             Stage.COMPILE
         );
@@ -322,14 +295,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
         var construction = path.resolve("construction");
         assertThat(construction.resolve("properties"))
             .content()
-            .hasLineCount(5)
-            .contains(
-                "conveyor.schematic.name=project",
-                "conveyor.schematic.version=1",
-                "conveyor.discovery.directory=" + path,
-                "conveyor.construction.directory=" + construction,
-                "conveyor.repository.remote.cache.directory=" + defaultCacheDirectory(path)
-            );
+            .isEqualTo("conveyor.construction.directory=" + construction);
     }
 
     @Test
@@ -353,23 +319,19 @@ final class PropertiesFeatureTests extends ConveyorTest {
                 .repository("main", path, true)
                 .property("key", "interpolated")
                 .property("templated", "${key}-suffix")
-                .plugin("properties")
+                .plugin(
+                    "properties",
+                    "1.0.0",
+                    Map.of("keys", "templated,key")
+                )
                 .install(path),
             Stage.COMPILE
         );
 
         assertThat(defaultConstructionDirectory(path).resolve("properties"))
             .content()
-            .hasLineCount(7)
-            .contains(
-                "conveyor.schematic.name=project",
-                "conveyor.schematic.version=1",
-                "conveyor.discovery.directory=" + path,
-                "conveyor.construction.directory=" + defaultConstructionDirectory(path),
-                "conveyor.repository.remote.cache.directory=" + defaultCacheDirectory(path),
-                "key=interpolated",
-                "templated=interpolated-suffix"
-            );
+            .hasLineCount(2)
+            .contains("key=interpolated", "templated=interpolated-suffix");
     }
 
     @Test

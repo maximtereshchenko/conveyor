@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 final class InheritanceFeatureTests extends ConveyorTest {
 
     @Test
-    void givenManualTemplate_whenConstructToStage_thenSchematicInheritsProperties(
+    void givenRemoteTemplate_whenConstructToStage_thenSchematicInheritsProperties(
         @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
@@ -40,26 +40,18 @@ final class InheritanceFeatureTests extends ConveyorTest {
             factory.schematicDefinitionBuilder()
                 .template("template")
                 .repository(path)
-                .plugin("properties")
+                .plugin("properties", "1.0.0", Map.of("keys", "template.key"))
                 .install(path),
             Stage.COMPILE
         );
 
         assertThat(defaultConstructionDirectory(path).resolve("properties"))
             .content()
-            .hasLineCount(6)
-            .contains(
-                "conveyor.schematic.name=project",
-                "conveyor.schematic.version=1",
-                "conveyor.discovery.directory=" + path,
-                "conveyor.construction.directory=" + defaultConstructionDirectory(path),
-                "conveyor.repository.remote.cache.directory=" + defaultCacheDirectory(path),
-                "template.key=value"
-            );
+            .isEqualTo("template.key=value");
     }
 
     @Test
-    void givenManualTemplate_whenConstructToStage_thenSchematicInheritsPlugins(
+    void givenRemoteTemplate_whenConstructToStage_thenSchematicInheritsPlugins(
         @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
@@ -95,7 +87,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
     }
 
     @Test
-    void givenManualTemplate_whenConstructToStage_thenSchematicInheritsDependencies(
+    void givenRemoteTemplate_whenConstructToStage_thenSchematicInheritsDependencies(
         @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
@@ -137,7 +129,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
     }
 
     @Test
-    void givenManualTemplate_whenConstructToStage_thenSchematicInheritsTestDependencies(
+    void givenRemoteTemplate_whenConstructToStage_thenSchematicInheritsTestDependencies(
         @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
@@ -198,7 +190,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
             )
             .install(path);
         var project = path.resolve("project");
-        var templateSchematic = factory.schematicDefinitionBuilder()
+        factory.schematicDefinitionBuilder()
             .name("template")
             .repository(path)
             .inclusion(conveyorJson(project))
@@ -207,23 +199,15 @@ final class InheritanceFeatureTests extends ConveyorTest {
 
         module.construct(
             factory.schematicDefinitionBuilder()
-                .template(templateSchematic)
-                .plugin("properties")
+                .template("template")
+                .plugin("properties", "1.0.0", Map.of("keys", "template.key"))
                 .install(project),
             Stage.COMPILE
         );
 
         assertThat(defaultConstructionDirectory(project).resolve("properties"))
             .content()
-            .hasLineCount(6)
-            .contains(
-                "conveyor.schematic.name=project",
-                "conveyor.schematic.version=1",
-                "conveyor.discovery.directory=" + project,
-                "conveyor.construction.directory=" + defaultConstructionDirectory(project),
-                "conveyor.repository.remote.cache.directory=" + defaultCacheDirectory(path),
-                "template.key=value"
-            );
+            .isEqualTo("template.key=value");
     }
 
     @Test
@@ -242,7 +226,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
             )
             .install(path);
         var project = path.resolve("project");
-        var templateSchematic = factory.schematicDefinitionBuilder()
+        factory.schematicDefinitionBuilder()
             .name("template")
             .repository(path)
             .inclusion(conveyorJson(project))
@@ -251,7 +235,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
 
         module.construct(
             factory.schematicDefinitionBuilder()
-                .template(templateSchematic)
+                .template("template")
                 .install(project),
             Stage.COMPILE
         );
@@ -282,7 +266,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
             )
             .install(path);
         var project = path.resolve("project");
-        var templateSchematic = factory.schematicDefinitionBuilder()
+        factory.schematicDefinitionBuilder()
             .name("template")
             .repository(path)
             .inclusion(conveyorJson(project))
@@ -291,7 +275,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
 
         module.construct(
             factory.schematicDefinitionBuilder()
-                .template(templateSchematic)
+                .template("template")
                 .plugin("dependencies")
                 .install(project),
             Stage.COMPILE
@@ -325,7 +309,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
             )
             .install(path);
         var project = path.resolve("project");
-        var templateSchematic = factory.schematicDefinitionBuilder()
+        factory.schematicDefinitionBuilder()
             .name("template")
             .repository(path)
             .inclusion(conveyorJson(project))
@@ -334,7 +318,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
 
         module.construct(
             factory.schematicDefinitionBuilder()
-                .template(templateSchematic)
+                .template("template")
                 .plugin("dependencies", "1.0.0", Map.of("scope", "TEST"))
                 .install(project),
             Stage.COMPILE
@@ -362,7 +346,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
             )
             .install(repository);
         var project = path.resolve("project");
-        var templateSchematic = factory.schematicDefinitionBuilder()
+        factory.schematicDefinitionBuilder()
             .name("template")
             .repository(repository)
             .inclusion(conveyorJson(project))
@@ -370,40 +354,8 @@ final class InheritanceFeatureTests extends ConveyorTest {
 
         module.construct(
             factory.schematicDefinitionBuilder()
-                .template(templateSchematic)
+                .template("template")
                 .plugin("instant", "1.0.0", Map.of("instant", "COMPILE-RUN"))
-                .install(project),
-            Stage.COMPILE
-        );
-
-        assertThat(instantPath(project)).exists();
-    }
-
-    @Test
-    void givenNoExplicitlyDefinedTemplate_whenConstructToStage_thenSchematicInheritsFromSchematicInParentDirectory(
-        @TempDir Path path,
-        ConveyorModule module,
-        BuilderFactory factory
-    ) {
-        factory.repositoryBuilder()
-            .schematicDefinition(
-                factory.schematicDefinitionBuilder()
-                    .name("instant")
-            )
-            .jar(
-                factory.jarBuilder("instant")
-            )
-            .install(path);
-        var project = path.resolve("project");
-        factory.schematicDefinitionBuilder()
-            .name("template")
-            .repository(path)
-            .inclusion(conveyorJson(project))
-            .plugin("instant", "1.0.0", Map.of("instant", "COMPILE-RUN"))
-            .install(path);
-
-        module.construct(
-            factory.schematicDefinitionBuilder()
                 .install(project),
             Stage.COMPILE
         );
@@ -430,11 +382,17 @@ final class InheritanceFeatureTests extends ConveyorTest {
 
         module.construct(
             factory.schematicDefinitionBuilder()
+                .name("template")
                 .repository(path)
                 .inclusion(
                     factory.schematicDefinitionBuilder()
                         .name("included")
-                        .plugin("properties")
+                        .template("template")
+                        .plugin(
+                            "properties",
+                            "1.0.0",
+                            Map.of("keys", "template.key")
+                        )
                         .install(included)
                 )
                 .property("template.key", "value")
@@ -444,15 +402,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
 
         assertThat(defaultConstructionDirectory(included).resolve("properties"))
             .content()
-            .hasLineCount(6)
-            .contains(
-                "conveyor.schematic.name=included",
-                "conveyor.schematic.version=1",
-                "conveyor.discovery.directory=" + included,
-                "conveyor.construction.directory=" + defaultConstructionDirectory(included),
-                "conveyor.repository.remote.cache.directory=" + defaultCacheDirectory(path),
-                "template.key=value"
-            );
+            .isEqualTo("template.key=value");
     }
 
     @Test
@@ -474,10 +424,12 @@ final class InheritanceFeatureTests extends ConveyorTest {
 
         module.construct(
             factory.schematicDefinitionBuilder()
+                .name("template")
                 .repository(path)
                 .inclusion(
                     factory.schematicDefinitionBuilder()
-                        .name("template")
+                        .name("included")
+                        .template("template")
                         .install(included)
                 )
                 .plugin("instant", "1.0.0", Map.of("instant", "COMPILE-RUN"))
@@ -514,10 +466,12 @@ final class InheritanceFeatureTests extends ConveyorTest {
 
         module.construct(
             factory.schematicDefinitionBuilder()
+                .name("template")
                 .repository(path)
                 .inclusion(
                     factory.schematicDefinitionBuilder()
                         .name("included")
+                        .template("template")
                         .plugin("dependencies")
                         .install(included)
                 )
@@ -557,10 +511,12 @@ final class InheritanceFeatureTests extends ConveyorTest {
 
         module.construct(
             factory.schematicDefinitionBuilder()
+                .name("template")
                 .repository(path)
                 .inclusion(
                     factory.schematicDefinitionBuilder()
                         .name("included")
+                        .template("template")
                         .plugin(
                             "dependencies",
                             "1.0.0",
@@ -598,10 +554,12 @@ final class InheritanceFeatureTests extends ConveyorTest {
 
         module.construct(
             factory.schematicDefinitionBuilder()
+                .name("template")
                 .repository(repository)
                 .inclusion(
                     factory.schematicDefinitionBuilder()
                         .name("included")
+                        .template("template")
                         .plugin(
                             "instant",
                             "1.0.0",
@@ -635,10 +593,12 @@ final class InheritanceFeatureTests extends ConveyorTest {
 
         module.construct(
             factory.schematicDefinitionBuilder()
+                .name("template")
                 .repository(path)
                 .inclusion(
                     factory.schematicDefinitionBuilder()
                         .name("included")
+                        .template("template")
                         .install(included)
                 )
                 .plugin("instant", "1.0.0", Map.of("instant", "COMPILE-RUN"))
@@ -683,16 +643,19 @@ final class InheritanceFeatureTests extends ConveyorTest {
 
         module.construct(
             factory.schematicDefinitionBuilder()
+                .name("template")
                 .repository(path)
                 .inclusion(
                     factory.schematicDefinitionBuilder()
                         .name("depends")
-                        .schematicDependency("dependency")
+                        .template("template")
+                        .dependency("dependency")
                         .install(depends)
                 )
                 .inclusion(
                     factory.schematicDefinitionBuilder()
                         .name("dependency")
+                        .template("template")
                         .plugin(
                             "product",
                             "1.0.0",
@@ -724,7 +687,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
             )
             .install(path);
         var included = path.resolve("included");
-        var templateSchematic = factory.schematicDefinitionBuilder()
+        factory.schematicDefinitionBuilder()
             .name("template")
             .repository(path)
             .inclusion(conveyorJson(included))
@@ -734,7 +697,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
         module.construct(
             factory.schematicDefinitionBuilder()
                 .name("included")
-                .template(templateSchematic)
+                .template("template")
                 .install(included),
             Stage.COMPILE
         );
@@ -763,12 +726,16 @@ final class InheritanceFeatureTests extends ConveyorTest {
         var projectDepth2a = projectDepth1a.resolve("project-depth-2a");
         var projectDepth2b = projectDepth1b.resolve("project-depth-2b");
         var projectSchematic = factory.schematicDefinitionBuilder()
+            .name("project")
+            .template("template")
             .inclusion(
                 factory.schematicDefinitionBuilder()
                     .name("project-depth-1a")
+                    .template("project")
                     .inclusion(
                         factory.schematicDefinitionBuilder()
                             .name("project-depth-2a")
+                            .template("project-depth-1a")
                             .install(projectDepth2a)
                     )
                     .install(projectDepth1a)
@@ -776,9 +743,11 @@ final class InheritanceFeatureTests extends ConveyorTest {
             .inclusion(
                 factory.schematicDefinitionBuilder()
                     .name("project-depth-1b")
+                    .template("project")
                     .inclusion(
                         factory.schematicDefinitionBuilder()
                             .name("project-depth-2b")
+                            .template("project-depth-1b")
                             .install(projectDepth2b)
                     )
                     .install(projectDepth1b)
@@ -832,15 +801,18 @@ final class InheritanceFeatureTests extends ConveyorTest {
         var depends = path.resolve("depends");
         var dependsSchematic = factory.schematicDefinitionBuilder()
             .name("depends")
+            .template("template")
             .plugin("dependencies")
-            .schematicDependency("dependency")
+            .dependency("dependency")
             .install(depends);
         factory.schematicDefinitionBuilder()
+            .name("template")
             .repository(path)
             .inclusion(dependsSchematic)
             .inclusion(
                 factory.schematicDefinitionBuilder()
                     .name("dependency")
+                    .template("template")
                     .plugin(
                         "product",
                         "1.0.0",
@@ -920,20 +892,24 @@ final class InheritanceFeatureTests extends ConveyorTest {
         var transitive = path.resolve("transitive");
         var includedSchematic = factory.schematicDefinitionBuilder()
             .name("included")
-            .schematicDependency("dependency")
+            .template("template")
+            .dependency("dependency")
             .install(path.resolve("included"));
         factory.schematicDefinitionBuilder()
+            .name("template")
             .repository(path)
             .inclusion(includedSchematic)
             .inclusion(
                 factory.schematicDefinitionBuilder()
                     .name("dependency")
-                    .schematicDependency("transitive")
+                    .template("template")
+                    .dependency("transitive")
                     .install(path.resolve("dependency"))
             )
             .inclusion(
                 factory.schematicDefinitionBuilder()
                     .name("transitive")
+                    .template("template")
                     .plugin("instant", "1.0.0", Map.of("instant", "COMPILE-RUN"))
                     .install(transitive)
             )
@@ -964,16 +940,19 @@ final class InheritanceFeatureTests extends ConveyorTest {
 
         module.construct(
             factory.schematicDefinitionBuilder()
+                .name("template")
                 .repository(path)
                 .inclusion(
                     factory.schematicDefinitionBuilder()
                         .name("depends")
-                        .schematicDependency("dependency")
+                        .template("template")
+                        .dependency("dependency")
                         .install(depends)
                 )
                 .inclusion(
                     factory.schematicDefinitionBuilder()
                         .name("dependency")
+                        .template("template")
                         .install(dependency)
                 )
                 .plugin("instant", "1.0.0", Map.of("instant", "ARCHIVE-RUN"))
@@ -1006,16 +985,19 @@ final class InheritanceFeatureTests extends ConveyorTest {
 
         module.construct(
             factory.schematicDefinitionBuilder()
+                .name("template")
                 .repository(path)
                 .inclusion(
                     factory.schematicDefinitionBuilder()
                         .name("depends")
-                        .schematicDependency("dependency")
+                        .template("template")
+                        .dependency("dependency")
                         .install(depends)
                 )
                 .inclusion(
                     factory.schematicDefinitionBuilder()
                         .name("dependency")
+                        .template("template")
                         .install(dependency)
                 )
                 .plugin("instant", "1.0.0", Map.of("instant", "PUBLISH-RUN"))

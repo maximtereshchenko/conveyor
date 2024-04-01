@@ -6,6 +6,7 @@ import com.github.maximtereshchenko.conveyor.plugin.api.*;
 import java.io.*;
 import java.nio.file.*;
 import java.util.*;
+import java.util.stream.*;
 
 public final class ${normalizedName} implements ConveyorPlugin {
 
@@ -15,28 +16,28 @@ public final class ${normalizedName} implements ConveyorPlugin {
     }
 
     @Override
-    public List<ConveyorTaskBinding> bindings(ConveyorProperties properties, Map<String, String> configuration) {
+    public List<ConveyorTaskBinding> bindings(ConveyorSchematic schematic, Map<String, String> configuration) {
         return List.of(
             new ConveyorTaskBinding(
                 Stage.COMPILE,
                 Step.RUN,
-                (dependencies, products) -> execute(products, properties)
+                (conveyorSchematic, products) -> execute(schematic, configuration)
             )
         );
     }
 
-    private Products execute(Products products, ConveyorProperties properties) {
-        writeProperties(properties);
-        return products;
+    private Set<Product> execute(ConveyorSchematic schematic, Map<String, String> configuration) {
+        writeProperties(schematic, Set.of(configuration.get("keys").split(",")));
+        return Set.of();
     }
 
-    private void writeProperties(ConveyorProperties properties) {
+    private void writeProperties(ConveyorSchematic schematic, Set<String> keys) {
         try {
-            Files.write(
-                Files.createDirectories(properties.constructionDirectory()).resolve("properties"),
-                properties.stream()
-                    .map(Map.Entry::toString)
-                    .toList()
+            Files.writeString(
+                Files.createDirectories(schematic.constructionDirectory()).resolve("properties"),
+                keys.stream()
+                    .map(key -> key + '=' + schematic.propertyValue(key).orElse(""))
+                    .collect(Collectors.joining(System.lineSeparator()))
             );
         } catch (IOException e) {
             throw new UncheckedIOException(e);

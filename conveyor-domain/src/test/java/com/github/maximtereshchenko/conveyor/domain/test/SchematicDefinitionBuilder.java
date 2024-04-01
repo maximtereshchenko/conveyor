@@ -18,16 +18,16 @@ final class SchematicDefinitionBuilder {
     private final JacksonAdapter jacksonAdapter;
     private final String group = "com.github.maximtereshchenko.conveyor";
     private final List<Path> inclusions = new ArrayList<>();
-    private final Collection<RepositoryDefinition> repositories = new ArrayList<>();
+    private final List<RepositoryDefinition> repositories = new ArrayList<>();
     private final Map<String, String> properties = new HashMap<>();
-    private final Collection<PreferencesInclusionDefinition> preferenceInclusions =
+    private final List<PreferencesInclusionDefinition> preferenceInclusions =
         new ArrayList<>();
-    private final Collection<ArtifactPreferenceDefinition> artifactPreferences = new ArrayList<>();
-    private final Collection<PluginDefinition> plugins = new ArrayList<>();
-    private final Collection<SchematicDependencyDefinition> dependencies = new ArrayList<>();
+    private final List<ArtifactPreferenceDefinition> artifactPreferences = new ArrayList<>();
+    private final List<PluginDefinition> plugins = new ArrayList<>();
+    private final List<DependencyDefinition> dependencies = new ArrayList<>();
     private String name = "project";
     private String version = "1.0.0";
-    private TemplateForSchematicDefinition template = new NoTemplate();
+    private TemplateDefinition template = new NoTemplateDefinition();
 
     SchematicDefinitionBuilder(JacksonAdapter jacksonAdapter) {
         this.jacksonAdapter = jacksonAdapter;
@@ -99,7 +99,7 @@ final class SchematicDefinitionBuilder {
     }
 
     SchematicDefinitionBuilder template(String name) {
-        template = new ManualTemplateDefinition(group, name, version);
+        template = new SchematicTemplateDefinition(group, name, version);
         return this;
     }
 
@@ -140,7 +140,7 @@ final class SchematicDefinitionBuilder {
 
     SchematicDefinitionBuilder dependency(String name, String version, DependencyScope scope) {
         dependencies.add(
-            new DependencyOnArtifactDefinition(
+            new DependencyDefinition(
                 group,
                 name,
                 Optional.ofNullable(version),
@@ -152,13 +152,6 @@ final class SchematicDefinitionBuilder {
 
     SchematicDefinitionBuilder inclusion(Path path) {
         inclusions.add(path);
-        return this;
-    }
-
-    SchematicDefinitionBuilder schematicDependency(String name) {
-        dependencies.add(
-            new DependencyOnSchematicDefinition(name, Optional.of(DependencyScope.IMPLEMENTATION))
-        );
         return this;
     }
 
@@ -174,11 +167,6 @@ final class SchematicDefinitionBuilder {
 
     SchematicDefinitionBuilder property(String key, String value) {
         properties.put(key, value);
-        return this;
-    }
-
-    SchematicDefinitionBuilder template(Path path) {
-        template = new SchematicPathTemplateDefinition(path);
         return this;
     }
 

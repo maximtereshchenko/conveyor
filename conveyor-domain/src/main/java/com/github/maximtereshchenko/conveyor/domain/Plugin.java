@@ -1,71 +1,51 @@
 package com.github.maximtereshchenko.conveyor.domain;
 
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-final class Plugin extends StoredArtifact<ArtifactDependencyModel> {
+final class Plugin implements Artifact {
 
     private static final String ENABLED_CONFIGURATION_KEY = "enabled";
 
+    private final DirectlyReferencedArtifact directlyReferencedArtifact;
     private final PluginModel pluginModel;
     private final Properties properties;
-    private final ModelFactory modelFactory;
-    private final Preferences preferences;
 
     Plugin(
+        DirectlyReferencedArtifact directlyReferencedArtifact,
         PluginModel pluginModel,
-        Properties properties,
-        ModelFactory modelFactory,
-        Preferences preferences,
-        Repositories repositories
+        Properties properties
     ) {
-        super(repositories);
+        this.directlyReferencedArtifact = directlyReferencedArtifact;
         this.pluginModel = pluginModel;
         this.properties = properties;
-        this.modelFactory = modelFactory;
-        this.preferences = preferences;
     }
 
     @Override
     public String group() {
-        return pluginModel.group();
+        return directlyReferencedArtifact.group();
     }
 
     @Override
     public String name() {
-        return pluginModel.name();
+        return directlyReferencedArtifact.name();
     }
 
     @Override
-    public SemanticVersion version() {
-        return pluginModel.version()
-            .map(properties::interpolated)
-            .map(SemanticVersion::new)
-            .or(() -> preferences.version(pluginModel.group(), pluginModel.name()))
-            .orElseThrow();
+    public SemanticVersion semanticVersion() {
+        return directlyReferencedArtifact.semanticVersion();
     }
 
     @Override
-    Set<ArtifactDependencyModel> dependencyModels() {
-        return modelFactory.manualHierarchy(
-                pluginModel.group(),
-                pluginModel.name(),
-                version(),
-                repositories()
-            )
-            .dependencies();
+    public Path path() {
+        return directlyReferencedArtifact.path();
     }
 
     @Override
-    Dependency dependency(ArtifactDependencyModel dependencyModel) {
-        return new TransitiveDependency(
-            dependencyModel,
-            modelFactory,
-            properties,
-            preferences,
-            repositories()
-        );
+    public Set<Artifact> dependencies() {
+        return directlyReferencedArtifact.dependencies();
     }
 
     boolean isEnabled() {

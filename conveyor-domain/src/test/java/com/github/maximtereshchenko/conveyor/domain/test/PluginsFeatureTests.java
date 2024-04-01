@@ -34,22 +34,18 @@ final class PluginsFeatureTests extends ConveyorTest {
             factory.schematicDefinitionBuilder()
                 .repository(path)
                 .property("user.defined.property", "value")
-                .plugin("properties")
+                .plugin(
+                    "properties",
+                    "1.0.0",
+                    Map.of("keys", "user.defined.property")
+                )
                 .install(path),
             Stage.COMPILE
         );
 
         assertThat(defaultConstructionDirectory(path).resolve("properties"))
             .content()
-            .hasLineCount(6)
-            .contains(
-                "conveyor.schematic.name=project",
-                "conveyor.schematic.version=1",
-                "conveyor.discovery.directory=" + path,
-                "conveyor.construction.directory=" + defaultConstructionDirectory(path),
-                "conveyor.repository.remote.cache.directory=" + defaultCacheDirectory(path),
-                "user.defined.property=value"
-            );
+            .isEqualTo("user.defined.property=value");
     }
 
     @Test
@@ -243,7 +239,7 @@ final class PluginsFeatureTests extends ConveyorTest {
     }
 
     @Test
-    void givenPluginManualDeclareTestDependency_whenConstructToStage_thenThatDependencyIsNotUsed(
+    void givenPluginSchematicDeclareTestDependency_whenConstructToStage_thenThatDependencyIsNotUsed(
         @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory

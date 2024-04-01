@@ -1,53 +1,47 @@
 package com.github.maximtereshchenko.conveyor.domain;
 
-import com.github.maximtereshchenko.conveyor.common.api.Products;
+import com.github.maximtereshchenko.conveyor.common.api.Product;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorProperties;
+import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
+import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskBinding;
 
 import java.lang.module.ModuleFinder;
 import java.nio.file.Path;
-import java.util.Comparator;
-import java.util.ServiceLoader;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Stream;
 
 final class Plugins {
 
     private final Set<Plugin> all;
     private final ModulePathFactory modulePathFactory;
-    private final Properties properties;
-    private final Dependencies dependencies;
 
-    Plugins(
-        Set<Plugin> all,
-        ModulePathFactory modulePathFactory,
-        Properties properties,
-        Dependencies dependencies
-    ) {
+    Plugins(Set<Plugin> all, ModulePathFactory modulePathFactory) {
         this.all = all;
         this.modulePathFactory = modulePathFactory;
-        this.properties = properties;
-        this.dependencies = dependencies;
     }
 
-    Products executeTasks(Products products, Stage stage) {
+    Set<Product> executeTasks(
+        ConveyorSchematic conveyorSchematic,
+        Set<Product> products,
+        Stage stage
+    ) {
+        var copy = new HashSet<>(products);
+        for (var task : tasks(conveyorSchematic, stage)) {
+            copy.addAll(task.execute(conveyorSchematic, copy));
+        }
+        return copy;
+    }
+
+    private List<ConveyorTask> tasks(ConveyorSchematic conveyorSchematic, Stage stage) {
         return conveyorPlugins()
             .filter(conveyorPlugin -> named(conveyorPlugin.name()).isEnabled())
-            .flatMap(conveyorPlugin -> bindings(properties.conveyorProperties(), conveyorPlugin))
+            .flatMap(conveyorPlugin -> bindings(conveyorSchematic, conveyorPlugin))
             .filter(binding -> isBeforeOrEqual(binding, stage))
             .sorted(byStageAndStep())
             .map(ConveyorTaskBinding::task)
-            .reduce(
-                products,
-                (aggregated, task) ->
-                    task.execute(
-                        scopes -> dependencies.modulePath(Set.of(scopes)),
-                        aggregated
-                    ),
-                (a, b) -> a
-            );
+            .toList();
     }
 
     private Comparator<ConveyorTaskBinding> byStageAndStep() {
@@ -59,11 +53,11 @@ final class Plugins {
     }
 
     private Stream<ConveyorTaskBinding> bindings(
-        ConveyorProperties conveyorProperties,
+        ConveyorSchematic conveyorSchematic,
         ConveyorPlugin conveyorPlugin
     ) {
         return conveyorPlugin.bindings(
-                conveyorProperties,
+                conveyorSchematic,
                 named(conveyorPlugin.name()).configuration()
             )
             .stream();

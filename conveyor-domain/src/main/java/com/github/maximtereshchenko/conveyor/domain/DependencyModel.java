@@ -1,10 +1,22 @@
 package com.github.maximtereshchenko.conveyor.domain;
 
-sealed interface DependencyModel permits ArtifactDependencyModel, SchematicDependencyModel {
+import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 
-    String group();
+import java.util.Optional;
 
-    String name();
+record DependencyModel(
+    String group,
+    String name,
+    Optional<String> version,
+    Optional<DependencyScope> scope
+) implements ArtifactModel {
 
-    DependencyModel override(DependencyModel base);
+    DependencyModel override(DependencyModel base) {
+        return new DependencyModel(
+            group,
+            name,
+            version.or(base::version),
+            scope.or(base::scope)
+        );
+    }
 }

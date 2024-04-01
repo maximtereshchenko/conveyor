@@ -1,8 +1,7 @@
 package com.github.maximtereshchenko.conveyor.domain;
 
 import com.github.maximtereshchenko.conveyor.api.ConveyorModule;
-import com.github.maximtereshchenko.conveyor.api.SchematicProducts;
-import com.github.maximtereshchenko.conveyor.api.port.DefinitionTranslator;
+import com.github.maximtereshchenko.conveyor.api.port.SchematicDefinitionTranslator;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 
 import java.nio.file.Path;
@@ -11,32 +10,32 @@ import java.util.stream.Collectors;
 
 public final class ConveyorFacade implements ConveyorModule {
 
-    private final DefinitionTranslator definitionTranslator;
-    private final ModelFactory modelFactory;
+    private final SchematicDefinitionTranslator schematicDefinitionTranslator;
+    private final SchematicModelFactory modelFactory;
     private final ModulePathFactory modulePathFactory;
     private final XmlFactory xmlFactory;
     private final Http http;
 
-    public ConveyorFacade(DefinitionTranslator definitionTranslator) {
-        this.definitionTranslator = definitionTranslator;
-        this.modelFactory = new ModelFactory(definitionTranslator);
+    public ConveyorFacade(SchematicDefinitionTranslator schematicDefinitionTranslator) {
+        this.schematicDefinitionTranslator = schematicDefinitionTranslator;
+        this.modelFactory = new SchematicModelFactory(schematicDefinitionTranslator);
         this.modulePathFactory = new ModulePathFactory();
         this.xmlFactory = XmlFactory.newInstance();
         this.http = new Http();
     }
 
     @Override
-    public SchematicProducts construct(Path path, Stage stage) {
-        return schematics(path).construct(stage);
+    public void construct(Path path, Stage stage) {
+        schematics(path).construct(stage);
     }
 
     private Schematics schematics(Path path) {
-        var schematics = modelFactory.partialSchematicHierarchies(path)
+        var schematics = modelFactory.hierarchicalLocalSchematicModels(path)
             .stream()
-            .map(partialSchematicHierarchy ->
+            .map(hierarchicalLocalSchematicModel ->
                 new Schematic(
-                    partialSchematicHierarchy,
-                    definitionTranslator,
+                    hierarchicalLocalSchematicModel,
+                    schematicDefinitionTranslator,
                     modelFactory,
                     modulePathFactory,
                     xmlFactory,

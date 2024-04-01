@@ -12,7 +12,7 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public final class JacksonAdapter implements DefinitionTranslator {
+public final class JacksonAdapter implements SchematicDefinitionTranslator {
 
     private final ObjectMapper objectMapper;
 
@@ -23,22 +23,8 @@ public final class JacksonAdapter implements DefinitionTranslator {
     public static JacksonAdapter configured() {
         var module = new SimpleModule();
         module.addSerializer(Path.class, new ToStringSerializer());
-        module.addSerializer(
-            NoTemplate.class,
-            new NoExplicitlyDefinedTemplateSerializer()
-        );
-        module.addDeserializer(
-            TemplateForSchematicDefinition.class,
-            new TemplateForSchematicDefinitionDeserializer()
-        );
-        module.addDeserializer(
-            TemplateForManualDefinition.class,
-            new TemplateForManualDefinitionDeserializer()
-        );
-        module.addDeserializer(
-            SchematicDependencyDefinition.class,
-            new DependencyDefinitionDeserializer()
-        );
+        module.addSerializer(NoTemplateDefinition.class, new NoTemplateDefinitionSerializer());
+        module.addDeserializer(TemplateDefinition.class, new TemplateDefinitionDeserializer());
         module.addDeserializer(RepositoryDefinition.class, new RepositoryDefinitionDeserializer());
         return new JacksonAdapter(
             new ObjectMapper()
@@ -50,26 +36,17 @@ public final class JacksonAdapter implements DefinitionTranslator {
 
     @Override
     public SchematicDefinition schematicDefinition(Path path) {
-        return read(path, SchematicDefinition.class);
-    }
-
-    @Override
-    public ManualDefinition manualDefinition(Path path) {
-        return read(path, ManualDefinition.class);
+        try (var reader = Files.newBufferedReader(path)) {
+            return objectMapper.readValue(reader, SchematicDefinition.class);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     @Override
     public void write(SchematicDefinition schematicDefinition, OutputStream outputStream) {
         try {
             objectMapper.writeValue(outputStream, schematicDefinition);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-    }
-
-    private <T> T read(Path path, Class<T> type) {
-        try (var reader = Files.newBufferedReader(path)) {
-            return objectMapper.readValue(reader, type);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

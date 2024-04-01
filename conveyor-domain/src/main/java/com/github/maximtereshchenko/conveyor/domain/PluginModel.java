@@ -9,7 +9,7 @@ record PluginModel(
     String name,
     Optional<String> version,
     Map<String, String> configuration
-) {
+) implements ArtifactModel {
 
     PluginModel override(PluginModel base) {
         var copy = new HashMap<>(base.configuration());

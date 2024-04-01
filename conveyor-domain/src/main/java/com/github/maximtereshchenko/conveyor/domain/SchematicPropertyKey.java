@@ -1,7 +1,8 @@
 package com.github.maximtereshchenko.conveyor.domain;
 
-enum ConveyorPropertyKey {
+enum SchematicPropertyKey {
 
+    TEMPLATE_LOCATION("conveyor.schematic.template.location"),
     SCHEMATIC_NAME("conveyor.schematic.name"),
     SCHEMATIC_VERSION("conveyor.schematic.version"),
     DISCOVERY_DIRECTORY("conveyor.discovery.directory"),
@@ -10,7 +11,7 @@ enum ConveyorPropertyKey {
 
     private final String fullName;
 
-    ConveyorPropertyKey(String fullName) {
+    SchematicPropertyKey(String fullName) {
         this.fullName = fullName;
     }
 

@@ -1,11 +1,23 @@
 package com.github.maximtereshchenko.conveyor.domain;
 
-import java.nio.file.Path;
+import java.util.Map;
 import java.util.Set;
 
-interface SchematicModel<T extends TemplateModel> extends Model<T, DependencyModel> {
+interface SchematicModel {
 
-    Path path();
+    String group();
 
-    Set<RepositoryModel> repositories();
+    String name();
+
+    SemanticVersion version();
+
+    TemplateModel template();
+
+    Map<String, String> properties();
+
+    PreferencesModel preferences();
+
+    Set<PluginModel> plugins();
+
+    Set<DependencyModel> dependencies();
 }

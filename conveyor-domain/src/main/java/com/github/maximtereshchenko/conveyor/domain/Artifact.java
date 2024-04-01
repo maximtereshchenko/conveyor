@@ -9,7 +9,7 @@ interface Artifact {
 
     String name();
 
-    SemanticVersion version();
+    SemanticVersion semanticVersion();
 
     Path path();
 

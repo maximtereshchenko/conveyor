@@ -9,21 +9,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 
-final class LocalDirectoryRepository implements Repository {
+final class LocalDirectoryRepository extends UriRepository {
 
     private final Path path;
 
     LocalDirectoryRepository(Path path) {
         this.path = path;
-    }
-
-    @Override
-    public Optional<Path> path(URI uri, Classifier classifier) {
-        var requested = absolutePath(uri);
-        if (Files.exists(requested)) {
-            return Optional.of(requested);
-        }
-        return Optional.empty();
     }
 
     void stored(URI uri, IOConsumer<OutputStream> consumer) {
@@ -32,6 +23,23 @@ final class LocalDirectoryRepository implements Repository {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
+
+    @Override
+    String extension(Classifier classifier) {
+        return switch (classifier) {
+            case SCHEMATIC_DEFINITION -> "json";
+            case MODULE -> "jar";
+        };
+    }
+
+    @Override
+    Optional<Path> path(URI uri, Classifier classifier) {
+        var requested = absolutePath(uri);
+        if (Files.exists(requested)) {
+            return Optional.of(requested);
+        }
+        return Optional.empty();
     }
 
     private OutputStream outputStream(Path target) throws IOException {

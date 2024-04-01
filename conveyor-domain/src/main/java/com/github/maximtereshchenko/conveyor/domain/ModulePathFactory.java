@@ -111,7 +111,7 @@ final class ModulePathFactory {
         }
 
         private Comparator<ArtifactRelation> comparator() {
-            return Comparator.<ArtifactRelation, SemanticVersion>comparing(relation -> relation.artifact().version())
+            return Comparator.<ArtifactRelation, SemanticVersion>comparing(relation -> relation.artifact().semanticVersion())
                 .reversed();
         }
     }

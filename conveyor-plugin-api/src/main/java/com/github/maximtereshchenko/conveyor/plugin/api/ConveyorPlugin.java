@@ -8,7 +8,7 @@ public interface ConveyorPlugin {
     String name();
 
     List<ConveyorTaskBinding> bindings(
-        ConveyorProperties properties,
+        ConveyorSchematic schematic,
         Map<String, String> configuration
     );
 }

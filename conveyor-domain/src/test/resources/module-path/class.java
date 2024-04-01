@@ -17,20 +17,19 @@ public final class ${normalizedName} implements ConveyorPlugin {
     }
 
     @Override
-    public List<ConveyorTaskBinding> bindings(ConveyorProperties properties, Map<String, String> configuration) {
+    public List<ConveyorTaskBinding> bindings(ConveyorSchematic schematic, Map<String, String> configuration) {
         return List.of(
             new ConveyorTaskBinding(
                 Stage.COMPILE,
                 Step.RUN,
-                (dependencies, products) ->
-                    execute(products, properties.constructionDirectory().resolve("module-path"))
+                (conveyorSchematic, products) -> execute(schematic.constructionDirectory().resolve("module-path"))
             )
         );
     }
 
-    private Products execute(Products products, Path path) {
+    private Set<Product> execute(Path path) {
         write(path, modulePath());
-        return products;
+        return Set.of();
     }
 
     private String modulePath() {

@@ -1,4 +1,4 @@
 package com.github.maximtereshchenko.conveyor.domain;
 
-sealed interface SchematicTemplateModel extends TemplateModel
-    permits OtherManualTemplateModel, OtherSchematicTemplateModel, NoTemplateModel {}
+record SchematicTemplateModel(String group, String name, SemanticVersion version)
+    implements TemplateModel {}
