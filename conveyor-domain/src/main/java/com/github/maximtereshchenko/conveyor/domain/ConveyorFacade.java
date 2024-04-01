@@ -13,13 +13,17 @@ import com.github.maximtereshchenko.conveyor.plugin.api.Stage;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public final class ConveyorFacade implements ConveyorModule {
 
     private final JsonReader jsonReader;
     private final ModuleLoader moduleLoader = new ModuleLoader();
+    private final Pattern interpolationPattern = Pattern.compile("\\$\\{([^}]+)}");
 
     public ConveyorFacade(JsonReader jsonReader) {
         this.jsonReader = jsonReader;
@@ -70,8 +74,27 @@ public final class ConveyorFacade implements ConveyorModule {
         return conveyorPlugin.bindings(
             new ConveyorPluginConfiguration(
                 projectDefinitionPath.getParent(),
-                projectDefinition.pluginConfiguration(conveyorPlugin.name())
+                pluginConfiguration(projectDefinition, conveyorPlugin.name())
             )
         );
+    }
+
+    private Map<String, String> pluginConfiguration(ProjectDefinition projectDefinition, String name) {
+        return projectDefinition.pluginConfiguration(name)
+            .entrySet()
+            .stream()
+            .map(entry -> Map.entry(entry.getKey(), interpolate(entry.getValue(), projectDefinition.properties())))
+            .collect(Collectors.collectingAndThen(Collectors.toMap(Entry::getKey, Entry::getValue), Map::copyOf));
+    }
+
+    private String interpolate(String value, Map<String, String> properties) {
+        return interpolationPattern.matcher(value)
+            .results()
+            .reduce(
+                value,
+                (current, matchResult) ->
+                    current.replace(matchResult.group(), properties.get(matchResult.group(1))),
+                (first, second) -> first
+            );
     }
 }

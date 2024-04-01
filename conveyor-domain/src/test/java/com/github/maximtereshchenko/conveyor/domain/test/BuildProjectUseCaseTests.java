@@ -229,6 +229,41 @@ final class BuildProjectUseCaseTests {
             .isEqualTo("property=value");
     }
 
+    @Test
+    void givenProperty_whenBuild_thenPropertyInterpolatedIntoPluginConfiguration(
+        @TempDir Path path
+    ) throws Exception {
+        new GeneratedConveyorPlugin("plugin", 1).install(path);
+        module.build(
+            conveyorJson(
+                path,
+                """
+                    {
+                       "name": "project",
+                       "version": 1,
+                       "properties": {
+                           "property": "value"
+                       },
+                       "plugins": [
+                           {
+                               "name": "plugin",
+                               "version": 1,
+                               "configuration": {
+                                   "property": "${property}-suffix"
+                               }
+                           }
+                       ]
+                    }
+                    """
+            ),
+            Stage.COMPILE
+        );
+
+        assertThat(path.resolve("plugin-1-task-executed"))
+            .content(StandardCharsets.UTF_8)
+            .isEqualTo("property=value-suffix");
+    }
+
     private Path conveyorJson(Path path, GeneratedArtifactDefinition... definitions) throws IOException {
         return conveyorJson(
             path,
