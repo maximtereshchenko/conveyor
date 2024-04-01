@@ -1,8 +1,8 @@
 package com.github.maximtereshchenko.conveyor.domain.test;
 
 import com.github.maximtereshchenko.conveyor.api.ConveyorModule;
-import com.github.maximtereshchenko.conveyor.common.api.BuildFileType;
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
+import com.github.maximtereshchenko.conveyor.common.api.ProductType;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -22,16 +22,16 @@ final class InheritanceTests extends ConveyorTest {
         ConveyorModule module,
         ArtifactFactory factory
     ) {
-        factory.superParent()
+        factory.superManual()
             .plugin(factory.pluginBuilder())
             .install(path);
 
-        var projectBuildFiles = module.build(
+        var projectBuildFiles = module.construct(
             factory.conveyorJson().install(path),
             Stage.COMPILE
         );
 
-        assertThat(projectBuildFiles.byType("project", BuildFileType.ARTIFACT))
+        assertThat(projectBuildFiles.byType("project", ProductType.MODULE_COMPONENT))
             .contains(defaultBuildDirectory(path).resolve("project-plugin-1-run"));
     }
 
@@ -42,18 +42,18 @@ final class InheritanceTests extends ConveyorTest {
         ArtifactFactory factory
     ) {
         var plugin = factory.pluginBuilder();
-        factory.superParent()
+        factory.superManual()
             .plugin(plugin.version(2))
             .install(path);
 
-        var projectBuildFiles = module.build(
+        var projectBuildFiles = module.construct(
             factory.conveyorJson()
                 .plugin(plugin.version(1))
                 .install(path),
             Stage.COMPILE
         );
 
-        assertThat(projectBuildFiles.byType("project", BuildFileType.ARTIFACT))
+        assertThat(projectBuildFiles.byType("project", ProductType.MODULE_COMPONENT))
             .contains(defaultBuildDirectory(path).resolve("project-plugin-1-run"));
     }
 
@@ -64,11 +64,11 @@ final class InheritanceTests extends ConveyorTest {
         ArtifactFactory factory
     ) {
         var plugin = factory.pluginBuilder();
-        factory.superParent()
+        factory.superManual()
             .plugin(plugin, Map.of("key", "parent-value"))
             .install(path);
 
-        module.build(
+        module.construct(
             factory.conveyorJson()
                 .plugin(plugin, Map.of("key", "value"))
                 .install(path),
@@ -87,11 +87,11 @@ final class InheritanceTests extends ConveyorTest {
         ArtifactFactory factory
     ) {
         var plugin = factory.pluginBuilder();
-        factory.superParent()
+        factory.superManual()
             .plugin(plugin, Map.of("parent-key", "value"))
             .install(path);
 
-        module.build(
+        module.construct(
             factory.conveyorJson()
                 .plugin(plugin, Map.of("key", "value"))
                 .install(path),
@@ -109,7 +109,7 @@ final class InheritanceTests extends ConveyorTest {
         ConveyorModule module,
         ArtifactFactory factory
     ) {
-        factory.superParent()
+        factory.superManual()
             .dependency(
                 factory.dependencyBuilder()
                     .name("implementation"),
@@ -122,9 +122,12 @@ final class InheritanceTests extends ConveyorTest {
             )
             .install(path);
 
-        module.build(
+        module.construct(
             factory.conveyorJson()
-                .plugin(factory.pluginBuilder())
+                .plugin(
+                    factory.pluginBuilder()
+
+                )
                 .install(path),
             Stage.COMPILE
         );
@@ -141,11 +144,11 @@ final class InheritanceTests extends ConveyorTest {
         ConveyorModule module,
         ArtifactFactory factory
     ) {
-        factory.superParent()
+        factory.superManual()
             .property("parent-key", "parent-value")
             .install(path);
 
-        module.build(
+        module.construct(
             factory.conveyorJson()
                 .property("key", "value")
                 .plugin(
@@ -170,11 +173,11 @@ final class InheritanceTests extends ConveyorTest {
         ConveyorModule module,
         ArtifactFactory factory
     ) {
-        factory.superParent()
+        factory.superManual()
             .property("key", "parent-value")
             .install(path);
 
-        module.build(
+        module.construct(
             factory.conveyorJson()
                 .property("key", "value")
                 .plugin(
@@ -196,11 +199,11 @@ final class InheritanceTests extends ConveyorTest {
         ConveyorModule module,
         ArtifactFactory factory
     ) {
-        factory.superParent()
+        factory.superManual()
             .property("key", "value")
             .install(path);
 
-        var projectBuildFiles = module.build(
+        var projectBuildFiles = module.construct(
             factory.conveyorJson()
                 .parent(
                     factory.projectBuilder("parent")
@@ -217,7 +220,7 @@ final class InheritanceTests extends ConveyorTest {
             Stage.COMPILE
         );
 
-        assertThat(projectBuildFiles.byType("project", BuildFileType.ARTIFACT))
+        assertThat(projectBuildFiles.byType("project", ProductType.MODULE_COMPONENT))
             .contains(defaultBuildDirectory(path).resolve("project-plugin-1-run"));
         assertThat(defaultBuildDirectory(path).resolve("project-plugin-1-configuration"))
             .content(StandardCharsets.UTF_8)
@@ -232,9 +235,9 @@ final class InheritanceTests extends ConveyorTest {
         ConveyorModule module,
         ArtifactFactory factory
     ) {
-        factory.superParent().install(path);
+        factory.superManual().install(path);
 
-        module.build(
+        module.construct(
             factory.conveyorJson()
                 .name("project")
                 .subproject(
@@ -261,9 +264,9 @@ final class InheritanceTests extends ConveyorTest {
         ConveyorModule module,
         ArtifactFactory factory
     ) {
-        factory.superParent().install(path);
+        factory.superManual().install(path);
 
-        module.build(
+        module.construct(
             factory.conveyorJson()
                 .name("project")
                 .subproject(
@@ -321,9 +324,9 @@ final class InheritanceTests extends ConveyorTest {
         ConveyorModule module,
         ArtifactFactory factory
     ) {
-        factory.superParent().install(path);
+        factory.superManual().install(path);
 
-        module.build(
+        module.construct(
             factory.conveyorJson()
                 .name("project")
                 .plugin(factory.pluginBuilder())
@@ -350,5 +353,37 @@ final class InheritanceTests extends ConveyorTest {
             )
         )
             .isSorted();
+    }
+
+    @Test
+    void givenProjectDependsOnOtherProject_whenBuild_thenDependantProjectHasAccessToClassesFromDependency(
+        @TempDir Path path,
+        ConveyorModule module,
+        ArtifactFactory factory
+    ) {
+        factory.superManual().install(path);
+
+        module.construct(
+            factory.conveyorJson()
+                .name("project")
+                .plugin(factory.pluginBuilder())
+                .subproject(
+                    factory.conveyorJson()
+                        .name("dependant")
+                        .dependency("dependency")
+                )
+                .subproject(
+                    factory.conveyorJson()
+                        .name("dependency")
+                )
+                .install(path),
+            Stage.COMPILE
+        );
+
+        assertThat(
+            modulePath(defaultBuildDirectory(path.resolve("dependant"))
+                .resolve("dependant-plugin-1-module-path-implementation"))
+        )
+            .containsExactly(path.resolve("dependency"));
     }
 }

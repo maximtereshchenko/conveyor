@@ -26,7 +26,7 @@ final class ArtifactFactory {
         return ProjectDefinitionBuilder.conveyorJson(gsonAdapter);
     }
 
-    ProjectDefinitionBuilder superParent() {
-        return ProjectDefinitionBuilder.superParent(gsonAdapter);
+    ProjectDefinitionBuilder superManual() {
+        return ProjectDefinitionBuilder.superManual(gsonAdapter);
     }
 }

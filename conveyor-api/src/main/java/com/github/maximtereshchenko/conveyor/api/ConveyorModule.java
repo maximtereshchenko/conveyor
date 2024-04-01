@@ -6,5 +6,5 @@ import java.nio.file.Path;
 
 public interface ConveyorModule {
 
-    ProjectBuildFiles build(Path projectDefinition, Stage stage);
+    SchematicProducts construct(Path path, Stage stage);
 }
