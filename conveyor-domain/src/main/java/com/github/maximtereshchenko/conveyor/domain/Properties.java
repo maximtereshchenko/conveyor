@@ -2,6 +2,8 @@ package com.github.maximtereshchenko.conveyor.domain;
 
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorProperties;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -27,9 +29,9 @@ final class Properties {
                         entry -> interpolated(entry.getValue())
                     )
                 ),
-            SchematicPropertyKey.NAME.fullName(),
-            SchematicPropertyKey.DISCOVERY_DIRECTORY.fullName(),
-            SchematicPropertyKey.CONSTRUCTION_DIRECTORY.fullName()
+            ConveyorPropertyKey.SCHEMATIC_NAME.fullName(),
+            ConveyorPropertyKey.DISCOVERY_DIRECTORY.fullName(),
+            ConveyorPropertyKey.CONSTRUCTION_DIRECTORY.fullName()
         );
     }
 
@@ -45,5 +47,9 @@ final class Properties {
                     ),
                 (a, b) -> a
             );
+    }
+
+    Path remoteRepositoryCacheDirectory() {
+        return Paths.get(all.get(ConveyorPropertyKey.REMOTE_REPOSITORY_CACHE_DIRECTORY.fullName()));
     }
 }

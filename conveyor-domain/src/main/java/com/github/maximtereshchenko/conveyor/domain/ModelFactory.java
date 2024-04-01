@@ -1,6 +1,6 @@
 package com.github.maximtereshchenko.conveyor.domain;
 
-import com.github.maximtereshchenko.conveyor.api.port.DefinitionReader;
+import com.github.maximtereshchenko.conveyor.api.port.DefinitionTranslator;
 
 import java.nio.file.Path;
 import java.util.LinkedHashSet;
@@ -10,10 +10,10 @@ import java.util.stream.Stream;
 
 final class ModelFactory {
 
-    private final DefinitionReader definitionReader;
+    private final DefinitionTranslator definitionTranslator;
 
-    ModelFactory(DefinitionReader definitionReader) {
-        this.definitionReader = definitionReader;
+    ModelFactory(DefinitionTranslator definitionTranslator) {
+        this.definitionTranslator = definitionTranslator;
     }
 
     LinkedHashSet<PartialSchematicHierarchy> partialSchematicHierarchies(Path path) {
@@ -102,7 +102,7 @@ final class ModelFactory {
     }
 
     private StandaloneSchematicModel standaloneSchematicModel(Path path) {
-        return new StandaloneSchematicModel(definitionReader.schematicDefinition(path), path);
+        return new StandaloneSchematicModel(definitionTranslator.schematicDefinition(path), path);
     }
 
     private PartialSchematicHierarchy partialSchematicHierarchy(Path path) {

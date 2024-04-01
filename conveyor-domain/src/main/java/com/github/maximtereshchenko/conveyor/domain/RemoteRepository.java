@@ -16,7 +16,6 @@ import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
@@ -27,13 +26,13 @@ import java.util.stream.Stream;
 final class RemoteRepository implements Repository {
 
     private final URL url;
-    private final Path path;
     private final HttpClient httpClient;
+    private final LocalDirectoryRepository cache;
 
-    RemoteRepository(URL url, Path path) {
+    RemoteRepository(URL url, LocalDirectoryRepository cache) {
         this.url = url;
-        this.path = path;
         this.httpClient = HttpClient.newHttpClient();
+        this.cache = cache;
     }
 
     @Override
@@ -41,40 +40,52 @@ final class RemoteRepository implements Repository {
         String name,
         SemanticVersion semanticVersion
     ) {
-        return uri(name, semanticVersion, "pom")
-            .flatMap(this::inputStream)
-            .map(this::manualDefinition);
+        return cache.manualDefinition(name, semanticVersion)
+            .or(() ->
+                uri(name, semanticVersion, "pom")
+                    .flatMap(this::inputStream)
+                    .map(inputStream -> manualDefinition(name, semanticVersion, inputStream))
+            );
     }
 
     @Override
     public Optional<Path> path(String name, SemanticVersion semanticVersion) {
-        return uri(name, semanticVersion, "jar")
-            .flatMap(this::inputStream)
-            .map(inputStream -> path(name, semanticVersion, inputStream));
+        return cache.path(name, semanticVersion)
+            .or(() ->
+                uri(name, semanticVersion, "jar")
+                    .flatMap(this::inputStream)
+                    .map(inputStream -> path(name, semanticVersion, inputStream))
+            );
     }
 
     private Path path(String name, SemanticVersion semanticVersion, InputStream inputStream) {
         try (inputStream) {
-            var downloaded = path.resolve(name + '-' + semanticVersion + ".jar");
-            Files.write(downloaded, inputStream.readAllBytes());
-            return downloaded;
+            return cache.storedJar(name, semanticVersion, inputStream.readAllBytes());
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
     }
 
-    private ManualDefinition manualDefinition(InputStream inputStream) {
+    private ManualDefinition manualDefinition(
+        String name,
+        SemanticVersion semanticVersion,
+        InputStream inputStream
+    ) {
         try (inputStream) {
             var document = document(inputStream);
             document.getDocumentElement().normalize();
-            return new ManualDefinition(
-                single(document, "groupId") + ':' + single(document, "artifactId"),
-                single(document, "version"),
-                new NoExplicitlyDefinedTemplate(),
-                Map.of(),
-                new PreferencesDefinition(),
-                List.of(),
-                List.of()
+            return cache.stored(
+                name,
+                semanticVersion,
+                new ManualDefinition(
+                    single(document, "groupId") + ':' + single(document, "artifactId"),
+                    single(document, "version"),
+                    new NoExplicitlyDefinedTemplate(),
+                    Map.of(),
+                    new PreferencesDefinition(),
+                    List.of(),
+                    List.of()
+                )
             );
         } catch (Exception e) {
             throw new IllegalArgumentException(e);

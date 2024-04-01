@@ -1,20 +1,23 @@
 package com.github.maximtereshchenko.conveyor.domain;
 
-import com.github.maximtereshchenko.conveyor.api.port.DefinitionReader;
+import com.github.maximtereshchenko.conveyor.api.port.DefinitionTranslator;
 import com.github.maximtereshchenko.conveyor.api.port.ManualDefinition;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Locale;
 import java.util.Optional;
 
 final class LocalDirectoryRepository implements Repository {
 
     private final Path path;
-    private final DefinitionReader definitionReader;
+    private final DefinitionTranslator definitionTranslator;
 
-    LocalDirectoryRepository(Path path, DefinitionReader definitionReader) {
+    LocalDirectoryRepository(Path path, DefinitionTranslator definitionTranslator) {
         this.path = path;
-        this.definitionReader = definitionReader;
+        this.definitionTranslator = definitionTranslator;
     }
 
     @Override
@@ -22,24 +25,48 @@ final class LocalDirectoryRepository implements Repository {
         String name,
         SemanticVersion semanticVersion
     ) {
-        return path(fullName(name, semanticVersion) + ".json")
-            .map(definitionReader::manualDefinition);
+        return existing(fullPath(name, semanticVersion, Extension.JSON))
+            .map(definitionTranslator::manualDefinition);
     }
 
     @Override
     public Optional<Path> path(String name, SemanticVersion semanticVersion) {
-        return path(fullName(name, semanticVersion) + ".jar");
+        return existing(fullPath(name, semanticVersion, Extension.JAR));
     }
 
-    private Optional<Path> path(String fileName) {
-        var requested = path.resolve(fileName).normalize();
-        if (Files.exists(requested)) {
-            return Optional.of(requested);
+    Path storedJar(String name, SemanticVersion semanticVersion, byte[] bytes) throws IOException {
+        return Files.write(fullPath(name, semanticVersion, Extension.JAR), bytes);
+    }
+
+    ManualDefinition stored(
+        String name,
+        SemanticVersion semanticVersion,
+        ManualDefinition manualDefinition
+    ) {
+        definitionTranslator.write(
+            manualDefinition,
+            fullPath(name, semanticVersion, Extension.JSON)
+        );
+        return manualDefinition;
+    }
+
+    private Optional<Path> existing(Path path) {
+        if (Files.exists(path)) {
+            return Optional.of(path);
         }
         return Optional.empty();
     }
 
-    private String fullName(String name, SemanticVersion version) {
-        return name + '-' + version;
+    private Path fullPath(String name, SemanticVersion version, Extension extension) {
+        try {
+            return Files.createDirectories(path).resolve(
+                    "%s-%s.%s".formatted(name, version, extension.name().toLowerCase(Locale.ROOT))
+                )
+                .normalize();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
+
+    private enum Extension {JSON, JAR}
 }
