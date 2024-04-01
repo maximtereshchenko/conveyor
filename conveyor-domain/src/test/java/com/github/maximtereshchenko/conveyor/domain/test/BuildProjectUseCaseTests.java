@@ -170,6 +170,68 @@ final class BuildProjectUseCaseTests {
             .isDirectoryContaining("glob:**transitive-1");
     }
 
+    @Test
+    void givenPluginRequireTransitiveDependency_whenBuildWithHigherVersion_thenTransitiveDependencyExcluded(
+        @TempDir Path path
+    ) throws Exception {
+        var transitive = new GeneratedDependency(path, "transitive", 1).install(path);
+        new GeneratedConveyorPlugin(
+            "first-plugin",
+            1,
+            new GeneratedDependency(
+                path,
+                "common-dependency",
+                1,
+                transitive
+            )
+                .install(path)
+        )
+            .install(path);
+        new GeneratedConveyorPlugin(
+            "second-plugin",
+            1,
+            new GeneratedDependency(
+                path,
+                "dependency",
+                1,
+                new GeneratedDependency(
+                    path,
+                    "common-dependency",
+                    2
+                )
+                    .install(path)
+            )
+                .install(path)
+        )
+            .install(path);
+        var conveyorJson = Files.writeString(
+            conveyorJson(path),
+            """
+                {
+                   "version": 1,
+                   "plugins": [
+                     {
+                       "name": "first-plugin",
+                       "version": 1
+                     },
+                     {
+                       "name": "second-plugin",
+                       "version": 1
+                     }
+                   ]
+                 }
+                """
+        );
+        Files.delete(transitive.jar());
+
+        module.build(conveyorJson, Stage.COMPILE);
+
+        assertThat(path).isDirectoryContaining("glob:**first-plugin-1-task-executed")
+            .isDirectoryContaining("glob:**second-plugin-1-task-executed")
+            .isDirectoryContaining("glob:**dependency-1")
+            .isDirectoryContaining("glob:**common-dependency-2");
+    }
+
     private Path conveyorJson(Path path) {
         return path.resolve("conveyor.json");
     }
