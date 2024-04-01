@@ -1,7 +1,7 @@
 package com.github.maximtereshchenko.conveyor.domain;
 
 import com.github.maximtereshchenko.conveyor.api.port.ArtifactDefinition;
-import com.github.maximtereshchenko.conveyor.api.port.DependencyDefinition;
+import com.github.maximtereshchenko.conveyor.api.port.ExternalDependencyDefinition;
 import com.github.maximtereshchenko.conveyor.api.port.PluginDefinition;
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 
@@ -15,5 +15,7 @@ interface Project extends ArtifactDefinition {
 
     Collection<PluginDefinition> plugins();
 
-    Collection<DependencyDefinition> dependencies(Set<DependencyScope> scopes);
+    Collection<ExternalDependencyDefinition> dependencies(Set<DependencyScope> scopes);
+
+    boolean dependsOn(String project);
 }

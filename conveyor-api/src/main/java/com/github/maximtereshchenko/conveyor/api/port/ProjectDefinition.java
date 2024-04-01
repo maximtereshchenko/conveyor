@@ -26,4 +26,12 @@ public record ProjectDefinition(
         plugins = List.copyOf(Objects.requireNonNullElse(plugins, List.of()));
         dependencies = List.copyOf(Objects.requireNonNullElse(dependencies, List.of()));
     }
+
+    //TODO
+    public Collection<ExternalDependencyDefinition> externalDependencies() {
+        return dependencies.stream()
+            .filter(ExternalDependencyDefinition.class::isInstance)
+            .map(ExternalDependencyDefinition.class::cast)
+            .toList();
+    }
 }

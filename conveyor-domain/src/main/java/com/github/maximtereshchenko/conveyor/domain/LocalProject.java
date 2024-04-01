@@ -79,6 +79,10 @@ final class LocalProject implements ConveyorProject {
             );
     }
 
+    boolean dependsOn(LocalProject localProject) {
+        return project.dependsOn(localProject.name());
+    }
+
     private Set<Path> pluginsModulePath() {
         return modulePath(project.plugins());
     }
