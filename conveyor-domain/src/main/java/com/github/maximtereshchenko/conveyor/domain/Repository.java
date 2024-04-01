@@ -11,10 +11,12 @@ import java.util.Optional;
 final class Repository {
 
     private final RepositoryDefinition repositoryDefinition;
+    private final Path discoveryDirectory;
     private final DefinitionReader definitionReader;
 
-    Repository(RepositoryDefinition repositoryDefinition, DefinitionReader definitionReader) {
+    Repository(RepositoryDefinition repositoryDefinition, Path discoveryDirectory, DefinitionReader definitionReader) {
         this.repositoryDefinition = repositoryDefinition;
+        this.discoveryDirectory = discoveryDirectory;
         this.definitionReader = definitionReader;
     }
 
@@ -36,7 +38,7 @@ final class Repository {
     }
 
     private Optional<Path> path(String fileName) {
-        var path = repositoryDefinition.path().resolve(fileName);
+        var path = discoveryDirectory.resolve(repositoryDefinition.path()).resolve(fileName).normalize();
         if (Files.exists(path)) {
             return Optional.of(path);
         }

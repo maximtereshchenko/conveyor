@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -135,5 +136,30 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         assertThat(defaultConstructionDirectory(project).resolve("module-path"))
             .content()
             .isEqualTo("dependency-1");
+    }
+
+    @Test
+    void givenRelativeRepositoryPath_whenConstructToStage_thenRepositoryPathResolvedRelativeToDiscoveryDirectory(
+        @TempDir Path path,
+        ConveyorModule module,
+        BuilderFactory factory
+    ) {
+        factory.repositoryBuilder()
+            .superManual()
+            .manual(builder -> builder.name("instant").version(1))
+            .jar("instant", builder -> builder.name("instant").version(1))
+            .install(path.resolve("repository"));
+
+        module.construct(
+            factory.schematicBuilder()
+                .name("project")
+                .version(1)
+                .repository("main", Paths.get("./temp/../repository"), true)
+                .plugin("instant", 1, Map.of("instant", "COMPILE-RUN"))
+                .install(path),
+            Stage.COMPILE
+        );
+
+        assertThat(defaultConstructionDirectory(path).resolve("instant")).exists();
     }
 }

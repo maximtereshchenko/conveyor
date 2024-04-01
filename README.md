@@ -9,7 +9,7 @@ A build tool for Java projects
     * A schematic can be constructed up to the specified stage: CLEAN, COMPILE, TEST, ARCHIVE or PUBLISH
 * Manual
     * This is a definition of an already archived artifact
-* Module path
+* Dependency version resolution
     * Given the same dependency is required but with different versions, the highest version wins taken into account the
       presence of the dependency requiring that version in the result module path
 * Plugins
@@ -76,6 +76,7 @@ A build tool for Java projects
 * Repositories
     * Repositories are defined in a schematic with a name, a path to the directory containing artifacts and manuals and
       an optional `enabled` flag
+    * The path to the directory containing artifacts and manuals is relative to the discovery directory
     * Repositories are inherited from a schematic used as a template
     * The path can be overridden in a schematic
     * A repository can be disabled with the `enabled` flag equal to `false`

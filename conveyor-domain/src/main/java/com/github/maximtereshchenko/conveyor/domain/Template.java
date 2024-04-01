@@ -8,6 +8,8 @@ interface Template {
 
     Repositories repositories();
 
+    SchematicProperties schematicProperties();
+
     Properties properties(Repositories repositories);
 
     Plugins plugins(Repositories repositories);
