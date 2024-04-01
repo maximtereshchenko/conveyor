@@ -1,6 +1,8 @@
 package com.github.maximtereshchenko.conveyor.domain;
 
-import java.util.Collection;
+interface ArtifactDefinition {
 
-record ArtifactDefinition(String name, int version, Collection<DependencyDefinition> dependencies)
-    implements VersionedArtifactDefinition {}
+    String name();
+
+    int version();
+}
