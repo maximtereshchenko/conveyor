@@ -7,16 +7,31 @@ import com.github.maximtereshchenko.conveyor.api.port.ProjectDefinition;
 import java.util.Collection;
 import java.util.Map;
 
-final class SuperParent implements Parent {
+final class SuperParent implements Project {
 
     private final ProjectDefinition projectDefinition;
 
-    SuperParent(ProjectDefinition projectDefinition) {
+    private SuperParent(ProjectDefinition projectDefinition) {
         this.projectDefinition = projectDefinition;
     }
 
-    static Parent from(DirectoryRepository repository) {
+    static Project from(DirectoryRepository repository) {
         return new SuperParent(repository.projectDefinition(new SuperParentArtifactDefinition()));
+    }
+
+    @Override
+    public String name() {
+        return projectDefinition.name();
+    }
+
+    @Override
+    public int version() {
+        return projectDefinition.version();
+    }
+
+    @Override
+    public Map<String, String> properties() {
+        return projectDefinition.properties();
     }
 
     @Override
@@ -27,11 +42,6 @@ final class SuperParent implements Parent {
     @Override
     public Collection<DependencyDefinition> dependencies() {
         return projectDefinition.dependencies();
-    }
-
-    @Override
-    public Map<String, String> properties() {
-        return projectDefinition.properties();
     }
 
     private static final class SuperParentArtifactDefinition implements ArtifactDefinition {

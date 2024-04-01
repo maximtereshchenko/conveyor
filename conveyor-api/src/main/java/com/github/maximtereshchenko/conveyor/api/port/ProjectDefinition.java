@@ -20,8 +20,8 @@ public record ProjectDefinition(
     public ProjectDefinition {
         parent = Objects.requireNonNullElse(parent, new NoExplicitParent());
         repository = Objects.requireNonNullElse(repository, Paths.get(""));
-        properties = Objects.requireNonNullElse(properties, Map.of());
-        plugins = Objects.requireNonNullElse(plugins, List.of());
-        dependencies = Objects.requireNonNullElse(dependencies, List.of());
+        properties = Map.copyOf(Objects.requireNonNullElse(properties, Map.of()));
+        plugins = List.copyOf(Objects.requireNonNullElse(plugins, List.of()));
+        dependencies = List.copyOf(Objects.requireNonNullElse(dependencies, List.of()));
     }
 }

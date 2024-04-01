@@ -10,11 +10,14 @@ import java.nio.file.Path;
 
 public final class ConveyorFacade implements ConveyorModule {
 
-    private final ProjectDefinitionReader projectDefinitionReader;
-    private final ModuleLoader moduleLoader = new ModuleLoader();
+    private final ProjectFactory projectFactory;
+    private final ModuleLoader moduleLoader;
+    private final InterpolationService interpolationService;
 
     public ConveyorFacade(ProjectDefinitionReader projectDefinitionReader) {
-        this.projectDefinitionReader = projectDefinitionReader;
+        this.projectFactory = new ProjectFactory(projectDefinitionReader);
+        this.moduleLoader = new ModuleLoader();
+        this.interpolationService = new InterpolationService();
     }
 
     @Override
@@ -22,6 +25,7 @@ public final class ConveyorFacade implements ConveyorModule {
         if (!Files.exists(projectDefinitionPath)) {
             throw new CouldNotFindProjectDefinition(projectDefinitionPath);
         }
-        return Project.from(projectDefinitionReader, projectDefinitionPath).executeTasks(moduleLoader, stage);
+        return projectFactory.projectToBuild(projectDefinitionPath)
+            .executeTasks(moduleLoader, interpolationService, stage);
     }
 }

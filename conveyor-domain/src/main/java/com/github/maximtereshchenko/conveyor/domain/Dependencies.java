@@ -28,7 +28,7 @@ final class Dependencies {
         return dependencies(
             repository,
             new Dependencies(project, List.of(new PluginsRoot(project))),
-            project.definition(),
+            project,
             project.plugins()
         );
     }
@@ -41,7 +41,7 @@ final class Dependencies {
         return dependencies(
             repository,
             new Dependencies(project, List.of(new DependenciesRoot(project, Set.of(scopes)))),
-            project.definition(),
+            project,
             project.dependencies()
         );
     }
@@ -72,8 +72,8 @@ final class Dependencies {
     }
 
     Set<ArtifactDefinition> modulePath() {
-        var modulePath = new HashSet<>(modulePath(project.definition().name(), project.definition().version()));
-        modulePath.remove(project.definition());
+        var modulePath = new HashSet<>(modulePath(project.name(), project.version()));
+        modulePath.remove(project);
         return Set.copyOf(modulePath);
     }
 
@@ -134,7 +134,7 @@ final class Dependencies {
         private final Project project;
 
         PluginsRoot(Project project) {
-            super(project.definition());
+            super(project);
             this.project = project;
         }
 
@@ -158,7 +158,7 @@ final class Dependencies {
         private final Set<DependencyScope> scopes;
 
         DependenciesRoot(Project project, Set<DependencyScope> scopes) {
-            super(project.definition());
+            super(project);
             this.project = project;
             this.scopes = scopes;
         }
