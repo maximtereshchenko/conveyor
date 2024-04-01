@@ -77,7 +77,7 @@ final class CleanConveyorPluginTests {
 
     @Test
     void givenBuildFiles_whenExecuteTask_thenBuildFilesAreNotModified(@TempDir Path path) {
-        var buildFiles = new BuildFiles().with(new BuildFile(path, BuildFileType.SOURCE));
+        var buildFiles = new BuildFiles().with(path, BuildFileType.SOURCE);
 
         assertThat(executeTask(path, buildFiles)).isSameAs(buildFiles);
     }

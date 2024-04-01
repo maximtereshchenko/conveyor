@@ -1,7 +1,6 @@
 package com.github.maximtereshchenko.conveyor.domain.test;
 
 import com.github.maximtereshchenko.conveyor.api.ConveyorModule;
-import com.github.maximtereshchenko.conveyor.common.api.BuildFile;
 import com.github.maximtereshchenko.conveyor.common.api.BuildFileType;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import org.junit.jupiter.api.Test;
@@ -27,7 +26,7 @@ final class PropertiesTests extends ConveyorTest {
         factory.superParent().install(path);
         var project = Files.createDirectory(path.resolve("project"));
 
-        var buildFiles = module.build(
+        var projectBuildFiles = module.build(
             factory.conveyorJson()
                 .property("conveyor.project.directory", project.toString())
                 .plugin(factory.pluginBuilder())
@@ -35,10 +34,8 @@ final class PropertiesTests extends ConveyorTest {
             Stage.COMPILE
         );
 
-        assertThat(buildFiles.byType(BuildFileType.ARTIFACT))
-            .contains(
-                new BuildFile(defaultBuildDirectory(project).resolve("project-plugin-1-run"), BuildFileType.ARTIFACT)
-            );
+        assertThat(projectBuildFiles.byType("project", BuildFileType.ARTIFACT))
+            .contains(defaultBuildDirectory(project).resolve("project-plugin-1-run"));
     }
 
     @Test
@@ -50,7 +47,7 @@ final class PropertiesTests extends ConveyorTest {
         factory.superParent().install(path);
         var project = Files.createDirectory(path.resolve("project"));
 
-        var buildFiles = module.build(
+        var projectBuildFiles = module.build(
             factory.conveyorJson()
                 .property(
                     "conveyor.project.directory",
@@ -61,10 +58,8 @@ final class PropertiesTests extends ConveyorTest {
             Stage.COMPILE
         );
 
-        assertThat(buildFiles.byType(BuildFileType.ARTIFACT))
-            .contains(
-                new BuildFile(defaultBuildDirectory(project).resolve("project-plugin-1-run"), BuildFileType.ARTIFACT)
-            );
+        assertThat(projectBuildFiles.byType("project", BuildFileType.ARTIFACT))
+            .contains(defaultBuildDirectory(project).resolve("project-plugin-1-run"));
     }
 
     @Test
@@ -76,7 +71,7 @@ final class PropertiesTests extends ConveyorTest {
         factory.superParent().install(path);
         var build = path.resolve("build");
 
-        var buildFiles = module.build(
+        var projectBuildFiles = module.build(
             factory.conveyorJson()
                 .property("conveyor.project.build.directory", build.toString())
                 .plugin(factory.pluginBuilder())
@@ -84,10 +79,8 @@ final class PropertiesTests extends ConveyorTest {
             Stage.COMPILE
         );
 
-        assertThat(buildFiles.byType(BuildFileType.ARTIFACT))
-            .contains(
-                new BuildFile(build.resolve("project-plugin-1-run"), BuildFileType.ARTIFACT)
-            );
+        assertThat(projectBuildFiles.byType("project", BuildFileType.ARTIFACT))
+            .contains(build.resolve("project-plugin-1-run"));
     }
 
     @Test
@@ -99,7 +92,7 @@ final class PropertiesTests extends ConveyorTest {
         factory.superParent().install(path);
         var project = path.resolve("project");
 
-        var buildFiles = module.build(
+        var projectBuildFiles = module.build(
             factory.conveyorJson()
                 .property("conveyor.project.directory", project.toString())
                 .property("conveyor.project.build.directory", "./build")
@@ -108,10 +101,8 @@ final class PropertiesTests extends ConveyorTest {
             Stage.COMPILE
         );
 
-        assertThat(buildFiles.byType(BuildFileType.ARTIFACT))
-            .contains(
-                new BuildFile(project.resolve("build").resolve("project-plugin-1-run"), BuildFileType.ARTIFACT)
-            );
+        assertThat(projectBuildFiles.byType("project", BuildFileType.ARTIFACT))
+            .contains(project.resolve("build").resolve("project-plugin-1-run"));
     }
 
     @Test
