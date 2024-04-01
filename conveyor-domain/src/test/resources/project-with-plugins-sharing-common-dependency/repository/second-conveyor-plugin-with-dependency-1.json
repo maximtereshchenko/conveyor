@@ -1,0 +1,10 @@
+{
+  "name": "second-conveyor-plugin-with-dependency",
+  "version": 1,
+  "dependencies": [
+    {
+      "name": "conveyor-plugin-dependency",
+      "version": 2
+    }
+  ]
+}

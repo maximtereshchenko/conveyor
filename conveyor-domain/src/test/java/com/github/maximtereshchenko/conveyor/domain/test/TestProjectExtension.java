@@ -24,21 +24,27 @@ final class TestProjectExtension implements ParameterResolver {
 
     @Override
     public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
-        return copyToTemporaryDirectory(testProjectPath());
+        return copyToTemporaryDirectory(
+            testProjectPath(
+                parameterContext.findAnnotation(TestProject.class)
+                    .orElseThrow()
+                    .value()
+            )
+        );
     }
 
-    private Path testProjectPath() {
+    private Path testProjectPath(String name) {
         try {
             return Paths.get(
                 Objects.requireNonNull(
                         Thread.currentThread()
                             .getContextClassLoader()
-                            .getResource("test-project")
+                            .getResource(name)
                     )
                     .toURI()
             );
         } catch (URISyntaxException e) {
-            throw new ParameterResolutionException("Could not find test project", e);
+            throw new ParameterResolutionException("Could not find resource", e);
         }
     }
 

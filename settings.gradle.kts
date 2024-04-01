@@ -4,6 +4,9 @@ include("conveyor-domain")
 include("conveyor-plugin-api")
 include("file-conveyor-plugin")
 include("gson-conveyor-project-definition-reader")
+include("conveyor-plugin-dependency")
+include("first-conveyor-plugin-with-dependency")
+include("second-conveyor-plugin-with-dependency")
 dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {
