@@ -17,15 +17,17 @@ final class Schematic {
     private final PartialSchematicHierarchy partialSchematicHierarchy;
     private final DefinitionReader definitionReader;
     private final ModelFactory modelFactory;
+    private final ModulePathFactory modulePathFactory;
 
     Schematic(
         PartialSchematicHierarchy partialSchematicHierarchy,
         DefinitionReader definitionReader,
-        ModelFactory modelFactory
+        ModelFactory modelFactory, ModulePathFactory modulePathFactory
     ) {
         this.partialSchematicHierarchy = partialSchematicHierarchy;
         this.definitionReader = definitionReader;
         this.modelFactory = modelFactory;
+        this.modulePathFactory = modulePathFactory;
     }
 
     String name() {
@@ -83,7 +85,8 @@ final class Schematic {
             fullSchematicHierarchy.dependencies()
                 .stream()
                 .map(dependencyModel -> dependency(dependencyModel, preferences, repositories, schematicProducts))
-                .collect(Collectors.toSet())
+                .collect(Collectors.toSet()),
+            modulePathFactory
         );
     }
 
@@ -135,6 +138,7 @@ final class Schematic {
                 .stream()
                 .map(pluginModel -> new Plugin(pluginModel, properties, modelFactory, preferences, repositories))
                 .collect(Collectors.toSet()),
+            modulePathFactory,
             properties,
             dependencies
         );

@@ -13,10 +13,12 @@ public final class ConveyorFacade implements ConveyorModule {
 
     private final DefinitionReader definitionReader;
     private final ModelFactory modelFactory;
+    private final ModulePathFactory modulePathFactory;
 
     public ConveyorFacade(DefinitionReader definitionReader) {
         this.definitionReader = definitionReader;
         this.modelFactory = new ModelFactory(definitionReader);
+        this.modulePathFactory = new ModulePathFactory();
     }
 
     @Override
@@ -27,7 +29,9 @@ public final class ConveyorFacade implements ConveyorModule {
     private Schematics schematics(Path path) {
         var schematics = modelFactory.partialSchematicHierarchies(path)
             .stream()
-            .map(partialSchematicHierarchy -> new Schematic(partialSchematicHierarchy, definitionReader, modelFactory))
+            .map(partialSchematicHierarchy ->
+                new Schematic(partialSchematicHierarchy, definitionReader, modelFactory, modulePathFactory)
+            )
             .collect(Collectors.toCollection(LinkedHashSet::new));
         return new Schematics(schematics, initial(schematics, path));
     }
