@@ -29,6 +29,11 @@ final class ProjectConveyorPluginAdapter implements Project {
     }
 
     @Override
+    public Path buildDirectory() {
+        return projectDirectory;
+    }
+
+    @Override
     public Set<Path> modulePath(DependencyScope... scopes) {
         return Dependencies.forDependencies(repository, projectDefinition, scopes)
             .modulePath()

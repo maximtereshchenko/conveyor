@@ -8,5 +8,7 @@ public interface Project {
 
     Path projectDirectory();
 
+    Path buildDirectory();
+
     Set<Path> modulePath(DependencyScope... scopes);
 }
