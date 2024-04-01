@@ -8,6 +8,8 @@ import com.github.maximtereshchenko.conveyor.api.ConveyorModule;
 import com.github.maximtereshchenko.conveyor.api.exception.CouldNotFindProjectDefinition;
 import com.github.maximtereshchenko.conveyor.api.port.DependencyDefinition;
 import com.github.maximtereshchenko.conveyor.api.port.NoExplicitParent;
+import com.github.maximtereshchenko.conveyor.api.port.ParentDefinition;
+import com.github.maximtereshchenko.conveyor.api.port.ParentProjectDefinition;
 import com.github.maximtereshchenko.conveyor.api.port.PluginDefinition;
 import com.github.maximtereshchenko.conveyor.api.port.ProjectDefinition;
 import com.github.maximtereshchenko.conveyor.common.api.BuildFile;
@@ -299,6 +301,7 @@ final class BuildProjectUseCaseTests {
         module.build(
             conveyorJson(
                 path,
+                new NoExplicitParent(),
                 Map.of(),
                 List.of(new PluginDefinition("plugin", 1, Map.of("property", "value"))),
                 List.of()
@@ -319,6 +322,7 @@ final class BuildProjectUseCaseTests {
         module.build(
             conveyorJson(
                 path,
+                new NoExplicitParent(),
                 Map.of("property", "value"),
                 List.of(new PluginDefinition("plugin", 1, Map.of("property", "${property}-suffix"))),
                 List.of()
@@ -574,6 +578,7 @@ final class BuildProjectUseCaseTests {
         module.build(
             conveyorJson(
                 path,
+                new NoExplicitParent(),
                 Map.of(),
                 List.of(new PluginDefinition("plugin", 1, Map.of("key", "child-value"))),
                 List.of()
@@ -601,6 +606,7 @@ final class BuildProjectUseCaseTests {
         module.build(
             conveyorJson(
                 path,
+                new NoExplicitParent(),
                 Map.of(),
                 List.of(new PluginDefinition("plugin", 1, Map.of("child-key", "value"))),
                 List.of()
@@ -660,6 +666,7 @@ final class BuildProjectUseCaseTests {
         module.build(
             conveyorJson(
                 path,
+                new NoExplicitParent(),
                 Map.of("child-key", "child-value"),
                 List.of(new PluginDefinition(
                     plugin.name(),
@@ -693,6 +700,7 @@ final class BuildProjectUseCaseTests {
         module.build(
             conveyorJson(
                 path,
+                new NoExplicitParent(),
                 Map.of("key", "child-value"),
                 List.of(new PluginDefinition(
                     plugin.name(),
@@ -707,6 +715,57 @@ final class BuildProjectUseCaseTests {
         assertThat(defaultBuildDirectory(path).resolve("plugin-1-configuration"))
             .content(StandardCharsets.UTF_8)
             .isEqualTo("key=child-value");
+    }
+
+    @Test
+    void givenChildHasMultipleParents_whenBuild_thenChildInheritsFromAllParents(@TempDir Path path) throws Exception {
+        var plugin = new GeneratedConveyorPlugin(gsonAdapter, "plugin").install(path);
+        var dependency = new GeneratedDependency(gsonAdapter, "dependency").install(path);
+        installSuperParent(
+            path,
+            Map.of("key", "value"),
+            List.of(),
+            List.of()
+        );
+        installProjectDefinition(
+            path,
+            "grand-parent",
+            1,
+            new NoExplicitParent(),
+            Map.of(),
+            List.of(new PluginDefinition(plugin.name(), plugin.version(), Map.of("key", "${key}"))),
+            List.of()
+        );
+        installProjectDefinition(
+            path,
+            "parent",
+            1,
+            new ParentProjectDefinition("grand-parent", 1),
+            Map.of(),
+            List.of(),
+            List.of(new DependencyDefinition(dependency.name(), dependency.version(), DependencyScope.IMPLEMENTATION))
+        );
+
+        var buildFiles = module.build(
+            conveyorJson(
+                path,
+                new ParentProjectDefinition("parent", 1),
+                Map.of(),
+                List.of(),
+                List.of()
+            ),
+            Stage.COMPILE
+        );
+
+        assertThat(buildFiles.byType(BuildFileType.ARTIFACT))
+            .contains(
+                new BuildFile(defaultBuildDirectory(path).resolve("plugin-1-run"), BuildFileType.ARTIFACT)
+            );
+        assertThat(defaultBuildDirectory(path).resolve("plugin-1-configuration"))
+            .content(StandardCharsets.UTF_8)
+            .isEqualTo("key=value");
+        assertThat(modulePath(defaultBuildDirectory(path).resolve("plugin-1-module-path-implementation")))
+            .containsExactly(dependency.jar());
     }
 
     private void installSuperParent(Path path, GeneratedArtifactDefinition... plugins) {
@@ -726,13 +785,33 @@ final class BuildProjectUseCaseTests {
         Collection<PluginDefinition> plugins,
         Collection<DependencyDefinition> dependencies
     ) {
+        installProjectDefinition(
+            path,
+            "super-parent",
+            1,
+            new NoExplicitParent(),
+            properties,
+            plugins,
+            dependencies
+        );
+    }
+
+    private void installProjectDefinition(
+        Path path,
+        String name,
+        int version,
+        ParentDefinition parentDefinition,
+        Map<String, String> properties,
+        Collection<PluginDefinition> plugins,
+        Collection<DependencyDefinition> dependencies
+    ) {
         gsonAdapter.write(
-            path.resolve("super-parent-1.json"),
+            path.resolve("%s-%d.json".formatted(name, version)),
             new ProjectDefinition(
-                "super-parent",
-                1,
-                new NoExplicitParent(),
-                null,
+                name,
+                version,
+                parentDefinition,
+                path,
                 properties,
                 plugins,
                 dependencies
@@ -767,6 +846,7 @@ final class BuildProjectUseCaseTests {
     ) {
         return conveyorJson(
             path,
+            new NoExplicitParent(),
             properties,
             plugins.stream()
                 .map(definition -> new PluginDefinition(definition.name(), definition.version(), Map.of()))
@@ -786,13 +866,14 @@ final class BuildProjectUseCaseTests {
 
     private Path conveyorJson(
         Path path,
+        ParentDefinition parentDefinition,
         Map<String, String> properties,
         Collection<PluginDefinition> plugins,
         Collection<DependencyDefinition> dependencies
     ) {
         return conveyorJson(
             path,
-            new ProjectDefinition("project", 1, null, path, properties, plugins, dependencies)
+            new ProjectDefinition("project", 1, parentDefinition, path, properties, plugins, dependencies)
         );
     }
 

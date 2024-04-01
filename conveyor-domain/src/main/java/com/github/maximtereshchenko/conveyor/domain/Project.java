@@ -1,6 +1,8 @@
 package com.github.maximtereshchenko.conveyor.domain;
 
 import com.github.maximtereshchenko.conveyor.api.port.DependencyDefinition;
+import com.github.maximtereshchenko.conveyor.api.port.NoExplicitParent;
+import com.github.maximtereshchenko.conveyor.api.port.ParentProjectDefinition;
 import com.github.maximtereshchenko.conveyor.api.port.PluginDefinition;
 import com.github.maximtereshchenko.conveyor.api.port.ProjectDefinition;
 import com.github.maximtereshchenko.conveyor.api.port.ProjectDefinitionReader;
@@ -20,7 +22,7 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-final class Project {
+final class Project implements Parent {
 
     private final Path projectDefinitionPath;
     private final Parent parent;
@@ -43,19 +45,35 @@ final class Project {
 
     static Project from(ProjectDefinitionReader projectDefinitionReader, Path projectDefinitionPath) {
         var projectDefinition = projectDefinitionReader.projectDefinition(projectDefinitionPath);
-        var repository = new DirectoryRepository(
-            projectDefinitionPath.getParent().resolve(projectDefinition.repository()),
-            projectDefinitionReader
+        return from(
+            projectDefinitionPath,
+            new DirectoryRepository(
+                projectDefinitionPath.getParent().resolve(projectDefinition.repository()),
+                projectDefinitionReader
+            ),
+            projectDefinition
         );
+    }
+
+    private static Project from(
+        Path projectDefinitionPath,
+        DirectoryRepository repository,
+        ProjectDefinition projectDefinition
+    ) {
         return new Project(
             projectDefinitionPath,
-            SuperParent.from(repository),
+            switch (projectDefinition.parent()) {
+                case NoExplicitParent ignored -> SuperParent.from(repository);
+                case ParentProjectDefinition definition ->
+                    Project.from(projectDefinitionPath, repository, repository.projectDefinition(definition));
+            },
             projectDefinition,
             repository
         );
     }
 
-    Collection<DependencyDefinition> dependencies() {
+    @Override
+    public Collection<DependencyDefinition> dependencies() {
         var indexed = parent.dependencies()
             .stream()
             .collect(Collectors.toMap(DependencyDefinition::name, Function.identity()));
@@ -65,7 +83,8 @@ final class Project {
         return List.copyOf(indexed.values());
     }
 
-    Collection<PluginDefinition> plugins() {
+    @Override
+    public Collection<PluginDefinition> plugins() {
         var indexed = parent.plugins()
             .stream()
             .collect(Collectors.toMap(PluginDefinition::name, Function.identity()));
@@ -78,6 +97,13 @@ final class Project {
             }
         }
         return List.copyOf(indexed.values());
+    }
+
+    @Override
+    public Map<String, String> properties() {
+        var copy = new HashMap<>(parent.properties());
+        copy.putAll(projectDefinition.properties());
+        return Map.copyOf(copy);
     }
 
     ProjectDefinition definition() {
@@ -129,12 +155,6 @@ final class Project {
             .flatMap(Collection::stream)
             .map(entry -> Map.entry(entry.getKey(), interpolate(entry.getValue(), properties())))
             .collect(Collectors.collectingAndThen(Collectors.toMap(Entry::getKey, Entry::getValue), Map::copyOf));
-    }
-
-    private Map<String, String> properties() {
-        var copy = new HashMap<>(parent.properties());
-        copy.putAll(projectDefinition.properties());
-        return Map.copyOf(copy);
     }
 
     private String interpolate(String value, Map<String, String> properties) {
