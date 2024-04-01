@@ -1,6 +1,7 @@
 package com.github.maximtereshchenko.conveyor.domain.test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.github.maximtereshchenko.conveyor.api.ConveyorModule;
@@ -166,6 +167,28 @@ final class BuildProjectUseCaseTests {
         assertThat(defaultBuildDirectory(path))
             .isDirectoryContaining("glob:**dependency-1")
             .isDirectoryContaining("glob:**transitive-1");
+    }
+
+    @Test
+    void givenPluginRequireDependencyWithTestScope_whenBuild_thenDependencyIsNotLoaded(@TempDir Path path)
+        throws Exception {
+        installSuperParent(path);
+        var test = new GeneratedDependency(gsonAdapter, "test").install(path);
+        Files.delete(test.jar());
+        var conveyorJson = conveyorJson(
+            path,
+            new GeneratedConveyorPlugin(
+                gsonAdapter,
+                "plugin",
+                1,
+                Stage.COMPILE,
+                List.of(),
+                List.of(test)
+            )
+                .install(path)
+        );
+
+        assertThatCode(() -> module.build(conveyorJson, Stage.COMPILE)).doesNotThrowAnyException();
     }
 
     @Test
@@ -373,11 +396,41 @@ final class BuildProjectUseCaseTests {
             Stage.COMPILE
         );
 
-        var defaultBuildDirectory = defaultBuildDirectory(path);
-        assertThat(modulePath(defaultBuildDirectory.resolve("plugin-1-module-path-implementation")))
+        assertThat(modulePath(defaultBuildDirectory(path).resolve("plugin-1-module-path-implementation")))
             .containsExactly(implementation.jar());
-        assertThat(modulePath(defaultBuildDirectory.resolve("plugin-1-module-path-test")))
+        assertThat(modulePath(defaultBuildDirectory(path).resolve("plugin-1-module-path-test")))
             .containsExactly(test.jar());
+    }
+
+    @Test
+    void givenTransitiveDependencyWithTestScope_whenBuild_thenDependencyIsNotLoaded(@TempDir Path path)
+        throws Exception {
+        installSuperParent(path);
+        var test = new GeneratedDependency(gsonAdapter, "test").install(path);
+        var implementation = new GeneratedDependency(
+            gsonAdapter,
+            "dependency",
+            1,
+            List.of(),
+            List.of(test)
+        )
+            .install(path);
+        Files.delete(test.jar());
+
+        module.build(
+            conveyorJson(
+                path,
+                Map.of(),
+                List.of(new GeneratedConveyorPlugin(gsonAdapter, "plugin").install(path)),
+                Map.of(implementation, DependencyScope.IMPLEMENTATION)
+            ),
+            Stage.COMPILE
+        );
+
+        assertThat(modulePath(defaultBuildDirectory(path).resolve("plugin-1-module-path-implementation")))
+            .doesNotContain(test.jar());
+        assertThat(modulePath(defaultBuildDirectory(path).resolve("plugin-1-module-path-test")))
+            .doesNotContain(test.jar());
     }
 
     @Test

@@ -57,7 +57,15 @@ final class Dependencies {
             .reduce(
                 original,
                 (dependencies, definition) ->
-                    dependencies(repository, dependencies, definition, definition.dependencies())
+                    dependencies(
+                        repository,
+                        dependencies,
+                        definition,
+                        definition.dependencies()
+                            .stream()
+                            .filter(dependencyDefinition -> dependencyDefinition.scope() != DependencyScope.TEST)
+                            .toList()
+                    )
                         .with(parent, definition),
                 (first, second) -> first
             );
@@ -114,6 +122,7 @@ final class Dependencies {
         Set<String> dependsOn() {
             return projectDefinition.dependencies()
                 .stream()
+                .filter(dependencyDefinition -> dependencyDefinition.scope() != DependencyScope.TEST)
                 .map(DependencyDefinition::name)
                 .collect(Collectors.toSet());
         }
