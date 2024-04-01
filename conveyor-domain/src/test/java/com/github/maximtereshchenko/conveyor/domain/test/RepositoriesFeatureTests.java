@@ -198,7 +198,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         WireMockRuntimeInfo wireMockRuntimeInfo
     ) {
         factory.repositoryBuilder()
-            .remoteJar(
+            .jar(
                 factory.jarBuilder("instant")
             )
             .pom(
@@ -235,7 +235,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         WireMockRuntimeInfo wireMockRuntimeInfo
     ) {
         factory.repositoryBuilder()
-            .remoteJar(
+            .jar(
                 factory.jarBuilder("instant")
             )
             .pom(
@@ -263,7 +263,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
             .filteredOn(serveEvent -> serveEvent.getRequest().getUrl().contains("instant"))
             .hasSize(2);
         assertThat(defaultCacheDirectory(path))
-            .isDirectoryContaining("glob:**instant-1.0.0.{json,jar}");
+            .isDirectoryRecursivelyContaining("glob:**instant-1.0.0.{json,jar}");
     }
 
     @Test
@@ -275,7 +275,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         WireMockRuntimeInfo wireMockRuntimeInfo
     ) {
         factory.repositoryBuilder()
-            .remoteJar(
+            .jar(
                 factory.jarBuilder("instant")
             )
             .pom(
@@ -303,7 +303,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         );
 
         assertThat(cache)
-            .isDirectoryContaining("glob:**instant-1.0.0.{json,jar}");
+            .isDirectoryRecursivelyContaining("glob:**instant-1.0.0.{json,jar}");
     }
 
     @Test
@@ -315,7 +315,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         WireMockRuntimeInfo wireMockRuntimeInfo
     ) {
         factory.repositoryBuilder()
-            .remoteJar(
+            .jar(
                 factory.jarBuilder("instant")
             )
             .pom(
@@ -342,7 +342,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         );
 
         assertThat(path.resolve("cache"))
-            .isDirectoryContaining("glob:**instant-1.0.0.{json,jar}");
+            .isDirectoryRecursivelyContaining("glob:**instant-1.0.0.{json,jar}");
     }
 
     @Test
@@ -354,7 +354,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         WireMockRuntimeInfo wireMockRuntimeInfo
     ) {
         factory.repositoryBuilder()
-            .remoteJar(
+            .jar(
                 factory.jarBuilder("module-path")
             )
             .pom(
@@ -367,7 +367,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                     .artifactId("parent")
                     .dependency("dependency")
             )
-            .remoteJar(
+            .jar(
                 factory.jarBuilder("dependency")
             )
             .pom(
@@ -407,7 +407,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                     .artifactId("bom")
                     .managedDependency("dependency", "1.0.0")
             )
-            .remoteJar(
+            .jar(
                 factory.jarBuilder("dependency")
             )
             .pom(

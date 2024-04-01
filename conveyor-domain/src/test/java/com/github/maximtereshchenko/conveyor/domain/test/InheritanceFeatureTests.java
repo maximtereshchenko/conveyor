@@ -866,9 +866,13 @@ final class InheritanceFeatureTests extends ConveyorTest {
                         "1.0.0",
                         Map.of(
                             "path",
-                            path.resolve(
-                                    "com.github.maximtereshchenko.conveyor:dependency-1.0.0.jar"
-                                )
+                            path.resolve("com")
+                                .resolve("github")
+                                .resolve("maximtereshchenko")
+                                .resolve("conveyor")
+                                .resolve("dependency")
+                                .resolve("1.0.0")
+                                .resolve("dependency-1.0.0.jar")
                                 .toString()
                         )
                     )

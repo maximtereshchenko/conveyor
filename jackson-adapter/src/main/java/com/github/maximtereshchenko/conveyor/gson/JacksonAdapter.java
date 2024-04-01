@@ -59,21 +59,9 @@ public final class JacksonAdapter implements DefinitionTranslator {
     }
 
     @Override
-    public void write(ManualDefinition manualDefinition, Path path) {
-        write(path, manualDefinition);
-    }
-
-    public void write(Path path, Object object) {
-        try (var writer = Files.newBufferedWriter(path)) {
-            objectMapper.writeValue(writer, object);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-    }
-
-    public void write(Object object, OutputStream outputStream) {
+    public void write(SchematicDefinition schematicDefinition, OutputStream outputStream) {
         try {
-            objectMapper.writerWithDefaultPrettyPrinter().writeValue(outputStream, object);
+            objectMapper.writeValue(outputStream, schematicDefinition);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

@@ -204,9 +204,13 @@ final class DependenciesFeatureTests extends ConveyorTest {
                             "1.0.0",
                             Map.of(
                                 "path",
-                                path.resolve(
-                                        "com.github.maximtereshchenko.conveyor:first-1.0.0.jar"
-                                    )
+                                path.resolve("com")
+                                    .resolve("github")
+                                    .resolve("maximtereshchenko")
+                                    .resolve("conveyor")
+                                    .resolve("first")
+                                    .resolve("1.0.0")
+                                    .resolve("first-1.0.0.jar")
                                     .toString()
                             )
                         )
