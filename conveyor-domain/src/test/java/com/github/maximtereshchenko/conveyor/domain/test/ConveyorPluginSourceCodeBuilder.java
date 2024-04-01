@@ -78,7 +78,7 @@ final class ConveyorPluginSourceCodeBuilder {
                             Step.PREPARE,
                             (buildFiles) -> writeInstant(
                                 buildFiles,
-                                project.buildDirectory().resolve(fullName + "-prepared")
+                                project.buildDirectory().resolve("%%s-%%s-prepared".formatted(project.name(), fullName))
                             )
                         ),
                         new ConveyorTaskBinding(
@@ -86,7 +86,7 @@ final class ConveyorPluginSourceCodeBuilder {
                             Step.FINALIZE,
                             (buildFiles) -> writeInstant(
                                 buildFiles,
-                                project.buildDirectory().resolve(fullName + "-finalized")
+                                project.buildDirectory().resolve("%%s-%%s-finalized".formatted(project.name(), fullName))
                             )
                         ),
                         new ConveyorTaskBinding(
@@ -110,18 +110,18 @@ final class ConveyorPluginSourceCodeBuilder {
                 private BuildFiles execute(BuildFiles buildFiles, ConveyorProject project, Map<String, String> configuration) {
                     %s
                     write(
-                        project.buildDirectory().resolve(fullName + "-configuration"),
+                        project.buildDirectory().resolve("%%s-%%s-configuration".formatted(project.name(), fullName)),
                         toString(configuration.entrySet())
                     );
                     write(
-                        project.buildDirectory().resolve(fullName + "-module-path-implementation"),
+                        project.buildDirectory().resolve("%%s-%%s-module-path-implementation".formatted(project.name(), fullName)),
                         toString(project.modulePath(DependencyScope.IMPLEMENTATION))
                     );
                     write(
-                        project.buildDirectory().resolve(fullName + "-module-path-test"),
+                        project.buildDirectory().resolve("%%s-%%s-module-path-test".formatted(project.name(), fullName)),
                         toString(project.modulePath(DependencyScope.TEST))
                     );
-                    return writeInstant(buildFiles, project.buildDirectory().resolve(fullName + "-run"));
+                    return writeInstant(buildFiles, project.buildDirectory().resolve("%%s-%%s-run".formatted(project.name(), fullName)));
                 }
                 private Path write(Path path) {
                     return write(path, Instant.now().toString());

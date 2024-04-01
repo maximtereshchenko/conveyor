@@ -32,12 +32,12 @@ final class InheritanceTests extends ConveyorTest {
 
         assertThat(buildFiles.byType(BuildFileType.ARTIFACT))
             .contains(
-                new BuildFile(defaultBuildDirectory(path).resolve("plugin-1-run"), BuildFileType.ARTIFACT)
+                new BuildFile(defaultBuildDirectory(path).resolve("project-plugin-1-run"), BuildFileType.ARTIFACT)
             );
     }
 
     @Test
-    void givenPluginDeclaredInChildWithDifferentVersion_whenBuild_thenPluginVersionInChildShouldTakePrecedence(
+    void givenPluginDeclaredInSubprojectWithDifferentVersion_whenBuild_thenPluginVersionInSubprojectShouldTakePrecedence(
         @TempDir Path path,
         ConveyorModule module,
         ArtifactFactory factory
@@ -56,12 +56,12 @@ final class InheritanceTests extends ConveyorTest {
 
         assertThat(buildFiles.byType(BuildFileType.ARTIFACT))
             .contains(
-                new BuildFile(defaultBuildDirectory(path).resolve("plugin-1-run"), BuildFileType.ARTIFACT)
+                new BuildFile(defaultBuildDirectory(path).resolve("project-plugin-1-run"), BuildFileType.ARTIFACT)
             );
     }
 
     @Test
-    void givenPluginDeclaredInChildWithDifferentConfigurationValue_whenBuild_thenValueInChildShouldTakePrecedence(
+    void givenPluginDeclaredInSubprojectWithDifferentConfigurationValue_whenBuild_thenValueInSubprojectShouldTakePrecedence(
         @TempDir Path path,
         ConveyorModule module,
         ArtifactFactory factory
@@ -73,18 +73,18 @@ final class InheritanceTests extends ConveyorTest {
 
         module.build(
             factory.conveyorJson()
-                .plugin(plugin, Map.of("key", "child-value"))
+                .plugin(plugin, Map.of("key", "value"))
                 .install(path),
             Stage.COMPILE
         );
 
-        assertThat(defaultBuildDirectory(path).resolve("plugin-1-configuration"))
+        assertThat(defaultBuildDirectory(path).resolve("project-plugin-1-configuration"))
             .content(StandardCharsets.UTF_8)
-            .isEqualTo("key=child-value");
+            .isEqualTo("key=value");
     }
 
     @Test
-    void givenPluginDeclaredInChildWithAdditionalConfiguration_whenBuild_thenPluginConfigurationsAreMerged(
+    void givenPluginDeclaredInSubprojectWithAdditionalConfiguration_whenBuild_thenPluginConfigurationsAreMerged(
         @TempDir Path path,
         ConveyorModule module,
         ArtifactFactory factory
@@ -96,18 +96,18 @@ final class InheritanceTests extends ConveyorTest {
 
         module.build(
             factory.conveyorJson()
-                .plugin(plugin, Map.of("child-key", "value"))
+                .plugin(plugin, Map.of("key", "value"))
                 .install(path),
             Stage.COMPILE
         );
 
-        assertThat(defaultBuildDirectory(path).resolve("plugin-1-configuration"))
+        assertThat(defaultBuildDirectory(path).resolve("project-plugin-1-configuration"))
             .content(StandardCharsets.UTF_8)
-            .containsIgnoringNewLines("parent-key=value", "child-key=value");
+            .containsIgnoringNewLines("parent-key=value", "key=value");
     }
 
     @Test
-    void givenParentHasDependencies_whenBuild_thenChildInheritedDependencies(
+    void givenParentHasDependencies_whenBuild_thenSubprojectInheritedDependencies(
         @TempDir Path path,
         ConveyorModule module,
         ArtifactFactory factory
@@ -132,14 +132,14 @@ final class InheritanceTests extends ConveyorTest {
             Stage.COMPILE
         );
 
-        assertThat(modulePath(defaultBuildDirectory(path).resolve("plugin-1-module-path-implementation")))
+        assertThat(modulePath(defaultBuildDirectory(path).resolve("project-plugin-1-module-path-implementation")))
             .containsExactly(path.resolve("implementation-1.jar"));
-        assertThat(modulePath(defaultBuildDirectory(path).resolve("plugin-1-module-path-test")))
+        assertThat(modulePath(defaultBuildDirectory(path).resolve("project-plugin-1-module-path-test")))
             .containsExactly(path.resolve("test-1.jar"));
     }
 
     @Test
-    void givenChildHasDifferentProperty_whenBuild_thenPropertiesAreMerged(
+    void givenSubprojectHasDifferentProperty_whenBuild_thenPropertiesAreMerged(
         @TempDir Path path,
         ConveyorModule module,
         ArtifactFactory factory
@@ -150,25 +150,25 @@ final class InheritanceTests extends ConveyorTest {
 
         module.build(
             factory.conveyorJson()
-                .property("child-key", "child-value")
+                .property("key", "value")
                 .plugin(
                     factory.plugin(),
                     Map.of(
                         "parent-key", "${parent-key}",
-                        "child-key", "${child-key}"
+                        "key", "${key}"
                     )
                 )
                 .install(path),
             Stage.COMPILE
         );
 
-        assertThat(defaultBuildDirectory(path).resolve("plugin-1-configuration"))
+        assertThat(defaultBuildDirectory(path).resolve("project-plugin-1-configuration"))
             .content(StandardCharsets.UTF_8)
-            .containsIgnoringNewLines("parent-key=parent-value", "child-key=child-value");
+            .containsIgnoringNewLines("parent-key=parent-value", "key=value");
     }
 
     @Test
-    void givenChildHasPropertyWithSameKey_whenBuild_thenChildPropertyValueTookPrecedence(
+    void givenSubprojectHasPropertyWithSameKey_whenBuild_thenSubprojectPropertyValueTookPrecedence(
         @TempDir Path path,
         ConveyorModule module,
         ArtifactFactory factory
@@ -179,7 +179,7 @@ final class InheritanceTests extends ConveyorTest {
 
         module.build(
             factory.conveyorJson()
-                .property("key", "child-value")
+                .property("key", "value")
                 .plugin(
                     factory.plugin(),
                     Map.of("key", "${key}")
@@ -188,13 +188,13 @@ final class InheritanceTests extends ConveyorTest {
             Stage.COMPILE
         );
 
-        assertThat(defaultBuildDirectory(path).resolve("plugin-1-configuration"))
+        assertThat(defaultBuildDirectory(path).resolve("project-plugin-1-configuration"))
             .content(StandardCharsets.UTF_8)
-            .isEqualTo("key=child-value");
+            .isEqualTo("key=value");
     }
 
     @Test
-    void givenChildHasMultipleParents_whenBuild_thenChildInheritsFromAllParents(
+    void givenProjectHierarchy_whenBuild_thenSubprojectInheritsFromAllParents(
         @TempDir Path path,
         ConveyorModule module,
         ArtifactFactory factory
@@ -222,12 +222,41 @@ final class InheritanceTests extends ConveyorTest {
 
         assertThat(buildFiles.byType(BuildFileType.ARTIFACT))
             .contains(
-                new BuildFile(defaultBuildDirectory(path).resolve("plugin-1-run"), BuildFileType.ARTIFACT)
+                new BuildFile(defaultBuildDirectory(path).resolve("project-plugin-1-run"), BuildFileType.ARTIFACT)
             );
-        assertThat(defaultBuildDirectory(path).resolve("plugin-1-configuration"))
+        assertThat(defaultBuildDirectory(path).resolve("project-plugin-1-configuration"))
             .content(StandardCharsets.UTF_8)
             .isEqualTo("key=value");
-        assertThat(modulePath(defaultBuildDirectory(path).resolve("plugin-1-module-path-implementation")))
+        assertThat(modulePath(defaultBuildDirectory(path).resolve("project-plugin-1-module-path-implementation")))
             .containsExactly(path.resolve("dependency-1.jar"));
+    }
+
+    @Test
+    void givenSubproject_whenBuild_thenParentBuildBeforeSubproject(
+        @TempDir Path path,
+        ConveyorModule module,
+        ArtifactFactory factory
+    ) {
+        factory.superParent().install(path);
+
+        var buildFiles = module.build(
+            factory.conveyorJson()
+                .name("project")
+                .subproject(
+                    factory.conveyorJson()
+                        .name("subproject")
+                )
+                .plugin(factory.plugin())
+                .install(path),
+            Stage.COMPILE
+        );
+
+        assertThat(instant(defaultBuildDirectory(path).resolve("project-plugin-1-run")))
+            .isBefore(
+                instant(
+                    defaultBuildDirectory(path.resolve("subproject"))
+                        .resolve("subproject-plugin-1-run")
+                )
+            );
     }
 }

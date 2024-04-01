@@ -34,6 +34,11 @@ final class ProjectToBuild implements ConveyorProject {
     }
 
     @Override
+    public String name() {
+        return project.name();
+    }
+
+    @Override
     public Path projectDirectory() {
         var projectDirectory = project.properties().get("conveyor.project.directory");
         if (projectDirectory == null) {
@@ -64,6 +69,24 @@ final class ProjectToBuild implements ConveyorProject {
             .stream()
             .map(repository::artifact)
             .collect(Collectors.toSet());
+    }
+
+    public BuildFiles build(ModuleLoader moduleLoader, InterpolationService interpolationService, Stage stage) {
+        return project.subprojects()
+            .stream()
+            .map(subproject ->
+                new ProjectToBuild(
+                    projectDefinitionPath.getParent().resolve(subproject.name()).resolve("conveyor.json"),
+                    subproject,
+                    repository
+                )
+            )
+            .reduce(
+                executeTasks(moduleLoader, interpolationService, stage),
+                (buildFiles, projectToBuild) ->
+                    buildFiles.with(projectToBuild.executeTasks(moduleLoader, interpolationService, stage)),
+                (first, second) -> first
+            );
     }
 
     BuildFiles executeTasks(ModuleLoader moduleLoader, InterpolationService interpolationService, Stage stage) {

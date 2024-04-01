@@ -6,6 +6,8 @@ import java.util.Set;
 
 public interface ConveyorProject {
 
+    String name();
+
     Path projectDirectory();
 
     Path buildDirectory();

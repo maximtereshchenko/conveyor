@@ -22,18 +22,34 @@ final class ProjectFactory {
         );
         return new ProjectToBuild(
             projectDefinitionPath,
-            project(repository, projectDefinition),
+            project(
+                repository,
+                projectDefinition,
+                projectDefinitionPath.getParent()
+            ),
             repository
         );
     }
 
-    private Project project(DirectoryRepository repository, ProjectDefinition projectDefinition) {
-        return new ChildProject(
+    private Project project(
+        DirectoryRepository repository,
+        ProjectDefinition projectDefinition,
+        Path directory
+    ) {
+        return new Subproject(
             switch (projectDefinition.parent()) {
                 case NoExplicitParent ignored -> SuperParent.from(repository);
                 case ParentProjectDefinition parentProjectDefinition ->
-                    project(repository, repository.projectDefinition(parentProjectDefinition));
+                    project(repository, repository.projectDefinition(parentProjectDefinition), directory);
             },
+            projectDefinition.subprojects()
+                .stream()
+                .map(directory::resolve)
+                .map(path -> path.resolve("conveyor.json"))
+                .map(conveyorJson -> project(repository, reader.projectDefinition(conveyorJson),
+                    conveyorJson.getParent()
+                ))
+                .toList(),
             projectDefinition
         );
     }
