@@ -1,4 +1,4 @@
-package com.github.maximtereshchenko.conveyor.plugin.api;
+package com.github.maximtereshchenko.conveyor.common.api;
 
 public enum Stage {
 

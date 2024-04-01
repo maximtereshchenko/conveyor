@@ -12,13 +12,15 @@ record ProjectDefinition(
     int version,
     Path repository,
     Map<String, String> properties,
-    Collection<PluginDefinition> plugins
+    Collection<PluginDefinition> plugins,
+    Collection<ProjectDependencyDefinition> dependencies
 ) implements ArtifactDefinition {
 
     ProjectDefinition {
         repository = Objects.requireNonNullElse(repository, Paths.get(""));
         properties = Objects.requireNonNullElse(properties, Map.of());
         plugins = Objects.requireNonNullElse(plugins, List.of());
+        dependencies = Objects.requireNonNullElse(dependencies, List.of());
     }
 
     Map<String, String> pluginConfiguration(String name) {

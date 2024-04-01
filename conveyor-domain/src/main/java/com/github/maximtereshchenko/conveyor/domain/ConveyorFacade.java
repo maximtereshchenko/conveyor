@@ -5,11 +5,10 @@ import com.github.maximtereshchenko.conveyor.api.BuildSucceeded;
 import com.github.maximtereshchenko.conveyor.api.ConveyorModule;
 import com.github.maximtereshchenko.conveyor.api.CouldNotFindProjectDefinition;
 import com.github.maximtereshchenko.conveyor.api.port.JsonReader;
+import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPluginConfiguration;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskBinding;
-import com.github.maximtereshchenko.conveyor.plugin.api.Stage;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -46,7 +45,7 @@ public final class ConveyorFacade implements ConveyorModule {
 
     Set<Path> pluginsModulePath(DirectoryRepository repository, ProjectDefinition projectDefinition) {
         return Dependencies.forPlugins(repository, projectDefinition)
-            .modulePath(projectDefinition)
+            .modulePath()
             .stream()
             .map(repository::artifact)
             .collect(Collectors.toSet());
@@ -60,7 +59,7 @@ public final class ConveyorFacade implements ConveyorModule {
     ) {
         moduleLoader.conveyorPlugins(pluginsModulePath(repository, projectDefinition))
             .stream()
-            .map(conveyorPlugin -> bindings(conveyorPlugin, projectDefinitionPath, projectDefinition))
+            .map(conveyorPlugin -> bindings(conveyorPlugin, projectDefinitionPath, repository, projectDefinition))
             .flatMap(Collection::stream)
             .filter(binding -> binding.stage().compareTo(stage) <= 0)
             .sorted(Comparator.comparing(ConveyorTaskBinding::stage).thenComparing(ConveyorTaskBinding::step))
@@ -71,13 +70,12 @@ public final class ConveyorFacade implements ConveyorModule {
     private Collection<ConveyorTaskBinding> bindings(
         ConveyorPlugin conveyorPlugin,
         Path projectDefinitionPath,
+        DirectoryRepository repository,
         ProjectDefinition projectDefinition
     ) {
         return conveyorPlugin.bindings(
-            new ConveyorPluginConfiguration(
-                projectDefinitionPath.getParent(),
-                pluginConfiguration(projectDefinition, conveyorPlugin.name())
-            )
+            new ProjectConveyorPluginAdapter(projectDefinitionPath.getParent(), repository, projectDefinition),
+            pluginConfiguration(projectDefinition, conveyorPlugin.name())
         );
     }
 

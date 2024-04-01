@@ -23,7 +23,7 @@ final class DirectoryRepository {
         return artifact;
     }
 
-    StoredArtifactDefinition artifactDefinition(ArtifactDefinition artifactDefinition) {
+    StoredArtifactDefinition storedArtifactDefinition(ArtifactDefinition artifactDefinition) {
         var fullName = fullName(artifactDefinition);
         var definition = directory.resolve(fullName + ".json");
         if (!Files.exists(definition)) {
