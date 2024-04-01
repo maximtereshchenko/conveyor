@@ -43,9 +43,10 @@ final class PropertiesFeatureTests extends ConveyorTest {
 
         assertThat(defaultConstructionDirectory(path).resolve("properties"))
             .content()
-            .hasLineCount(5)
+            .hasLineCount(6)
             .contains(
                 "conveyor.schematic.name=project",
+                "conveyor.schematic.version=1",
                 "conveyor.discovery.directory=" + path,
                 "conveyor.construction.directory=" + defaultConstructionDirectory(path),
                 "template.key=template.value",
@@ -84,9 +85,10 @@ final class PropertiesFeatureTests extends ConveyorTest {
 
         assertThat(defaultConstructionDirectory(path).resolve("properties"))
             .content()
-            .hasLineCount(4)
+            .hasLineCount(5)
             .contains(
                 "conveyor.schematic.name=project",
+                "conveyor.schematic.version=1",
                 "conveyor.discovery.directory=" + path,
                 "conveyor.construction.directory=" + defaultConstructionDirectory(path),
                 "key=value"
@@ -124,9 +126,10 @@ final class PropertiesFeatureTests extends ConveyorTest {
 
         assertThat(defaultConstructionDirectory(path).resolve("properties"))
             .content()
-            .hasLineCount(3)
+            .hasLineCount(4)
             .contains(
                 "conveyor.schematic.name=project",
+                "conveyor.schematic.version=1",
                 "conveyor.discovery.directory=" + path,
                 "conveyor.construction.directory=" + defaultConstructionDirectory(path)
             );
@@ -157,9 +160,10 @@ final class PropertiesFeatureTests extends ConveyorTest {
 
         assertThat(defaultConstructionDirectory(path).resolve("properties"))
             .content()
-            .hasLineCount(3)
+            .hasLineCount(4)
             .contains(
                 "conveyor.schematic.name=project",
+                "conveyor.schematic.version=1",
                 "conveyor.discovery.directory=" + path,
                 "conveyor.construction.directory=" + defaultConstructionDirectory(path)
             );
@@ -191,9 +195,10 @@ final class PropertiesFeatureTests extends ConveyorTest {
 
         assertThat(defaultConstructionDirectory(path).resolve("properties"))
             .content()
-            .hasLineCount(3)
+            .hasLineCount(4)
             .contains(
                 "conveyor.schematic.name=project",
+                "conveyor.schematic.version=1",
                 "conveyor.discovery.directory=" + project,
                 "conveyor.construction.directory=" + defaultConstructionDirectory(path)
             );
@@ -224,9 +229,10 @@ final class PropertiesFeatureTests extends ConveyorTest {
 
         assertThat(defaultConstructionDirectory(path).resolve("properties"))
             .content()
-            .hasLineCount(3)
+            .hasLineCount(4)
             .contains(
                 "conveyor.schematic.name=project",
+                "conveyor.schematic.version=1",
                 "conveyor.discovery.directory=" + path.resolve("project"),
                 "conveyor.construction.directory=" + defaultConstructionDirectory(path)
             );
@@ -258,9 +264,10 @@ final class PropertiesFeatureTests extends ConveyorTest {
 
         assertThat(construction.resolve("properties"))
             .content()
-            .hasLineCount(3)
+            .hasLineCount(4)
             .contains(
                 "conveyor.schematic.name=project",
+                "conveyor.schematic.version=1",
                 "conveyor.discovery.directory=" + path,
                 "conveyor.construction.directory=" + construction
             );
@@ -292,9 +299,10 @@ final class PropertiesFeatureTests extends ConveyorTest {
         var construction = path.resolve("construction");
         assertThat(construction.resolve("properties"))
             .content()
-            .hasLineCount(3)
+            .hasLineCount(4)
             .contains(
                 "conveyor.schematic.name=project",
+                "conveyor.schematic.version=1",
                 "conveyor.discovery.directory=" + path,
                 "conveyor.construction.directory=" + construction
             );
@@ -326,9 +334,10 @@ final class PropertiesFeatureTests extends ConveyorTest {
 
         assertThat(defaultConstructionDirectory(path).resolve("properties"))
             .content()
-            .hasLineCount(5)
+            .hasLineCount(6)
             .contains(
                 "conveyor.schematic.name=project",
+                "conveyor.schematic.version=1",
                 "conveyor.discovery.directory=" + path,
                 "conveyor.construction.directory=" + defaultConstructionDirectory(path),
                 "key=interpolated",

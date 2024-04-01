@@ -329,4 +329,128 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
             .hasLineCount(2)
             .contains("dependency-1", "transitive-2");
     }
+
+    @Test
+    void givenPluginWithoutVersion_whenConstructToStage_thenVersionIsFromPreferences(
+        @TempDir Path path,
+        ConveyorModule module,
+        BuilderFactory factory
+    ) {
+        factory.repositoryBuilder()
+            .superManual()
+            .manual(builder -> builder.name("instant").version(1))
+            .jar("instant", builder -> builder.name("instant").version(1))
+            .install(path);
+
+        module.construct(
+            factory.schematicBuilder()
+                .name("project")
+                .version(1)
+                .repository("main", path, true)
+                .preference("instant", 1)
+                .plugin("instant", Map.of("instant", "COMPILE-RUN"))
+                .install(path),
+            Stage.COMPILE
+        );
+
+        assertThat(defaultConstructionDirectory(path).resolve("instant")).exists();
+    }
+
+    @Test
+    void givenDirectDependencyWithoutVersion_whenConstructToStage_thenVersionIsFromPreferences(
+        @TempDir Path path,
+        ConveyorModule module,
+        BuilderFactory factory
+    ) {
+        factory.repositoryBuilder()
+            .superManual()
+            .manual(builder -> builder.name("dependencies").version(1))
+            .jar("dependencies", builder -> builder.name("dependencies").version(1))
+            .manual(builder -> builder.name("dependency").version(1))
+            .jar("dependency", builder -> builder.name("dependency").version(1))
+            .install(path);
+
+        module.construct(
+            factory.schematicBuilder()
+                .name("project")
+                .version(1)
+                .repository("main", path, true)
+                .preference("dependency", 1)
+                .plugin("dependencies", 1, Map.of())
+                .dependency("dependency", DependencyScope.IMPLEMENTATION)
+                .install(path),
+            Stage.COMPILE
+        );
+
+        assertThat(defaultConstructionDirectory(path).resolve("dependencies"))
+            .content()
+            .isEqualTo("dependency-1");
+    }
+
+    @Test
+    void givenPreferenceInclusion_whenConstructToStage_thenPreferencesAreIncludedFromReferencedManual(
+        @TempDir Path path,
+        ConveyorModule module,
+        BuilderFactory factory
+    ) {
+        factory.repositoryBuilder()
+            .superManual()
+            .manual(builder -> builder.name("instant").version(1))
+            .jar("instant", builder -> builder.name("instant").version(1))
+            .manual(builder ->
+                builder.name("bom")
+                    .version(1)
+                    .preference("instant", 1)
+            )
+            .install(path);
+
+        module.construct(
+            factory.schematicBuilder()
+                .name("project")
+                .version(1)
+                .repository("main", path, true)
+                .preferenceInclusion("bom", 1)
+                .plugin("instant", Map.of("instant", "COMPILE-RUN"))
+                .install(path),
+            Stage.COMPILE
+        );
+
+        assertThat(defaultConstructionDirectory(path).resolve("instant")).exists();
+    }
+
+    @Test
+    void givenTransitivePreferenceInclusion_whenConstructToStage_thenPreferencesAreIncludedFromTransitiveInclusion(
+        @TempDir Path path,
+        ConveyorModule module,
+        BuilderFactory factory
+    ) {
+        factory.repositoryBuilder()
+            .superManual()
+            .manual(builder -> builder.name("instant").version(1))
+            .jar("instant", builder -> builder.name("instant").version(1))
+            .manual(builder ->
+                builder.name("bom")
+                    .version(1)
+                    .preferenceInclusion("parent-bom", 1)
+            )
+            .manual(builder ->
+                builder.name("parent-bom")
+                    .version(1)
+                    .preference("instant", 1)
+            )
+            .install(path);
+
+        module.construct(
+            factory.schematicBuilder()
+                .name("project")
+                .version(1)
+                .repository("main", path, true)
+                .preferenceInclusion("bom", 1)
+                .plugin("instant", Map.of("instant", "COMPILE-RUN"))
+                .install(path),
+            Stage.COMPILE
+        );
+
+        assertThat(defaultConstructionDirectory(path).resolve("instant")).exists();
+    }
 }

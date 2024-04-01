@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 final class Schematic {
 
@@ -56,7 +57,7 @@ final class Schematic {
     SchematicProducts construct(SchematicProducts schematicProducts, Stage stage) {
         var repositories = repositories();
         var fullSchematicHierarchy = modelFactory.fullSchematicHierarchy(partialSchematicHierarchy, repositories);
-        var preferences = preferences(fullSchematicHierarchy);
+        var preferences = preferences(fullSchematicHierarchy, repositories);
         return schematicProducts
             .with(
                 fullSchematicHierarchy.name(),
@@ -147,6 +148,7 @@ final class Schematic {
     private Properties properties(FullSchematicHierarchy fullSchematicHierarchy) {
         var properties = new HashMap<>(fullSchematicHierarchy.properties());
         properties.put(SchematicPropertyKey.NAME.fullName(), fullSchematicHierarchy.name());
+        properties.put(SchematicPropertyKey.VERSION.fullName(), String.valueOf(fullSchematicHierarchy.version()));
         put(
             properties,
             SchematicPropertyKey.DISCOVERY_DIRECTORY,
@@ -162,12 +164,31 @@ final class Schematic {
         return new Properties(properties);
     }
 
-    private Preferences preferences(FullSchematicHierarchy fullSchematicHierarchy) {
+    private Preferences preferences(FullSchematicHierarchy fullSchematicHierarchy, Repositories repositories) {
         return new Preferences(
-            fullSchematicHierarchy.preferences()
-                .artifacts()
-                .stream()
+            artifactPreferenceModels(fullSchematicHierarchy.preferences(), repositories)
                 .collect(Collectors.toMap(ArtifactPreferenceModel::name, ArtifactPreferenceModel::version))
+        );
+    }
+
+    private Stream<ArtifactPreferenceModel> artifactPreferenceModels(
+        PreferencesModel preferencesModel,
+        Repositories repositories
+    ) {
+        return Stream.concat(
+            preferencesModel.inclusions()
+                .stream()
+                .map(preferencesInclusionModel ->
+                    modelFactory.manualHierarchy(
+                        preferencesInclusionModel.name(),
+                        preferencesInclusionModel.version(),
+                        repositories
+                    )
+                )
+                .map(Hierarchy::preferences)
+                .flatMap(model -> artifactPreferenceModels(model, repositories)),
+            preferencesModel.artifacts()
+                .stream()
         );
     }
 
