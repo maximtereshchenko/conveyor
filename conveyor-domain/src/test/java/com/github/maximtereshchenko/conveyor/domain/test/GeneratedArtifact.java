@@ -1,5 +1,9 @@
 package com.github.maximtereshchenko.conveyor.domain.test;
 
+import com.github.maximtereshchenko.conveyor.api.port.DependencyDefinition;
+import com.github.maximtereshchenko.conveyor.api.port.ProjectDefinition;
+import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
+import com.github.maximtereshchenko.conveyor.gson.GsonAdapter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -13,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -26,11 +31,18 @@ import javax.tools.ToolProvider;
 
 abstract class GeneratedArtifact {
 
+    private final GsonAdapter gsonAdapter;
     private final String name;
     private final int version;
     private final Collection<GeneratedArtifactDefinition> dependencies;
 
-    GeneratedArtifact(String name, int version, Collection<GeneratedArtifactDefinition> dependencies) {
+    GeneratedArtifact(
+        GsonAdapter gsonAdapter,
+        String name,
+        int version,
+        Collection<GeneratedArtifactDefinition> dependencies
+    ) {
+        this.gsonAdapter = gsonAdapter;
         this.name = name;
         this.version = version;
         this.dependencies = List.copyOf(dependencies);
@@ -52,16 +64,25 @@ abstract class GeneratedArtifact {
         var fileName = "%s-%d".formatted(name, version);
         var jarPath = directory.resolve(fileName + ".jar");
         writeJar(jarPath, compiled());
-        Files.writeString(
+        gsonAdapter.write(
             directory.resolve(fileName + ".json"),
-            """
-                {
-                  "name": "%s",
-                  "version": %d,
-                  "dependencies": [%s]
-                }
-                """
-                .formatted(name, version, dependencyDefinitions())
+            new ProjectDefinition(
+                name,
+                version,
+                null,
+                null,
+                Map.of(),
+                List.of(),
+                dependencies.stream()
+                    .map(definition ->
+                        new DependencyDefinition(
+                            definition.name(),
+                            definition.version(),
+                            DependencyScope.IMPLEMENTATION
+                        )
+                    )
+                    .toList()
+            )
         );
         return new GeneratedArtifactDefinition(
             packageName(),
@@ -80,17 +101,6 @@ abstract class GeneratedArtifact {
 
     final String packageName() {
         return name.replace("-", "");
-    }
-
-    private String dependencyDefinitions() {
-        return dependencies.stream()
-            .map(generatedArtifact ->
-                """
-                    {"name":%s,"version":%d}
-                    """
-                    .formatted(generatedArtifact.name(), generatedArtifact.version())
-            )
-            .collect(Collectors.joining(","));
     }
 
     private void writeJar(Path path, Collection<FileObject> compiled) throws IOException {

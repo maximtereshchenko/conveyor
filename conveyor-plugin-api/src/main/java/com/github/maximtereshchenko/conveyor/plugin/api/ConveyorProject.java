@@ -4,7 +4,7 @@ import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 import java.nio.file.Path;
 import java.util.Set;
 
-public interface Project {
+public interface ConveyorProject {
 
     Path projectDirectory();
 

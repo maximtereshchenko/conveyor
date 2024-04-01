@@ -1,6 +1,7 @@
 package com.github.maximtereshchenko.conveyor.domain.test;
 
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
+import com.github.maximtereshchenko.conveyor.gson.GsonAdapter;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -10,13 +11,18 @@ final class GeneratedConveyorPlugin extends GeneratedArtifact {
 
     private final Stage stage;
 
-    GeneratedConveyorPlugin(String name, Stage stage, GeneratedArtifactDefinition... dependencies) {
-        super(name, 1, List.of(dependencies));
+    GeneratedConveyorPlugin(
+        GsonAdapter gsonAdapter,
+        String name,
+        Stage stage,
+        GeneratedArtifactDefinition... dependencies
+    ) {
+        super(gsonAdapter, name, 1, List.of(dependencies));
         this.stage = stage;
     }
 
-    GeneratedConveyorPlugin(String name, GeneratedArtifactDefinition... dependencies) {
-        this(name, Stage.COMPILE, dependencies);
+    GeneratedConveyorPlugin(GsonAdapter gsonAdapter, String name, GeneratedArtifactDefinition... dependencies) {
+        this(gsonAdapter, name, Stage.COMPILE, dependencies);
     }
 
     @Override
@@ -44,7 +50,7 @@ final class GeneratedConveyorPlugin extends GeneratedArtifact {
                     return "%s";
                 }
                 @Override
-                public Collection<ConveyorTaskBinding> bindings(Project project, Map<String, String> configuration) {
+                public Collection<ConveyorTaskBinding> bindings(ConveyorProject project, Map<String, String> configuration) {
                     return List.of(
                         new ConveyorTaskBinding(
                             stage,
@@ -80,7 +86,7 @@ final class GeneratedConveyorPlugin extends GeneratedArtifact {
                         Thread.currentThread().interrupt();
                     }
                 }
-                private BuildFiles execute(BuildFiles buildFiles, Project project, Map<String, String> configuration) {
+                private BuildFiles execute(BuildFiles buildFiles, ConveyorProject project, Map<String, String> configuration) {
                     %s
                     write(
                         project.buildDirectory().resolve(fullName + "-configuration"),

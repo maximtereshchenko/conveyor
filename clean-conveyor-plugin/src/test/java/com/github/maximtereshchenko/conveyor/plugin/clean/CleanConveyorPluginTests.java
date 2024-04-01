@@ -9,8 +9,8 @@ import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import com.github.maximtereshchenko.conveyor.common.api.Step;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
+import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorProject;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskBinding;
-import com.github.maximtereshchenko.conveyor.plugin.api.Project;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
@@ -86,8 +86,8 @@ final class CleanConveyorPluginTests {
         assertThat(executeTask(path, buildFiles)).isSameAs(buildFiles);
     }
 
-    Project project(Path buildDirectory) {
-        return new Project() {
+    ConveyorProject project(Path buildDirectory) {
+        return new ConveyorProject() {
 
             @Override
             public Path projectDirectory() {

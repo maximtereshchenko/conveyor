@@ -1,17 +1,33 @@
 package com.github.maximtereshchenko.conveyor.domain.test;
 
+import com.github.maximtereshchenko.conveyor.gson.GsonAdapter;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 final class GeneratedDependency extends GeneratedArtifact {
 
-    GeneratedDependency(String name, int version, GeneratedArtifactDefinition... dependencies) {
-        super(name, version, List.of(dependencies));
+    GeneratedDependency(
+        GsonAdapter gsonAdapter,
+        String name,
+        int version,
+        Collection<GeneratedArtifactDefinition> dependencies
+    ) {
+        super(gsonAdapter, name, version, dependencies);
     }
 
-    GeneratedDependency(String name, GeneratedArtifactDefinition... dependencies) {
-        this(name, 1, dependencies);
+    GeneratedDependency(
+        GsonAdapter gsonAdapter,
+        String name,
+        int version,
+        GeneratedArtifactDefinition... dependencies
+    ) {
+        this(gsonAdapter, name, version, List.of(dependencies));
+    }
+
+    GeneratedDependency(GsonAdapter gsonAdapter, String name, GeneratedArtifactDefinition... dependencies) {
+        this(gsonAdapter, name, 1, List.of(dependencies));
     }
 
     @Override
