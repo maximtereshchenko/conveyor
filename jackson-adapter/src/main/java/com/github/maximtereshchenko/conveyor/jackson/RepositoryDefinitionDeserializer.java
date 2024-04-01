@@ -4,13 +4,13 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-import com.github.maximtereshchenko.conveyor.api.port.LocalDirectoryRepositoryDefinition;
-import com.github.maximtereshchenko.conveyor.api.port.RemoteRepositoryDefinition;
-import com.github.maximtereshchenko.conveyor.api.port.RepositoryDefinition;
+import com.github.maximtereshchenko.conveyor.api.schematic.LocalDirectoryRepositoryDefinition;
+import com.github.maximtereshchenko.conveyor.api.schematic.RemoteRepositoryDefinition;
+import com.github.maximtereshchenko.conveyor.api.schematic.RepositoryDefinition;
 
 import java.io.IOException;
 import java.net.URI;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.Optional;
 
 final class RepositoryDefinitionDeserializer extends StdDeserializer<RepositoryDefinition> {
@@ -33,7 +33,11 @@ final class RepositoryDefinitionDeserializer extends StdDeserializer<RepositoryD
                 enabled
             );
         }
-        return new LocalDirectoryRepositoryDefinition(name, Paths.get(path.asText()), enabled);
+        return new LocalDirectoryRepositoryDefinition(
+            name,
+            context.readTreeAsValue(path, Path.class),
+            enabled
+        );
     }
 
     private Optional<Boolean> enabled(JsonNode jsonNode) {

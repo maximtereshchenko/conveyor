@@ -1,21 +1,19 @@
 rootProject.name = "conveyor"
-include("conveyor-api")
-include("conveyor-domain")
-include("conveyor-plugin-api")
-include("jackson-adapter")
 include("conveyor-common-api")
-include("wiremock")
+include("conveyor-plugin-api")
+include("conveyor-api")
+include("conveyor-core")
+include("jackson-adapter")
 include("jackson-dataformat-xml")
+include("wiremock")
 dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {
-            val version = version("asm", "9.6")
             library("assertj-core", "org.assertj", "assertj-core").version("3.25.1")
             library("junit-bom", "org.junit", "junit-bom").version("5.10.2")
             library("jackson-bom", "com.fasterxml.jackson", "jackson-bom").version("2.17.0")
             library("wiremock", "org.wiremock", "wiremock").version("3.4.2")
-            library("asm", "org.ow2.asm", "asm").versionRef(version)
-            library("asm-commons", "org.ow2.asm", "asm-commons").versionRef(version)
+            library("jimfs", "com.google.jimfs", "jimfs").version("1.3.0")
             library("junit-jupiter", "org.junit.jupiter", "junit-jupiter").withoutVersion()
             library("junit-jupiter-engine", "org.junit.jupiter", "junit-jupiter-engine")
                 .withoutVersion()
@@ -32,7 +30,6 @@ dependencyResolutionManagement {
                 .withoutVersion()
             library("jackson-annotations", "com.fasterxml.jackson.core", "jackson-annotations")
                 .withoutVersion()
-            plugin("shadow", "com.github.johnrengelman.shadow").version("8.1.1")
         }
     }
 }

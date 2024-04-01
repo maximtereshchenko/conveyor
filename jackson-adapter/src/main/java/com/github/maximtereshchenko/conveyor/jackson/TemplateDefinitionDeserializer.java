@@ -5,9 +5,9 @@ import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-import com.github.maximtereshchenko.conveyor.api.port.NoTemplateDefinition;
-import com.github.maximtereshchenko.conveyor.api.port.SchematicTemplateDefinition;
-import com.github.maximtereshchenko.conveyor.api.port.TemplateDefinition;
+import com.github.maximtereshchenko.conveyor.api.schematic.NoTemplateDefinition;
+import com.github.maximtereshchenko.conveyor.api.schematic.SchematicTemplateDefinition;
+import com.github.maximtereshchenko.conveyor.api.schematic.TemplateDefinition;
 
 import java.io.IOException;
 

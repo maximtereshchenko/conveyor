@@ -4,11 +4,16 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-import com.github.maximtereshchenko.conveyor.api.port.*;
+import com.github.maximtereshchenko.conveyor.api.port.SchematicDefinitionTranslator;
+import com.github.maximtereshchenko.conveyor.api.schematic.NoTemplateDefinition;
+import com.github.maximtereshchenko.conveyor.api.schematic.RepositoryDefinition;
+import com.github.maximtereshchenko.conveyor.api.schematic.SchematicDefinition;
+import com.github.maximtereshchenko.conveyor.api.schematic.TemplateDefinition;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UncheckedIOException;
+import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -20,12 +25,16 @@ public final class JacksonAdapter implements SchematicDefinitionTranslator {
         this.objectMapper = objectMapper;
     }
 
-    public static JacksonAdapter configured() {
+    public static JacksonAdapter configured(FileSystem fileSystem) {
         var module = new SimpleModule();
         module.addSerializer(Path.class, new ToStringSerializer());
         module.addSerializer(NoTemplateDefinition.class, new NoTemplateDefinitionSerializer());
         module.addDeserializer(TemplateDefinition.class, new TemplateDefinitionDeserializer());
-        module.addDeserializer(RepositoryDefinition.class, new RepositoryDefinitionDeserializer());
+        module.addDeserializer(
+            RepositoryDefinition.class,
+            new RepositoryDefinitionDeserializer()
+        );
+        module.addDeserializer(Path.class, new PathDeserializer(fileSystem));
         return new JacksonAdapter(
             new ObjectMapper()
                 .registerModule(module)

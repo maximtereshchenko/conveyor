@@ -1,9 +1,9 @@
-module com.github.maximtereshchenko.conveyor.jackson.dataformat.xml {
+module com.fasterxml.jackson.dataformat.xml.shadowed {
     requires java.xml;
     requires com.fasterxml.jackson.annotation;
     requires org.codehaus.stax2;
-    exports com.github.maximtereshchenko.conveyor.jackson.dataformat.xml;
-    exports com.github.maximtereshchenko.conveyor.jackson.databind;
-    exports com.github.maximtereshchenko.conveyor.jackson.dataformat.xml.annotation;
-    exports com.github.maximtereshchenko.conveyor.jackson.annotation;
+    exports com.fasterxml.jackson.dataformat.xml.shadowed;
+    exports com.fasterxml.jackson.databind.shadowed;
+    exports com.fasterxml.jackson.dataformat.xml.shadowed.annotation;
+    exports com.fasterxml.jackson.annotation.shadowed;
 }

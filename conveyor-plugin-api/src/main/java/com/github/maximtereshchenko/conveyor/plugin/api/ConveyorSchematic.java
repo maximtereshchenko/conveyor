@@ -10,6 +10,8 @@ import java.util.Set;
 
 public interface ConveyorSchematic {
 
+    Path discoveryDirectory();
+
     Path constructionDirectory();
 
     Optional<String> propertyValue(String key);

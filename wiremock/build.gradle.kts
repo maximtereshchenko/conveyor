@@ -1,31 +1,11 @@
 plugins {
     java
-    alias(libs.plugins.shadow)
+    `shadow-conventions`
 }
 
-buildscript {
-    dependencies {
-        classpath(libs.asm)
-        classpath(libs.asm.commons)
-    }
-}
-
-tasks {
-    shadowJar {
-        relocate("com.github.tomakehurst.wiremock", "com.github.maximtereshchenko.conveyor.wiremock")
-        excludes.remove("module-info.class")
-        dependencies {
-            exclude {
-                listOf("org.wiremock", "com.github.jknack")
-                    .none { allowed -> it.moduleGroup.startsWith(allowed) }
-            }
-        }
-        archiveClassifier = null
-    }
-    jar {
-        enabled = false
-        dependsOn(shadowJar)
-    }
+shadowConventions {
+    libraries = setOf(libs.wiremock.get().toString(), "com.github.jknack:handlebars")
+    packages = setOf("com.github.tomakehurst.wiremock", "com.github.jknack.handlebars")
 }
 
 dependencies {
