@@ -50,9 +50,9 @@ final class XmlFactory {
 
     Xml xml(InputStream inputStream) {
         try {
-            var document = documentBuilder.parse(inputStream);
-            document.getDocumentElement().normalize();
-            return new Xml(document);
+            var root = documentBuilder.parse(inputStream).getDocumentElement();
+            root.normalize();
+            return new Xml(root);
         } catch (SAXException e) {
             throw new IllegalArgumentException(e);
         } catch (IOException e) {

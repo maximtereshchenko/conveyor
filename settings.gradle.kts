@@ -12,7 +12,7 @@ dependencyResolutionManagement {
             val version = version("asm", "9.6")
             library("assertj-core", "org.assertj", "assertj-core").version("3.25.1")
             library("junit-bom", "org.junit", "junit-bom").version("5.10.2")
-            library("jackson-bom", "com.fasterxml.jackson", "jackson-bom").version("2.16.1")
+            library("jackson-bom", "com.fasterxml.jackson", "jackson-bom").version("2.17.0")
             library("wiremock", "org.wiremock", "wiremock").version("3.4.2")
             library("asm", "org.ow2.asm", "asm").versionRef(version)
             library("asm-commons", "org.ow2.asm", "asm-commons").versionRef(version)
@@ -29,6 +29,8 @@ dependencyResolutionManagement {
             library("jackson-dataformat-xml", "com.fasterxml.jackson.dataformat", "jackson-dataformat-xml")
                 .withoutVersion()
             library("jackson-core", "com.fasterxml.jackson.core", "jackson-core")
+                .withoutVersion()
+            library("jackson-annotations", "com.fasterxml.jackson.core", "jackson-annotations")
                 .withoutVersion()
             plugin("shadow", "com.github.johnrengelman.shadow").version("8.1.1")
         }
