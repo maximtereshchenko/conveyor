@@ -489,6 +489,23 @@ final class BuildProjectUseCaseTests {
             );
     }
 
+    @Test
+    void givenPluginDeclaredInChildWithDifferentVersion_whenBuild_thenPluginVersionInChildShouldTakePrecedence(
+        @TempDir Path path
+    ) throws Exception {
+        installSuperParent(path, new GeneratedConveyorPlugin(gsonAdapter, "plugin", 2).install(path));
+
+        var buildFiles = module.build(
+            conveyorJson(path, new GeneratedConveyorPlugin(gsonAdapter, "plugin", 1).install(path)),
+            Stage.COMPILE
+        );
+
+        assertThat(buildFiles.byType(BuildFileType.ARTIFACT))
+            .contains(
+                new BuildFile(defaultBuildDirectory(path).resolve("plugin-1-run"), BuildFileType.ARTIFACT)
+            );
+    }
+
     private void installSuperParent(Path path, GeneratedArtifactDefinition... plugins) throws IOException {
         gsonAdapter.write(
             path.resolve("super-parent-1.json"),
