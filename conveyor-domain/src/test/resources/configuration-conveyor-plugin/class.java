@@ -31,7 +31,7 @@ public final class ${normalizedName} implements ConveyorPlugin {
         );
     }
 
-    private Products execute(Products products, Path path, Map<String, String> configuration){
+    private Products execute(Products products, Path path, Map<String, String> configuration) {
         return products.with(
             write(
                 path,
@@ -44,7 +44,7 @@ public final class ${normalizedName} implements ConveyorPlugin {
         );
     }
 
-    private Path write(Path path, String content){
+    private Path write(Path path, String content) {
         try {
             Files.createDirectories(path.getParent());
             return Files.writeString(path, content);

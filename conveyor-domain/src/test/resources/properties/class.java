@@ -32,7 +32,6 @@ public final class ${normalizedName} implements ConveyorPlugin {
 
     private void writeProperties(ConveyorProperties properties) {
         try {
-    System.out.println(Files.createDirectories(properties.constructionDirectory()).resolve("properties"));
             Files.write(
                 Files.createDirectories(properties.constructionDirectory()).resolve("properties"),
                 properties.stream()

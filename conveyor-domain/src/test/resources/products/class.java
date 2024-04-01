@@ -6,7 +6,6 @@ import com.github.maximtereshchenko.conveyor.plugin.api.*;
 import java.io.*;
 import java.nio.file.*;
 import java.util.*;
-import java.util.function.*;
 import java.util.stream.*;
 
 public final class ${normalizedName} implements ConveyorPlugin {
@@ -20,25 +19,25 @@ public final class ${normalizedName} implements ConveyorPlugin {
     public List<ConveyorTaskBinding> bindings(ConveyorProperties properties, Map<String, String> configuration) {
         return List.of(
             new ConveyorTaskBinding(
-                Stage.COMPILE,
+                Stage.PUBLISH,
                 Step.RUN,
-                (dependencies, products) ->
-                    execute(products, properties.constructionDirectory().resolve("module-path"))
+                (dependencies, products) -> execute(products, properties.constructionDirectory().resolve("products"))
             )
         );
     }
 
     private Products execute(Products products, Path path) {
-        write(path, modulePath());
+        write(path, products(products));
         return products;
     }
 
-    private String modulePath() {
-        return ServiceLoader.load(getClass().getModule().getLayer(), Supplier.class)
-            .stream()
-            .map(ServiceLoader.Provider::get)
-            .map(Supplier::get)
-            .map(Object::toString)
+    private String products(Products products) {
+        return Stream.of(ProductType.values())
+            .flatMap(productType ->
+                products.byType(productType)
+                    .stream()
+                    .map(path -> productType + "=" + path)
+            )
             .collect(Collectors.joining(System.lineSeparator()));
     }
 
