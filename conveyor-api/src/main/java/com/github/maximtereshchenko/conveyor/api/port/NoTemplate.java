@@ -2,7 +2,7 @@ package com.github.maximtereshchenko.conveyor.api.port;
 
 import java.util.Objects;
 
-public final class NoExplicitlyDefinedTemplate
+public final class NoTemplate
     implements TemplateForSchematicDefinition, TemplateForManualDefinition {
 
     @Override

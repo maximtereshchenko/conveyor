@@ -13,6 +13,11 @@ final class ManualHierarchyAdapter implements SchematicModel<TemplateModel> {
     }
 
     @Override
+    public String group() {
+        return manualHierarchy.group();
+    }
+
+    @Override
     public String name() {
         return manualHierarchy.name();
     }

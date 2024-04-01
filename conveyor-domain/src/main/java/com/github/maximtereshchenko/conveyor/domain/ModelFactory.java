@@ -23,11 +23,12 @@ final class ModelFactory {
     }
 
     ManualHierarchy manualHierarchy(
+        String group,
         String name,
         SemanticVersion version,
         Repositories repositories
     ) {
-        return manualHierarchy(name, version, repositories, ManualHierarchy::new);
+        return manualHierarchy(group, name, version, repositories, ManualHierarchy::new);
     }
 
     FullSchematicHierarchy fullSchematicHierarchy(
@@ -37,6 +38,7 @@ final class ModelFactory {
         var otherManualTemplateModel = partialSchematicHierarchy.template();
         return new FullSchematicHierarchy(
             manualHierarchy(
+                otherManualTemplateModel.group(),
                 otherManualTemplateModel.name(),
                 otherManualTemplateModel.version(),
                 repositories
@@ -50,6 +52,7 @@ final class ModelFactory {
     }
 
     private ManualHierarchy manualHierarchy(
+        String group,
         String name,
         SemanticVersion version,
         Repositories repositories,
@@ -57,6 +60,7 @@ final class ModelFactory {
     ) {
         var standaloneManualModel = new StandaloneManualModel(
             repositories.manualDefinition(
+                group,
                 name,
                 version
             )
@@ -76,6 +80,7 @@ final class ModelFactory {
         return switch (manualTemplateModel) {
             case NoTemplateModel ignored -> manualHierarchy;
             case OtherManualTemplateModel model -> manualHierarchy(
+                model.group(),
                 model.name(),
                 model.version(),
                 repositories,

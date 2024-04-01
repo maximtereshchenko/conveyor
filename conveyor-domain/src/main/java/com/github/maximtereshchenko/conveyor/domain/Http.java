@@ -8,17 +8,22 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Optional;
+import java.util.function.Function;
 
 final class Http {
 
     private final HttpClient httpClient = HttpClient.newHttpClient();
 
-    Optional<InputStream> get(URI uri) {
+    <T> Optional<T> get(URI uri, Function<InputStream, T> function) {
         var response = getResponse(uri);
         if (response.statusCode() != 200) {
             return Optional.empty();
         }
-        return Optional.of(response.body());
+        try (var inputStream = response.body()) {
+            return Optional.of(function.apply(inputStream));
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     private HttpResponse<InputStream> getResponse(URI uri) {

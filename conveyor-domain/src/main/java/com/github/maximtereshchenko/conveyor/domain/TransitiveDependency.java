@@ -18,7 +18,7 @@ final class TransitiveDependency extends ArtifactDependency {
         Properties properties,
         Preferences preferences
     ) {
-        return preferences.version(artifactDependencyModel.name())
+        return preferences.version(artifactDependencyModel.group(), artifactDependencyModel.name())
             .or(() -> artifactDependencyModel.version()
                 .map(properties::interpolated)
                 .map(SemanticVersion::new)

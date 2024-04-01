@@ -16,6 +16,11 @@ final class StandaloneManualModel
     }
 
     @Override
+    public String group() {
+        return manualDefinition.group();
+    }
+
+    @Override
     public String name() {
         return manualDefinition.name();
     }
@@ -29,10 +34,11 @@ final class StandaloneManualModel
     public ManualTemplateModel template() {
         return switch (manualDefinition.template()) {
             case ManualTemplateDefinition definition -> new OtherManualTemplateModel(
+                definition.group(),
                 definition.name(),
                 new SemanticVersion(definition.version())
             );
-            case NoExplicitlyDefinedTemplate ignored -> new NoTemplateModel();
+            case NoTemplate ignored -> new NoTemplateModel();
         };
     }
 
@@ -59,6 +65,7 @@ final class StandaloneManualModel
     @Override
     ArtifactDependencyModel dependencyModel(ManualDependencyDefinition dependencyDefinition) {
         return new ArtifactDependencyModel(
+            dependencyDefinition.group(),
             dependencyDefinition.name(),
             Optional.of(dependencyDefinition.version()),
             Optional.of(dependencyDefinition.scope())

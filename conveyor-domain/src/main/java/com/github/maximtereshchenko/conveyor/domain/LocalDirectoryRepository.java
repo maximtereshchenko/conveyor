@@ -22,30 +22,37 @@ final class LocalDirectoryRepository implements Repository {
 
     @Override
     public Optional<ManualDefinition> manualDefinition(
+        String group,
         String name,
         SemanticVersion semanticVersion
     ) {
-        return existing(fullPath(name, semanticVersion, Extension.JSON))
+        return existing(fullPath(group, name, semanticVersion, Extension.JSON))
             .map(definitionTranslator::manualDefinition);
     }
 
     @Override
-    public Optional<Path> path(String name, SemanticVersion semanticVersion) {
-        return existing(fullPath(name, semanticVersion, Extension.JAR));
+    public Optional<Path> path(
+        String group,
+        String name,
+        SemanticVersion semanticVersion
+    ) {
+        return existing(fullPath(group, name, semanticVersion, Extension.JAR));
     }
 
-    Path storedJar(String name, SemanticVersion semanticVersion, byte[] bytes) throws IOException {
-        return Files.write(fullPath(name, semanticVersion, Extension.JAR), bytes);
+    Path storedJar(String group, String name, SemanticVersion semanticVersion, byte[] bytes)
+        throws IOException {
+        return Files.write(fullPath(group, name, semanticVersion, Extension.JAR), bytes);
     }
 
     ManualDefinition stored(
+        String group,
         String name,
         SemanticVersion semanticVersion,
         ManualDefinition manualDefinition
     ) {
         definitionTranslator.write(
             manualDefinition,
-            fullPath(name, semanticVersion, Extension.JSON)
+            fullPath(group, name, semanticVersion, Extension.JSON)
         );
         return manualDefinition;
     }
@@ -57,10 +64,16 @@ final class LocalDirectoryRepository implements Repository {
         return Optional.empty();
     }
 
-    private Path fullPath(String name, SemanticVersion version, Extension extension) {
+    private Path fullPath(String group, String name, SemanticVersion version, Extension extension) {
         try {
-            return Files.createDirectories(path).resolve(
-                    "%s-%s.%s".formatted(name, version, extension.name().toLowerCase(Locale.ROOT))
+            return Files.createDirectories(path)
+                .resolve(
+                    "%s:%s-%s.%s".formatted(
+                        group,
+                        name,
+                        version,
+                        extension.name().toLowerCase(Locale.ROOT)
+                    )
                 )
                 .normalize();
         } catch (IOException e) {

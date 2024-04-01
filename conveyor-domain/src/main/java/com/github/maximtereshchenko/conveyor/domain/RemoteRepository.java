@@ -30,61 +30,72 @@ final class RemoteRepository implements Repository {
 
     @Override
     public Optional<ManualDefinition> manualDefinition(
+        String group,
         String name,
         SemanticVersion semanticVersion
     ) {
-        return cache.manualDefinition(name, semanticVersion)
+        return cache.manualDefinition(group, name, semanticVersion)
             .or(() ->
-                absoluteUri(name, semanticVersion, "pom")
-                    .flatMap(http::get)
-                    .map(inputStream -> manualDefinition(name, semanticVersion, inputStream))
+                http.get(
+                    absoluteUri(group, name, semanticVersion, "pom"),
+                    inputStream -> manualDefinition(group, name, semanticVersion, inputStream)
+                )
             );
     }
 
     @Override
-    public Optional<Path> path(String name, SemanticVersion semanticVersion) {
-        return cache.path(name, semanticVersion)
+    public Optional<Path> path(
+        String group,
+        String name,
+        SemanticVersion semanticVersion
+    ) {
+        return cache.path(group, name, semanticVersion)
             .or(() ->
-                absoluteUri(name, semanticVersion, "jar")
-                    .flatMap(http::get)
-                    .map(inputStream -> path(name, semanticVersion, inputStream))
+                http.get(
+                    absoluteUri(group, name, semanticVersion, "jar"),
+                    inputStream -> path(group, name, semanticVersion, inputStream)
+                )
             );
     }
 
-    private Path path(String name, SemanticVersion semanticVersion, InputStream inputStream) {
-        try (inputStream) {
-            return cache.storedJar(name, semanticVersion, inputStream.readAllBytes());
+    private Path path(
+        String group,
+        String name,
+        SemanticVersion semanticVersion,
+        InputStream inputStream
+    ) {
+        try {
+            return cache.storedJar(group, name, semanticVersion, inputStream.readAllBytes());
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
     }
 
     private ManualDefinition manualDefinition(
+        String group,
         String name,
         SemanticVersion semanticVersion,
         InputStream inputStream
     ) {
-        try (inputStream) {
-            var xml = xmlFactory.xml(inputStream);
-            return cache.stored(
-                name,
-                semanticVersion,
-                new ManualDefinition(
-                    name(xml),
-                    version(xml),
-                    template(xml),
-                    Map.of(),
-                    new PreferencesDefinition(
-                        List.of(),
-                        artifacts(xml)
-                    ),
+        var xml = xmlFactory.xml(inputStream);
+        return cache.stored(
+            group,
+            name,
+            semanticVersion,
+            new ManualDefinition(
+                xml.text("groupId"),
+                xml.text("artifactId"),
+                version(xml),
+                template(xml),
+                Map.of(),
+                new PreferencesDefinition(
                     List.of(),
-                    dependencies(xml)
-                )
-            );
-        } catch (Exception e) {
-            throw new IllegalArgumentException(e);
-        }
+                    artifacts(xml)
+                ),
+                List.of(),
+                dependencies(xml)
+            )
+        );
     }
 
     private Collection<ArtifactPreferenceDefinition> artifacts(Xml xml) {
@@ -94,7 +105,13 @@ final class RemoteRepository implements Repository {
             .flatMap(Collection::stream)
             .map(dependencies -> dependencies.tags("dependency"))
             .flatMap(Collection::stream)
-            .map(dependency -> new ArtifactPreferenceDefinition(name(dependency), version(xml)))
+            .map(dependency ->
+                new ArtifactPreferenceDefinition(
+                    dependency.text("groupId"),
+                    dependency.text("artifactId"),
+                    version(xml)
+                )
+            )
             .toList();
     }
 
@@ -105,7 +122,8 @@ final class RemoteRepository implements Repository {
             .flatMap(Collection::stream)
             .map(dependency ->
                 new ManualDependencyDefinition(
-                    name(dependency),
+                    dependency.text("groupId"),
+                    dependency.text("artifactId"),
                     version(xml),
                     DependencyScope.IMPLEMENTATION
                 )
@@ -118,35 +136,31 @@ final class RemoteRepository implements Repository {
             .stream()
             .<TemplateForManualDefinition>map(parent ->
                 new ManualTemplateDefinition(
-                    parent.text("groupId") + ':' + parent.text("artifactId"),
+                    parent.text("groupId"),
+                    parent.text("artifactId"),
                     version(parent)
                 )
             )
             .findAny()
-            .orElseGet(NoExplicitlyDefinedTemplate::new);
+            .orElseGet(NoTemplate::new);
     }
 
-    private Optional<URI> absoluteUri(
+    private URI absoluteUri(
+        String group,
         String name,
         SemanticVersion semanticVersion,
         String classifier
     ) {
-        if (!name.contains(":")) {
-            return Optional.empty();
-        }
-        var groupAndArtifact = name.split(":");
         try {
-            return Optional.of(
-                url.toURI()
-                    .resolve(
-                        uri(
-                            List.of(groupAndArtifact[0].split("\\.")),
-                            groupAndArtifact[1],
-                            semanticVersion,
-                            classifier
-                        )
+            return url.toURI()
+                .resolve(
+                    uri(
+                        List.of(group.split("\\.")),
+                        name,
+                        semanticVersion,
+                        classifier
                     )
-            );
+                );
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException(e);
         }
@@ -170,10 +184,6 @@ final class RemoteRepository implements Repository {
                 .map(Objects::toString)
                 .collect(Collectors.joining("/", "/", ""))
         );
-    }
-
-    private String name(Xml xml) {
-        return xml.text("groupId") + ':' + xml.text("artifactId");
     }
 
     private String version(Xml xml) {

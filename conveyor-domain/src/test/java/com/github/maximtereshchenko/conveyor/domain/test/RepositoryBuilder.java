@@ -1,63 +1,117 @@
 package com.github.maximtereshchenko.conveyor.domain.test;
 
-import com.github.maximtereshchenko.conveyor.gson.JacksonAdapter;
+import com.github.maximtereshchenko.conveyor.wiremock.client.WireMock;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.function.UnaryOperator;
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Consumer;
+
+import static com.github.maximtereshchenko.conveyor.wiremock.client.WireMock.get;
+import static com.github.maximtereshchenko.conveyor.wiremock.client.WireMock.ok;
 
 final class RepositoryBuilder {
 
-    private final JacksonAdapter gsonAdapter;
-    private final Collection<Installation> installations;
+    private final Map<Path, Consumer<OutputStream>> files = new HashMap<>();
 
-    private RepositoryBuilder(JacksonAdapter gsonAdapter, Collection<Installation> installations) {
-        this.gsonAdapter = gsonAdapter;
-        this.installations = List.copyOf(installations);
+    RepositoryBuilder schematicDefinition(SchematicDefinitionBuilder schematicDefinitionBuilder) {
+        files.put(
+            path(
+                schematicDefinitionBuilder.group(),
+                schematicDefinitionBuilder.name(),
+                schematicDefinitionBuilder.version(),
+                "json"
+            ),
+            schematicDefinitionBuilder::install
+        );
+        return this;
     }
 
-    RepositoryBuilder(JacksonAdapter gsonAdapter) {
-        this(gsonAdapter, List.of());
+    RepositoryBuilder jar(JarBuilder jarBuilder) {
+        files.put(
+            path(jarBuilder.group(), jarBuilder.name(), jarBuilder.version(), "jar"),
+            jarBuilder::write
+        );
+        return this;
     }
 
-    RepositoryBuilder superManual() {
-        return superManual(builder -> builder);
+    RepositoryBuilder remoteJar(JarBuilder jarBuilder) {
+        files.put(
+            remotePath(jarBuilder.group(), jarBuilder.name(), jarBuilder.version(), "jar"),
+            jarBuilder::write
+        );
+        return this;
     }
 
-    RepositoryBuilder superManual(UnaryOperator<ManualBuilder> configuration) {
-        return manual(builder ->
-            configuration.apply(
-                builder.name("super-manual")
-                    .version("1.0.0")
-                    .noTemplate()
+    RepositoryBuilder pom(PomBuilder pomBuilder) {
+        files.put(
+            remotePath(
+                pomBuilder.groupId(),
+                pomBuilder.artifactId(),
+                pomBuilder.version(),
+                "pom"
+            ),
+            pomBuilder::write
+        );
+        return this;
+    }
+
+    void install(Path directory) {
+        for (var entry : files.entrySet()) {
+            try (var outputStream = outputStream(directory, entry.getKey())) {
+                entry.getValue().accept(outputStream);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        }
+    }
+
+    void install(WireMock wireMock) {
+        for (var entry : files.entrySet()) {
+            var outputStream = new ByteArrayOutputStream();
+            entry.getValue().accept(outputStream);
+            wireMock.register(
+                get(entry.getKey().toString())
+                    .willReturn(
+                        ok()
+                            .withHeader("Content-Type", contentType(entry.getKey()))
+                            .withBody(outputStream.toByteArray())
+                    )
+            );
+        }
+    }
+
+    private String contentType(Path path) {
+        if (path.toString().endsWith("pom")) {
+            return "text/xml";
+        }
+        return "application/octet-stream";
+    }
+
+    private OutputStream outputStream(Path directory, Path path) throws IOException {
+        return Files.newOutputStream(Files.createDirectories(directory).resolve(path));
+    }
+
+    private Path path(String group, String name, String version, String extension) {
+        return Paths.get("%s:%s-%s.%s".formatted(group, name, version, extension));
+    }
+
+    private Path remotePath(String group, String name, String version, String extension) {
+        return Paths.get(
+            "/%s/%s/%s/%s-%s.%s".formatted(
+                group.replace('.', '/'),
+                name,
+                version,
+                name,
+                version,
+                extension
             )
         );
-    }
-
-    RepositoryBuilder manual(UnaryOperator<ManualBuilder> configuration) {
-        var copy = new ArrayList<>(installations);
-        copy.add(path -> configuration.apply(new ManualBuilder(gsonAdapter)).install(path));
-        return new RepositoryBuilder(gsonAdapter, copy);
-    }
-
-    RepositoryBuilder jar(String templateDirectory, UnaryOperator<JarBuilder> configuration) {
-        var copy = new ArrayList<>(installations);
-        copy.add(path ->
-            configuration.apply(JarBuilder.from(templateDirectory))
-                .install(path)
-        );
-        return new RepositoryBuilder(gsonAdapter, copy);
-    }
-
-    void install(Path path) {
-        installations.forEach(installation -> installation.install(path));
-    }
-
-    @FunctionalInterface
-    private interface Installation {
-
-        void install(Path path);
     }
 }

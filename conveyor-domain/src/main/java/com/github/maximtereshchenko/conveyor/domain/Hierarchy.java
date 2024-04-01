@@ -18,6 +18,11 @@ abstract class Hierarchy
     }
 
     @Override
+    public String group() {
+        return models.getLast().group();
+    }
+
+    @Override
     public String name() {
         return models.getLast().name();
     }

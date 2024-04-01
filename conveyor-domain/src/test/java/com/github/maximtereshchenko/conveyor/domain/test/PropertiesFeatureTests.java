@@ -19,24 +19,27 @@ final class PropertiesFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .superManual()
-            .manual(builder ->
-                builder.name("template")
-                    .version("1.0.0")
+            .schematicDefinition(factory.superManual())
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("template")
                     .property("template.key", "template.value")
             )
-            .manual(builder -> builder.name("properties").version("1.0.0"))
-            .jar("properties", builder -> builder.name("properties").version("1.0.0"))
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("properties")
+            )
+            .jar(
+                factory.jarBuilder("properties")
+            )
             .install(path);
 
         module.construct(
-            factory.schematicBuilder()
-                .name("project")
-                .version("1.0.0")
+            factory.schematicDefinitionBuilder()
                 .repository("main", path, true)
-                .template("template", "1.0.0")
+                .template("template")
                 .property("key", "value")
-                .plugin("properties", "1.0.0", Map.of())
+                .plugin("properties")
                 .install(path),
             Stage.COMPILE
         );
@@ -62,24 +65,27 @@ final class PropertiesFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .superManual()
-            .manual(builder ->
-                builder.name("template")
-                    .version("1.0.0")
+            .schematicDefinition(factory.superManual())
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("template")
                     .property("key", "template.value")
             )
-            .manual(builder -> builder.name("properties").version("1.0.0"))
-            .jar("properties", builder -> builder.name("properties").version("1.0.0"))
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("properties")
+            )
+            .jar(
+                factory.jarBuilder("properties")
+            )
             .install(path);
 
         module.construct(
-            factory.schematicBuilder()
-                .name("project")
-                .version("1.0.0")
+            factory.schematicDefinitionBuilder()
                 .repository("main", path, true)
-                .template("template", "1.0.0")
+                .template("template")
                 .property("key", "value")
-                .plugin("properties", "1.0.0", Map.of())
+                .plugin("properties")
                 .install(path),
             Stage.COMPILE
         );
@@ -104,24 +110,27 @@ final class PropertiesFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .superManual()
-            .manual(builder ->
-                builder.name("template")
-                    .version("1.0.0")
+            .schematicDefinition(factory.superManual())
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("template")
                     .property("to.be.removed", "value")
             )
-            .manual(builder -> builder.name("properties").version("1.0.0"))
-            .jar("properties", builder -> builder.name("properties").version("1.0.0"))
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("properties")
+            )
+            .jar(
+                factory.jarBuilder("properties")
+            )
             .install(path);
 
         module.construct(
-            factory.schematicBuilder()
-                .name("project")
-                .version("1.0.0")
+            factory.schematicDefinitionBuilder()
                 .repository("main", path, true)
-                .template("template", "1.0.0")
+                .template("template")
                 .property("to.be.removed", "")
-                .plugin("properties", "1.0.0", Map.of())
+                .plugin("properties")
                 .install(path),
             Stage.COMPILE
         );
@@ -145,18 +154,21 @@ final class PropertiesFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .superManual()
-            .manual(builder -> builder.name("properties").version("1.0.0"))
-            .jar("properties", builder -> builder.name("properties").version("1.0.0"))
+            .schematicDefinition(factory.superManual())
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("properties")
+            )
+            .jar(
+                factory.jarBuilder("properties")
+            )
             .install(path);
 
         module.construct(
-            factory.schematicBuilder()
-                .name("project")
-                .version("1.0.0")
+            factory.schematicDefinitionBuilder()
                 .repository("main", path, true)
                 .property("conveyor.schematic.name", "custom")
-                .plugin("properties", "1.0.0", Map.of())
+                .plugin("properties")
                 .install(path),
             Stage.COMPILE
         );
@@ -180,19 +192,22 @@ final class PropertiesFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .superManual()
-            .manual(builder -> builder.name("properties").version("1.0.0"))
-            .jar("properties", builder -> builder.name("properties").version("1.0.0"))
+            .schematicDefinition(factory.superManual())
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("properties")
+            )
+            .jar(
+                factory.jarBuilder("properties")
+            )
             .install(path);
         var project = path.resolve("project");
 
         module.construct(
-            factory.schematicBuilder()
-                .name("project")
-                .version("1.0.0")
+            factory.schematicDefinitionBuilder()
                 .repository("main", path, true)
                 .property("conveyor.discovery.directory", project.toString())
-                .plugin("properties", "1.0.0", Map.of())
+                .plugin("properties")
                 .install(path),
             Stage.COMPILE
         );
@@ -216,18 +231,21 @@ final class PropertiesFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .superManual()
-            .manual(builder -> builder.name("properties").version("1.0.0"))
-            .jar("properties", builder -> builder.name("properties").version("1.0.0"))
+            .schematicDefinition(factory.superManual())
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("properties")
+            )
+            .jar(
+                factory.jarBuilder("properties")
+            )
             .install(path);
 
         module.construct(
-            factory.schematicBuilder()
-                .name("project")
-                .version("1.0.0")
+            factory.schematicDefinitionBuilder()
                 .repository("main", path, true)
                 .property("conveyor.discovery.directory", "./temp/../project")
-                .plugin("properties", "1.0.0", Map.of())
+                .plugin("properties")
                 .install(path),
             Stage.COMPILE
         );
@@ -251,19 +269,22 @@ final class PropertiesFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .superManual()
-            .manual(builder -> builder.name("properties").version("1.0.0"))
-            .jar("properties", builder -> builder.name("properties").version("1.0.0"))
+            .schematicDefinition(factory.superManual())
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("properties")
+            )
+            .jar(
+                factory.jarBuilder("properties")
+            )
             .install(path);
         var construction = path.resolve("construction");
 
         module.construct(
-            factory.schematicBuilder()
-                .name("project")
-                .version("1.0.0")
+            factory.schematicDefinitionBuilder()
                 .repository("main", path, true)
                 .property("conveyor.construction.directory", construction.toString())
-                .plugin("properties", "1.0.0", Map.of())
+                .plugin("properties")
                 .install(path),
             Stage.COMPILE
         );
@@ -287,18 +308,21 @@ final class PropertiesFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .superManual()
-            .manual(builder -> builder.name("properties").version("1.0.0"))
-            .jar("properties", builder -> builder.name("properties").version("1.0.0"))
+            .schematicDefinition(factory.superManual())
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("properties")
+            )
+            .jar(
+                factory.jarBuilder("properties")
+            )
             .install(path);
 
         module.construct(
-            factory.schematicBuilder()
-                .name("project")
-                .version("1.0.0")
+            factory.schematicDefinitionBuilder()
                 .repository("main", path, true)
                 .property("conveyor.construction.directory", "./temp/../construction")
-                .plugin("properties", "1.0.0", Map.of())
+                .plugin("properties")
                 .install(path),
             Stage.COMPILE
         );
@@ -323,19 +347,22 @@ final class PropertiesFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .superManual()
-            .manual(builder -> builder.name("properties").version("1.0.0"))
-            .jar("properties", builder -> builder.name("properties").version("1.0.0"))
+            .schematicDefinition(factory.superManual())
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("properties")
+            )
+            .jar(
+                factory.jarBuilder("properties")
+            )
             .install(path);
 
         module.construct(
-            factory.schematicBuilder()
-                .name("project")
-                .version("1.0.0")
+            factory.schematicDefinitionBuilder()
                 .repository("main", path, true)
                 .property("key", "interpolated")
                 .property("templated", "${key}-suffix")
-                .plugin("properties", "1.0.0", Map.of())
+                .plugin("properties")
                 .install(path),
             Stage.COMPILE
         );
@@ -361,19 +388,26 @@ final class PropertiesFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .superManual()
-            .manual(builder -> builder.name("configuration").version("1.0.0"))
-            .jar("configuration", builder -> builder.name("configuration").version("1.0.0"))
+            .schematicDefinition(factory.superManual())
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("configuration")
+            )
+            .jar(
+                factory.jarBuilder("configuration")
+            )
             .install(path);
 
         module.construct(
-            factory.schematicBuilder()
-                .name("project")
-                .version("1.0.0")
+            factory.schematicDefinitionBuilder()
                 .repository("main", path, true)
                 .property("key", "interpolated")
                 .property("templated", "${key}-suffix")
-                .plugin("configuration", "1.0.0", Map.of("key", "prefix-${templated}"))
+                .plugin(
+                    "configuration",
+                    "1.0.0",
+                    Map.of("key", "prefix-${templated}")
+                )
                 .install(path),
             Stage.COMPILE
         );

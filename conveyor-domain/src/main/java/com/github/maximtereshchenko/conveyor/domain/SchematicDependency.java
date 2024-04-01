@@ -33,6 +33,11 @@ final class SchematicDependency extends DependentArtifact<DependencyModel> imple
     }
 
     @Override
+    public String group() {
+        return schematicDependencyModel.group();
+    }
+
+    @Override
     public String name() {
         return schematicDependencyModel.name();
     }

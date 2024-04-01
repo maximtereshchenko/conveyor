@@ -16,14 +16,22 @@ abstract class BaseModel<T extends TemplateModel, M extends DependencyModel, D> 
                 .inclusions()
                 .stream()
                 .map(definition ->
-                    new PreferencesInclusionModel(definition.name(), definition.version())
+                    new PreferencesInclusionModel(
+                        definition.group(),
+                        definition.name(),
+                        definition.version()
+                    )
                 )
                 .collect(Collectors.toSet()),
             preferencesDefinition()
                 .artifacts()
                 .stream()
                 .map(definition ->
-                    new ArtifactPreferenceModel(definition.name(), definition.version())
+                    new ArtifactPreferenceModel(
+                        definition.group(),
+                        definition.name(),
+                        definition.version()
+                    )
                 )
                 .collect(Collectors.toSet())
         );
@@ -35,6 +43,7 @@ abstract class BaseModel<T extends TemplateModel, M extends DependencyModel, D> 
             .stream()
             .map(pluginDefinition ->
                 new PluginModel(
+                    pluginDefinition.group(),
                     pluginDefinition.name(),
                     pluginDefinition.version(),
                     pluginDefinition.configuration()

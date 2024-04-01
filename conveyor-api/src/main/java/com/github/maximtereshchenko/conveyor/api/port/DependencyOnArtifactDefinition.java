@@ -5,6 +5,7 @@ import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 import java.util.Optional;
 
 public record DependencyOnArtifactDefinition(
+    String group,
     String name,
     Optional<String> version,
     Optional<DependencyScope> scope

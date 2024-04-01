@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Objects;
 
 public record ManualDefinition(
+    String group,
     String name,
     String version,
     TemplateForManualDefinition template,
@@ -16,7 +17,7 @@ public record ManualDefinition(
 ) {
 
     public ManualDefinition {
-        template = Objects.requireNonNullElse(template, new NoExplicitlyDefinedTemplate());
+        template = Objects.requireNonNullElse(template, new NoTemplate());
         properties = Map.copyOf(Objects.requireNonNullElse(properties, Map.of()));
         preferences = Objects.requireNonNullElse(preferences, new PreferencesDefinition());
         plugins = List.copyOf(Objects.requireNonNullElse(plugins, List.of()));

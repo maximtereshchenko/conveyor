@@ -23,30 +23,47 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .superManual()
-            .manual(builder ->
-                builder.name("module-path")
-                    .version("1.0.0")
-                    .dependency("dependency", "1.0.0", DependencyScope.IMPLEMENTATION)
-                    .dependency("test", "1.0.0", DependencyScope.TEST)
+            .schematicDefinition(factory.superManual())
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("module-path")
+                    .dependency("dependency")
+                    .dependency(
+                        "test",
+                        "1.0.0",
+                        DependencyScope.TEST
+                    )
             )
-            .jar("module-path", builder -> builder.name("module-path").version("1.0.0"))
-            .manual(builder -> builder.name("dependency").version("1.0.0"))
-            .jar("dependency", builder -> builder.name("dependency").version("1.0.0"))
-            .manual(builder ->
-                builder.name("test")
-                    .version("1.0.0")
-                    .dependency("dependency", "2.0.0", DependencyScope.IMPLEMENTATION)
+            .jar(
+                factory.jarBuilder("module-path")
             )
-            .manual(builder -> builder.name("dependency").version("2.0.0"))
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("dependency")
+            )
+            .jar(
+                factory.jarBuilder("dependency")
+            )
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("test")
+                    .dependency(
+                        "dependency",
+                        "2.0.0",
+                        DependencyScope.IMPLEMENTATION
+                    )
+            )
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("dependency")
+                    .version("2.0.0")
+            )
             .install(path);
 
         module.construct(
-            factory.schematicBuilder()
-                .name("project")
-                .version("1.0.0")
-                .repository("main", path, true)
-                .plugin("module-path", "1.0.0", Map.of())
+            factory.schematicDefinitionBuilder()
+                .repository(path)
+                .plugin("module-path")
                 .install(path),
             Stage.COMPILE
         );
@@ -63,31 +80,49 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .superManual()
-            .manual(builder ->
-                builder.name("first")
-                    .version("1.0.0")
-                    .dependency("dependency", "1.0.0", DependencyScope.IMPLEMENTATION)
+            .schematicDefinition(factory.superManual())
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("first")
+                    .dependency("dependency")
             )
-            .jar("module-path", builder -> builder.name("first").version("1.0.0"))
-            .manual(builder ->
-                builder.name("second")
-                    .version("1.0.0")
-                    .dependency("dependency", "2.0.0", DependencyScope.IMPLEMENTATION)
+            .jar(
+                factory.jarBuilder("module-path")
+                    .name("first")
             )
-            .jar("module-path", builder -> builder.name("second").version("1.0.0"))
-            .manual(builder -> builder.name("dependency").version("1.0.0"))
-            .manual(builder -> builder.name("dependency").version("2.0.0"))
-            .jar("dependency", builder -> builder.name("dependency").version("2.0.0"))
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("second")
+                    .dependency(
+                        "dependency",
+                        "2.0.0",
+                        DependencyScope.IMPLEMENTATION
+                    )
+            )
+            .jar(
+                factory.jarBuilder("module-path")
+                    .name("second")
+            )
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("dependency")
+            )
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("dependency")
+                    .version("2.0.0")
+            )
+            .jar(
+                factory.jarBuilder("dependency")
+                    .version("2.0.0")
+            )
             .install(path);
 
         module.construct(
-            factory.schematicBuilder()
-                .name("project")
-                .version("1.0.0")
-                .repository("main", path, true)
-                .plugin("first", "1.0.0", Map.of())
-                .plugin("second", "1.0.0", Map.of())
+            factory.schematicDefinitionBuilder()
+                .repository(path)
+                .plugin("first")
+                .plugin("second")
                 .install(path),
             Stage.COMPILE
         );
@@ -104,45 +139,78 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .superManual()
-            .manual(builder ->
-                builder.name("first")
-                    .version("1.0.0")
-                    .dependency("should-not-be-affected", "1.0.0", DependencyScope.IMPLEMENTATION)
-                    .dependency("exclude-affecting", "1.0.0", DependencyScope.IMPLEMENTATION)
+            .schematicDefinition(factory.superManual())
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder().name("first")
+                    .dependency("should-not-be-affected")
+                    .dependency("exclude-affecting")
             )
-            .jar("module-path", builder -> builder.name("first").version("1.0.0"))
-            .manual(builder ->
-                builder.name("second")
-                    .version("1.0.0")
-                    .dependency("will-affect", "1.0.0", DependencyScope.IMPLEMENTATION)
+            .jar(
+                factory.jarBuilder("module-path")
+                    .name("first")
             )
-            .jar("module-path", builder -> builder.name("second").version("1.0.0"))
-            .manual(builder -> builder.name("should-not-be-affected").version("1.0.0"))
-            .jar("dependency", builder -> builder.name("should-not-be-affected").version("1.0.0"))
-            .manual(builder ->
-                builder.name("exclude-affecting")
-                    .version("1.0.0")
-                    .dependency("will-affect", "2.0.0", DependencyScope.IMPLEMENTATION)
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("second")
+                    .dependency("will-affect")
             )
-            .jar("dependency", builder -> builder.name("exclude-affecting").version("1.0.0"))
-            .manual(builder ->
-                builder.name("will-affect")
-                    .version("1.0.0")
-                    .dependency("should-not-be-affected", "2.0.0", DependencyScope.IMPLEMENTATION)
+            .jar(
+                factory.jarBuilder("module-path")
+                    .name("second")
             )
-            .manual(builder -> builder.name("should-not-be-affected").version("2.0.0"))
-            .manual(builder -> builder.name("will-affect").version("2.0.0"))
-            .jar("dependency", builder -> builder.name("will-affect").version("2.0.0"))
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("should-not-be-affected")
+            )
+            .jar(
+                factory.jarBuilder("dependency")
+                    .name("should-not-be-affected")
+            )
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("exclude-affecting")
+                    .dependency(
+                        "will-affect",
+                        "2.0.0",
+                        DependencyScope.IMPLEMENTATION
+                    )
+            )
+            .jar(
+                factory.jarBuilder("dependency")
+                    .name("exclude-affecting")
+
+            )
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("will-affect")
+                    .dependency(
+                        "should-not-be-affected",
+                        "2.0.0",
+                        DependencyScope.IMPLEMENTATION
+                    )
+            )
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("should-not-be-affected")
+                    .version("2.0.0")
+            )
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("will-affect")
+                    .version("2.0.0")
+            )
+            .jar(
+                factory.jarBuilder("dependency")
+                    .name("will-affect")
+                    .version("2.0.0")
+            )
             .install(path);
 
         module.construct(
-            factory.schematicBuilder()
-                .name("project")
-                .version("1.0.0")
-                .repository("main", path, true)
-                .plugin("first", "1.0.0", Map.of())
-                .plugin("second", "1.0.0", Map.of())
+            factory.schematicDefinitionBuilder()
+                .repository(path)
+                .plugin("first")
+                .plugin("second")
                 .install(path),
             Stage.COMPILE
         );
@@ -164,26 +232,42 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .superManual()
-            .manual(builder -> builder.name("dependencies").version("1.0.0"))
-            .jar("dependencies", builder -> builder.name("dependencies").version("1.0.0"))
-            .manual(builder -> builder.name("dependency").version("1.0.0"))
-            .jar("dependency", builder -> builder.name("dependency").version("1.0.0"))
-            .manual(builder ->
-                builder.name("test")
-                    .version("1.0.0")
-                    .dependency("dependency", "2.0.0", DependencyScope.IMPLEMENTATION)
+            .schematicDefinition(factory.superManual())
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("dependencies")
             )
-            .manual(builder -> builder.name("dependency").version("2.0.0"))
+            .jar(
+                factory.jarBuilder("dependencies")
+            )
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("dependency")
+            )
+            .jar(
+                factory.jarBuilder("dependency")
+            )
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("test")
+                    .dependency(
+                        "dependency",
+                        "2.0.0",
+                        DependencyScope.IMPLEMENTATION
+                    )
+            )
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("dependency")
+                    .version("2.0.0")
+            )
             .install(path);
 
         module.construct(
-            factory.schematicBuilder()
-                .name("project")
-                .version("1.0.0")
-                .repository("main", path, true)
-                .plugin("dependencies", "1.0.0", Map.of())
-                .dependency("dependency", "1.0.0", DependencyScope.IMPLEMENTATION)
+            factory.schematicDefinitionBuilder()
+                .repository(path)
+                .plugin("dependencies")
+                .dependency("dependency")
                 .dependency("test", "1.0.0", DependencyScope.TEST)
                 .install(path),
             Stage.COMPILE
@@ -201,34 +285,58 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .superManual()
-            .manual(builder -> builder.name("dependencies").version("1.0.0"))
-            .jar("dependencies", builder -> builder.name("dependencies").version("1.0.0"))
-            .manual(builder ->
-                builder.name("first")
-                    .version("1.0.0")
-                    .dependency("dependency", "1.0.0", DependencyScope.IMPLEMENTATION)
+            .schematicDefinition(factory.superManual())
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("dependencies")
             )
-            .jar("dependency", builder -> builder.name("first").version("1.0.0"))
-            .manual(builder ->
-                builder.name("second")
-                    .version("1.0.0")
-                    .dependency("dependency", "2.0.0", DependencyScope.IMPLEMENTATION)
+            .jar(
+                factory.jarBuilder("dependencies")
             )
-            .jar("dependency", builder -> builder.name("second").version("1.0.0"))
-            .manual(builder -> builder.name("dependency").version("1.0.0"))
-            .manual(builder -> builder.name("dependency").version("2.0.0"))
-            .jar("dependency", builder -> builder.name("dependency").version("2.0.0"))
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("first")
+                    .dependency("dependency")
+            )
+            .jar(
+                factory.jarBuilder("dependency")
+                    .name("first")
+            )
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("second")
+                    .dependency(
+                        "dependency",
+                        "2.0.0",
+                        DependencyScope.IMPLEMENTATION
+                    )
+            )
+            .jar(
+                factory.jarBuilder("dependency")
+                    .name("second")
+            )
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("dependency")
+            )
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("dependency")
+                    .version("2.0.0")
+            )
+            .jar(
+                factory.jarBuilder("dependency")
+                    .name("dependency")
+                    .version("2.0.0")
+            )
             .install(path);
 
         module.construct(
-            factory.schematicBuilder()
-                .name("project")
-                .version("1.0.0")
-                .repository("main", path, true)
-                .plugin("dependencies", "1.0.0", Map.of())
-                .dependency("first", "1.0.0", DependencyScope.IMPLEMENTATION)
-                .dependency("second", "1.0.0", DependencyScope.IMPLEMENTATION)
+            factory.schematicDefinitionBuilder()
+                .repository(path)
+                .plugin("dependencies")
+                .dependency("first")
+                .dependency("second")
                 .install(path),
             Stage.COMPILE
         );
@@ -246,48 +354,87 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .superManual()
-            .manual(builder -> builder.name("dependencies").version("1.0.0"))
-            .jar("dependencies", builder -> builder.name("dependencies").version("1.0.0"))
-            .manual(builder ->
-                builder.name("first")
-                    .version("1.0.0")
-                    .dependency("should-not-be-affected", "1.0.0", DependencyScope.IMPLEMENTATION)
-                    .dependency("exclude-affecting", "1.0.0", DependencyScope.IMPLEMENTATION)
+            .schematicDefinition(factory.superManual())
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("dependencies")
             )
-            .jar("dependency", builder -> builder.name("first").version("1.0.0"))
-            .manual(builder ->
-                builder.name("second")
-                    .version("1.0.0")
-                    .dependency("will-affect", "1.0.0", DependencyScope.IMPLEMENTATION)
+            .jar(
+                factory.jarBuilder("dependencies")
             )
-            .jar("dependency", builder -> builder.name("second").version("1.0.0"))
-            .manual(builder -> builder.name("should-not-be-affected").version("1.0.0"))
-            .jar("dependency", builder -> builder.name("should-not-be-affected").version("1.0.0"))
-            .manual(builder ->
-                builder.name("exclude-affecting")
-                    .version("1.0.0")
-                    .dependency("will-affect", "2.0.0", DependencyScope.IMPLEMENTATION)
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("first")
+                    .dependency("should-not-be-affected")
+                    .dependency("exclude-affecting")
             )
-            .jar("dependency", builder -> builder.name("exclude-affecting").version("1.0.0"))
-            .manual(builder ->
-                builder.name("will-affect")
-                    .version("1.0.0")
-                    .dependency("should-not-be-affected", "2.0.0", DependencyScope.IMPLEMENTATION)
+            .jar(
+                factory.jarBuilder("dependency")
+                    .name("first")
             )
-            .manual(builder -> builder.name("should-not-be-affected").version("2.0.0"))
-            .manual(builder -> builder.name("will-affect").version("2.0.0"))
-            .jar("dependency", builder -> builder.name("will-affect").version("2.0.0"))
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("second")
+                    .dependency("will-affect")
+            )
+            .jar(
+                factory.jarBuilder("dependency")
+                    .name("second")
+            )
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("should-not-be-affected")
+            )
+            .jar(
+                factory.jarBuilder("dependency")
+                    .name("should-not-be-affected")
+            )
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("exclude-affecting")
+                    .dependency(
+                        "will-affect",
+                        "2.0.0",
+                        DependencyScope.IMPLEMENTATION
+                    )
+            )
+            .jar(
+                factory.jarBuilder("dependency")
+                    .name("exclude-affecting")
+            )
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("will-affect")
+                    .dependency(
+                        "should-not-be-affected",
+                        "2.0.0",
+                        DependencyScope.IMPLEMENTATION
+                    )
+            )
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("should-not-be-affected")
+                    .version("2.0.0")
+            )
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("will-affect")
+                    .version("2.0.0")
+            )
+            .jar(
+                factory.jarBuilder("dependency")
+                    .name("will-affect")
+                    .version("2.0.0")
+            )
             .install(path);
 
         module.construct(
-            factory.schematicBuilder()
-                .name("project")
-                .version("1.0.0")
-                .repository("main", path, true)
-                .plugin("dependencies", "1.0.0", Map.of())
-                .dependency("first", "1.0.0", DependencyScope.IMPLEMENTATION)
-                .dependency("second", "1.0.0", DependencyScope.IMPLEMENTATION)
+            factory.schematicDefinitionBuilder()
+
+                .repository(path)
+                .plugin("dependencies")
+                .dependency("first")
+                .dependency("second")
                 .install(path),
             Stage.COMPILE
         );
@@ -311,27 +458,41 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .superManual()
-            .manual(builder -> builder.name("dependencies").version("1.0.0"))
-            .jar("dependencies", builder -> builder.name("dependencies").version("1.0.0"))
-            .manual(builder ->
-                builder.name("dependency")
-                    .version("1.0.0")
-                    .dependency("transitive", "1.0.0", DependencyScope.IMPLEMENTATION)
+            .schematicDefinition(factory.superManual())
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("dependencies")
             )
-            .jar("dependency", builder -> builder.name("dependency").version("1.0.0"))
-            .manual(builder -> builder.name("transitive").version("2.0.0"))
-            .jar("dependency", builder -> builder.name("transitive").version("2.0.0"))
+            .jar(
+                factory.jarBuilder("dependencies")
+            )
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("dependency")
+                    .dependency("transitive")
+            )
+            .jar(
+                factory.jarBuilder("dependency")
+            )
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("transitive")
+                    .version("2.0.0")
+            )
+            .jar(
+                factory.jarBuilder("dependency")
+                    .name("transitive")
+                    .version("2.0.0")
+            )
             .install(path);
 
         module.construct(
-            factory.schematicBuilder()
-                .name("project")
-                .version("1.0.0")
-                .repository("main", path, true)
-                .plugin("dependencies", "1.0.0", Map.of())
+            factory.schematicDefinitionBuilder()
+
+                .repository(path)
+                .plugin("dependencies")
                 .preference("transitive", "2.0.0")
-                .dependency("dependency", "1.0.0", DependencyScope.IMPLEMENTATION)
+                .dependency("dependency")
                 .install(path),
             Stage.COMPILE
         );
@@ -349,16 +510,19 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .superManual()
-            .manual(builder -> builder.name("instant").version("1.0.0"))
-            .jar("instant", builder -> builder.name("instant").version("1.0.0"))
+            .schematicDefinition(factory.superManual())
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("instant")
+            )
+            .jar(
+                factory.jarBuilder("instant")
+            )
             .install(path);
 
         module.construct(
-            factory.schematicBuilder()
-                .name("project")
-                .version("1.0.0")
-                .repository("main", path, true)
+            factory.schematicDefinitionBuilder()
+                .repository(path)
                 .preference("instant", "1.0.0")
                 .plugin("instant", Map.of("instant", "COMPILE-RUN"))
                 .install(path),
@@ -375,20 +539,28 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .superManual()
-            .manual(builder -> builder.name("dependencies").version("1.0.0"))
-            .jar("dependencies", builder -> builder.name("dependencies").version("1.0.0"))
-            .manual(builder -> builder.name("dependency").version("1.0.0"))
-            .jar("dependency", builder -> builder.name("dependency").version("1.0.0"))
+            .schematicDefinition(factory.superManual())
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("dependencies")
+            )
+            .jar(
+                factory.jarBuilder("dependencies")
+            )
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("dependency")
+            )
+            .jar(
+                factory.jarBuilder("dependency")
+            )
             .install(path);
 
         module.construct(
-            factory.schematicBuilder()
-                .name("project")
-                .version("1.0.0")
-                .repository("main", path, true)
+            factory.schematicDefinitionBuilder()
+                .repository(path)
                 .preference("dependency", "1.0.0")
-                .plugin("dependencies", "1.0.0", Map.of())
+                .plugin("dependencies")
                 .dependency("dependency", DependencyScope.IMPLEMENTATION)
                 .install(path),
             Stage.COMPILE
@@ -406,21 +578,24 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .superManual()
-            .manual(builder -> builder.name("instant").version("1.0.0"))
-            .jar("instant", builder -> builder.name("instant").version("1.0.0"))
-            .manual(builder ->
-                builder.name("bom")
-                    .version("1.0.0")
+            .schematicDefinition(factory.superManual())
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("instant")
+            )
+            .jar(
+                factory.jarBuilder("instant")
+            )
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("bom")
                     .preference("instant", "1.0.0")
             )
             .install(path);
 
         module.construct(
-            factory.schematicBuilder()
-                .name("project")
-                .version("1.0.0")
-                .repository("main", path, true)
+            factory.schematicDefinitionBuilder()
+                .repository(path)
                 .preferenceInclusion("bom", "1.0.0")
                 .plugin("instant", Map.of("instant", "COMPILE-RUN"))
                 .install(path),
@@ -437,26 +612,30 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .superManual()
-            .manual(builder -> builder.name("instant").version("1.0.0"))
-            .jar("instant", builder -> builder.name("instant").version("1.0.0"))
-            .manual(builder ->
-                builder.name("bom")
-                    .version("1.0.0")
+            .schematicDefinition(factory.superManual())
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("instant")
+            )
+            .jar(
+                factory.jarBuilder("instant")
+            )
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("bom")
                     .preferenceInclusion("parent-bom", "1.0.0")
             )
-            .manual(builder ->
-                builder.name("parent-bom")
-                    .version("1.0.0")
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("parent-bom")
                     .preference("instant", "1.0.0")
             )
             .install(path);
 
         module.construct(
-            factory.schematicBuilder()
-                .name("project")
-                .version("1.0.0")
-                .repository("main", path, true)
+            factory.schematicDefinitionBuilder()
+
+                .repository(path)
                 .preferenceInclusion("bom", "1.0.0")
                 .plugin("instant", Map.of("instant", "COMPILE-RUN"))
                 .install(path),
@@ -490,27 +669,48 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .superManual()
-            .manual(builder -> builder.name("dependencies").version("1.0.0"))
-            .jar("dependencies", builder -> builder.name("dependencies").version("1.0.0"))
-            .manual(builder ->
-                builder.name("dependency")
-                    .version("1.0.0")
-                    .dependency("common", higher, DependencyScope.IMPLEMENTATION)
+            .schematicDefinition(factory.superManual())
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("dependencies")
             )
-            .jar("dependency", builder -> builder.name("dependency").version("1.0.0"))
-            .manual(builder -> builder.name("common").version(higher))
-            .jar("dependency", builder -> builder.name("common").version(higher))
-            .manual(builder -> builder.name("common").version(lower))
+            .jar(
+                factory.jarBuilder("dependencies")
+            )
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("dependency")
+                    .dependency(
+                        "common",
+                        higher,
+                        DependencyScope.IMPLEMENTATION
+                    )
+            )
+            .jar(
+                factory.jarBuilder("dependency")
+            )
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("common")
+                    .version(higher)
+            )
+            .jar(
+                factory.jarBuilder("dependency")
+                    .name("common")
+                    .version(higher)
+            )
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("common")
+                    .version(lower)
+            )
             .install(path);
 
         module.construct(
-            factory.schematicBuilder()
-                .name("project")
-                .version("1.0.0")
-                .repository("main", path, true)
-                .plugin("dependencies", "1.0.0", Map.of())
-                .dependency("dependency", "1.0.0", DependencyScope.IMPLEMENTATION)
+            factory.schematicDefinitionBuilder()
+                .repository(path)
+                .plugin("dependencies")
+                .dependency("dependency")
                 .dependency("common", lower, DependencyScope.IMPLEMENTATION)
                 .install(path),
             Stage.COMPILE
@@ -529,21 +729,33 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .superManual()
-            .manual(builder -> builder.name("dependencies").version("1.0.0"))
-            .jar("dependencies", builder -> builder.name("dependencies").version("1.0.0"))
-            .manual(builder -> builder.name("dependency").version("1.0.0"))
-            .jar("dependency", builder -> builder.name("dependency").version("1.0.0"))
+            .schematicDefinition(factory.superManual())
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("dependencies")
+            )
+            .jar(
+                factory.jarBuilder("dependencies")
+            )
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("dependency")
+            )
+            .jar(
+                factory.jarBuilder("dependency")
+            )
             .install(path);
 
         module.construct(
-            factory.schematicBuilder()
-                .name("project")
-                .version("1.0.0")
-                .repository("main", path, true)
+            factory.schematicDefinitionBuilder()
+                .repository(path)
                 .property("dependency.version", "1.0.0")
-                .plugin("dependencies", "1.0.0", Map.of())
-                .dependency("dependency", "${dependency.version}", DependencyScope.IMPLEMENTATION)
+                .plugin("dependencies")
+                .dependency(
+                    "dependency",
+                    "${dependency.version}",
+                    DependencyScope.IMPLEMENTATION
+                )
                 .install(path),
             Stage.COMPILE
         );
@@ -560,41 +772,65 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .superManual()
-            .manual(builder -> builder.name("dependencies").version("1.0.0"))
-            .jar("dependencies", builder -> builder.name("dependencies").version("1.0.0"))
-            .manual(builder -> builder.name("product").version("1.0.0"))
-            .jar("product", builder -> builder.name("product").version("1.0.0"))
-            .manual(builder -> builder.name("library").version("1.0.0"))
-            .jar("dependency", builder -> builder.name("library").version("1.0.0"))
-            .jar("dependency", builder -> builder.name("dependency").version("1.0.0"))
+            .schematicDefinition(factory.superManual())
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("dependencies")
+            )
+            .jar(
+                factory.jarBuilder("dependencies")
+            )
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("product")
+            )
+            .jar(
+                factory.jarBuilder("product")
+            )
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("library")
+            )
+            .jar(
+                factory.jarBuilder("dependency")
+                    .name("library")
+            )
+            .jar(
+                factory.jarBuilder("dependency")
+            )
             .install(path);
         var depends = path.resolve("depends");
 
         module.construct(
-            factory.schematicBuilder()
-                .name("project")
-                .version("1.0.0")
-                .repository("main", path, true)
+            factory.schematicDefinitionBuilder()
+                .repository(path)
                 .inclusion(
-                    factory.schematicBuilder()
+                    factory.schematicDefinitionBuilder()
                         .name("dependency")
-                        .version("1.0.0")
                         .property("library.version", "1.0.0")
                         .plugin(
                             "product",
                             "1.0.0",
-                            Map.of("path", path.resolve("dependency-1.0.0.jar").toString())
+                            Map.of(
+                                "path",
+                                path.resolve(
+                                        "com.github.maximtereshchenko.conveyor:dependency-1.0.0.jar"
+                                    )
+                                    .toString()
+                            )
                         )
-                        .dependency("library", "${library.version}", DependencyScope.IMPLEMENTATION)
+                        .dependency(
+                            "library",
+                            "${library.version}",
+                            DependencyScope.IMPLEMENTATION
+                        )
                         .install(path.resolve("dependency"))
                 )
                 .inclusion(
-                    factory.schematicBuilder()
+                    factory.schematicDefinitionBuilder()
                         .name("depends")
-                        .version("1.0.0")
                         .plugin("dependencies", "1.0.0", Map.of())
-                        .schematicDependency("dependency", DependencyScope.IMPLEMENTATION)
+                        .schematicDependency("dependency")
                         .install(depends)
                 )
                 .install(path),
@@ -614,18 +850,25 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .superManual()
-            .manual(builder -> builder.name("instant").version("1.0.0"))
-            .jar("instant", builder -> builder.name("instant").version("1.0.0"))
+            .schematicDefinition(factory.superManual())
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("instant")
+            )
+            .jar(
+                factory.jarBuilder("instant")
+            )
             .install(path);
 
         module.construct(
-            factory.schematicBuilder()
-                .name("project")
-                .version("1.0.0")
-                .repository("main", path, true)
+            factory.schematicDefinitionBuilder()
+                .repository(path)
                 .property("instant.version", "1.0.0")
-                .plugin("instant", "${instant.version}", Map.of("instant", "COMPILE-RUN"))
+                .plugin(
+                    "instant",
+                    "${instant.version}",
+                    Map.of("instant", "COMPILE-RUN")
+                )
                 .install(path),
             Stage.COMPILE
         );
@@ -640,16 +883,19 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .superManual()
-            .manual(builder -> builder.name("instant").version("1.0.0"))
-            .jar("instant", builder -> builder.name("instant").version("1.0.0"))
+            .schematicDefinition(factory.superManual())
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("instant")
+            )
+            .jar(
+                factory.jarBuilder("instant")
+            )
             .install(path);
 
         module.construct(
-            factory.schematicBuilder()
-                .name("project")
-                .version("1.0.0")
-                .repository("main", path, true)
+            factory.schematicDefinitionBuilder()
+                .repository(path)
                 .property("instant.version", "1.0.0")
                 .preference("instant", "${instant.version}")
                 .plugin("instant", Map.of("instant", "COMPILE-RUN"))
@@ -667,21 +913,24 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .superManual()
-            .manual(builder -> builder.name("instant").version("1.0.0"))
-            .jar("instant", builder -> builder.name("instant").version("1.0.0"))
-            .manual(builder ->
-                builder.name("bom")
-                    .version("1.0.0")
+            .schematicDefinition(factory.superManual())
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("instant")
+            )
+            .jar(
+                factory.jarBuilder("instant")
+            )
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("bom")
                     .preference("instant", "1.0.0")
             )
             .install(path);
 
         module.construct(
-            factory.schematicBuilder()
-                .name("project")
-                .version("1.0.0")
-                .repository("main", path, true)
+            factory.schematicDefinitionBuilder()
+                .repository(path)
                 .property("bom.version", "1.0.0")
                 .preferenceInclusion("bom", "${bom.version}")
                 .plugin("instant", Map.of("instant", "COMPILE-RUN"))

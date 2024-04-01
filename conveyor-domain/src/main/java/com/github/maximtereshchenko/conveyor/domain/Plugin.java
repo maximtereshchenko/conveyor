@@ -28,6 +28,11 @@ final class Plugin extends StoredArtifact<ArtifactDependencyModel> {
     }
 
     @Override
+    public String group() {
+        return pluginModel.group();
+    }
+
+    @Override
     public String name() {
         return pluginModel.name();
     }
@@ -37,13 +42,18 @@ final class Plugin extends StoredArtifact<ArtifactDependencyModel> {
         return pluginModel.version()
             .map(properties::interpolated)
             .map(SemanticVersion::new)
-            .or(() -> preferences.version(pluginModel.name()))
+            .or(() -> preferences.version(pluginModel.group(), pluginModel.name()))
             .orElseThrow();
     }
 
     @Override
     Set<ArtifactDependencyModel> dependencyModels() {
-        return modelFactory.manualHierarchy(pluginModel.name(), version(), repositories())
+        return modelFactory.manualHierarchy(
+                pluginModel.group(),
+                pluginModel.name(),
+                version(),
+                repositories()
+            )
             .dependencies();
     }
 

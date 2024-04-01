@@ -5,6 +5,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 public record PluginDefinition(
+    String group,
     String name,
     Optional<String> version,
     Map<String, String> configuration

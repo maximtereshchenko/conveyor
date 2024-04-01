@@ -5,6 +5,8 @@ import java.util.Set;
 
 interface Artifact {
 
+    String group();
+
     String name();
 
     SemanticVersion version();

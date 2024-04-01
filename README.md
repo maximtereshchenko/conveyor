@@ -15,18 +15,18 @@ A build tool for Java projects
     * Given the same dependency is required but with different versions, the highest version wins
       taken into account the
       presence of the dependency requiring that version in the result module path
-    * Preferences are defined in a manual or a schematic with a name and a version
+    * Preferences are defined in a manual or a schematic with a group, a name and a version
     * Plugins are used with defined version. If plugin does not define its version, then version
       defined in preferences is used
     * Direct dependencies are used with defined version. If dependency does not define its version,
       then version defined in preferences is used
     * Transitive dependencies are used with versions defined in preferences. If preferences do not
       contain the dependency, the version defined in a manual requiring this dependency is used
-    * Preferences can be imported from a manual by defining that manual with a name and a version as
-      the inclusion in preferences
+    * Preferences can be imported from a manual by defining that manual with a group, a name and a
+      version as the inclusion in preferences
 * Plugins
-    * Plugins are defined in a manual or a schematic with a name, an optional version and an
-      optional configuration in a form of key-value pairs
+    * Plugins are defined in a manual or a schematic with a group, a name, an optional version and
+      an optional configuration in a form of key-value pairs
     * Plugins are archived in a JAR and exported via Java module system
     * Plugins are loaded via Java module system from a module layer containing required dependencies
       from the plugin's manual
@@ -66,16 +66,16 @@ A build tool for Java projects
     * Properties, plugin versions, dependency versions and preference versions can be interpolated
       with other properties using `${property.key}` syntax
 * Dependencies
-    * Dependencies are defined in a manual or a schematic with a name, an optional version and an
-      optional scope: IMPLEMENTATION (default) or TEST
+    * Dependencies are defined in a manual or a schematic with a group, a name, an optional version
+      and an optional scope: IMPLEMENTATION (default) or TEST
     * Each dependency should come with a manual
     * Dependencies are inherited from a manual or a schematic used as a template
     * Version and scope of the inherited dependency can be overridden
-    * Schematic can define a dependency on other schematic with a name and an optional scope. In
-      such case the product from this schematic of type MODULE will be used in module path
+    * Schematic can define a dependency on other schematic with a group, a name and an optional
+      scope. In such case the product from this schematic of type MODULE will be used in module path
 * Inheritance
     * A schematic inherits properties, plugins and dependencies from a manual used as a template. It
-      is defined with a name and a version
+      is defined with a group, a name and a version
     * A schematic inherits properties, plugins, dependencies and repositories from another schematic
       used as a template. It is defined with a path to the file with the schematic
     * If a schematic does not have an explicitly defined template, then a schematic

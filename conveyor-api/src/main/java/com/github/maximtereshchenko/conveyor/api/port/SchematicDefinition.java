@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Objects;
 
 public record SchematicDefinition(
+    String group,
     String name,
     String version,
     TemplateForSchematicDefinition template,
@@ -19,7 +20,7 @@ public record SchematicDefinition(
 ) {
 
     public SchematicDefinition {
-        template = Objects.requireNonNullElse(template, new NoExplicitlyDefinedTemplate());
+        template = Objects.requireNonNullElse(template, new NoTemplate());
         inclusions = List.copyOf(Objects.requireNonNullElse(inclusions, List.of()));
         repositories = List.copyOf(Objects.requireNonNullElse(repositories, List.of()));
         properties = Map.copyOf(Objects.requireNonNullElse(properties, Map.of()));

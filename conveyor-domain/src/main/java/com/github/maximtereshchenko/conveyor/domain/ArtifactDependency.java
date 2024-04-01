@@ -4,7 +4,8 @@ import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 
 import java.util.Set;
 
-abstract class ArtifactDependency extends StoredArtifact<ArtifactDependencyModel> implements Dependency {
+abstract class ArtifactDependency extends StoredArtifact<ArtifactDependencyModel>
+    implements Dependency {
 
     private final ArtifactDependencyModel artifactDependencyModel;
     private final ModelFactory modelFactory;
@@ -26,6 +27,11 @@ abstract class ArtifactDependency extends StoredArtifact<ArtifactDependencyModel
     }
 
     @Override
+    public String group() {
+        return artifactDependencyModel.group();
+    }
+
+    @Override
     public String name() {
         return artifactDependencyModel.name();
     }
@@ -43,6 +49,7 @@ abstract class ArtifactDependency extends StoredArtifact<ArtifactDependencyModel
     @Override
     Set<ArtifactDependencyModel> dependencyModels() {
         return modelFactory.manualHierarchy(
+                artifactDependencyModel.group(),
                 artifactDependencyModel.name(),
                 version(),
                 repositories()
