@@ -97,12 +97,8 @@ final class StandaloneSchematicModel
     @Override
     DependencyModel dependencyModel(SchematicDependencyDefinition dependencyDefinition) {
         return switch (dependencyDefinition) {
-            case DependencyOnArtifactDefinition definition -> new ArtifactDependencyModel(
-                definition.name(),
-                definition.version()
-                    .map(SemanticVersion::new),
-                definition.scope()
-            );
+            case DependencyOnArtifactDefinition definition ->
+                new ArtifactDependencyModel(definition.name(), definition.version(), definition.scope());
             case DependencyOnSchematicDefinition definition ->
                 new SchematicDependencyModel(definition.schematic(), definition.scope());
         };
