@@ -1,0 +1,11 @@
+package ${normalizedName};
+
+import java.util.function.*;
+
+public final class ${normalizedName} implements Supplier<String> {
+
+    @Override
+    public String get() {
+        return "${name}-${version}";
+    }
+}

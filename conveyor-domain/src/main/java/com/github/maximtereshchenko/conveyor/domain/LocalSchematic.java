@@ -49,11 +49,13 @@ final class LocalSchematic implements Schematic {
     public ImmutableList<Schematic> inclusions() {
         return schematicDefinition.inclusions()
             .stream()
-            .map(path -> new LocalSchematic(this,
+            .map(path -> new LocalSchematic(
+                this,
                 definitionReader.schematicDefinition(path),
                 repository,
                 path,
-                definitionReader))
+                definitionReader
+            ))
             .collect(new ImmutableListCollector<>());
     }
 

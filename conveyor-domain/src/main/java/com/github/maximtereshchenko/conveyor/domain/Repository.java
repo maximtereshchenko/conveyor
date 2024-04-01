@@ -25,7 +25,7 @@ final class Repository {
         if (Files.exists(jar)) {
             return jar;
         }
-        throw new IllegalArgumentException();
+        throw new IllegalArgumentException(jar.toString());
     }
 
     private String fullName(String name, int version) {
