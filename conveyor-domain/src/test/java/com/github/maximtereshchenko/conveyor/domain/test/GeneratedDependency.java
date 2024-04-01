@@ -1,21 +1,17 @@
 package com.github.maximtereshchenko.conveyor.domain.test;
 
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 final class GeneratedDependency extends GeneratedArtifact {
 
-    private final Path directory;
-
-    GeneratedDependency(Path directory, String name, int version, GeneratedArtifactDefinition... dependencies) {
+    GeneratedDependency(String name, int version, GeneratedArtifactDefinition... dependencies) {
         super(name, version, List.of(dependencies));
-        this.directory = directory;
     }
 
-    GeneratedDependency(Path directory, String name, GeneratedArtifactDefinition... dependencies) {
-        this(directory, name, 1, dependencies);
+    GeneratedDependency(String name, GeneratedArtifactDefinition... dependencies) {
+        this(name, 1, dependencies);
     }
 
     @Override
@@ -30,10 +26,10 @@ final class GeneratedDependency extends GeneratedArtifact {
             import java.io.*;
             import java.nio.file.*;
             public final class %s {
-                public %s() {
+                public %s(Path dir) {
                     %s
                     try {
-                        var path = Paths.get("%s");
+                        var path = dir.resolve("%s-%d");
                         if (!Files.exists(path)) Files.createFile(path);
                     } catch (IOException e) {
                         throw new UncheckedIOException(e);
@@ -46,7 +42,7 @@ final class GeneratedDependency extends GeneratedArtifact {
                 className(),
                 className(),
                 dependencyUsages(),
-                directory.resolve(name() + '-' + version())
+                name(), version()
             );
     }
 
@@ -71,7 +67,7 @@ final class GeneratedDependency extends GeneratedArtifact {
         return dependencies()
             .stream()
             .map(GeneratedArtifactDefinition::className)
-            .map("new %s();"::formatted)
+            .map("new %s(dir);"::formatted)
             .collect(Collectors.joining());
     }
 }

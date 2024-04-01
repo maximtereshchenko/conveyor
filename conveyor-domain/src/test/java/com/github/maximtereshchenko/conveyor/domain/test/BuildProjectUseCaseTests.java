@@ -51,7 +51,7 @@ final class BuildProjectUseCaseTests {
             Stage.COMPILE
         );
 
-        assertThat(path).isDirectoryContaining("glob:**plugin-1-run");
+        assertThat(defaultBuildDirectory(path)).isDirectoryContaining("glob:**plugin-1-run");
     }
 
     @Test
@@ -62,7 +62,7 @@ final class BuildProjectUseCaseTests {
             Stage.CLEAN
         );
 
-        assertThat(path).isDirectoryNotContaining("glob:**plugin-1-run");
+        assertThat(defaultBuildDirectory(path)).doesNotExist();
     }
 
     @Test
@@ -73,19 +73,19 @@ final class BuildProjectUseCaseTests {
                 path,
                 new GeneratedConveyorPlugin(
                     "first-plugin",
-                    new GeneratedDependency(path, "dependency", 1).install(path)
+                    new GeneratedDependency("dependency", 1).install(path)
                 )
                     .install(path),
                 new GeneratedConveyorPlugin(
                     "second-plugin",
-                    new GeneratedDependency(path, "dependency", 2).install(path)
+                    new GeneratedDependency("dependency", 2).install(path)
                 )
                     .install(path)
             ),
             Stage.COMPILE
         );
 
-        assertThat(path).isDirectoryContaining("glob:**first-plugin-1-run")
+        assertThat(defaultBuildDirectory(path)).isDirectoryContaining("glob:**first-plugin-1-run")
             .isDirectoryContaining("glob:**second-plugin-1-run")
             .isDirectoryContaining("glob:**dependency-2")
             .isDirectoryNotContaining("glob:**dependency-1");
@@ -100,9 +100,8 @@ final class BuildProjectUseCaseTests {
                 new GeneratedConveyorPlugin(
                     "plugin",
                     new GeneratedDependency(
-                        path,
                         "dependency",
-                        new GeneratedDependency(path, "transitive").install(path)
+                        new GeneratedDependency("transitive").install(path)
                     )
                         .install(path)
                 )
@@ -111,7 +110,7 @@ final class BuildProjectUseCaseTests {
             Stage.COMPILE
         );
 
-        assertThat(path).isDirectoryContaining("glob:**plugin-1-run")
+        assertThat(defaultBuildDirectory(path)).isDirectoryContaining("glob:**plugin-1-run")
             .isDirectoryContaining("glob:**dependency-1")
             .isDirectoryContaining("glob:**transitive-1");
     }
@@ -120,13 +119,12 @@ final class BuildProjectUseCaseTests {
     void givenPluginRequireTransitiveDependency_whenBuildWithHigherVersion_thenTransitiveDependencyExcluded(
         @TempDir Path path
     ) throws Exception {
-        var transitive = new GeneratedDependency(path, "transitive", 1).install(path);
+        var transitive = new GeneratedDependency("transitive", 1).install(path);
         var conveyorJson = conveyorJson(
             path,
             new GeneratedConveyorPlugin(
                 "first-plugin",
                 new GeneratedDependency(
-                    path,
                     "common-dependency",
                     1,
                     transitive
@@ -137,10 +135,8 @@ final class BuildProjectUseCaseTests {
             new GeneratedConveyorPlugin(
                 "second-plugin",
                 new GeneratedDependency(
-                    path,
                     "dependency",
                     new GeneratedDependency(
-                        path,
                         "common-dependency",
                         2
                     )
@@ -154,7 +150,7 @@ final class BuildProjectUseCaseTests {
 
         module.build(conveyorJson, Stage.COMPILE);
 
-        assertThat(path).isDirectoryContaining("glob:**first-plugin-1-run")
+        assertThat(defaultBuildDirectory(path)).isDirectoryContaining("glob:**first-plugin-1-run")
             .isDirectoryContaining("glob:**second-plugin-1-run")
             .isDirectoryContaining("glob:**dependency-1")
             .isDirectoryContaining("glob:**common-dependency-2");
@@ -164,23 +160,26 @@ final class BuildProjectUseCaseTests {
     void givenDependencyAffectResolvedVersions_whenBuildWithDependencyExcluded_thenItShouldNotAffectVersions(
         @TempDir Path path
     ) throws Exception {
+        var defaultBuildDirectory = defaultBuildDirectory(path);
+
         module.build(
             conveyorJson(
                 path,
                 new GeneratedConveyorPlugin(
                     "plugin",
-                    new GeneratedDependency(path, "should-not-be-updated", 1).install(path),
+                    new GeneratedDependency("should-not-be-updated", 1)
+                        .install(path),
                     new GeneratedDependency(
-                        path,
                         "can-affect-versions",
                         1,
-                        new GeneratedDependency(path, "should-not-be-updated", 2).install(path)
+                        new GeneratedDependency("should-not-be-updated", 2)
+                            .install(path)
                     )
                         .install(path),
                     new GeneratedDependency(
-                        path,
                         "will-remove-dependency",
-                        new GeneratedDependency(path, "can-affect-versions", 2).install(path)
+                        new GeneratedDependency("can-affect-versions", 2)
+                            .install(path)
                     )
                         .install(path)
                 )
@@ -189,7 +188,7 @@ final class BuildProjectUseCaseTests {
             Stage.COMPILE
         );
 
-        assertThat(path).isDirectoryContaining("glob:**plugin-1-run")
+        assertThat(defaultBuildDirectory).isDirectoryContaining("glob:**plugin-1-run")
             .isDirectoryContaining("glob:**will-remove-dependency-1")
             .isDirectoryContaining("glob:**can-affect-versions-2")
             .isDirectoryContaining("glob:**should-not-be-updated-1")
@@ -210,7 +209,7 @@ final class BuildProjectUseCaseTests {
             Stage.COMPILE
         );
 
-        assertThat(path.resolve("plugin-1-configuration"))
+        assertThat(defaultBuildDirectory(path).resolve("plugin-1-configuration"))
             .content(StandardCharsets.UTF_8)
             .isEqualTo("property=value");
     }
@@ -229,7 +228,7 @@ final class BuildProjectUseCaseTests {
             Stage.COMPILE
         );
 
-        assertThat(path.resolve("plugin-1-configuration"))
+        assertThat(defaultBuildDirectory(path).resolve("plugin-1-configuration"))
             .content(StandardCharsets.UTF_8)
             .isEqualTo("property=value-suffix");
     }
@@ -244,9 +243,10 @@ final class BuildProjectUseCaseTests {
             Stage.COMPILE
         );
 
-        var preparedTime = instant(path.resolve("plugin-1-prepared"));
-        var runTime = instant(path.resolve("plugin-1-run"));
-        var finalizedTime = instant(path.resolve("plugin-1-finalized"));
+        var defaultBuildDirectory = defaultBuildDirectory(path);
+        var preparedTime = instant(defaultBuildDirectory.resolve("plugin-1-prepared"));
+        var runTime = instant(defaultBuildDirectory.resolve("plugin-1-run"));
+        var finalizedTime = instant(defaultBuildDirectory.resolve("plugin-1-finalized"));
         assertThat(preparedTime).isBefore(runTime);
         assertThat(runTime).isBefore(finalizedTime);
     }
@@ -262,12 +262,13 @@ final class BuildProjectUseCaseTests {
             Stage.COMPILE
         );
 
-        var cleanPreparedTime = instant(path.resolve("clean-1-prepared"));
-        var cleanRunTime = instant(path.resolve("clean-1-run"));
-        var cleanFinalizedTime = instant(path.resolve("clean-1-finalized"));
-        var compilePreparedTime = instant(path.resolve("compile-1-prepared"));
-        var compileRunTime = instant(path.resolve("compile-1-run"));
-        var compileFinalizedTime = instant(path.resolve("compile-1-finalized"));
+        var defaultBuildDirectory = defaultBuildDirectory(path);
+        var cleanPreparedTime = instant(defaultBuildDirectory.resolve("clean-1-prepared"));
+        var cleanRunTime = instant(defaultBuildDirectory.resolve("clean-1-run"));
+        var cleanFinalizedTime = instant(defaultBuildDirectory.resolve("clean-1-finalized"));
+        var compilePreparedTime = instant(defaultBuildDirectory.resolve("compile-1-prepared"));
+        var compileRunTime = instant(defaultBuildDirectory.resolve("compile-1-run"));
+        var compileFinalizedTime = instant(defaultBuildDirectory.resolve("compile-1-finalized"));
         assertThat(cleanPreparedTime).isBefore(cleanRunTime);
         assertThat(cleanRunTime).isBefore(cleanFinalizedTime);
         assertThat(compilePreparedTime).isBefore(compileRunTime);
@@ -277,8 +278,8 @@ final class BuildProjectUseCaseTests {
 
     @Test
     void givenDependenciesDeclared_whenBuild_thenPluginCanAccessModulePath(@TempDir Path path) throws Exception {
-        var implementation = new GeneratedDependency(path, "implementation").install(path);
-        var test = new GeneratedDependency(path, "test").install(path);
+        var implementation = new GeneratedDependency("implementation").install(path);
+        var test = new GeneratedDependency("test").install(path);
 
         module.build(
             conveyorJson(
@@ -293,9 +294,10 @@ final class BuildProjectUseCaseTests {
             Stage.COMPILE
         );
 
-        assertThat(modulePath(path.resolve("plugin-1-module-path-implementation")))
+        var defaultBuildDirectory = defaultBuildDirectory(path);
+        assertThat(modulePath(defaultBuildDirectory.resolve("plugin-1-module-path-implementation")))
             .containsExactly(implementation.jar());
-        assertThat(modulePath(path.resolve("plugin-1-module-path-test")))
+        assertThat(modulePath(defaultBuildDirectory.resolve("plugin-1-module-path-test")))
             .containsExactly(test.jar());
     }
 
@@ -313,7 +315,7 @@ final class BuildProjectUseCaseTests {
             Stage.COMPILE
         );
 
-        assertThat(project).isDirectoryContaining("glob:**plugin-1-run");
+        assertThat(defaultBuildDirectory(project)).isDirectoryContaining("glob:**plugin-1-run");
     }
 
     @Test
@@ -334,7 +336,46 @@ final class BuildProjectUseCaseTests {
             Stage.COMPILE
         );
 
-        assertThat(project).isDirectoryContaining("glob:**plugin-1-run");
+        assertThat(defaultBuildDirectory(project)).isDirectoryContaining("glob:**plugin-1-run");
+    }
+
+    @Test
+    void givenProjectBuildDirectoryProperty_whenBuild_thenProjectBuiltInSpecifiedDirectory(
+        @TempDir Path path
+    ) throws Exception {
+        var build = path.resolve("build");
+
+        module.build(
+            conveyorJson(
+                path,
+                Map.of("conveyor.project.build.directory", build.toString()),
+                new GeneratedConveyorPlugin("plugin").install(path)
+            ),
+            Stage.COMPILE
+        );
+
+        assertThat(build).isDirectoryContaining("glob:**plugin-1-run");
+    }
+
+    @Test
+    void givenRelativeProjectBuildDirectoryProperty_whenBuild_thenProjectBuildDirectoryIsRelativeToProjectDirectory(
+        @TempDir Path path
+    ) throws Exception {
+        var project = path.resolve("project");
+
+        module.build(
+            conveyorJson(
+                path,
+                Map.of(
+                    "conveyor.project.directory", project.toString(),
+                    "conveyor.project.build.directory", "./build"
+                ),
+                new GeneratedConveyorPlugin("plugin").install(path)
+            ),
+            Stage.COMPILE
+        );
+
+        assertThat(project.resolve("build")).isDirectoryContaining("glob:**plugin-1-run");
     }
 
     private Collection<Path> modulePath(Path path) throws IOException {
@@ -397,5 +438,9 @@ final class BuildProjectUseCaseTests {
         var conveyorJson = path.resolve("conveyor.json");
         gsonAdapter.write(conveyorJson, projectDefinition);
         return conveyorJson;
+    }
+
+    private Path defaultBuildDirectory(Path path) {
+        return path.resolve(".conveyor");
     }
 }
