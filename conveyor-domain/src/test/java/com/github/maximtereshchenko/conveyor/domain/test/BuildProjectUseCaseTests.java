@@ -510,10 +510,11 @@ final class BuildProjectUseCaseTests {
     void givenPluginDeclaredInChildWithDifferentConfigurationValue_whenBuild_thenValueInChildShouldTakePrecedence(
         @TempDir Path path
     ) throws Exception {
+        new GeneratedConveyorPlugin(gsonAdapter, "plugin").install(path);
         installSuperParent(
             path,
-            Map.of("key", "parent-value"),
-            new GeneratedConveyorPlugin(gsonAdapter, "plugin").install(path)
+            List.of(new PluginDefinition("plugin", 1, Map.of("key", "parent-value"))),
+            List.of()
         );
 
         module.build(
@@ -535,10 +536,11 @@ final class BuildProjectUseCaseTests {
     void givenPluginDeclaredInChildWithAdditionalConfiguration_whenBuild_thenPluginConfigurationShouldBeMerged(
         @TempDir Path path
     ) throws Exception {
+        new GeneratedConveyorPlugin(gsonAdapter, "plugin").install(path);
         installSuperParent(
             path,
-            Map.of("parent-key", "value"),
-            new GeneratedConveyorPlugin(gsonAdapter, "plugin").install(path)
+            List.of(new PluginDefinition("plugin", 1, Map.of("parent-key", "value"))),
+            List.of()
         );
 
         module.build(
@@ -556,14 +558,53 @@ final class BuildProjectUseCaseTests {
             .containsIgnoringNewLines("parent-key=value", "child-key=value");
     }
 
+    @Test
+    void givenParentHasDependencies_whenBuild_thenChildInheritedDependencies(
+        @TempDir Path path
+    ) throws Exception {
+        var implementation = new GeneratedDependency(gsonAdapter, "implementation").install(path);
+        var test = new GeneratedDependency(gsonAdapter, "test").install(path);
+        installSuperParent(
+            path,
+            List.of(),
+            List.of(
+                new DependencyDefinition(
+                    implementation.name(),
+                    implementation.version(),
+                    DependencyScope.IMPLEMENTATION
+                ),
+                new DependencyDefinition(test.name(), test.version(), DependencyScope.TEST)
+            )
+        );
+
+        module.build(
+            conveyorJson(
+                path,
+                new GeneratedConveyorPlugin(gsonAdapter, "plugin").install(path)
+            ),
+            Stage.COMPILE
+        );
+
+        assertThat(modulePath(defaultBuildDirectory(path).resolve("plugin-1-module-path-implementation")))
+            .containsExactly(implementation.jar());
+        assertThat(modulePath(defaultBuildDirectory(path).resolve("plugin-1-module-path-test")))
+            .containsExactly(test.jar());
+    }
+
     private void installSuperParent(Path path, GeneratedArtifactDefinition... plugins) {
-        installSuperParent(path, Map.of(), plugins);
+        installSuperParent(
+            path,
+            Stream.of(plugins)
+                .map(definition -> new PluginDefinition(definition.name(), definition.version(), Map.of()))
+                .toList(),
+            List.of()
+        );
     }
 
     private void installSuperParent(
         Path path,
-        Map<String, String> configuration,
-        GeneratedArtifactDefinition... plugins
+        Collection<PluginDefinition> plugins,
+        Collection<DependencyDefinition> dependencies
     ) {
         gsonAdapter.write(
             path.resolve("super-parent-1.json"),
@@ -573,10 +614,8 @@ final class BuildProjectUseCaseTests {
                 new NoExplicitParent(),
                 null,
                 Map.of(),
-                Stream.of(plugins)
-                    .map(definition -> new PluginDefinition(definition.name(), definition.version(), configuration))
-                    .toList(),
-                List.of()
+                plugins,
+                dependencies
             )
         );
     }
