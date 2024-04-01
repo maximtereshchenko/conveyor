@@ -7,6 +7,8 @@ include("gson-conveyor-project-definition-reader")
 include("conveyor-plugin-dependency")
 include("first-conveyor-plugin-with-dependency")
 include("second-conveyor-plugin-with-dependency")
+include("conveyor-plugin-dependency-with-transitive")
+include("conveyor-plugin-transitive-dependency")
 dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {

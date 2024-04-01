@@ -1,0 +1,11 @@
+{
+  "name": "project",
+  "version": 1,
+  "repository": "./repository",
+  "plugins": [
+    {
+      "name": "first-conveyor-plugin-with-dependency",
+      "version": 1
+    }
+  ]
+}
