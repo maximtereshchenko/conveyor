@@ -21,29 +21,29 @@ final class Manual extends Definition {
     }
 
     @Override
-    public Optional<Repository> repository() {
-        return Optional.empty();
+    public Repositories repositories() {
+        return new Repositories();
     }
 
     @Override
-    public Properties properties(Repository repository) {
-        var manualDefinition = manualDefinition(repository);
+    public Properties properties(Repositories repositories) {
+        var manualDefinition = manualDefinition(repositories);
         return properties(manualDefinition.properties())
-            .override(template(manualDefinition.template()).properties(repository));
+            .override(template(manualDefinition.template()).properties(repositories));
     }
 
     @Override
-    public Plugins plugins(Repository repository) {
-        var manualDefinition = manualDefinition(repository);
+    public Plugins plugins(Repositories repositories) {
+        var manualDefinition = manualDefinition(repositories);
         return plugins(manualDefinition.plugins())
-            .override(template(manualDefinition.template()).plugins(repository));
+            .override(template(manualDefinition.template()).plugins(repositories));
     }
 
     @Override
-    public Dependencies dependencies(Repository repository, SchematicProducts schematicProducts) {
-        var manualDefinition = manualDefinition(repository);
+    public Dependencies dependencies(Repositories repositories, SchematicProducts schematicProducts) {
+        var manualDefinition = manualDefinition(repositories);
         return dependencies(manualDefinition.dependencies(), schematicProducts)
-            .override(template(manualDefinition.template()).dependencies(repository, schematicProducts));
+            .override(template(manualDefinition.template()).dependencies(repositories, schematicProducts));
     }
 
     @Override
@@ -56,8 +56,8 @@ final class Manual extends Definition {
         return false;
     }
 
-    private ManualDefinition manualDefinition(Repository repository) {
-        return repository.manualDefinition(name, version);
+    private ManualDefinition manualDefinition(Repositories repositories) {
+        return repositories.manualDefinition(name, version);
     }
 
     private Template template(TemplateForManualDefinition templateDefinition) {

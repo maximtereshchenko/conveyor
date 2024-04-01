@@ -38,7 +38,7 @@ final class VersionedPlugin implements Plugin {
     }
 
     @Override
-    public Artifact artifact(Repository repository) {
-        return new PackagedArtifact(name, version, repository);
+    public Artifact artifact(Repositories repositories) {
+        return new PackagedArtifact(name, version, repositories);
     }
 }

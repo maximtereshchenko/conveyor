@@ -28,7 +28,7 @@ final class SchematicBuilder {
                 0,
                 new NoExplicitlyDefinedTemplate(),
                 List.of(),
-                Optional.empty(),
+                List.of(),
                 Map.of(),
                 List.of(),
                 List.of()
@@ -44,7 +44,7 @@ final class SchematicBuilder {
                 schematicDefinition.version(),
                 schematicDefinition.template(),
                 schematicDefinition.inclusions(),
-                schematicDefinition.repository(),
+                schematicDefinition.repositories(),
                 schematicDefinition.properties(),
                 schematicDefinition.plugins(),
                 schematicDefinition.dependencies()
@@ -60,7 +60,7 @@ final class SchematicBuilder {
                 version,
                 schematicDefinition.template(),
                 schematicDefinition.inclusions(),
-                schematicDefinition.repository(),
+                schematicDefinition.repositories(),
                 schematicDefinition.properties(),
                 schematicDefinition.plugins(),
                 schematicDefinition.dependencies()
@@ -76,7 +76,9 @@ final class SchematicBuilder {
         return template(new ManualTemplateDefinition(name, version));
     }
 
-    SchematicBuilder repository(Path path) {
+    SchematicBuilder repository(String name, Path path, boolean enabled) {
+        var copy = new ArrayList<>(schematicDefinition.repositories());
+        copy.add(new RepositoryDefinition(name, path, enabled));
         return new SchematicBuilder(
             gsonAdapter,
             new SchematicDefinition(
@@ -84,7 +86,7 @@ final class SchematicBuilder {
                 schematicDefinition.version(),
                 schematicDefinition.template(),
                 schematicDefinition.inclusions(),
-                Optional.of(path),
+                copy,
                 schematicDefinition.properties(),
                 schematicDefinition.plugins(),
                 schematicDefinition.dependencies()
@@ -102,7 +104,7 @@ final class SchematicBuilder {
                 schematicDefinition.version(),
                 schematicDefinition.template(),
                 copy,
-                schematicDefinition.repository(),
+                schematicDefinition.repositories(),
                 schematicDefinition.properties(),
                 schematicDefinition.plugins(),
                 schematicDefinition.dependencies()
@@ -128,7 +130,7 @@ final class SchematicBuilder {
                 schematicDefinition.version(),
                 schematicDefinition.template(),
                 schematicDefinition.inclusions(),
-                schematicDefinition.repository(),
+                schematicDefinition.repositories(),
                 schematicDefinition.properties(),
                 copy,
                 schematicDefinition.dependencies()
@@ -154,7 +156,7 @@ final class SchematicBuilder {
                 schematicDefinition.version(),
                 schematicDefinition.template(),
                 schematicDefinition.inclusions(),
-                schematicDefinition.repository(),
+                schematicDefinition.repositories(),
                 copy,
                 schematicDefinition.plugins(),
                 schematicDefinition.dependencies()
@@ -181,7 +183,7 @@ final class SchematicBuilder {
                 schematicDefinition.version(),
                 templateDefinition,
                 schematicDefinition.inclusions(),
-                schematicDefinition.repository(),
+                schematicDefinition.repositories(),
                 schematicDefinition.properties(),
                 schematicDefinition.plugins(),
                 schematicDefinition.dependencies()
@@ -199,7 +201,7 @@ final class SchematicBuilder {
                 schematicDefinition.version(),
                 schematicDefinition.template(),
                 schematicDefinition.inclusions(),
-                schematicDefinition.repository(),
+                schematicDefinition.repositories(),
                 schematicDefinition.properties(),
                 schematicDefinition.plugins(),
                 copy

@@ -30,7 +30,7 @@ final class PluginsFeatureTests extends ConveyorTest {
             factory.schematicBuilder()
                 .name("project")
                 .version(1)
-                .repository(path)
+                .repository("main", path, true)
                 .property("user.defined.property", "value")
                 .plugin("properties", 1, Map.of())
                 .install(path),
@@ -62,7 +62,7 @@ final class PluginsFeatureTests extends ConveyorTest {
 
         module.construct(
             factory.schematicBuilder()
-                .repository(path)
+                .repository("main", path, true)
                 .property("property", "value")
                 .plugin("configuration", 1, Map.of("configuration", "${property}-suffix"))
                 .install(path),
@@ -91,7 +91,7 @@ final class PluginsFeatureTests extends ConveyorTest {
             factory.schematicBuilder()
                 .name("project")
                 .version(1)
-                .repository(path)
+                .repository("main", path, true)
                 .plugin("configuration", 1, Map.of("user.defined.configuration", "value"))
                 .install(path),
             Stage.COMPILE
@@ -122,7 +122,7 @@ final class PluginsFeatureTests extends ConveyorTest {
             factory.schematicBuilder()
                 .name("project")
                 .version(1)
-                .repository(path)
+                .repository("main", path, true)
                 .plugin(
                     "instant",
                     1,
@@ -160,7 +160,7 @@ final class PluginsFeatureTests extends ConveyorTest {
             factory.schematicBuilder()
                 .name("project")
                 .version(1)
-                .repository(path)
+                .repository("main", path, true)
                 .plugin("module-path", 1, Map.of())
                 .install(path),
             Stage.COMPILE
@@ -199,7 +199,7 @@ final class PluginsFeatureTests extends ConveyorTest {
             factory.schematicBuilder()
                 .name("project")
                 .version(1)
-                .repository(path)
+                .repository("main", path, true)
                 .plugin("module-path", 1, Map.of())
                 .install(path),
             Stage.COMPILE
@@ -233,7 +233,7 @@ final class PluginsFeatureTests extends ConveyorTest {
             factory.schematicBuilder()
                 .name("project")
                 .version(1)
-                .repository(path)
+                .repository("main", path, true)
                 .plugin("module-path", 1, Map.of())
                 .install(path),
             Stage.COMPILE
@@ -273,7 +273,7 @@ final class PluginsFeatureTests extends ConveyorTest {
             factory.schematicBuilder()
                 .name("project")
                 .version(1)
-                .repository(path)
+                .repository("main", path, true)
                 .plugin("module-path", 1, Map.of())
                 .install(path),
             Stage.COMPILE
@@ -313,7 +313,7 @@ final class PluginsFeatureTests extends ConveyorTest {
             factory.schematicBuilder()
                 .name("project")
                 .version(1)
-                .repository(path)
+                .repository("main", path, true)
                 .plugin("first", 1, Map.of())
                 .plugin("second", 1, Map.of())
                 .install(path),
@@ -368,7 +368,7 @@ final class PluginsFeatureTests extends ConveyorTest {
             factory.schematicBuilder()
                 .name("project")
                 .version(1)
-                .repository(path)
+                .repository("main", path, true)
                 .plugin("first", 1, Map.of())
                 .plugin("second", 1, Map.of())
                 .install(path),
@@ -402,7 +402,7 @@ final class PluginsFeatureTests extends ConveyorTest {
             factory.schematicBuilder()
                 .name("project")
                 .version(1)
-                .repository(path)
+                .repository("main", path, true)
                 .template("template", 1)
                 .install(path),
             Stage.COMPILE
@@ -433,7 +433,7 @@ final class PluginsFeatureTests extends ConveyorTest {
             factory.schematicBuilder()
                 .name("project")
                 .version(1)
-                .repository(path)
+                .repository("main", path, true)
                 .template("template", 1)
                 .plugin("instant", 2, Map.of("instant", "COMPILE-RUN"))
                 .install(path),
@@ -464,7 +464,7 @@ final class PluginsFeatureTests extends ConveyorTest {
             factory.schematicBuilder()
                 .name("project")
                 .version(1)
-                .repository(path)
+                .repository("main", path, true)
                 .template("template", 1)
                 .plugin("configuration", Map.of("key", "schematic-value"))
                 .install(path),
@@ -501,7 +501,7 @@ final class PluginsFeatureTests extends ConveyorTest {
             factory.schematicBuilder()
                 .name("project")
                 .version(1)
-                .repository(path)
+                .repository("main", path, true)
                 .template("template", 1)
                 .plugin("configuration", Map.of("to.be.removed", ""))
                 .install(path),
@@ -534,7 +534,7 @@ final class PluginsFeatureTests extends ConveyorTest {
             factory.schematicBuilder()
                 .name("project")
                 .version(1)
-                .repository(path)
+                .repository("main", path, true)
                 .template("template", 1)
                 .plugin("configuration", Map.of("key", "value"))
                 .install(path),

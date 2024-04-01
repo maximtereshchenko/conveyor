@@ -25,12 +25,12 @@ final class Dependencies {
         );
     }
 
-    Set<Path> modulePath(Repository repository, ImmutableSet<DependencyScope> scopes) {
+    Set<Path> modulePath(Repositories repositories, ImmutableSet<DependencyScope> scopes) {
         return ModulePath.from(
                 indexed.values()
                     .stream()
                     .filter(dependency -> dependency.in(scopes))
-                    .map(dependency -> dependency.artifact(repository))
+                    .map(dependency -> dependency.artifact(repositories))
                     .collect(new ImmutableSetCollector<>())
             )
             .resolved()

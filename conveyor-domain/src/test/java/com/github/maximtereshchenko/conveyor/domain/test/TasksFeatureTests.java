@@ -32,7 +32,7 @@ final class TasksFeatureTests extends ConveyorTest {
             factory.schematicBuilder()
                 .name("project")
                 .version(1)
-                .repository(path)
+                .repository("main", path, true)
                 .plugin("instant", 1, Map.of("instant", "COMPILE-RUN"))
                 .install(path),
             Stage.TEST
@@ -57,7 +57,7 @@ final class TasksFeatureTests extends ConveyorTest {
             factory.schematicBuilder()
                 .name("project")
                 .version(1)
-                .repository(path)
+                .repository("main", path, true)
                 .plugin("instant", 1, Map.of("instant", "COMPILE-RUN"))
                 .install(path),
             Stage.COMPILE
@@ -82,7 +82,7 @@ final class TasksFeatureTests extends ConveyorTest {
             factory.schematicBuilder()
                 .name("project")
                 .version(1)
-                .repository(path)
+                .repository("main", path, true)
                 .plugin("instant", 1, Map.of())
                 .install(path),
             Stage.CLEAN
@@ -107,7 +107,7 @@ final class TasksFeatureTests extends ConveyorTest {
             factory.schematicBuilder()
                 .name("project")
                 .version(1)
-                .repository(path)
+                .repository("main", path, true)
                 .plugin(
                     "instant",
                     1,
@@ -151,7 +151,7 @@ final class TasksFeatureTests extends ConveyorTest {
             factory.schematicBuilder()
                 .name("project")
                 .version(1)
-                .repository(path)
+                .repository("main", path, true)
                 .plugin(
                     "instant",
                     1,
@@ -193,7 +193,7 @@ final class TasksFeatureTests extends ConveyorTest {
             factory.schematicBuilder()
                 .name("project")
                 .version(1)
-                .repository(path)
+                .repository("main", path, true)
                 .plugin("dependencies", 1, Map.of())
                 .dependency("dependency", 1, DependencyScope.IMPLEMENTATION)
                 .install(path),
@@ -229,7 +229,7 @@ final class TasksFeatureTests extends ConveyorTest {
             factory.schematicBuilder()
                 .name("project")
                 .version(1)
-                .repository(path)
+                .repository("main", path, true)
                 .plugin("dependencies", 1, Map.of())
                 .dependency("dependency", 1, DependencyScope.IMPLEMENTATION)
                 .install(path),
@@ -260,7 +260,7 @@ final class TasksFeatureTests extends ConveyorTest {
             factory.schematicBuilder()
                 .name("project")
                 .version(1)
-                .repository(path)
+                .repository("main", path, true)
                 .plugin("dependencies", 1, Map.of("scope", "TEST"))
                 .dependency("test", 1, DependencyScope.TEST)
                 .install(path),
@@ -296,7 +296,7 @@ final class TasksFeatureTests extends ConveyorTest {
             factory.schematicBuilder()
                 .name("project")
                 .version(1)
-                .repository(path)
+                .repository("main", path, true)
                 .plugin("dependencies", 1, Map.of())
                 .dependency("dependency", 1, DependencyScope.IMPLEMENTATION)
                 .dependency("test", 1, DependencyScope.TEST)
@@ -340,7 +340,7 @@ final class TasksFeatureTests extends ConveyorTest {
             factory.schematicBuilder()
                 .name("project")
                 .version(1)
-                .repository(path)
+                .repository("main", path, true)
                 .plugin("dependencies", 1, Map.of())
                 .dependency("first", 1, DependencyScope.IMPLEMENTATION)
                 .dependency("second", 1, DependencyScope.IMPLEMENTATION)
@@ -399,7 +399,7 @@ final class TasksFeatureTests extends ConveyorTest {
             factory.schematicBuilder()
                 .name("project")
                 .version(1)
-                .repository(path)
+                .repository("main", path, true)
                 .plugin("dependencies", 1, Map.of())
                 .dependency("first", 1, DependencyScope.IMPLEMENTATION)
                 .dependency("second", 1, DependencyScope.IMPLEMENTATION)
@@ -430,7 +430,7 @@ final class TasksFeatureTests extends ConveyorTest {
         var schematicDefinition = factory.schematicBuilder()
             .name("project")
             .version(1)
-            .repository(path)
+            .repository("main", path, true)
             .plugin("product", 1, Map.of("path", product.toString()))
             .plugin("products", 1, Map.of())
             .install(path);

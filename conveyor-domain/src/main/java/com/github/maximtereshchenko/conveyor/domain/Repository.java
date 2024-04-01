@@ -2,30 +2,45 @@ package com.github.maximtereshchenko.conveyor.domain;
 
 import com.github.maximtereshchenko.conveyor.api.port.DefinitionReader;
 import com.github.maximtereshchenko.conveyor.api.port.ManualDefinition;
+import com.github.maximtereshchenko.conveyor.api.port.RepositoryDefinition;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 
 final class Repository {
 
-    private final Path path;
+    private final RepositoryDefinition repositoryDefinition;
     private final DefinitionReader definitionReader;
 
-    Repository(Path path, DefinitionReader definitionReader) {
-        this.path = path;
+    Repository(RepositoryDefinition repositoryDefinition, DefinitionReader definitionReader) {
+        this.repositoryDefinition = repositoryDefinition;
         this.definitionReader = definitionReader;
     }
 
-    ManualDefinition manualDefinition(String name, int version) {
-        return definitionReader.manualDefinition(path.resolve(fullName(name, version) + ".json"));
+    boolean isEnabled() {
+        return repositoryDefinition.enabled();
     }
 
-    Path path(String name, int version) {
-        var jar = path.resolve(fullName(name, version) + ".jar");
-        if (Files.exists(jar)) {
-            return jar;
+    String name() {
+        return repositoryDefinition.name();
+    }
+
+    Optional<ManualDefinition> manualDefinition(String name, int version) {
+        return path(fullName(name, version) + ".json")
+            .map(definitionReader::manualDefinition);
+    }
+
+    Optional<Path> path(String name, int version) {
+        return path(fullName(name, version) + ".jar");
+    }
+
+    private Optional<Path> path(String fileName) {
+        var path = repositoryDefinition.path().resolve(fileName);
+        if (Files.exists(path)) {
+            return Optional.of(path);
         }
-        throw new IllegalArgumentException(jar.toString());
+        return Optional.empty();
     }
 
     private String fullName(String name, int version) {

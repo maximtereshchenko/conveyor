@@ -40,7 +40,7 @@ final class Schematics {
                 new SchematicProducts(),
                 (schematicProducts, schematic) ->
                     schematic.construct(
-                        schematic.repository().orElseThrow(),
+                        schematic.repositories(),
                         schematicProducts,
                         stage(stage, schematic)
                     ),

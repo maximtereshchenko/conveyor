@@ -7,22 +7,22 @@ import java.util.Optional;
 final class EmptyTemplate implements Template {
 
     @Override
-    public Optional<Repository> repository() {
-        return Optional.empty();
+    public Repositories repositories() {
+        return new Repositories();
     }
 
     @Override
-    public Properties properties(Repository repository) {
+    public Properties properties(Repositories repositories) {
         return new Properties();
     }
 
     @Override
-    public Plugins plugins(Repository repository) {
+    public Plugins plugins(Repositories repositories) {
         return new Plugins();
     }
 
     @Override
-    public Dependencies dependencies(Repository repository, SchematicProducts schematicProducts) {
+    public Dependencies dependencies(Repositories repositories, SchematicProducts schematicProducts) {
         return new Dependencies();
     }
 

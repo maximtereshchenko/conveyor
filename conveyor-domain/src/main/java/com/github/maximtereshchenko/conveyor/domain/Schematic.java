@@ -70,28 +70,32 @@ final class Schematic extends Definition {
     }
 
     @Override
-    public Optional<Repository> repository() {
-        return schematicDefinition.repository()
-            .map(path -> new Repository(path, definitionReader()))
-            .or(template::repository);
+    public Repositories repositories() {
+        return Repositories.from(
+                schematicDefinition.repositories()
+                    .stream()
+                    .map(repositoryDefinition -> new Repository(repositoryDefinition, definitionReader()))
+                    .collect(new ImmutableSetCollector<>())
+            )
+            .override(template.repositories());
     }
 
     @Override
-    public Properties properties(Repository repository) {
+    public Properties properties(Repositories repositories) {
         return properties(schematicDefinition.properties())
-            .override(template.properties(repository));
+            .override(template.properties(repositories));
     }
 
     @Override
-    public Plugins plugins(Repository repository) {
+    public Plugins plugins(Repositories repositories) {
         return plugins(schematicDefinition.plugins())
-            .override(template.plugins(repository));
+            .override(template.plugins(repositories));
     }
 
     @Override
-    public Dependencies dependencies(Repository repository, SchematicProducts schematicProducts) {
+    public Dependencies dependencies(Repositories repositories, SchematicProducts schematicProducts) {
         return dependencies(schematicDefinition.dependencies(), schematicProducts)
-            .override(template.dependencies(repository, schematicProducts));
+            .override(template.dependencies(repositories, schematicProducts));
     }
 
     @Override
@@ -128,7 +132,7 @@ final class Schematic extends Definition {
     ImmutableList<Schematic> inclusions() {
         return schematicDefinition.inclusions()
             .stream()
-            .map(path -> Schematic.from(definitionReader(), this, path))
+            .map(inclusion -> Schematic.from(definitionReader(), this, inclusion))
             .collect(new ImmutableListCollector<>());
     }
 
@@ -150,15 +154,15 @@ final class Schematic extends Definition {
             );
     }
 
-    SchematicProducts construct(Repository repository, SchematicProducts schematicProducts, Stage stage) {
+    SchematicProducts construct(Repositories repositories, SchematicProducts schematicProducts, Stage stage) {
         return schematicProducts.with(
             schematicDefinition.name(),
-            plugins(repository)
+            plugins(repositories)
                 .executeTasks(
                     new Products().with(path, ProductType.SCHEMATIC_DEFINITION),
-                    repository,
-                    properties(repository).withDefaults(schematicDefinition.name(), path),
-                    dependencies(repository, schematicProducts),
+                    repositories,
+                    properties(repositories).withDefaults(schematicDefinition.name(), path),
+                    dependencies(repositories, schematicProducts),
                     stage
                 )
         );
