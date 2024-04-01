@@ -1,4 +1,5 @@
 module com.github.maximtereshchenko.conveyor.domain.test {
+    requires java.compiler;
     requires com.github.maximtereshchenko.conveyor.api;
     requires com.github.maximtereshchenko.conveyor.plugin.api;
     requires com.github.maximtereshchenko.conveyor.domain;
