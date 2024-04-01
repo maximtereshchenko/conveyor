@@ -39,10 +39,6 @@ final class ManualBuilder {
         return template(new NoExplicitlyDefinedTemplate());
     }
 
-    ManualBuilder template(String name, int version) {
-        return template(new ManualTemplateDefinition(name, version));
-    }
-
     ManualBuilder name(String name) {
         return new ManualBuilder(
             gsonAdapter,
@@ -124,15 +120,13 @@ final class ManualBuilder {
         );
     }
 
-    Path install(Path directory) {
+    void install(Path directory) {
         try {
-            var path = Files.createDirectories(directory)
-                .resolve("%s-%d.json".formatted(manualDefinition.name(), manualDefinition.version()));
             gsonAdapter.write(
-                path,
+                Files.createDirectories(directory)
+                    .resolve("%s-%d.json".formatted(manualDefinition.name(), manualDefinition.version())),
                 manualDefinition
             );
-            return path;
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
