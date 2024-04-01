@@ -1,7 +1,6 @@
 package com.github.maximtereshchenko.conveyor.domain.test;
 
 import com.github.maximtereshchenko.conveyor.api.ConveyorModule;
-import com.github.maximtereshchenko.conveyor.common.api.ProductType;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -174,24 +173,30 @@ final class PropertiesFeatureTests extends ConveyorTest {
     ) {
         factory.repositoryBuilder()
             .superManual()
-            .manual(builder -> builder.name("construction-directory").version(1))
-            .jar("construction-directory", builder -> builder.name("construction-directory").version(1))
+            .manual(builder -> builder.name("properties").version(1))
+            .jar("properties", builder -> builder.name("properties").version(1))
             .install(path);
         var project = path.resolve("project");
 
-        var projectBuildFiles = module.construct(
+        module.construct(
             factory.schematicBuilder()
                 .name("project")
                 .version(1)
                 .repository(path)
                 .property("conveyor.discovery.directory", project.toString())
-                .plugin("construction-directory", 1, Map.of())
+                .plugin("properties", 1, Map.of())
                 .install(path),
             Stage.COMPILE
         );
 
-        assertThat(projectBuildFiles.byType("project", ProductType.MODULE))
-            .containsExactly(defaultConstructionDirectory(project));
+        assertThat(defaultConstructionDirectory(project).resolve("properties"))
+            .content()
+            .hasLineCount(3)
+            .contains(
+                "conveyor.schematic.name=project",
+                "conveyor.discovery.directory=" + project,
+                "conveyor.construction.directory=" + defaultConstructionDirectory(project)
+            );
     }
 
     @Test
@@ -202,23 +207,30 @@ final class PropertiesFeatureTests extends ConveyorTest {
     ) {
         factory.repositoryBuilder()
             .superManual()
-            .manual(builder -> builder.name("construction-directory").version(1))
-            .jar("construction-directory", builder -> builder.name("construction-directory").version(1))
+            .manual(builder -> builder.name("properties").version(1))
+            .jar("properties", builder -> builder.name("properties").version(1))
             .install(path);
 
-        var projectBuildFiles = module.construct(
+        module.construct(
             factory.schematicBuilder()
                 .name("project")
                 .version(1)
                 .repository(path)
                 .property("conveyor.discovery.directory", "./temp/../project")
-                .plugin("construction-directory", 1, Map.of())
+                .plugin("properties", 1, Map.of())
                 .install(path),
             Stage.COMPILE
         );
 
-        assertThat(projectBuildFiles.byType("project", ProductType.MODULE))
-            .containsExactly(defaultConstructionDirectory(path.resolve("project")));
+        var project = path.resolve("project");
+        assertThat(defaultConstructionDirectory(project).resolve("properties"))
+            .content()
+            .hasLineCount(3)
+            .contains(
+                "conveyor.schematic.name=project",
+                "conveyor.discovery.directory=" + project,
+                "conveyor.construction.directory=" + defaultConstructionDirectory(project)
+            );
     }
 
     @Test
@@ -229,24 +241,30 @@ final class PropertiesFeatureTests extends ConveyorTest {
     ) {
         factory.repositoryBuilder()
             .superManual()
-            .manual(builder -> builder.name("construction-directory").version(1))
-            .jar("construction-directory", builder -> builder.name("construction-directory").version(1))
+            .manual(builder -> builder.name("properties").version(1))
+            .jar("properties", builder -> builder.name("properties").version(1))
             .install(path);
         var construction = path.resolve("construction");
 
-        var projectBuildFiles = module.construct(
+        module.construct(
             factory.schematicBuilder()
                 .name("project")
                 .version(1)
                 .repository(path)
                 .property("conveyor.construction.directory", construction.toString())
-                .plugin("construction-directory", 1, Map.of())
+                .plugin("properties", 1, Map.of())
                 .install(path),
             Stage.COMPILE
         );
 
-        assertThat(projectBuildFiles.byType("project", ProductType.MODULE))
-            .containsExactly(construction);
+        assertThat(construction.resolve("properties"))
+            .content()
+            .hasLineCount(3)
+            .contains(
+                "conveyor.schematic.name=project",
+                "conveyor.discovery.directory=" + path,
+                "conveyor.construction.directory=" + construction
+            );
     }
 
     @Test
@@ -257,23 +275,30 @@ final class PropertiesFeatureTests extends ConveyorTest {
     ) {
         factory.repositoryBuilder()
             .superManual()
-            .manual(builder -> builder.name("construction-directory").version(1))
-            .jar("construction-directory", builder -> builder.name("construction-directory").version(1))
+            .manual(builder -> builder.name("properties").version(1))
+            .jar("properties", builder -> builder.name("properties").version(1))
             .install(path);
 
-        var projectBuildFiles = module.construct(
+        module.construct(
             factory.schematicBuilder()
                 .name("project")
                 .version(1)
                 .repository(path)
                 .property("conveyor.construction.directory", "./temp/../construction")
-                .plugin("construction-directory", 1, Map.of())
+                .plugin("properties", 1, Map.of())
                 .install(path),
             Stage.COMPILE
         );
 
-        assertThat(projectBuildFiles.byType("project", ProductType.MODULE))
-            .containsExactly(path.resolve("construction"));
+        var construction = path.resolve("construction");
+        assertThat(construction.resolve("properties"))
+            .content()
+            .hasLineCount(3)
+            .contains(
+                "conveyor.schematic.name=project",
+                "conveyor.discovery.directory=" + path,
+                "conveyor.construction.directory=" + construction
+            );
     }
 
     @Test

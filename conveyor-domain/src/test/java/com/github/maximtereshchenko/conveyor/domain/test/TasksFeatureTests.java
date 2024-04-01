@@ -2,7 +2,6 @@ package com.github.maximtereshchenko.conveyor.domain.test;
 
 import com.github.maximtereshchenko.conveyor.api.ConveyorModule;
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
-import com.github.maximtereshchenko.conveyor.common.api.ProductType;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -25,21 +24,21 @@ final class TasksFeatureTests extends ConveyorTest {
     ) {
         factory.repositoryBuilder()
             .superManual()
-            .manual(builder -> builder.name("construction-directory").version(1))
-            .jar("construction-directory", builder -> builder.name("construction-directory").version(1))
+            .manual(builder -> builder.name("instant").version(1))
+            .jar("instant", builder -> builder.name("instant").version(1))
             .install(path);
 
-        var schematicProducts = module.construct(
+        module.construct(
             factory.schematicBuilder()
                 .name("project")
                 .version(1)
                 .repository(path)
-                .plugin("construction-directory", 1, Map.of())
+                .plugin("instant", 1, Map.of("instant", "COMPILE-RUN"))
                 .install(path),
             Stage.TEST
         );
 
-        assertThat(schematicProducts.byType("project", ProductType.MODULE)).hasSize(1);
+        assertThat(defaultConstructionDirectory(path).resolve("instant")).exists();
     }
 
     @Test
@@ -50,21 +49,21 @@ final class TasksFeatureTests extends ConveyorTest {
     ) {
         factory.repositoryBuilder()
             .superManual()
-            .manual(builder -> builder.name("construction-directory").version(1))
-            .jar("construction-directory", builder -> builder.name("construction-directory").version(1))
+            .manual(builder -> builder.name("instant").version(1))
+            .jar("instant", builder -> builder.name("instant").version(1))
             .install(path);
 
-        var schematicProducts = module.construct(
+        module.construct(
             factory.schematicBuilder()
                 .name("project")
                 .version(1)
                 .repository(path)
-                .plugin("construction-directory", 1, Map.of())
+                .plugin("instant", 1, Map.of("instant", "COMPILE-RUN"))
                 .install(path),
             Stage.COMPILE
         );
 
-        assertThat(schematicProducts.byType("project", ProductType.MODULE)).hasSize(1);
+        assertThat(defaultConstructionDirectory(path).resolve("instant")).exists();
     }
 
     @Test
@@ -75,21 +74,21 @@ final class TasksFeatureTests extends ConveyorTest {
     ) {
         factory.repositoryBuilder()
             .superManual()
-            .manual(builder -> builder.name("construction-directory").version(1))
-            .jar("construction-directory", builder -> builder.name("construction-directory").version(1))
+            .manual(builder -> builder.name("instant").version(1))
+            .jar("instant", builder -> builder.name("instant").version(1))
             .install(path);
 
-        var schematicProducts = module.construct(
+        module.construct(
             factory.schematicBuilder()
                 .name("project")
                 .version(1)
                 .repository(path)
-                .plugin("construction-directory", 1, Map.of())
+                .plugin("instant", 1, Map.of())
                 .install(path),
             Stage.CLEAN
         );
 
-        assertThat(schematicProducts.byType("project", ProductType.MODULE)).isEmpty();
+        assertThat(defaultConstructionDirectory(path).resolve("instant")).doesNotExist();
     }
 
     @Test
@@ -422,27 +421,28 @@ final class TasksFeatureTests extends ConveyorTest {
     ) {
         factory.repositoryBuilder()
             .superManual()
-            .manual(builder -> builder.name("construction-directory").version(1))
-            .jar("construction-directory", builder -> builder.name("construction-directory").version(1))
             .manual(builder -> builder.name("products").version(1))
             .jar("products", builder -> builder.name("products").version(1))
+            .manual(builder -> builder.name("product").version(1))
+            .jar("product", builder -> builder.name("product").version(1))
             .install(path);
+        var product = path.resolve("product");
         var schematicDefinition = factory.schematicBuilder()
             .name("project")
             .version(1)
             .repository(path)
-            .plugin("construction-directory", 1, Map.of())
+            .plugin("product", 1, Map.of("path", product.toString()))
             .plugin("products", 1, Map.of())
             .install(path);
 
-        module.construct(schematicDefinition, Stage.PUBLISH);
+        module.construct(schematicDefinition, Stage.COMPILE);
 
         assertThat(defaultConstructionDirectory(path).resolve("products"))
             .content()
             .hasLineCount(2)
             .contains(
                 "SCHEMATIC_DEFINITION=" + schematicDefinition,
-                "MODULE=" + defaultConstructionDirectory(path)
+                "MODULE=" + product
             );
     }
 
