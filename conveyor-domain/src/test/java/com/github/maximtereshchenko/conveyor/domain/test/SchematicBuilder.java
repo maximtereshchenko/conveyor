@@ -26,7 +26,7 @@ final class SchematicBuilder {
             new SchematicDefinition(
                 "",
                 0,
-                new NoExplicitTemplate(),
+                new NoExplicitlyDefinedTemplate(),
                 List.of(),
                 Optional.empty(),
                 Map.of(),
@@ -68,20 +68,12 @@ final class SchematicBuilder {
         );
     }
 
+    SchematicBuilder template(Path path) {
+        return template(new SchematicPathTemplateDefinition(path));
+    }
+
     SchematicBuilder template(String name, int version) {
-        return new SchematicBuilder(
-            gsonAdapter,
-            new SchematicDefinition(
-                schematicDefinition.name(),
-                schematicDefinition.version(),
-                new ManualTemplateDefinition(name, version),
-                schematicDefinition.inclusions(),
-                schematicDefinition.repository(),
-                schematicDefinition.properties(),
-                schematicDefinition.plugins(),
-                schematicDefinition.dependencies()
-            )
-        );
+        return template(new ManualTemplateDefinition(name, version));
     }
 
     SchematicBuilder repository(Path path) {
@@ -179,6 +171,22 @@ final class SchematicBuilder {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
+
+    private SchematicBuilder template(TemplateForSchematicDefinition templateDefinition) {
+        return new SchematicBuilder(
+            gsonAdapter,
+            new SchematicDefinition(
+                schematicDefinition.name(),
+                schematicDefinition.version(),
+                templateDefinition,
+                schematicDefinition.inclusions(),
+                schematicDefinition.repository(),
+                schematicDefinition.properties(),
+                schematicDefinition.plugins(),
+                schematicDefinition.dependencies()
+            )
+        );
     }
 
     private SchematicBuilder dependency(DependencyDefinition dependencyDefinition) {

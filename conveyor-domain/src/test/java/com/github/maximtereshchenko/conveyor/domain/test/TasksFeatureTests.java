@@ -435,7 +435,7 @@ final class TasksFeatureTests extends ConveyorTest {
             .plugin("products", 1, Map.of())
             .install(path);
 
-        module.construct(schematicDefinition, Stage.COMPILE);
+        module.construct(schematicDefinition, Stage.PUBLISH);
 
         assertThat(defaultConstructionDirectory(path).resolve("products"))
             .content()

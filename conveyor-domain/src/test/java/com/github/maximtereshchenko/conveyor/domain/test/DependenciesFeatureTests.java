@@ -168,7 +168,7 @@ final class DependenciesFeatureTests extends ConveyorTest {
                         .install(second)
                 )
                 .install(path),
-            Stage.COMPILE
+            Stage.ARCHIVE
         );
 
         assertThat(defaultConstructionDirectory(second).resolve("dependencies"))

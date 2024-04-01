@@ -13,4 +13,8 @@ interface Template {
     Plugins plugins(Repository repository);
 
     Dependencies dependencies(Repository repository, SchematicProducts schematicProducts);
+
+    Optional<Schematic> root();
+
+    boolean inheritsFrom(Schematic schematic);
 }

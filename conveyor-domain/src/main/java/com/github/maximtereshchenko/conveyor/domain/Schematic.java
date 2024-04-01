@@ -6,7 +6,9 @@ import com.github.maximtereshchenko.conveyor.common.api.ProductType;
 import com.github.maximtereshchenko.conveyor.common.api.Products;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -16,7 +18,7 @@ final class Schematic extends Definition {
     private final SchematicDefinition schematicDefinition;
     private final Path path;
 
-    private Schematic(
+    Schematic(
         DefinitionReader definitionReader,
         Template template,
         SchematicDefinition schematicDefinition,
@@ -34,7 +36,8 @@ final class Schematic extends Definition {
             templateDefinition -> switch (templateDefinition) {
                 case ManualTemplateDefinition definition ->
                     new Manual(definitionReader, definition.name(), definition.version());
-                case NoExplicitTemplate ignored -> Manual.superManual(definitionReader);
+                case SchematicPathTemplateDefinition definition -> from(definitionReader, definition.path());
+                case NoExplicitlyDefinedTemplate ignored -> defaultTemplate(definitionReader, path);
             },
             path
         );
@@ -44,9 +47,17 @@ final class Schematic extends Definition {
         return from(definitionReader, templateDefinition -> template, path);
     }
 
+    private static Template defaultTemplate(DefinitionReader definitionReader, Path path) {
+        var defaultSchematicTemplatePath = path.getParent().getParent().resolve("conveyor.json");
+        if (Files.exists(defaultSchematicTemplatePath)) {
+            return from(definitionReader, defaultSchematicTemplatePath);
+        }
+        return Manual.superManual(definitionReader);
+    }
+
     private static Schematic from(
         DefinitionReader definitionReader,
-        Function<TemplateDefinition, Template> templateFunction,
+        Function<TemplateForSchematicDefinition, Template> templateFunction,
         Path path
     ) {
         var schematicDefinition = definitionReader.schematicDefinition(path);
@@ -83,6 +94,37 @@ final class Schematic extends Definition {
             .override(template.dependencies(repository, schematicProducts));
     }
 
+    @Override
+    public Optional<Schematic> root() {
+        return template.root().or(() -> Optional.of(this));
+    }
+
+    @Override
+    public boolean inheritsFrom(Schematic schematic) {
+        return template.equals(schematic) || template.inheritsFrom(schematic);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(path);
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+        if (object == null || getClass() != object.getClass()) {
+            return false;
+        }
+        var schematic = (Schematic) object;
+        return Objects.equals(path, schematic.path);
+    }
+
+    String name() {
+        return schematicDefinition.name();
+    }
+
     ImmutableList<Schematic> inclusions() {
         return schematicDefinition.inclusions()
             .stream()
@@ -90,8 +132,22 @@ final class Schematic extends Definition {
             .collect(new ImmutableListCollector<>());
     }
 
-    boolean dependsOn(Schematic schematic) {
-        return template.equals(schematic) || hasSchematicDependency(schematic.schematicDefinition.name());
+    boolean requires(Schematic schematic, Schematics schematics) {
+        return template.equals(schematic) ||
+               template.inheritsFrom(schematic) ||
+               dependsOn(schematic, schematics);
+    }
+
+    boolean dependsOn(Schematic schematic, Schematics schematics) {
+        return schematicDefinition.dependencies()
+            .stream()
+            .map(this::schematicDependencyDefinition)
+            .flatMap(Optional::stream)
+            .map(SchematicDependencyDefinition::schematic)
+            .anyMatch(name ->
+                name.equals(schematic.name()) ||
+                schematics.findByName(name).dependsOn(schematic, schematics)
+            );
     }
 
     SchematicProducts construct(Repository repository, SchematicProducts schematicProducts, Stage stage) {
@@ -108,14 +164,19 @@ final class Schematic extends Definition {
         );
     }
 
-    private boolean hasSchematicDependency(String name) {
-        return schematicDefinition.dependencies()
-            .stream()
-            .anyMatch(dependencyDefinition ->
-                switch (dependencyDefinition) {
-                    case ArtifactDependencyDefinition ignored -> false;
-                    case SchematicDependencyDefinition definition -> definition.schematic().equals(name);
-                }
-            );
+    boolean contains(Schematic schematic) {
+        return equals(schematic) ||
+               inclusions()
+                   .stream()
+                   .anyMatch(inclusion -> inclusion.contains(schematic));
+    }
+
+    private Optional<SchematicDependencyDefinition> schematicDependencyDefinition(
+        DependencyDefinition dependencyDefinition
+    ) {
+        if (dependencyDefinition instanceof SchematicDependencyDefinition definition) {
+            return Optional.of(definition);
+        }
+        return Optional.empty();
     }
 }

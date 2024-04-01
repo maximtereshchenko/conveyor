@@ -46,15 +46,25 @@ final class Manual extends Definition {
             .override(template(manualDefinition.template()).dependencies(repository, schematicProducts));
     }
 
+    @Override
+    public Optional<Schematic> root() {
+        return Optional.empty();
+    }
+
+    @Override
+    public boolean inheritsFrom(Schematic schematic) {
+        return false;
+    }
+
     private ManualDefinition manualDefinition(Repository repository) {
         return repository.manualDefinition(name, version);
     }
 
-    private Template template(TemplateDefinition templateDefinition) {
+    private Template template(TemplateForManualDefinition templateDefinition) {
         return switch (templateDefinition) {
             case ManualTemplateDefinition definition ->
                 new Manual(definitionReader(), definition.name(), definition.version());
-            case NoExplicitTemplate ignored -> new EmptyTemplate();
+            case NoExplicitlyDefinedTemplate ignored -> new EmptyTemplate();
         };
     }
 }
