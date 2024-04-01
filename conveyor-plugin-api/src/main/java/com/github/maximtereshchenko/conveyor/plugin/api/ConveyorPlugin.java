@@ -4,5 +4,5 @@ import java.util.Collection;
 
 public interface ConveyorPlugin {
 
-    Collection<ConveyorTask> tasks(ConveyorPluginConfiguration configuration);
+    Collection<ConveyorTaskBinding> bindings(ConveyorPluginConfiguration configuration);
 }
