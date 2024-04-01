@@ -82,7 +82,7 @@ public final class ConveyorFacade implements ConveyorModule {
         ProjectDefinition projectDefinition
     ) {
         return conveyorPlugin.bindings(
-            new ProjectConveyorPluginAdapter(projectDefinitionPath.getParent(), repository, projectDefinition),
+            new ProjectConveyorPluginAdapter(projectDefinitionPath, repository, projectDefinition),
             pluginConfiguration(projectDefinition, conveyorPlugin.name())
         );
     }

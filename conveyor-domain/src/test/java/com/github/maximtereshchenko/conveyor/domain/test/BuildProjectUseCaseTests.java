@@ -51,7 +51,7 @@ final class BuildProjectUseCaseTests {
             Stage.COMPILE
         );
 
-        assertThat(path).isDirectoryContaining("glob:**plugin-1-configuration");
+        assertThat(path).isDirectoryContaining("glob:**plugin-1-run");
     }
 
     @Test
@@ -62,7 +62,7 @@ final class BuildProjectUseCaseTests {
             Stage.CLEAN
         );
 
-        assertThat(path).isDirectoryNotContaining("glob:**plugin-1-configuration");
+        assertThat(path).isDirectoryNotContaining("glob:**plugin-1-run");
     }
 
     @Test
@@ -85,8 +85,8 @@ final class BuildProjectUseCaseTests {
             Stage.COMPILE
         );
 
-        assertThat(path).isDirectoryContaining("glob:**first-plugin-1-configuration")
-            .isDirectoryContaining("glob:**second-plugin-1-configuration")
+        assertThat(path).isDirectoryContaining("glob:**first-plugin-1-run")
+            .isDirectoryContaining("glob:**second-plugin-1-run")
             .isDirectoryContaining("glob:**dependency-2")
             .isDirectoryNotContaining("glob:**dependency-1");
     }
@@ -111,7 +111,7 @@ final class BuildProjectUseCaseTests {
             Stage.COMPILE
         );
 
-        assertThat(path).isDirectoryContaining("glob:**plugin-1-configuration")
+        assertThat(path).isDirectoryContaining("glob:**plugin-1-run")
             .isDirectoryContaining("glob:**dependency-1")
             .isDirectoryContaining("glob:**transitive-1");
     }
@@ -154,8 +154,8 @@ final class BuildProjectUseCaseTests {
 
         module.build(conveyorJson, Stage.COMPILE);
 
-        assertThat(path).isDirectoryContaining("glob:**first-plugin-1-configuration")
-            .isDirectoryContaining("glob:**second-plugin-1-configuration")
+        assertThat(path).isDirectoryContaining("glob:**first-plugin-1-run")
+            .isDirectoryContaining("glob:**second-plugin-1-run")
             .isDirectoryContaining("glob:**dependency-1")
             .isDirectoryContaining("glob:**common-dependency-2");
     }
@@ -189,7 +189,7 @@ final class BuildProjectUseCaseTests {
             Stage.COMPILE
         );
 
-        assertThat(path).isDirectoryContaining("glob:**plugin-1-configuration")
+        assertThat(path).isDirectoryContaining("glob:**plugin-1-run")
             .isDirectoryContaining("glob:**will-remove-dependency-1")
             .isDirectoryContaining("glob:**can-affect-versions-2")
             .isDirectoryContaining("glob:**should-not-be-updated-1")
@@ -283,6 +283,7 @@ final class BuildProjectUseCaseTests {
         module.build(
             conveyorJson(
                 path,
+                Map.of(),
                 List.of(new GeneratedConveyorPlugin("plugin").install(path)),
                 Map.of(
                     implementation, DependencyScope.IMPLEMENTATION,
@@ -298,6 +299,44 @@ final class BuildProjectUseCaseTests {
             .containsExactly(test.jar());
     }
 
+    @Test
+    void givenProjectDirectoryProperty_whenBuild_thenProjectBuiltInSpecifiedDirectory(@TempDir Path path)
+        throws Exception {
+        var project = Files.createDirectory(path.resolve("project"));
+
+        module.build(
+            conveyorJson(
+                path,
+                Map.of("conveyor.project.directory", project.toString()),
+                new GeneratedConveyorPlugin("plugin").install(path)
+            ),
+            Stage.COMPILE
+        );
+
+        assertThat(project).isDirectoryContaining("glob:**plugin-1-run");
+    }
+
+    @Test
+    void givenRelativeProjectDirectoryProperty_whenBuild_thenProjectDirectoryIsRelativeToWorkingDirectory(
+        @TempDir Path path
+    ) throws Exception {
+        var project = Files.createDirectory(path.resolve("project"));
+
+        module.build(
+            conveyorJson(
+                path,
+                Map.of(
+                    "conveyor.project.directory",
+                    Paths.get("").toAbsolutePath().relativize(project).toString()
+                ),
+                new GeneratedConveyorPlugin("plugin").install(path)
+            ),
+            Stage.COMPILE
+        );
+
+        assertThat(project).isDirectoryContaining("glob:**plugin-1-run");
+    }
+
     private Collection<Path> modulePath(Path path) throws IOException {
         return Files.readAllLines(path)
             .stream()
@@ -310,17 +349,22 @@ final class BuildProjectUseCaseTests {
     }
 
     private Path conveyorJson(Path path, GeneratedArtifactDefinition... plugins) {
-        return conveyorJson(path, List.of(plugins), Map.of());
+        return conveyorJson(path, Map.of(), List.of(plugins), Map.of());
+    }
+
+    private Path conveyorJson(Path path, Map<String, String> properties, GeneratedArtifactDefinition... plugins) {
+        return conveyorJson(path, properties, List.of(plugins), Map.of());
     }
 
     private Path conveyorJson(
         Path path,
+        Map<String, String> properties,
         Collection<GeneratedArtifactDefinition> plugins,
         Map<GeneratedArtifactDefinition, DependencyScope> dependencies
     ) {
         return conveyorJson(
             path,
-            Map.of(),
+            properties,
             plugins.stream()
                 .map(definition -> new PluginDefinition(definition.name(), definition.version(), Map.of()))
                 .toList(),

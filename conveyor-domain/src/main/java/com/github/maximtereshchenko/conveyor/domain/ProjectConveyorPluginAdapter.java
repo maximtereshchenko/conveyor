@@ -4,33 +4,42 @@ import com.github.maximtereshchenko.conveyor.api.port.ProjectDefinition;
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 import com.github.maximtereshchenko.conveyor.plugin.api.Project;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 final class ProjectConveyorPluginAdapter implements Project {
 
-    private final Path projectDirectory;
+    private final Path projectDefinitionPath;
     private final DirectoryRepository repository;
     private final ProjectDefinition projectDefinition;
 
     ProjectConveyorPluginAdapter(
-        Path projectDirectory,
+        Path projectDefinitionPath,
         DirectoryRepository repository,
         ProjectDefinition projectDefinition
     ) {
-        this.projectDirectory = projectDirectory;
+        this.projectDefinitionPath = projectDefinitionPath;
         this.repository = repository;
         this.projectDefinition = projectDefinition;
     }
 
     @Override
     public Path projectDirectory() {
-        return projectDirectory;
+        var projectDirectory = projectDefinition.properties().get("conveyor.project.directory");
+        if (projectDirectory == null) {
+            return projectDefinitionPath.getParent();
+        }
+        return Paths.get(projectDirectory);
     }
 
     @Override
     public Path buildDirectory() {
-        return projectDirectory;
+        return projectDirectory()
+            .resolve(
+                projectDefinition.properties()
+                    .getOrDefault("conveyor.project.build.directory", ".conveyor")
+            );
     }
 
     @Override
