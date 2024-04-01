@@ -5,6 +5,7 @@ import com.github.maximtereshchenko.conveyor.api.port.DependencyDefinition;
 import com.github.maximtereshchenko.conveyor.api.port.PluginDefinition;
 import com.github.maximtereshchenko.conveyor.api.port.ProjectDefinition;
 import java.util.Collection;
+import java.util.Map;
 
 final class SuperParent implements Parent {
 
@@ -26,6 +27,11 @@ final class SuperParent implements Parent {
     @Override
     public Collection<DependencyDefinition> dependencies() {
         return projectDefinition.dependencies();
+    }
+
+    @Override
+    public Map<String, String> properties() {
+        return projectDefinition.properties();
     }
 
     private static final class SuperParentArtifactDefinition implements ArtifactDefinition {

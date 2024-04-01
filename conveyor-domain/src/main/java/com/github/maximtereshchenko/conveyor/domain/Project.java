@@ -116,19 +116,25 @@ final class Project {
     private Collection<ConveyorTaskBinding> bindings(ConveyorPlugin conveyorPlugin) {
         return conveyorPlugin.bindings(
             new ProjectConveyorPluginAdapter(projectDefinitionPath, repository, this),
-            pluginConfiguration(projectDefinition, conveyorPlugin.name())
+            pluginConfiguration(conveyorPlugin.name())
         );
     }
 
-    private Map<String, String> pluginConfiguration(ProjectDefinition projectDefinition, String name) {
+    private Map<String, String> pluginConfiguration(String name) {
         return plugins()
             .stream()
             .filter(pluginDefinition -> pluginDefinition.name().equals(name))
             .map(PluginDefinition::configuration)
             .map(Map::entrySet)
             .flatMap(Collection::stream)
-            .map(entry -> Map.entry(entry.getKey(), interpolate(entry.getValue(), projectDefinition.properties())))
+            .map(entry -> Map.entry(entry.getKey(), interpolate(entry.getValue(), properties())))
             .collect(Collectors.collectingAndThen(Collectors.toMap(Entry::getKey, Entry::getValue), Map::copyOf));
+    }
+
+    private Map<String, String> properties() {
+        var copy = new HashMap<>(parent.properties());
+        copy.putAll(projectDefinition.properties());
+        return Map.copyOf(copy);
     }
 
     private String interpolate(String value, Map<String, String> properties) {
@@ -137,7 +143,7 @@ final class Project {
             .reduce(
                 value,
                 (current, matchResult) ->
-                    current.replace(matchResult.group(), properties.get(matchResult.group(1))),
+                    current.replace(matchResult.group(), properties.getOrDefault(matchResult.group(1), "")),
                 (first, second) -> first
             );
     }
