@@ -35,16 +35,14 @@ final class ModelFactory {
         PartialSchematicHierarchy partialSchematicHierarchy,
         Repositories repositories
     ) {
-        var otherManualTemplateModel = partialSchematicHierarchy.template();
-        return new FullSchematicHierarchy(
-            manualHierarchy(
-                otherManualTemplateModel.group(),
-                otherManualTemplateModel.name(),
-                otherManualTemplateModel.version(),
-                repositories
-            ),
-            partialSchematicHierarchy
-        );
+        return switch (partialSchematicHierarchy.template()) {
+            case NoTemplateModel ignored -> new FullSchematicHierarchy(partialSchematicHierarchy);
+            case OtherManualTemplateModel model -> new FullSchematicHierarchy(
+                manualHierarchy(model.group(), model.name(), model.version(), repositories),
+                partialSchematicHierarchy
+            );
+            case OtherSchematicTemplateModel ignored -> throw new IllegalArgumentException();
+        };
     }
 
     FullSchematicHierarchy fullSchematicHierarchy(Path path, Repositories repositories) {
@@ -102,6 +100,7 @@ final class ModelFactory {
     private Path root(Path path) {
         return switch (standaloneSchematicModel(path).template()) {
             case OtherManualTemplateModel ignored -> path;
+            case NoTemplateModel ignored -> path;
             case OtherSchematicTemplateModel model -> root(model.path());
         };
     }
@@ -131,6 +130,7 @@ final class ModelFactory {
     ) {
         return switch (schematicTemplateModel) {
             case OtherManualTemplateModel ignored -> partialSchematicHierarchy;
+            case NoTemplateModel ignored -> partialSchematicHierarchy;
             case OtherSchematicTemplateModel model ->
                 partialSchematicHierarchy(model.path(), partialSchematicHierarchy::inheritedFrom);
         };

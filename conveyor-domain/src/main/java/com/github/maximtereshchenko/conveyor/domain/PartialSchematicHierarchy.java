@@ -5,7 +5,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 final class PartialSchematicHierarchy
-    extends SchematicHierarchy<OtherManualTemplateModel, SchematicTemplateModel> {
+    extends SchematicHierarchy<SchematicTemplateModel, SchematicTemplateModel> {
 
     private PartialSchematicHierarchy(
         LinkedHashSet<SchematicModel<? extends SchematicTemplateModel>> models
@@ -18,12 +18,8 @@ final class PartialSchematicHierarchy
     }
 
     @Override
-    public OtherManualTemplateModel template() {
-        return switch (models().getFirst().template()) {
-            case OtherManualTemplateModel model -> model;
-            case ManualTemplateModel ignored -> throw new IllegalArgumentException();
-            case OtherSchematicTemplateModel ignored -> throw new IllegalArgumentException();
-        };
+    public SchematicTemplateModel template() {
+        return models().getFirst().template();
     }
 
     PartialSchematicHierarchy inheritedFrom(StandaloneSchematicModel standaloneSchematicModel) {

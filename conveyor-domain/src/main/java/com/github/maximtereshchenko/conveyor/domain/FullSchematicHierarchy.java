@@ -19,6 +19,10 @@ final class FullSchematicHierarchy extends SchematicHierarchy<NoTemplateModel, T
         );
     }
 
+    FullSchematicHierarchy(PartialSchematicHierarchy partialSchematicHierarchy) {
+        super(new LinkedHashSet<>(List.of(partialSchematicHierarchy)));
+    }
+
     @Override
     public NoTemplateModel template() {
         return new NoTemplateModel();

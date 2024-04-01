@@ -1,6 +1,5 @@
-package com.github.maximtereshchenko.conveyor.gson;
+package com.github.maximtereshchenko.conveyor.jackson;
 
-import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -22,7 +21,7 @@ final class RepositoryDefinitionDeserializer extends StdDeserializer<RepositoryD
 
     @Override
     public RepositoryDefinition deserialize(JsonParser jsonParser, DeserializationContext context)
-        throws IOException, JacksonException {
+        throws IOException {
         JsonNode jsonNode = jsonParser.readValueAsTree();
         var name = jsonNode.get("name").asText();
         var enabled = enabled(jsonNode);

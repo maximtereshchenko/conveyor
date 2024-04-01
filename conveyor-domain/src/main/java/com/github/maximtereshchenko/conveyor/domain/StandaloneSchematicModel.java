@@ -136,10 +136,6 @@ final class StandaloneSchematicModel
         if (Files.exists(defaultSchematicTemplate)) {
             return new OtherSchematicTemplateModel(defaultSchematicTemplate);
         }
-        return new OtherManualTemplateModel(
-            "com.github.maximtereshchenko.conveyor",
-            "super-manual",
-            new SemanticVersion("1.0.0")
-        );
+        return new NoTemplateModel();
     }
 }

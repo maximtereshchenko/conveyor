@@ -22,7 +22,6 @@ final class InheritanceFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("template")
@@ -66,7 +65,6 @@ final class InheritanceFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("template")
@@ -103,7 +101,6 @@ final class InheritanceFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("template")
@@ -146,7 +143,6 @@ final class InheritanceFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("template")
@@ -193,7 +189,6 @@ final class InheritanceFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("properties")
@@ -238,7 +233,6 @@ final class InheritanceFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("instant")
@@ -272,7 +266,6 @@ final class InheritanceFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("dependency")
@@ -316,7 +309,6 @@ final class InheritanceFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("dependency")
@@ -361,7 +353,6 @@ final class InheritanceFeatureTests extends ConveyorTest {
     ) {
         var repository = path.resolve("repository");
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("instant")
@@ -395,7 +386,6 @@ final class InheritanceFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("instant")
@@ -428,7 +418,6 @@ final class InheritanceFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("properties")
@@ -473,7 +462,6 @@ final class InheritanceFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("instant")
@@ -507,7 +495,6 @@ final class InheritanceFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("dependency")
@@ -551,7 +538,6 @@ final class InheritanceFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("dependency")
@@ -600,7 +586,6 @@ final class InheritanceFeatureTests extends ConveyorTest {
     ) {
         var repository = path.resolve("repository");
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("instant")
@@ -638,7 +623,6 @@ final class InheritanceFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("instant")
@@ -672,7 +656,6 @@ final class InheritanceFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("instant")
@@ -732,7 +715,6 @@ final class InheritanceFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("instant")
@@ -767,7 +749,6 @@ final class InheritanceFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("instant")
@@ -826,7 +807,6 @@ final class InheritanceFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("dependency")
@@ -894,7 +874,6 @@ final class InheritanceFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("instant")
@@ -930,7 +909,6 @@ final class InheritanceFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("instant")
@@ -973,7 +951,6 @@ final class InheritanceFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("instant")
@@ -1016,7 +993,6 @@ final class InheritanceFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("instant")

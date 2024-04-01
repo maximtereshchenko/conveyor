@@ -1,6 +1,6 @@
 package com.github.maximtereshchenko.conveyor.domain.test;
 
-import com.github.maximtereshchenko.conveyor.gson.JacksonAdapter;
+import com.github.maximtereshchenko.conveyor.jackson.JacksonAdapter;
 import com.github.maximtereshchenko.conveyor.jackson.dataformat.xml.XmlMapper;
 
 final class BuilderFactory {
@@ -27,10 +27,5 @@ final class BuilderFactory {
 
     SchematicDefinitionBuilder schematicDefinitionBuilder() {
         return new SchematicDefinitionBuilder(jacksonAdapter);
-    }
-
-    SchematicDefinitionBuilder superManual() {
-        return schematicDefinitionBuilder()
-            .name("super-manual");
     }
 }

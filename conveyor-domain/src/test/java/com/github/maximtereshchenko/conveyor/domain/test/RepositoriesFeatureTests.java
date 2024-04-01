@@ -25,7 +25,6 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         var first = path.resolve("first");
         var second = path.resolve("second");
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .install(first);
         factory.repositoryBuilder()
             .schematicDefinition(
@@ -67,11 +66,9 @@ final class RepositoriesFeatureTests extends ConveyorTest {
     ) {
         var templateRepository = path.resolve("template-repository");
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .install(templateRepository);
         var projectRepository = path.resolve("project-repository");
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("instant")
@@ -111,7 +108,6 @@ final class RepositoriesFeatureTests extends ConveyorTest {
     ) {
         var templateRepository = path.resolve("template-repository");
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("module-path")
@@ -122,7 +118,6 @@ final class RepositoriesFeatureTests extends ConveyorTest {
             .install(templateRepository);
         var projectRepository = path.resolve("project-repository");
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("module-path")
@@ -168,7 +163,6 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("instant")
@@ -207,7 +201,6 @@ final class RepositoriesFeatureTests extends ConveyorTest {
             )
             .install(wireMockRuntimeInfo.getWireMock());
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .install(path);
 
         module.construct(
@@ -244,7 +237,6 @@ final class RepositoriesFeatureTests extends ConveyorTest {
             )
             .install(wireMockRuntimeInfo.getWireMock());
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .install(path);
         var schematic = factory.schematicDefinitionBuilder()
             .repository("local", path, true)
@@ -284,7 +276,6 @@ final class RepositoriesFeatureTests extends ConveyorTest {
             )
             .install(wireMockRuntimeInfo.getWireMock());
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .install(path);
         var cache = path.resolve("cache");
 
@@ -324,7 +315,6 @@ final class RepositoriesFeatureTests extends ConveyorTest {
             )
             .install(wireMockRuntimeInfo.getWireMock());
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .install(path);
 
         module.construct(
@@ -376,7 +366,6 @@ final class RepositoriesFeatureTests extends ConveyorTest {
             )
             .install(wireMockRuntimeInfo.getWireMock());
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .install(path);
 
         module.construct(
@@ -416,7 +405,6 @@ final class RepositoriesFeatureTests extends ConveyorTest {
             )
             .install(wireMockRuntimeInfo.getWireMock());
         factory.repositoryBuilder()
-            .schematicDefinition(factory.superManual())
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("dependencies")
