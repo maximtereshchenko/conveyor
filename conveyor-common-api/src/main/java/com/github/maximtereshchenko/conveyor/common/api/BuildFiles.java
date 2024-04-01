@@ -36,6 +36,11 @@ public final class BuildFiles {
     }
 
     @Override
+    public int hashCode() {
+        return Objects.hash(files);
+    }
+
+    @Override
     public boolean equals(Object object) {
         if (this == object) {
             return true;
@@ -45,11 +50,6 @@ public final class BuildFiles {
         }
         var that = (BuildFiles) object;
         return Objects.equals(files, that.files);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(files);
     }
 
     @Override

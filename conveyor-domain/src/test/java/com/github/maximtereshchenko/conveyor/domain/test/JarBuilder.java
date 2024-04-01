@@ -1,11 +1,7 @@
 package com.github.maximtereshchenko.conveyor.domain.test;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UncheckedIOException;
+import javax.tools.*;
+import java.io.*;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -18,13 +14,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-import javax.tools.FileObject;
-import javax.tools.ForwardingJavaFileManager;
-import javax.tools.JavaCompiler;
-import javax.tools.JavaFileObject;
-import javax.tools.SimpleJavaFileObject;
-import javax.tools.StandardJavaFileManager;
-import javax.tools.ToolProvider;
 
 final class JarBuilder {
 
@@ -152,13 +141,13 @@ final class JarBuilder {
         }
 
         @Override
-        public OutputStream openOutputStream() {
-            return outputStream;
+        public InputStream openInputStream() {
+            return new ByteArrayInputStream(outputStream.toByteArray());
         }
 
         @Override
-        public InputStream openInputStream() {
-            return new ByteArrayInputStream(outputStream.toByteArray());
+        public OutputStream openOutputStream() {
+            return outputStream;
         }
     }
 

@@ -1,10 +1,7 @@
 package com.github.maximtereshchenko.conveyor.domain;
 
-import com.github.maximtereshchenko.conveyor.api.port.NoExplicitParent;
-import com.github.maximtereshchenko.conveyor.api.port.ParentDefinition;
-import com.github.maximtereshchenko.conveyor.api.port.ParentProjectDefinition;
-import com.github.maximtereshchenko.conveyor.api.port.ProjectDefinition;
-import com.github.maximtereshchenko.conveyor.api.port.ProjectDefinitionReader;
+import com.github.maximtereshchenko.conveyor.api.port.*;
+
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;

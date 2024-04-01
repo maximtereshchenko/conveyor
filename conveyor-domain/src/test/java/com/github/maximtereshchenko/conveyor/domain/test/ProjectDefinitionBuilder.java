@@ -1,22 +1,14 @@
 package com.github.maximtereshchenko.conveyor.domain.test;
 
-import com.github.maximtereshchenko.conveyor.api.port.DependencyDefinition;
-import com.github.maximtereshchenko.conveyor.api.port.NoExplicitParent;
-import com.github.maximtereshchenko.conveyor.api.port.ParentDefinition;
-import com.github.maximtereshchenko.conveyor.api.port.ParentProjectDefinition;
-import com.github.maximtereshchenko.conveyor.api.port.PluginDefinition;
-import com.github.maximtereshchenko.conveyor.api.port.ProjectDefinition;
+import com.github.maximtereshchenko.conveyor.api.port.*;
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 import com.github.maximtereshchenko.conveyor.gson.GsonAdapter;
+
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 

@@ -45,12 +45,12 @@ final class ModuleInfoSourceCodeBuilder {
 
     String build() {
         return """
-            module %s {
-                %s
-                %s
-                %s
-            }
-            """
+               module %s {
+                   %s
+                   %s
+                   %s
+               }
+               """
             .formatted(
                 normalizedName(),
                 requires.stream()
