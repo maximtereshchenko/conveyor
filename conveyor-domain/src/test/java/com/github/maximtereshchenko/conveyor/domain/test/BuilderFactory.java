@@ -17,4 +17,8 @@ final class BuilderFactory {
     RepositoryBuilder repositoryBuilder() {
         return new RepositoryBuilder(gsonAdapter);
     }
+
+    ManualBuilder manualBuilder() {
+        return new ManualBuilder(gsonAdapter);
+    }
 }

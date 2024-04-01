@@ -694,8 +694,8 @@ final class InheritanceFeatureTests extends ConveyorTest {
             .jar("instant", builder -> builder.name("instant").version(1))
             .install(path);
         var project = path.resolve("project");
-        var projectDepth1a = path.resolve("project-depth-1a");
-        var projectDepth1b = path.resolve("project-depth-1b");
+        var projectDepth1a = project.resolve("project-depth-1a");
+        var projectDepth1b = project.resolve("project-depth-1b");
         var projectDepth2a = projectDepth1a.resolve("project-depth-2a");
         var projectDepth2b = projectDepth1b.resolve("project-depth-2b");
         var projectSchematic = factory.schematicBuilder()

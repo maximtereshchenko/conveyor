@@ -28,6 +28,7 @@ final class ManualBuilder {
                 0,
                 new ManualTemplateDefinition("super-manual", 1),
                 Map.of(),
+                new PreferencesDefinition(),
                 List.of(),
                 List.of()
             )
@@ -50,6 +51,7 @@ final class ManualBuilder {
                 manualDefinition.version(),
                 manualDefinition.template(),
                 manualDefinition.properties(),
+                manualDefinition.preferences(),
                 manualDefinition.plugins(),
                 manualDefinition.dependencies()
             )
@@ -64,6 +66,7 @@ final class ManualBuilder {
                 version,
                 manualDefinition.template(),
                 manualDefinition.properties(),
+                manualDefinition.preferences(),
                 manualDefinition.plugins(),
                 manualDefinition.dependencies()
             )
@@ -80,6 +83,7 @@ final class ManualBuilder {
                 manualDefinition.version(),
                 manualDefinition.template(),
                 copy,
+                manualDefinition.preferences(),
                 manualDefinition.plugins(),
                 manualDefinition.dependencies()
             )
@@ -88,7 +92,7 @@ final class ManualBuilder {
 
     ManualBuilder plugin(String name, int version, Map<String, String> configuration) {
         var copy = new ArrayList<>(manualDefinition.plugins());
-        copy.add(new PluginDefinition(name, OptionalInt.of(version), configuration));
+        copy.add(new PluginDefinition(name, Optional.of(version), configuration));
         return new ManualBuilder(
             gsonAdapter,
             new ManualDefinition(
@@ -96,6 +100,7 @@ final class ManualBuilder {
                 manualDefinition.version(),
                 manualDefinition.template(),
                 manualDefinition.properties(),
+                manualDefinition.preferences(),
                 copy,
                 manualDefinition.dependencies()
             )
@@ -104,7 +109,7 @@ final class ManualBuilder {
 
     ManualBuilder dependency(String name, int version, DependencyScope scope) {
         var copy = new ArrayList<>(manualDefinition.dependencies());
-        copy.add(new ArtifactDependencyDefinition(name, version, scope));
+        copy.add(new ManualDependencyDefinition(name, version, scope));
         return new ManualBuilder(
             gsonAdapter,
             new ManualDefinition(
@@ -112,19 +117,22 @@ final class ManualBuilder {
                 manualDefinition.version(),
                 manualDefinition.template(),
                 manualDefinition.properties(),
+                manualDefinition.preferences(),
                 manualDefinition.plugins(),
                 copy
             )
         );
     }
 
-    void install(Path directory) {
+    Path install(Path directory) {
         try {
+            var path = Files.createDirectories(directory)
+                .resolve("%s-%d.json".formatted(manualDefinition.name(), manualDefinition.version()));
             gsonAdapter.write(
-                Files.createDirectories(directory)
-                    .resolve("%s-%d.json".formatted(manualDefinition.name(), manualDefinition.version())),
+                path,
                 manualDefinition
             );
+            return path;
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -138,6 +146,7 @@ final class ManualBuilder {
                 manualDefinition.version(),
                 templateDefinition,
                 manualDefinition.properties(),
+                manualDefinition.preferences(),
                 manualDefinition.plugins(),
                 manualDefinition.dependencies()
             )

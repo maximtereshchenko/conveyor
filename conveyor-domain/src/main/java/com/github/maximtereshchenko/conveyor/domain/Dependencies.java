@@ -8,37 +8,18 @@ import java.util.stream.Collectors;
 
 final class Dependencies {
 
-    private final ImmutableMap<String, Dependency> indexed;
+    private final Set<Dependency> all;
 
-    private Dependencies(ImmutableMap<String, Dependency> indexed) {
-        this.indexed = indexed;
+    Dependencies(Set<Dependency> all) {
+        this.all = all;
     }
 
-    Dependencies() {
-        this(new ImmutableMap<>());
-    }
-
-    static Dependencies from(ImmutableSet<Dependency> dependencies) {
-        return new Dependencies(
-            dependencies.stream()
-                .collect(new ImmutableMapCollector<>(Dependency::name))
-        );
-    }
-
-    Set<Path> modulePath(Repositories repositories, ImmutableSet<DependencyScope> scopes) {
+    Set<Path> modulePath(Set<DependencyScope> scopes) {
         return ModulePath.from(
-                indexed.values()
-                    .stream()
-                    .filter(dependency -> dependency.in(scopes))
-                    .map(dependency -> dependency.artifact(repositories))
-                    .collect(new ImmutableSetCollector<>())
+                all.stream()
+                    .filter(dependency -> scopes.contains(dependency.scope()))
+                    .collect(Collectors.toSet())
             )
-            .resolved()
-            .stream()
-            .collect(Collectors.toSet());
-    }
-
-    Dependencies override(Dependencies base) {
-        return new Dependencies(base.indexed.withAll(indexed));
+            .resolved();
     }
 }

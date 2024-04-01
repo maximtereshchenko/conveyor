@@ -3,53 +3,35 @@ package com.github.maximtereshchenko.conveyor.domain;
 import com.github.maximtereshchenko.conveyor.api.SchematicProducts;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 
-import java.util.stream.Stream;
+import java.util.LinkedHashSet;
 
 final class Schematics {
 
+    private final LinkedHashSet<Schematic> all;
     private final Schematic initial;
-    private final ImmutableList<Schematic> hierarchy;
 
-    Schematics(Schematic initial, ImmutableList<Schematic> hierarchy) {
+    Schematics(LinkedHashSet<Schematic> all, Schematic initial) {
+        this.all = all;
         this.initial = initial;
-        this.hierarchy = hierarchy;
     }
 
-    static Schematics from(Schematic schematic) {
-        return new Schematics(
-            schematic,
-            schematics(schematic.root().orElseThrow())
-                .collect(new ImmutableListCollector<>())
-        );
-    }
-
-    private static Stream<Schematic> schematics(Schematic schematic) {
-        return Stream.concat(
-            Stream.of(schematic),
-            schematic.inclusions()
-                .stream()
-                .flatMap(Schematics::schematics)
-        );
+    boolean haveDependencyBetween(String name, Schematic schematic) {
+        return named(name).dependsOn(schematic, this);
     }
 
     SchematicProducts construct(Stage stage) {
-        return hierarchy.stream()
-            .filter(schematic -> initial.requires(schematic, this) || initial.contains(schematic))
-            .sorted(this::comparedByMutualDependency)
+        return all.stream()
+            .filter(this::toBeConstructed)
+            .sorted(this::comparedByMutualRequirement)
             .reduce(
                 new SchematicProducts(),
-                (schematicProducts, schematic) ->
-                    schematic.construct(
-                        schematic.repositories(),
-                        schematicProducts,
-                        stage(stage, schematic)
-                    ),
-                new PickSecond<>()
+                (schematicProducts, schematic) -> schematic.construct(schematicProducts, stage(stage, schematic)),
+                (a, b) -> a
             );
     }
 
-    Schematic findByName(String name) {
-        return hierarchy.stream()
+    private Schematic named(String name) {
+        return all.stream()
             .filter(schematic -> schematic.name().equals(name))
             .findAny()
             .orElseThrow();
@@ -66,17 +48,25 @@ final class Schematics {
     }
 
     private boolean isDependency(Schematic schematic) {
-        return hierarchy.stream()
+        return all.stream()
             .anyMatch(other -> other.dependsOn(schematic, this));
     }
 
-    private int comparedByMutualDependency(Schematic first, Schematic second) {
-        if (first.requires(second, this)) {
+    private int comparedByMutualRequirement(Schematic first, Schematic second) {
+        if (requirementExistsBetween(first, second)) {
             return 1;
         }
-        if (second.requires(first, this)) {
+        if (requirementExistsBetween(second, first)) {
             return -1;
         }
         return 0;
+    }
+
+    private boolean toBeConstructed(Schematic schematic) {
+        return requirementExistsBetween(initial, schematic) || schematic.inheritsFrom(initial);
+    }
+
+    private boolean requirementExistsBetween(Schematic from, Schematic to) {
+        return from.inheritsFrom(to) || from.dependsOn(to, this);
     }
 }
