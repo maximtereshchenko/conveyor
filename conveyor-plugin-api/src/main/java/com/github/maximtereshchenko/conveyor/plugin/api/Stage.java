@@ -2,5 +2,5 @@ package com.github.maximtereshchenko.conveyor.plugin.api;
 
 public enum Stage {
 
-    CLEAN, COMPILE
+    CLEAN, COMPILE, TEST, ARCHIVE, PUBLISH
 }

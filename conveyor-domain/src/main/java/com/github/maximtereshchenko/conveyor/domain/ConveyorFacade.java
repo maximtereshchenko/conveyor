@@ -13,6 +13,7 @@ import com.github.maximtereshchenko.conveyor.plugin.api.Stage;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -62,6 +63,7 @@ public final class ConveyorFacade implements ConveyorModule {
             .map(conveyorPlugin -> bindings(conveyorPlugin, projectDefinitionPath, projectDefinition))
             .flatMap(Collection::stream)
             .filter(binding -> binding.stage().compareTo(stage) <= 0)
+            .sorted(Comparator.comparing(ConveyorTaskBinding::stage).thenComparing(ConveyorTaskBinding::step))
             .map(ConveyorTaskBinding::task)
             .forEach(ConveyorTask::execute);
     }

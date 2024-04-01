@@ -8,8 +8,4 @@ public record ConveyorPluginConfiguration(Path projectDirectory, Map<String, Str
     public ConveyorPluginConfiguration {
         properties = Map.copyOf(properties);
     }
-
-    public String value(String key) {
-        return properties.get(key);
-    }
 }
