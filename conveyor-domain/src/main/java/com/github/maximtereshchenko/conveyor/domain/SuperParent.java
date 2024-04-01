@@ -5,7 +5,6 @@ import com.github.maximtereshchenko.conveyor.api.port.DependencyDefinition;
 import com.github.maximtereshchenko.conveyor.api.port.PluginDefinition;
 import com.github.maximtereshchenko.conveyor.api.port.ProjectDefinition;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 final class SuperParent implements Project {
@@ -33,11 +32,6 @@ final class SuperParent implements Project {
     @Override
     public Map<String, String> properties() {
         return projectDefinition.properties();
-    }
-
-    @Override
-    public Collection<Project> subprojects() {
-        return List.of();
     }
 
     @Override

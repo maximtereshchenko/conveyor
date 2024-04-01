@@ -1,10 +1,14 @@
 package com.github.maximtereshchenko.conveyor.domain;
 
 import com.github.maximtereshchenko.conveyor.api.port.NoExplicitParent;
+import com.github.maximtereshchenko.conveyor.api.port.ParentDefinition;
 import com.github.maximtereshchenko.conveyor.api.port.ParentProjectDefinition;
 import com.github.maximtereshchenko.conveyor.api.port.ProjectDefinition;
 import com.github.maximtereshchenko.conveyor.api.port.ProjectDefinitionReader;
 import java.nio.file.Path;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Stream;
 
 final class ProjectFactory {
 
@@ -14,42 +18,53 @@ final class ProjectFactory {
         this.reader = reader;
     }
 
-    ProjectToBuild projectToBuild(Path projectDefinitionPath) {
+    List<LocalProject> localProjects(Path projectDefinitionPath) {
         var projectDefinition = reader.projectDefinition(projectDefinitionPath);
-        var repository = new DirectoryRepository(
-            projectDefinitionPath.getParent().resolve(projectDefinition.repository()),
-            reader
-        );
-        return new ProjectToBuild(
+        var repository = new DirectoryRepository(projectDefinition.repository(), reader);
+        return localProjects(
             projectDefinitionPath,
-            project(
-                repository,
-                projectDefinition,
-                projectDefinitionPath.getParent()
-            ),
-            repository
+            repository,
+            projectDefinition,
+            project(repository, projectDefinition.parent())
         );
     }
 
-    private Project project(
+    private List<LocalProject> localProjects(
+        Path projectDefinitionPath,
         DirectoryRepository repository,
         ProjectDefinition projectDefinition,
-        Path directory
+        Project parent
     ) {
+        var current = new Subproject(parent, projectDefinition);
+        return Stream.concat(
+                Stream.of(new LocalProject(current, repository, projectDefinitionPath)),
+                projectDefinition.subprojects()
+                    .stream()
+                    .map(path -> projectDefinitionPath.getParent().resolve(path).resolve("conveyor.json"))
+                    .map(conveyorJson ->
+                        localProjects(
+                            conveyorJson,
+                            repository,
+                            reader.projectDefinition(conveyorJson),
+                            current
+                        )
+                    )
+                    .flatMap(Collection::stream)
+            )
+            .toList();
+    }
+
+    private Project project(DirectoryRepository repository, ParentDefinition parentDefinition) {
+        return switch (parentDefinition) {
+            case NoExplicitParent ignored -> SuperParent.from(repository);
+            case ParentProjectDefinition parentProjectDefinition ->
+                project(repository, repository.projectDefinition(parentProjectDefinition));
+        };
+    }
+
+    private Project project(DirectoryRepository repository, ProjectDefinition projectDefinition) {
         return new Subproject(
-            switch (projectDefinition.parent()) {
-                case NoExplicitParent ignored -> SuperParent.from(repository);
-                case ParentProjectDefinition parentProjectDefinition ->
-                    project(repository, repository.projectDefinition(parentProjectDefinition), directory);
-            },
-            projectDefinition.subprojects()
-                .stream()
-                .map(directory::resolve)
-                .map(path -> path.resolve("conveyor.json"))
-                .map(conveyorJson -> project(repository, reader.projectDefinition(conveyorJson),
-                    conveyorJson.getParent()
-                ))
-                .toList(),
+            project(repository, projectDefinition.parent()),
             projectDefinition
         );
     }
