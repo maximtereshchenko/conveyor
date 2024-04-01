@@ -22,21 +22,21 @@ final class PropertiesFeatureTests extends ConveyorTest {
             .superManual()
             .manual(builder ->
                 builder.name("template")
-                    .version(1)
+                    .version("1.0.0")
                     .property("template.key", "template.value")
             )
-            .manual(builder -> builder.name("properties").version(1))
-            .jar("properties", builder -> builder.name("properties").version(1))
+            .manual(builder -> builder.name("properties").version("1.0.0"))
+            .jar("properties", builder -> builder.name("properties").version("1.0.0"))
             .install(path);
 
         module.construct(
             factory.schematicBuilder()
                 .name("project")
-                .version(1)
+                .version("1.0.0")
                 .repository("main", path, true)
-                .template("template", 1)
+                .template("template", "1.0.0")
                 .property("key", "value")
-                .plugin("properties", 1, Map.of())
+                .plugin("properties", "1.0.0", Map.of())
                 .install(path),
             Stage.COMPILE
         );
@@ -64,21 +64,21 @@ final class PropertiesFeatureTests extends ConveyorTest {
             .superManual()
             .manual(builder ->
                 builder.name("template")
-                    .version(1)
+                    .version("1.0.0")
                     .property("key", "template.value")
             )
-            .manual(builder -> builder.name("properties").version(1))
-            .jar("properties", builder -> builder.name("properties").version(1))
+            .manual(builder -> builder.name("properties").version("1.0.0"))
+            .jar("properties", builder -> builder.name("properties").version("1.0.0"))
             .install(path);
 
         module.construct(
             factory.schematicBuilder()
                 .name("project")
-                .version(1)
+                .version("1.0.0")
                 .repository("main", path, true)
-                .template("template", 1)
+                .template("template", "1.0.0")
                 .property("key", "value")
-                .plugin("properties", 1, Map.of())
+                .plugin("properties", "1.0.0", Map.of())
                 .install(path),
             Stage.COMPILE
         );
@@ -105,21 +105,21 @@ final class PropertiesFeatureTests extends ConveyorTest {
             .superManual()
             .manual(builder ->
                 builder.name("template")
-                    .version(1)
+                    .version("1.0.0")
                     .property("to.be.removed", "value")
             )
-            .manual(builder -> builder.name("properties").version(1))
-            .jar("properties", builder -> builder.name("properties").version(1))
+            .manual(builder -> builder.name("properties").version("1.0.0"))
+            .jar("properties", builder -> builder.name("properties").version("1.0.0"))
             .install(path);
 
         module.construct(
             factory.schematicBuilder()
                 .name("project")
-                .version(1)
+                .version("1.0.0")
                 .repository("main", path, true)
-                .template("template", 1)
+                .template("template", "1.0.0")
                 .property("to.be.removed", "")
-                .plugin("properties", 1, Map.of())
+                .plugin("properties", "1.0.0", Map.of())
                 .install(path),
             Stage.COMPILE
         );
@@ -143,17 +143,17 @@ final class PropertiesFeatureTests extends ConveyorTest {
     ) {
         factory.repositoryBuilder()
             .superManual()
-            .manual(builder -> builder.name("properties").version(1))
-            .jar("properties", builder -> builder.name("properties").version(1))
+            .manual(builder -> builder.name("properties").version("1.0.0"))
+            .jar("properties", builder -> builder.name("properties").version("1.0.0"))
             .install(path);
 
         module.construct(
             factory.schematicBuilder()
                 .name("project")
-                .version(1)
+                .version("1.0.0")
                 .repository("main", path, true)
                 .property("conveyor.schematic.name", "custom")
-                .plugin("properties", 1, Map.of())
+                .plugin("properties", "1.0.0", Map.of())
                 .install(path),
             Stage.COMPILE
         );
@@ -177,18 +177,18 @@ final class PropertiesFeatureTests extends ConveyorTest {
     ) {
         factory.repositoryBuilder()
             .superManual()
-            .manual(builder -> builder.name("properties").version(1))
-            .jar("properties", builder -> builder.name("properties").version(1))
+            .manual(builder -> builder.name("properties").version("1.0.0"))
+            .jar("properties", builder -> builder.name("properties").version("1.0.0"))
             .install(path);
         var project = path.resolve("project");
 
         module.construct(
             factory.schematicBuilder()
                 .name("project")
-                .version(1)
+                .version("1.0.0")
                 .repository("main", path, true)
                 .property("conveyor.discovery.directory", project.toString())
-                .plugin("properties", 1, Map.of())
+                .plugin("properties", "1.0.0", Map.of())
                 .install(path),
             Stage.COMPILE
         );
@@ -212,17 +212,17 @@ final class PropertiesFeatureTests extends ConveyorTest {
     ) {
         factory.repositoryBuilder()
             .superManual()
-            .manual(builder -> builder.name("properties").version(1))
-            .jar("properties", builder -> builder.name("properties").version(1))
+            .manual(builder -> builder.name("properties").version("1.0.0"))
+            .jar("properties", builder -> builder.name("properties").version("1.0.0"))
             .install(path);
 
         module.construct(
             factory.schematicBuilder()
                 .name("project")
-                .version(1)
+                .version("1.0.0")
                 .repository("main", path, true)
                 .property("conveyor.discovery.directory", "./temp/../project")
-                .plugin("properties", 1, Map.of())
+                .plugin("properties", "1.0.0", Map.of())
                 .install(path),
             Stage.COMPILE
         );
@@ -246,18 +246,18 @@ final class PropertiesFeatureTests extends ConveyorTest {
     ) {
         factory.repositoryBuilder()
             .superManual()
-            .manual(builder -> builder.name("properties").version(1))
-            .jar("properties", builder -> builder.name("properties").version(1))
+            .manual(builder -> builder.name("properties").version("1.0.0"))
+            .jar("properties", builder -> builder.name("properties").version("1.0.0"))
             .install(path);
         var construction = path.resolve("construction");
 
         module.construct(
             factory.schematicBuilder()
                 .name("project")
-                .version(1)
+                .version("1.0.0")
                 .repository("main", path, true)
                 .property("conveyor.construction.directory", construction.toString())
-                .plugin("properties", 1, Map.of())
+                .plugin("properties", "1.0.0", Map.of())
                 .install(path),
             Stage.COMPILE
         );
@@ -281,17 +281,17 @@ final class PropertiesFeatureTests extends ConveyorTest {
     ) {
         factory.repositoryBuilder()
             .superManual()
-            .manual(builder -> builder.name("properties").version(1))
-            .jar("properties", builder -> builder.name("properties").version(1))
+            .manual(builder -> builder.name("properties").version("1.0.0"))
+            .jar("properties", builder -> builder.name("properties").version("1.0.0"))
             .install(path);
 
         module.construct(
             factory.schematicBuilder()
                 .name("project")
-                .version(1)
+                .version("1.0.0")
                 .repository("main", path, true)
                 .property("conveyor.construction.directory", "./temp/../construction")
-                .plugin("properties", 1, Map.of())
+                .plugin("properties", "1.0.0", Map.of())
                 .install(path),
             Stage.COMPILE
         );
@@ -316,18 +316,18 @@ final class PropertiesFeatureTests extends ConveyorTest {
     ) {
         factory.repositoryBuilder()
             .superManual()
-            .manual(builder -> builder.name("properties").version(1))
-            .jar("properties", builder -> builder.name("properties").version(1))
+            .manual(builder -> builder.name("properties").version("1.0.0"))
+            .jar("properties", builder -> builder.name("properties").version("1.0.0"))
             .install(path);
 
         module.construct(
             factory.schematicBuilder()
                 .name("project")
-                .version(1)
+                .version("1.0.0")
                 .repository("main", path, true)
                 .property("key", "interpolated")
                 .property("templated", "${key}-suffix")
-                .plugin("properties", 1, Map.of())
+                .plugin("properties", "1.0.0", Map.of())
                 .install(path),
             Stage.COMPILE
         );
@@ -353,18 +353,18 @@ final class PropertiesFeatureTests extends ConveyorTest {
     ) {
         factory.repositoryBuilder()
             .superManual()
-            .manual(builder -> builder.name("configuration").version(1))
-            .jar("configuration", builder -> builder.name("configuration").version(1))
+            .manual(builder -> builder.name("configuration").version("1.0.0"))
+            .jar("configuration", builder -> builder.name("configuration").version("1.0.0"))
             .install(path);
 
         module.construct(
             factory.schematicBuilder()
                 .name("project")
-                .version(1)
+                .version("1.0.0")
                 .repository("main", path, true)
                 .property("key", "interpolated")
                 .property("templated", "${key}-suffix")
-                .plugin("configuration", 1, Map.of("key", "prefix-${templated}"))
+                .plugin("configuration", "1.0.0", Map.of("key", "prefix-${templated}"))
                 .install(path),
             Stage.COMPILE
         );

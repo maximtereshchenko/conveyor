@@ -1,3 +1,3 @@
 package com.github.maximtereshchenko.conveyor.domain;
 
-record PreferencesInclusionModel(String name, int version) {}
+record PreferencesInclusionModel(String name, SemanticVersion version) {}

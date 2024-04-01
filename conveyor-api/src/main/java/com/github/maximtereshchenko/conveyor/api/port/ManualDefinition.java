@@ -7,7 +7,7 @@ import java.util.Objects;
 
 public record ManualDefinition(
     String name,
-    int version,
+    String version,
     TemplateForManualDefinition template,
     Map<String, String> properties,
     PreferencesDefinition preferences,

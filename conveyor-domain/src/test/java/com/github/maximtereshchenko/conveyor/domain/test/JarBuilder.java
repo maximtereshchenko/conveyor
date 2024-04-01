@@ -33,7 +33,7 @@ final class JarBuilder {
             .with("normalizedName", name.replace("-", ""));
     }
 
-    JarBuilder version(int version) {
+    JarBuilder version(String version) {
         return with("version", String.valueOf(version));
     }
 

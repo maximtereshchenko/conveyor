@@ -25,15 +25,15 @@ final class StandaloneSchematicModel
     }
 
     @Override
-    public int version() {
-        return schematicDefinition.version();
+    public SemanticVersion version() {
+        return new SemanticVersion(schematicDefinition.version());
     }
 
     @Override
     public SchematicTemplateModel template() {
         return switch (schematicDefinition.template()) {
             case ManualTemplateDefinition definition ->
-                new OtherManualTemplateModel(definition.name(), definition.version());
+                new OtherManualTemplateModel(definition.name(), new SemanticVersion(definition.version()));
             case NoExplicitlyDefinedTemplate ignored -> defaultTemplate();
             case SchematicPathTemplateDefinition definition -> new OtherSchematicTemplateModel(definition.path());
         };
@@ -97,8 +97,12 @@ final class StandaloneSchematicModel
     @Override
     DependencyModel dependencyModel(SchematicDependencyDefinition dependencyDefinition) {
         return switch (dependencyDefinition) {
-            case DependencyOnArtifactDefinition definition ->
-                new ArtifactDependencyModel(definition.name(), definition.version(), definition.scope());
+            case DependencyOnArtifactDefinition definition -> new ArtifactDependencyModel(
+                definition.name(),
+                definition.version()
+                    .map(SemanticVersion::new),
+                definition.scope()
+            );
             case DependencyOnSchematicDefinition definition ->
                 new SchematicDependencyModel(definition.schematic(), definition.scope());
         };
@@ -109,6 +113,6 @@ final class StandaloneSchematicModel
         if (Files.exists(defaultSchematicTemplate)) {
             return new OtherSchematicTemplateModel(defaultSchematicTemplate);
         }
-        return new OtherManualTemplateModel("super-manual", 1);
+        return new OtherManualTemplateModel("super-manual", new SemanticVersion("1.0.0"));
     }
 }

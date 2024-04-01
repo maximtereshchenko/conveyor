@@ -25,7 +25,7 @@ final class SchematicBuilder {
             gsonAdapter,
             new SchematicDefinition(
                 "",
-                0,
+                "",
                 new NoExplicitlyDefinedTemplate(),
                 List.of(),
                 List.of(),
@@ -54,7 +54,7 @@ final class SchematicBuilder {
         );
     }
 
-    SchematicBuilder version(int version) {
+    SchematicBuilder version(String version) {
         return new SchematicBuilder(
             gsonAdapter,
             new SchematicDefinition(
@@ -75,7 +75,7 @@ final class SchematicBuilder {
         return template(new SchematicPathTemplateDefinition(path));
     }
 
-    SchematicBuilder template(String name, int version) {
+    SchematicBuilder template(String name, String version) {
         return template(new ManualTemplateDefinition(name, version));
     }
 
@@ -121,7 +121,7 @@ final class SchematicBuilder {
         return plugin(new PluginDefinition(name, Optional.empty(), configuration));
     }
 
-    SchematicBuilder plugin(String name, int version, Map<String, String> configuration) {
+    SchematicBuilder plugin(String name, String version, Map<String, String> configuration) {
         return plugin(new PluginDefinition(name, Optional.of(version), configuration));
     }
 
@@ -129,7 +129,7 @@ final class SchematicBuilder {
         return dependency(new DependencyOnSchematicDefinition(name, Optional.of(scope)));
     }
 
-    SchematicBuilder dependency(String name, int version, DependencyScope scope) {
+    SchematicBuilder dependency(String name, String version, DependencyScope scope) {
         return dependency(new DependencyOnArtifactDefinition(name, Optional.of(version), Optional.of(scope)));
     }
 
@@ -167,7 +167,7 @@ final class SchematicBuilder {
         }
     }
 
-    SchematicBuilder preference(String name, int version) {
+    SchematicBuilder preference(String name, String version) {
         var copy = new ArrayList<>(schematicDefinition.preferences().artifacts());
         copy.add(new ArtifactPreferenceDefinition(name, version));
         return new SchematicBuilder(
@@ -186,7 +186,7 @@ final class SchematicBuilder {
         );
     }
 
-    SchematicBuilder preferenceInclusion(String name, int version) {
+    SchematicBuilder preferenceInclusion(String name, String version) {
         var copy = new ArrayList<>(schematicDefinition.preferences().inclusions());
         copy.add(new PreferencesInclusionDefinition(name, version));
         return new SchematicBuilder(

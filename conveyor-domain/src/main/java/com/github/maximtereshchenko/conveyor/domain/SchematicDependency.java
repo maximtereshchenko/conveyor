@@ -35,7 +35,7 @@ final class SchematicDependency extends DependentArtifact<DependencyModel> imple
     }
 
     @Override
-    public int version() {
+    public SemanticVersion version() {
         return fullSchematicHierarchy().version();
     }
 

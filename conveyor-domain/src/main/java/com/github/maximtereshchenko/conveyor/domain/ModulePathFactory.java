@@ -92,7 +92,7 @@ final class ModulePathFactory {
         private final Map<String, SortedSet<ArtifactRelation>> indexed = new HashMap<>();
 
         void add(ArtifactRelation artifactRelation) {
-            indexed.computeIfAbsent(artifactRelation.name(), key -> new TreeSet<>(this::comparedByVersionDescending))
+            indexed.computeIfAbsent(artifactRelation.name(), key -> new TreeSet<>(comparator()))
                 .add(artifactRelation);
             for (var edge : artifactRelation.edges()) {
                 add(edge);
@@ -111,8 +111,9 @@ final class ModulePathFactory {
                 .findFirst();
         }
 
-        private int comparedByVersionDescending(ArtifactRelation first, ArtifactRelation second) {
-            return Integer.compare(second.artifact().version(), first.artifact().version());
+        private Comparator<ArtifactRelation> comparator() {
+            return Comparator.<ArtifactRelation, SemanticVersion>comparing(relation -> relation.artifact().version())
+                .reversed();
         }
     }
 }

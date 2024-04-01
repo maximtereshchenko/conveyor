@@ -12,7 +12,7 @@ final class TransitiveDependency extends ArtifactDependency {
     }
 
     @Override
-    int version(ArtifactDependencyModel artifactDependencyModel, Preferences preferences) {
+    SemanticVersion version(ArtifactDependencyModel artifactDependencyModel, Preferences preferences) {
         return preferences.version(artifactDependencyModel.name())
             .or(artifactDependencyModel::version)
             .orElseThrow();

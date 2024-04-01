@@ -23,16 +23,16 @@ final class TasksFeatureTests extends ConveyorTest {
     ) {
         factory.repositoryBuilder()
             .superManual()
-            .manual(builder -> builder.name("instant").version(1))
-            .jar("instant", builder -> builder.name("instant").version(1))
+            .manual(builder -> builder.name("instant").version("1.0.0"))
+            .jar("instant", builder -> builder.name("instant").version("1.0.0"))
             .install(path);
 
         module.construct(
             factory.schematicBuilder()
                 .name("project")
-                .version(1)
+                .version("1.0.0")
                 .repository("main", path, true)
-                .plugin("instant", 1, Map.of("instant", "COMPILE-RUN"))
+                .plugin("instant", "1.0.0", Map.of("instant", "COMPILE-RUN"))
                 .install(path),
             Stage.TEST
         );
@@ -48,16 +48,16 @@ final class TasksFeatureTests extends ConveyorTest {
     ) {
         factory.repositoryBuilder()
             .superManual()
-            .manual(builder -> builder.name("instant").version(1))
-            .jar("instant", builder -> builder.name("instant").version(1))
+            .manual(builder -> builder.name("instant").version("1.0.0"))
+            .jar("instant", builder -> builder.name("instant").version("1.0.0"))
             .install(path);
 
         module.construct(
             factory.schematicBuilder()
                 .name("project")
-                .version(1)
+                .version("1.0.0")
                 .repository("main", path, true)
-                .plugin("instant", 1, Map.of("instant", "COMPILE-RUN"))
+                .plugin("instant", "1.0.0", Map.of("instant", "COMPILE-RUN"))
                 .install(path),
             Stage.COMPILE
         );
@@ -73,16 +73,16 @@ final class TasksFeatureTests extends ConveyorTest {
     ) {
         factory.repositoryBuilder()
             .superManual()
-            .manual(builder -> builder.name("instant").version(1))
-            .jar("instant", builder -> builder.name("instant").version(1))
+            .manual(builder -> builder.name("instant").version("1.0.0"))
+            .jar("instant", builder -> builder.name("instant").version("1.0.0"))
             .install(path);
 
         module.construct(
             factory.schematicBuilder()
                 .name("project")
-                .version(1)
+                .version("1.0.0")
                 .repository("main", path, true)
-                .plugin("instant", 1, Map.of())
+                .plugin("instant", "1.0.0", Map.of())
                 .install(path),
             Stage.CLEAN
         );
@@ -98,18 +98,18 @@ final class TasksFeatureTests extends ConveyorTest {
     ) {
         factory.repositoryBuilder()
             .superManual()
-            .manual(builder -> builder.name("instant").version(1))
-            .jar("instant", builder -> builder.name("instant").version(1))
+            .manual(builder -> builder.name("instant").version("1.0.0"))
+            .jar("instant", builder -> builder.name("instant").version("1.0.0"))
             .install(path);
 
         module.construct(
             factory.schematicBuilder()
                 .name("project")
-                .version(1)
+                .version("1.0.0")
                 .repository("main", path, true)
                 .plugin(
                     "instant",
-                    1,
+                    "1.0.0",
                     Map.of(
                         "clean", "CLEAN-RUN",
                         "compile", "COMPILE-RUN",
@@ -142,18 +142,18 @@ final class TasksFeatureTests extends ConveyorTest {
     ) {
         factory.repositoryBuilder()
             .superManual()
-            .manual(builder -> builder.name("instant").version(1))
-            .jar("instant", builder -> builder.name("instant").version(1))
+            .manual(builder -> builder.name("instant").version("1.0.0"))
+            .jar("instant", builder -> builder.name("instant").version("1.0.0"))
             .install(path);
 
         module.construct(
             factory.schematicBuilder()
                 .name("project")
-                .version(1)
+                .version("1.0.0")
                 .repository("main", path, true)
                 .plugin(
                     "instant",
-                    1,
+                    "1.0.0",
                     Map.of(
                         "prepare", "COMPILE-PREPARE",
                         "run", "COMPILE-RUN",
@@ -182,26 +182,26 @@ final class TasksFeatureTests extends ConveyorTest {
     ) {
         factory.repositoryBuilder()
             .superManual()
-            .manual(builder -> builder.name("dependencies").version(1))
-            .jar("dependencies", builder -> builder.name("dependencies").version(1))
-            .manual(builder -> builder.name("dependency").version(1))
-            .jar("dependency", builder -> builder.name("dependency").version(1))
+            .manual(builder -> builder.name("dependencies").version("1.0.0"))
+            .jar("dependencies", builder -> builder.name("dependencies").version("1.0.0"))
+            .manual(builder -> builder.name("dependency").version("1.0.0"))
+            .jar("dependency", builder -> builder.name("dependency").version("1.0.0"))
             .install(path);
 
         module.construct(
             factory.schematicBuilder()
                 .name("project")
-                .version(1)
+                .version("1.0.0")
                 .repository("main", path, true)
-                .plugin("dependencies", 1, Map.of())
-                .dependency("dependency", 1, DependencyScope.IMPLEMENTATION)
+                .plugin("dependencies", "1.0.0", Map.of())
+                .dependency("dependency", "1.0.0", DependencyScope.IMPLEMENTATION)
                 .install(path),
             Stage.COMPILE
         );
 
         assertThat(defaultConstructionDirectory(path).resolve("dependencies"))
             .content()
-            .isEqualTo("dependency-1");
+            .isEqualTo("dependency-1.0.0");
     }
 
     @Test
@@ -212,25 +212,25 @@ final class TasksFeatureTests extends ConveyorTest {
     ) {
         factory.repositoryBuilder()
             .superManual()
-            .manual(builder -> builder.name("dependencies").version(1))
-            .jar("dependencies", builder -> builder.name("dependencies").version(1))
+            .manual(builder -> builder.name("dependencies").version("1.0.0"))
+            .jar("dependencies", builder -> builder.name("dependencies").version("1.0.0"))
             .manual(builder ->
                 builder.name("dependency")
-                    .version(1)
-                    .dependency("transitive", 1, DependencyScope.IMPLEMENTATION)
+                    .version("1.0.0")
+                    .dependency("transitive", "1.0.0", DependencyScope.IMPLEMENTATION)
             )
-            .jar("dependency", builder -> builder.name("dependency").version(1))
-            .manual(builder -> builder.name("transitive").version(1))
-            .jar("dependency", builder -> builder.name("transitive").version(1))
+            .jar("dependency", builder -> builder.name("dependency").version("1.0.0"))
+            .manual(builder -> builder.name("transitive").version("1.0.0"))
+            .jar("dependency", builder -> builder.name("transitive").version("1.0.0"))
             .install(path);
 
         module.construct(
             factory.schematicBuilder()
                 .name("project")
-                .version(1)
+                .version("1.0.0")
                 .repository("main", path, true)
-                .plugin("dependencies", 1, Map.of())
-                .dependency("dependency", 1, DependencyScope.IMPLEMENTATION)
+                .plugin("dependencies", "1.0.0", Map.of())
+                .dependency("dependency", "1.0.0", DependencyScope.IMPLEMENTATION)
                 .install(path),
             Stage.COMPILE
         );
@@ -238,7 +238,7 @@ final class TasksFeatureTests extends ConveyorTest {
         assertThat(defaultConstructionDirectory(path).resolve("dependencies"))
             .content()
             .hasLineCount(2)
-            .contains("dependency-1", "transitive-1");
+            .contains("dependency-1.0.0", "transitive-1.0.0");
     }
 
     @Test
@@ -249,26 +249,26 @@ final class TasksFeatureTests extends ConveyorTest {
     ) {
         factory.repositoryBuilder()
             .superManual()
-            .manual(builder -> builder.name("dependencies").version(1))
-            .jar("dependencies", builder -> builder.name("dependencies").version(1))
-            .manual(builder -> builder.name("test").version(1))
-            .jar("dependency", builder -> builder.name("test").version(1))
+            .manual(builder -> builder.name("dependencies").version("1.0.0"))
+            .jar("dependencies", builder -> builder.name("dependencies").version("1.0.0"))
+            .manual(builder -> builder.name("test").version("1.0.0"))
+            .jar("dependency", builder -> builder.name("test").version("1.0.0"))
             .install(path);
 
         module.construct(
             factory.schematicBuilder()
                 .name("project")
-                .version(1)
+                .version("1.0.0")
                 .repository("main", path, true)
-                .plugin("dependencies", 1, Map.of("scope", "TEST"))
-                .dependency("test", 1, DependencyScope.TEST)
+                .plugin("dependencies", "1.0.0", Map.of("scope", "TEST"))
+                .dependency("test", "1.0.0", DependencyScope.TEST)
                 .install(path),
             Stage.COMPILE
         );
 
         assertThat(defaultConstructionDirectory(path).resolve("dependencies"))
             .content()
-            .isEqualTo("test-1");
+            .isEqualTo("test-1.0.0");
     }
 
     @Test
@@ -279,18 +279,18 @@ final class TasksFeatureTests extends ConveyorTest {
     ) {
         factory.repositoryBuilder()
             .superManual()
-            .manual(builder -> builder.name("products").version(1))
-            .jar("products", builder -> builder.name("products").version(1))
-            .manual(builder -> builder.name("product").version(1))
-            .jar("product", builder -> builder.name("product").version(1))
+            .manual(builder -> builder.name("products").version("1.0.0"))
+            .jar("products", builder -> builder.name("products").version("1.0.0"))
+            .manual(builder -> builder.name("product").version("1.0.0"))
+            .jar("product", builder -> builder.name("product").version("1.0.0"))
             .install(path);
         var product = path.resolve("product");
         var schematicDefinition = factory.schematicBuilder()
             .name("project")
-            .version(1)
+            .version("1.0.0")
             .repository("main", path, true)
-            .plugin("product", 1, Map.of("path", product.toString()))
-            .plugin("products", 1, Map.of())
+            .plugin("product", "1.0.0", Map.of("path", product.toString()))
+            .plugin("products", "1.0.0", Map.of())
             .install(path);
 
         module.construct(schematicDefinition, Stage.PUBLISH);

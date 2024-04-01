@@ -18,7 +18,7 @@ final class ManualHierarchyAdapter implements SchematicModel<TemplateModel> {
     }
 
     @Override
-    public int version() {
+    public SemanticVersion version() {
         return manualHierarchy.version();
     }
 

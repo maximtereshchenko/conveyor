@@ -18,13 +18,13 @@ final class EnabledRepository implements Repository {
     }
 
     @Override
-    public Optional<ManualDefinition> manualDefinition(String name, int version) {
+    public Optional<ManualDefinition> manualDefinition(String name, SemanticVersion version) {
         return path(fullName(name, version) + ".json")
             .map(definitionReader::manualDefinition);
     }
 
     @Override
-    public Optional<Path> path(String name, int version) {
+    public Optional<Path> path(String name, SemanticVersion version) {
         return path(fullName(name, version) + ".jar");
     }
 
@@ -36,7 +36,7 @@ final class EnabledRepository implements Repository {
         return Optional.empty();
     }
 
-    private String fullName(String name, int version) {
+    private String fullName(String name, SemanticVersion version) {
         return name + '-' + version;
     }
 }
