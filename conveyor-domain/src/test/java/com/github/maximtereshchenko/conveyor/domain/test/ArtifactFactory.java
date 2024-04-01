@@ -10,15 +10,15 @@ final class ArtifactFactory {
         this.gsonAdapter = gsonAdapter;
     }
 
-    ConveyorPluginBuilder plugin() {
+    ConveyorPluginBuilder pluginBuilder() {
         return ConveyorPluginBuilder.empty(gsonAdapter);
     }
 
-    DependencyBuilder dependency() {
+    DependencyBuilder dependencyBuilder() {
         return DependencyBuilder.empty(gsonAdapter);
     }
 
-    ProjectDefinitionBuilder project(String name) {
+    ProjectDefinitionBuilder projectBuilder(String name) {
         return ProjectDefinitionBuilder.empty(gsonAdapter, name);
     }
 

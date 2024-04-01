@@ -22,7 +22,7 @@ final class InheritanceTests extends ConveyorTest {
         ArtifactFactory factory
     ) {
         factory.superParent()
-            .plugin(factory.plugin())
+            .plugin(factory.pluginBuilder())
             .install(path);
 
         var buildFiles = module.build(
@@ -42,7 +42,7 @@ final class InheritanceTests extends ConveyorTest {
         ConveyorModule module,
         ArtifactFactory factory
     ) {
-        var plugin = factory.plugin();
+        var plugin = factory.pluginBuilder();
         factory.superParent()
             .plugin(plugin.version(2))
             .install(path);
@@ -66,7 +66,7 @@ final class InheritanceTests extends ConveyorTest {
         ConveyorModule module,
         ArtifactFactory factory
     ) {
-        var plugin = factory.plugin();
+        var plugin = factory.pluginBuilder();
         factory.superParent()
             .plugin(plugin, Map.of("key", "parent-value"))
             .install(path);
@@ -89,7 +89,7 @@ final class InheritanceTests extends ConveyorTest {
         ConveyorModule module,
         ArtifactFactory factory
     ) {
-        var plugin = factory.plugin();
+        var plugin = factory.pluginBuilder();
         factory.superParent()
             .plugin(plugin, Map.of("parent-key", "value"))
             .install(path);
@@ -114,12 +114,12 @@ final class InheritanceTests extends ConveyorTest {
     ) {
         factory.superParent()
             .dependency(
-                factory.dependency()
+                factory.dependencyBuilder()
                     .name("implementation"),
                 DependencyScope.IMPLEMENTATION
             )
             .dependency(
-                factory.dependency()
+                factory.dependencyBuilder()
                     .name("test"),
                 DependencyScope.TEST
             )
@@ -127,7 +127,7 @@ final class InheritanceTests extends ConveyorTest {
 
         module.build(
             factory.conveyorJson()
-                .plugin(factory.plugin())
+                .plugin(factory.pluginBuilder())
                 .install(path),
             Stage.COMPILE
         );
@@ -152,7 +152,7 @@ final class InheritanceTests extends ConveyorTest {
             factory.conveyorJson()
                 .property("key", "value")
                 .plugin(
-                    factory.plugin(),
+                    factory.pluginBuilder(),
                     Map.of(
                         "parent-key", "${parent-key}",
                         "key", "${key}"
@@ -181,7 +181,7 @@ final class InheritanceTests extends ConveyorTest {
             factory.conveyorJson()
                 .property("key", "value")
                 .plugin(
-                    factory.plugin(),
+                    factory.pluginBuilder(),
                     Map.of("key", "${key}")
                 )
                 .install(path),
@@ -206,15 +206,15 @@ final class InheritanceTests extends ConveyorTest {
         var buildFiles = module.build(
             factory.conveyorJson()
                 .parent(
-                    factory.project("parent")
+                    factory.projectBuilder("parent")
                         .parent(
-                            factory.project("grand-parent")
+                            factory.projectBuilder("grand-parent")
                                 .plugin(
-                                    factory.plugin(),
+                                    factory.pluginBuilder(),
                                     Map.of("key", "${key}")
                                 )
                         )
-                        .dependency(factory.dependency())
+                        .dependency(factory.dependencyBuilder())
                 )
                 .install(path),
             Stage.COMPILE
@@ -239,14 +239,14 @@ final class InheritanceTests extends ConveyorTest {
     ) {
         factory.superParent().install(path);
 
-        var buildFiles = module.build(
+        module.build(
             factory.conveyorJson()
                 .name("project")
                 .subproject(
                     factory.conveyorJson()
                         .name("subproject")
                 )
-                .plugin(factory.plugin())
+                .plugin(factory.pluginBuilder())
                 .install(path),
             Stage.COMPILE
         );

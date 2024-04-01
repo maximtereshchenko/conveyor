@@ -2,7 +2,6 @@ package com.github.maximtereshchenko.conveyor.domain;
 
 import com.github.maximtereshchenko.conveyor.api.port.ArtifactDefinition;
 import com.github.maximtereshchenko.conveyor.api.port.DependencyDefinition;
-import com.github.maximtereshchenko.conveyor.api.port.PluginDefinition;
 import com.github.maximtereshchenko.conveyor.api.port.ProjectDefinition;
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 import java.util.ArrayList;
@@ -24,31 +23,19 @@ final class Dependencies {
         this.artifacts = List.copyOf(artifacts);
     }
 
-    static Dependencies forPlugins(
-        DirectoryRepository repository,
-        Project project
-    ) {
-        return dependencies(
-            repository,
-            new Dependencies(project, List.of(new PluginsRoot(project))),
-            project,
-            project.plugins()
-        );
-    }
-
-    static Dependencies forDependencies(
+    static Dependencies from(
         DirectoryRepository repository,
         Project project,
-        DependencyScope... scopes
+        Collection<? extends ArtifactDefinition> artifactDefinitions
     ) {
         return dependencies(
             repository,
             new Dependencies(
                 project,
-                List.of(new DependenciesRoot(project, Set.of(scopes)))
+                List.of(new Root(project, artifactDefinitions))
             ),
             project,
-            project.dependencies()
+            artifactDefinitions
         );
     }
 
@@ -91,9 +78,9 @@ final class Dependencies {
 
     private int effectiveVersion(String name) {
         return artifacts.stream()
-            .filter(newRelation -> newRelation.hasName(name))
+            .filter(artifact -> artifact.hasName(name))
             .sorted(Comparator.comparingInt(Artifact::version).reversed())
-            .filter(newRelation -> newRelation.canBeUsed(this))
+            .filter(artifact -> artifact.canBeUsed(this))
             .map(Artifact::version)
             .findAny()
             .orElseThrow();
@@ -135,13 +122,13 @@ final class Dependencies {
 
     }
 
-    private static final class PluginsRoot extends Artifact {
+    private static final class Root extends Artifact {
 
-        private final Project project;
+        private final Collection<ArtifactDefinition> dependencies;
 
-        PluginsRoot(Project project) {
+        Root(Project project, Collection<? extends ArtifactDefinition> dependencies) {
             super(project);
-            this.project = project;
+            this.dependencies = List.copyOf(dependencies);
         }
 
         @Override
@@ -151,35 +138,8 @@ final class Dependencies {
 
         @Override
         Set<String> dependsOn() {
-            return project.plugins()
-                .stream()
-                .map(PluginDefinition::name)
-                .collect(Collectors.toSet());
-        }
-    }
-
-    private static final class DependenciesRoot extends Artifact {
-
-        private final Project project;
-        private final Set<DependencyScope> scopes;
-
-        DependenciesRoot(Project project, Set<DependencyScope> scopes) {
-            super(project);
-            this.project = project;
-            this.scopes = scopes;
-        }
-
-        @Override
-        boolean canBeUsed(Dependencies dependencies) {
-            return true;
-        }
-
-        @Override
-        Set<String> dependsOn() {
-            return project.dependencies()
-                .stream()
-                .filter(definition -> scopes.contains(definition.scope()))
-                .map(DependencyDefinition::name)
+            return dependencies.stream()
+                .map(ArtifactDefinition::name)
                 .collect(Collectors.toSet());
         }
     }
