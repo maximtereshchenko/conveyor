@@ -110,7 +110,7 @@ final class Project {
     }
 
     private Map<String, String> pluginConfiguration(ProjectDefinition projectDefinition, String name) {
-        return projectDefinition.plugins()
+        return plugins()
             .stream()
             .filter(pluginDefinition -> pluginDefinition.name().equals(name))
             .map(PluginDefinition::configuration)
