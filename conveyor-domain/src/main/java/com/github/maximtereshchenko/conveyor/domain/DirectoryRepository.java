@@ -1,17 +1,19 @@
 package com.github.maximtereshchenko.conveyor.domain;
 
-import com.github.maximtereshchenko.conveyor.api.port.JsonReader;
+import com.github.maximtereshchenko.conveyor.api.port.ArtifactDefinition;
+import com.github.maximtereshchenko.conveyor.api.port.StoredArtifactDefinition;
+import com.github.maximtereshchenko.conveyor.api.port.StoredArtifactDefinitionReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 final class DirectoryRepository {
 
     private final Path directory;
-    private final JsonReader jsonReader;
+    private final StoredArtifactDefinitionReader reader;
 
-    DirectoryRepository(Path directory, JsonReader jsonReader) {
+    DirectoryRepository(Path directory, StoredArtifactDefinitionReader reader) {
         this.directory = directory;
-        this.jsonReader = jsonReader;
+        this.reader = reader;
     }
 
     Path artifact(ArtifactDefinition artifactDefinition) {
@@ -29,7 +31,7 @@ final class DirectoryRepository {
         if (!Files.exists(definition)) {
             throw new IllegalArgumentException("Could not find artifact definition " + fullName);
         }
-        return jsonReader.read(definition, StoredArtifactDefinition.class);
+        return reader.storedArtifactDefinition(definition);
     }
 
     private String fullName(ArtifactDefinition artifactDefinition) {

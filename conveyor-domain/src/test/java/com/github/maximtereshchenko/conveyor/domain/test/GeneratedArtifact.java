@@ -120,7 +120,7 @@ abstract class GeneratedArtifact {
                 List.of(),
                 List.of(
                     new StringJavaFileObject(packageName(), className() + ".java", classSourceCode()),
-                    new StringJavaFileObject("module-info.java", moduleInfoSourceCode())
+                    new StringJavaFileObject("", "module-info.java", moduleInfoSourceCode())
                 )
             )
             .call();
@@ -197,10 +197,6 @@ abstract class GeneratedArtifact {
         StringJavaFileObject(String packageName, String name, String source) {
             super(URI.create(packageName).resolve(name), Kind.SOURCE);
             this.source = source;
-        }
-
-        StringJavaFileObject(String name, String source) {
-            this("", name, source);
         }
 
         @Override

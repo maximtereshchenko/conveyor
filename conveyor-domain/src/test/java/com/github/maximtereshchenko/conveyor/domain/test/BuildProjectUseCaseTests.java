@@ -5,10 +5,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.github.maximtereshchenko.conveyor.api.BuildSucceeded;
 import com.github.maximtereshchenko.conveyor.api.ConveyorModule;
 import com.github.maximtereshchenko.conveyor.api.CouldNotFindProjectDefinition;
+import com.github.maximtereshchenko.conveyor.api.port.PluginDefinition;
+import com.github.maximtereshchenko.conveyor.api.port.ProjectDefinition;
+import com.github.maximtereshchenko.conveyor.api.port.ProjectDependencyDefinition;
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import com.github.maximtereshchenko.conveyor.domain.ConveyorFacade;
-import com.github.maximtereshchenko.conveyor.projectdefinitionreader.gson.GsonProjectDefinitionReader;
+import com.github.maximtereshchenko.conveyor.gson.GsonAdapter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -17,15 +20,14 @@ import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 final class BuildProjectUseCaseTests {
 
-    private final ConveyorModule module = new ConveyorFacade(new GsonProjectDefinitionReader());
+    private final GsonAdapter gsonAdapter = new GsonAdapter();
+    private final ConveyorModule module = new ConveyorFacade(gsonAdapter, gsonAdapter);
 
     @Test
     void givenNoProjectDefinition_whenBuild_thenCouldNotFindProjectDefinitionReturned(@TempDir Path path) {
@@ -35,7 +37,7 @@ final class BuildProjectUseCaseTests {
     }
 
     @Test
-    void givenProjectDefinition_whenBuild_thenProjectIsBuilt(@TempDir Path path) throws Exception {
+    void givenProjectDefinition_whenBuild_thenProjectIsBuilt(@TempDir Path path) {
         var conveyorJson = conveyorJson(path);
 
         assertThat(module.build(conveyorJson(path), Stage.COMPILE))
@@ -197,24 +199,13 @@ final class BuildProjectUseCaseTests {
     @Test
     void givenPluginConfiguration_whenBuild_thenPluginCanSeeItsConfiguration(@TempDir Path path) throws Exception {
         new GeneratedConveyorPlugin("plugin").install(path);
+
         module.build(
             conveyorJson(
                 path,
-                """
-                    {
-                       "name": "project",
-                       "version": 1,
-                       "plugins": [
-                           {
-                               "name": "plugin",
-                               "version": 1,
-                               "configuration": {
-                                   "property": "value"
-                               }
-                           }
-                       ]
-                    }
-                    """
+                Map.of(),
+                List.of(new PluginDefinition("plugin", 1, Map.of("property", "value"))),
+                List.of()
             ),
             Stage.COMPILE
         );
@@ -227,27 +218,13 @@ final class BuildProjectUseCaseTests {
     @Test
     void givenProperty_whenBuild_thenPropertyInterpolatedIntoPluginConfiguration(@TempDir Path path) throws Exception {
         new GeneratedConveyorPlugin("plugin").install(path);
+
         module.build(
             conveyorJson(
                 path,
-                """
-                    {
-                       "name": "project",
-                       "version": 1,
-                       "properties": {
-                           "property": "value"
-                       },
-                       "plugins": [
-                           {
-                               "name": "plugin",
-                               "version": 1,
-                               "configuration": {
-                                   "property": "${property}-suffix"
-                               }
-                           }
-                       ]
-                    }
-                    """
+                Map.of("property", "value"),
+                List.of(new PluginDefinition("plugin", 1, Map.of("property", "${property}-suffix"))),
+                List.of()
             ),
             Stage.COMPILE
         );
@@ -332,7 +309,7 @@ final class BuildProjectUseCaseTests {
         return Instant.parse(Files.readString(path));
     }
 
-    private Path conveyorJson(Path path, GeneratedArtifactDefinition... plugins) throws IOException {
+    private Path conveyorJson(Path path, GeneratedArtifactDefinition... plugins) {
         return conveyorJson(path, List.of(plugins), Map.of());
     }
 
@@ -340,60 +317,41 @@ final class BuildProjectUseCaseTests {
         Path path,
         Collection<GeneratedArtifactDefinition> plugins,
         Map<GeneratedArtifactDefinition, DependencyScope> dependencies
-    ) throws IOException {
+    ) {
         return conveyorJson(
             path,
-            """
-                {
-                   "name": "project",
-                   "version": 1,
-                   "plugins": [
-                     %s
-                   ],
-                   "dependencies": [
-                     %s
-                   ]
-                }
-                """
-                .formatted(json(plugins), json(dependencies))
+            Map.of(),
+            plugins.stream()
+                .map(definition -> new PluginDefinition(definition.name(), definition.version(), Map.of()))
+                .toList(),
+            dependencies.entrySet()
+                .stream()
+                .map(entry ->
+                    new ProjectDependencyDefinition(
+                        entry.getKey().name(),
+                        entry.getKey().version(),
+                        entry.getValue()
+                    )
+                )
+                .toList()
         );
     }
 
-    private String json(Map<GeneratedArtifactDefinition, DependencyScope> dependencies) {
-        return dependencies.entrySet()
-            .stream()
-            .map(entry ->
-                """
-                    {
-                       "name": "%s",
-                       "version": %d,
-                       "scope": "%s"
-                    }
-                    """
-                    .formatted(
-                        entry.getKey().name(),
-                        entry.getKey().version(),
-                        entry.getValue().toString().toLowerCase(Locale.ROOT)
-                    )
-            )
-            .collect(Collectors.joining(","));
+    private Path conveyorJson(
+        Path path,
+        Map<String, String> properties,
+        Collection<PluginDefinition> plugins,
+        Collection<ProjectDependencyDefinition> dependencies
+    ) {
+        return conveyorJson(
+            path,
+            new ProjectDefinition("project", 1, path, properties, plugins, dependencies)
+        );
     }
 
-    private String json(Collection<GeneratedArtifactDefinition> definitions) {
-        return definitions.stream()
-            .map(definition ->
-                """
-                    {
-                       "name": "%s",
-                       "version": %d
-                    }
-                    """
-                    .formatted(definition.name(), definition.version())
-            )
-            .collect(Collectors.joining(","));
-    }
-
-    private Path conveyorJson(Path path, String json) throws IOException {
-        return Files.writeString(path.resolve("conveyor.json"), json);
+    private Path conveyorJson(Path path, ProjectDefinition projectDefinition) {
+        var conveyorJson = path.resolve("conveyor.json");
+        gsonAdapter.write(conveyorJson, projectDefinition);
+        return conveyorJson;
     }
 }

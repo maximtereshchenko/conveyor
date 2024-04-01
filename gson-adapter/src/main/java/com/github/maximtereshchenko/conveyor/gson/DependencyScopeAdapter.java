@@ -1,4 +1,4 @@
-package com.github.maximtereshchenko.conveyor.projectdefinitionreader.gson;
+package com.github.maximtereshchenko.conveyor.gson;
 
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 import com.google.gson.JsonDeserializationContext;
