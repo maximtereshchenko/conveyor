@@ -6,6 +6,7 @@ import com.github.maximtereshchenko.conveyor.gson.JacksonAdapter;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -80,22 +81,11 @@ final class SchematicBuilder {
     }
 
     SchematicBuilder repository(String name, Path path, boolean enabled) {
-        var copy = new ArrayList<>(schematicDefinition.repositories());
-        copy.add(new RepositoryDefinition(name, path, Optional.of(enabled)));
-        return new SchematicBuilder(
-            gsonAdapter,
-            new SchematicDefinition(
-                schematicDefinition.name(),
-                schematicDefinition.version(),
-                schematicDefinition.template(),
-                schematicDefinition.inclusions(),
-                copy,
-                schematicDefinition.properties(),
-                schematicDefinition.preferences(),
-                schematicDefinition.plugins(),
-                schematicDefinition.dependencies()
-            )
-        );
+        return repository(new LocalDirectoryRepositoryDefinition(name, path, Optional.of(enabled)));
+    }
+
+    SchematicBuilder repository(String name, URL url, boolean enabled) {
+        return repository(new RemoteRepositoryDefinition(name, url, Optional.of(enabled)));
     }
 
     SchematicBuilder inclusion(Path path) {
@@ -130,11 +120,23 @@ final class SchematicBuilder {
     }
 
     SchematicBuilder dependency(String name, String version, DependencyScope scope) {
-        return dependency(new DependencyOnArtifactDefinition(name, Optional.of(version), Optional.of(scope)));
+        return dependency(
+            new DependencyOnArtifactDefinition(
+                name,
+                Optional.of(version),
+                Optional.of(scope)
+            )
+        );
     }
 
     SchematicBuilder dependency(String name, DependencyScope scope) {
-        return dependency(new DependencyOnArtifactDefinition(name, Optional.empty(), Optional.of(scope)));
+        return dependency(
+            new DependencyOnArtifactDefinition(
+                name,
+                Optional.empty(),
+                Optional.of(scope)
+            )
+        );
     }
 
     SchematicBuilder property(String key, String value) {
@@ -199,6 +201,25 @@ final class SchematicBuilder {
                 schematicDefinition.repositories(),
                 schematicDefinition.properties(),
                 new PreferencesDefinition(copy, schematicDefinition.preferences().artifacts()),
+                schematicDefinition.plugins(),
+                schematicDefinition.dependencies()
+            )
+        );
+    }
+
+    private SchematicBuilder repository(RepositoryDefinition repositoryDefinition) {
+        var copy = new ArrayList<>(schematicDefinition.repositories());
+        copy.add(repositoryDefinition);
+        return new SchematicBuilder(
+            gsonAdapter,
+            new SchematicDefinition(
+                schematicDefinition.name(),
+                schematicDefinition.version(),
+                schematicDefinition.template(),
+                schematicDefinition.inclusions(),
+                copy,
+                schematicDefinition.properties(),
+                schematicDefinition.preferences(),
                 schematicDefinition.plugins(),
                 schematicDefinition.dependencies()
             )

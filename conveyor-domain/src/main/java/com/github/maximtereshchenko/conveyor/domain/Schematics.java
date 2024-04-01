@@ -25,7 +25,11 @@ final class Schematics {
             .sorted(this::comparedByMutualRequirement)
             .reduce(
                 new SchematicProducts(),
-                (schematicProducts, schematic) -> schematic.construct(schematicProducts, stage(stage, schematic)),
+                (schematicProducts, schematic) ->
+                    schematic.construct(
+                        schematicProducts,
+                        stage(stage, schematic)
+                    ),
                 (a, b) -> a
             );
     }

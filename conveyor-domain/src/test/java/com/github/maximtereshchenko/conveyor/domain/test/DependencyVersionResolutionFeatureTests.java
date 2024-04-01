@@ -150,7 +150,11 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
         assertThat(defaultConstructionDirectory(path).resolve("module-path"))
             .content(StandardCharsets.UTF_8)
             .hasLineCount(3)
-            .contains("should-not-be-affected-1.0.0", "exclude-affecting-1.0.0", "will-affect-2.0.0");
+            .contains(
+                "should-not-be-affected-1.0.0",
+                "exclude-affecting-1.0.0",
+                "will-affect-2.0.0"
+            );
     }
 
     @Test

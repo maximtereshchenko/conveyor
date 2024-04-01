@@ -67,16 +67,30 @@ final class SchematicDependency extends DependentArtifact<DependencyModel> imple
                 preferences,
                 repositories
             );
-            case SchematicDependencyModel model ->
-                new SchematicDependency(model, schematicProducts, modelFactory, repositories, preferences, properties);
+            case SchematicDependencyModel model -> new SchematicDependency(
+                model,
+                schematicProducts,
+                modelFactory,
+                repositories,
+                preferences,
+                properties
+            );
         };
     }
 
     private FullSchematicHierarchy fullSchematicHierarchy() {
-        return modelFactory.fullSchematicHierarchy(product(ProductType.SCHEMATIC_DEFINITION), repositories);
+        return modelFactory.fullSchematicHierarchy(
+            product(ProductType.SCHEMATIC_DEFINITION),
+            repositories
+        );
     }
 
     private Path product(ProductType productType) {
-        return schematicProducts.byType(schematicDependencyModel.name(), productType).iterator().next();
+        return schematicProducts.byType(
+                schematicDependencyModel.name(),
+                productType
+            )
+            .iterator()
+            .next();
     }
 }

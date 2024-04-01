@@ -7,7 +7,10 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-record PreferencesModel(Set<PreferencesInclusionModel> inclusions, Set<ArtifactPreferenceModel> artifacts) {
+record PreferencesModel(
+    Set<PreferencesInclusionModel> inclusions,
+    Set<ArtifactPreferenceModel> artifacts
+) {
 
     PreferencesModel override(PreferencesModel base) {
         return new PreferencesModel(

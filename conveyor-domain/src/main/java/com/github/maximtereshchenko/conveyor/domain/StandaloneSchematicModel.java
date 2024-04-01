@@ -32,10 +32,13 @@ final class StandaloneSchematicModel
     @Override
     public SchematicTemplateModel template() {
         return switch (schematicDefinition.template()) {
-            case ManualTemplateDefinition definition ->
-                new OtherManualTemplateModel(definition.name(), new SemanticVersion(definition.version()));
+            case ManualTemplateDefinition definition -> new OtherManualTemplateModel(
+                definition.name(),
+                new SemanticVersion(definition.version())
+            );
             case NoExplicitlyDefinedTemplate ignored -> defaultTemplate();
-            case SchematicPathTemplateDefinition definition -> new OtherSchematicTemplateModel(definition.path());
+            case SchematicPathTemplateDefinition definition ->
+                new OtherSchematicTemplateModel(definition.path());
         };
     }
 
@@ -53,7 +56,21 @@ final class StandaloneSchematicModel
     public Set<RepositoryModel> repositories() {
         return schematicDefinition.repositories()
             .stream()
-            .map(definition -> new RepositoryModel(definition.name(), definition.path(), definition.enabled()))
+            .map(repositoryDefinition ->
+                switch (repositoryDefinition) {
+                    case LocalDirectoryRepositoryDefinition definition ->
+                        new LocalDirectoryRepositoryModel(
+                            definition.name(),
+                            definition.path(),
+                            definition.enabled()
+                        );
+                    case RemoteRepositoryDefinition definition -> new RemoteRepositoryModel(
+                        definition.name(),
+                        definition.url(),
+                        definition.enabled()
+                    );
+                }
+            )
             .collect(Collectors.toSet());
     }
 
@@ -97,8 +114,11 @@ final class StandaloneSchematicModel
     @Override
     DependencyModel dependencyModel(SchematicDependencyDefinition dependencyDefinition) {
         return switch (dependencyDefinition) {
-            case DependencyOnArtifactDefinition definition ->
-                new ArtifactDependencyModel(definition.name(), definition.version(), definition.scope());
+            case DependencyOnArtifactDefinition definition -> new ArtifactDependencyModel(
+                definition.name(),
+                definition.version(),
+                definition.scope()
+            );
             case DependencyOnSchematicDefinition definition ->
                 new SchematicDependencyModel(definition.schematic(), definition.scope());
         };

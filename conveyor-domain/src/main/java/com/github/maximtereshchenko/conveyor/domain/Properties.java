@@ -21,7 +21,12 @@ final class Properties {
             all.entrySet()
                 .stream()
                 .filter(entry -> !entry.getValue().isBlank())
-                .collect(Collectors.toMap(Map.Entry::getKey, entry -> interpolated(entry.getValue()))),
+                .collect(
+                    Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> interpolated(entry.getValue())
+                    )
+                ),
             SchematicPropertyKey.NAME.fullName(),
             SchematicPropertyKey.DISCOVERY_DIRECTORY.fullName(),
             SchematicPropertyKey.CONSTRUCTION_DIRECTORY.fullName()

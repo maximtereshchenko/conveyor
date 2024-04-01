@@ -22,7 +22,11 @@ final class ModelFactory {
             .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-    ManualHierarchy manualHierarchy(String name, SemanticVersion version, Repositories repositories) {
+    ManualHierarchy manualHierarchy(
+        String name,
+        SemanticVersion version,
+        Repositories repositories
+    ) {
         return manualHierarchy(name, version, repositories, ManualHierarchy::new);
     }
 
@@ -51,8 +55,17 @@ final class ModelFactory {
         Repositories repositories,
         Function<StandaloneManualModel, ManualHierarchy> combiner
     ) {
-        var standaloneManualModel = new StandaloneManualModel(repositories.manualDefinition(name, version));
-        return manualHierarchy(standaloneManualModel.template(), repositories, combiner.apply(standaloneManualModel));
+        var standaloneManualModel = new StandaloneManualModel(
+            repositories.manualDefinition(
+                name,
+                version
+            )
+        );
+        return manualHierarchy(
+            standaloneManualModel.template(),
+            repositories,
+            combiner.apply(standaloneManualModel)
+        );
     }
 
     private ManualHierarchy manualHierarchy(
@@ -62,8 +75,12 @@ final class ModelFactory {
     ) {
         return switch (manualTemplateModel) {
             case NoTemplateModel ignored -> manualHierarchy;
-            case OtherManualTemplateModel model ->
-                manualHierarchy(model.name(), model.version(), repositories, manualHierarchy::inheritedFrom);
+            case OtherManualTemplateModel model -> manualHierarchy(
+                model.name(),
+                model.version(),
+                repositories,
+                manualHierarchy::inheritedFrom
+            );
         };
     }
 
@@ -97,7 +114,10 @@ final class ModelFactory {
         Function<StandaloneSchematicModel, PartialSchematicHierarchy> combiner
     ) {
         var standaloneSchematicModel = standaloneSchematicModel(path);
-        return partialSchematicHierarchy(standaloneSchematicModel.template(), combiner.apply(standaloneSchematicModel));
+        return partialSchematicHierarchy(
+            standaloneSchematicModel.template(),
+            combiner.apply(standaloneSchematicModel)
+        );
     }
 
     private PartialSchematicHierarchy partialSchematicHierarchy(

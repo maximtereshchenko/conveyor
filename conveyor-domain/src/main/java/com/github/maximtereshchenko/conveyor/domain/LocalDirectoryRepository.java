@@ -7,25 +7,28 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 
-final class EnabledRepository implements Repository {
+final class LocalDirectoryRepository implements Repository {
 
     private final Path path;
     private final DefinitionReader definitionReader;
 
-    EnabledRepository(Path path, DefinitionReader definitionReader) {
+    LocalDirectoryRepository(Path path, DefinitionReader definitionReader) {
         this.path = path;
         this.definitionReader = definitionReader;
     }
 
     @Override
-    public Optional<ManualDefinition> manualDefinition(String name, SemanticVersion version) {
-        return path(fullName(name, version) + ".json")
+    public Optional<ManualDefinition> manualDefinition(
+        String name,
+        SemanticVersion semanticVersion
+    ) {
+        return path(fullName(name, semanticVersion) + ".json")
             .map(definitionReader::manualDefinition);
     }
 
     @Override
-    public Optional<Path> path(String name, SemanticVersion version) {
-        return path(fullName(name, version) + ".jar");
+    public Optional<Path> path(String name, SemanticVersion semanticVersion) {
+        return path(fullName(name, semanticVersion) + ".jar");
     }
 
     private Optional<Path> path(String fileName) {

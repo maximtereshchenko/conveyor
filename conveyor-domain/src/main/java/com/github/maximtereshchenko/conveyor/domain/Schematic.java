@@ -56,7 +56,10 @@ final class Schematic {
 
     SchematicProducts construct(SchematicProducts schematicProducts, Stage stage) {
         var repositories = repositories();
-        var fullSchematicHierarchy = modelFactory.fullSchematicHierarchy(partialSchematicHierarchy, repositories);
+        var fullSchematicHierarchy = modelFactory.fullSchematicHierarchy(
+            partialSchematicHierarchy,
+            repositories
+        );
         var properties = properties(fullSchematicHierarchy);
         var preferences = preferences(fullSchematicHierarchy, repositories, properties);
         return schematicProducts
@@ -67,7 +70,13 @@ final class Schematic {
                     properties,
                     preferences,
                     repositories,
-                    dependencies(fullSchematicHierarchy, properties, preferences, repositories, schematicProducts)
+                    dependencies(
+                        fullSchematicHierarchy,
+                        properties,
+                        preferences,
+                        repositories,
+                        schematicProducts
+                    )
                 )
                     .executeTasks(
                         new Products()
@@ -88,7 +97,13 @@ final class Schematic {
             fullSchematicHierarchy.dependencies()
                 .stream()
                 .map(dependencyModel ->
-                    dependency(dependencyModel, properties, preferences, repositories, schematicProducts)
+                    dependency(
+                        dependencyModel,
+                        properties,
+                        preferences,
+                        repositories,
+                        schematicProducts
+                    )
                 )
                 .collect(Collectors.toSet()),
             modulePathFactory
@@ -105,8 +120,14 @@ final class Schematic {
         return switch (dependencyModel) {
             case ArtifactDependencyModel model ->
                 new DirectDependency(model, modelFactory, properties, preferences, repositories);
-            case SchematicDependencyModel model ->
-                new SchematicDependency(model, schematicProducts, modelFactory, repositories, preferences, properties);
+            case SchematicDependencyModel model -> new SchematicDependency(
+                model,
+                schematicProducts,
+                modelFactory,
+                repositories,
+                preferences,
+                properties
+            );
         };
     }
 
@@ -121,16 +142,27 @@ final class Schematic {
         return new Repositories(
             partialSchematicHierarchy.repositories()
                 .stream()
-                .map(repositoryModel -> repository(repositoryModel, partialSchematicHierarchy.path()))
+                .map(repositoryModel ->
+                    repository(
+                        repositoryModel,
+                        partialSchematicHierarchy.path()
+                    )
+                )
                 .collect(Collectors.toSet())
         );
     }
 
     private Repository repository(RepositoryModel repositoryModel, Path path) {
-        if (repositoryModel.enabled().orElse(Boolean.TRUE)) {
-            return new EnabledRepository(path.getParent().resolve(repositoryModel.path()), definitionReader);
+        if (!repositoryModel.enabled().orElse(Boolean.TRUE)) {
+            return new DisabledRepository();
         }
-        return new DisabledRepository();
+        return switch (repositoryModel) {
+            case LocalDirectoryRepositoryModel model -> new LocalDirectoryRepository(
+                path.getParent().resolve(model.path()),
+                definitionReader
+            );
+            case RemoteRepositoryModel model -> new RemoteRepository(model.url(), path.getParent());
+        };
     }
 
     private Plugins plugins(
@@ -143,7 +175,15 @@ final class Schematic {
         return new Plugins(
             fullSchematicHierarchy.plugins()
                 .stream()
-                .map(pluginModel -> new Plugin(pluginModel, properties, modelFactory, preferences, repositories))
+                .map(pluginModel ->
+                    new Plugin(
+                        pluginModel,
+                        properties,
+                        modelFactory,
+                        preferences,
+                        repositories
+                    )
+                )
                 .collect(Collectors.toSet()),
             modulePathFactory,
             properties,
@@ -154,7 +194,10 @@ final class Schematic {
     private Properties properties(FullSchematicHierarchy fullSchematicHierarchy) {
         var properties = new HashMap<>(fullSchematicHierarchy.properties());
         properties.put(SchematicPropertyKey.NAME.fullName(), fullSchematicHierarchy.name());
-        properties.put(SchematicPropertyKey.VERSION.fullName(), String.valueOf(fullSchematicHierarchy.version()));
+        properties.put(
+            SchematicPropertyKey.VERSION.fullName(),
+            String.valueOf(fullSchematicHierarchy.version())
+        );
         put(
             properties,
             SchematicPropertyKey.DISCOVERY_DIRECTORY,
@@ -218,7 +261,12 @@ final class Schematic {
         properties.put(
             schematicPropertyKey.fullName(),
             path.getParent()
-                .resolve(properties.getOrDefault(schematicPropertyKey.fullName(), defaultRelativePath))
+                .resolve(
+                    properties.getOrDefault(
+                        schematicPropertyKey.fullName(),
+                        defaultRelativePath
+                    )
+                )
                 .normalize()
                 .toString()
         );

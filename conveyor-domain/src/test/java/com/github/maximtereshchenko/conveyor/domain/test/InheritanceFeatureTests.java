@@ -374,7 +374,9 @@ final class InheritanceFeatureTests extends ConveyorTest {
         BuilderFactory factory
     ) {
         factory.repositoryBuilder()
-            .superManual(builder -> builder.plugin("instant", "1.0.0", Map.of("instant", "COMPILE-RUN")))
+            .superManual(builder ->
+                builder.plugin("instant", "1.0.0", Map.of("instant", "COMPILE-RUN"))
+            )
             .manual(builder -> builder.name("instant").version("1.0.0"))
             .jar("instant", builder -> builder.name("instant").version("1.0.0"))
             .install(path);

@@ -3,9 +3,12 @@ package com.github.maximtereshchenko.conveyor.domain;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-final class PartialSchematicHierarchy extends SchematicHierarchy<OtherManualTemplateModel, SchematicTemplateModel> {
+final class PartialSchematicHierarchy
+    extends SchematicHierarchy<OtherManualTemplateModel, SchematicTemplateModel> {
 
-    private PartialSchematicHierarchy(LinkedHashSet<SchematicModel<? extends SchematicTemplateModel>> models) {
+    private PartialSchematicHierarchy(
+        LinkedHashSet<SchematicModel<? extends SchematicTemplateModel>> models
+    ) {
         super(models);
     }
 

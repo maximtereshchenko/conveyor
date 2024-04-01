@@ -24,7 +24,11 @@ abstract class SchematicHierarchy<T extends TemplateModel, R extends TemplateMod
 
     @Override
     public Set<RepositoryModel> repositories() {
-        return reduce(SchematicModel::repositories, RepositoryModel::name, RepositoryModel::override);
+        return reduce(
+            SchematicModel::repositories,
+            RepositoryModel::name,
+            RepositoryModel::override
+        );
     }
 }
 

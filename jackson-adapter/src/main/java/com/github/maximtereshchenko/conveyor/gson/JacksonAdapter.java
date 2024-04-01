@@ -21,10 +21,23 @@ public final class JacksonAdapter implements DefinitionReader {
     public static JacksonAdapter configured() {
         var module = new SimpleModule();
         module.addSerializer(Path.class, new ToStringSerializer());
-        module.addSerializer(NoExplicitlyDefinedTemplate.class, new NoExplicitlyDefinedTemplateSerializer());
-        module.addDeserializer(TemplateForSchematicDefinition.class, new TemplateForSchematicDefinitionDeserializer());
-        module.addDeserializer(TemplateForManualDefinition.class, new TemplateForManualDefinitionDeserializer());
-        module.addDeserializer(SchematicDependencyDefinition.class, new DependencyDefinitionDeserializer());
+        module.addSerializer(
+            NoExplicitlyDefinedTemplate.class,
+            new NoExplicitlyDefinedTemplateSerializer()
+        );
+        module.addDeserializer(
+            TemplateForSchematicDefinition.class,
+            new TemplateForSchematicDefinitionDeserializer()
+        );
+        module.addDeserializer(
+            TemplateForManualDefinition.class,
+            new TemplateForManualDefinitionDeserializer()
+        );
+        module.addDeserializer(
+            SchematicDependencyDefinition.class,
+            new DependencyDefinitionDeserializer()
+        );
+        module.addDeserializer(RepositoryDefinition.class, new RepositoryDefinitionDeserializer());
         return new JacksonAdapter(
             new ObjectMapper()
                 .registerModule(module)

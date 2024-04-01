@@ -28,8 +28,10 @@ final class StandaloneManualModel
     @Override
     public ManualTemplateModel template() {
         return switch (manualDefinition.template()) {
-            case ManualTemplateDefinition definition ->
-                new OtherManualTemplateModel(definition.name(), new SemanticVersion(definition.version()));
+            case ManualTemplateDefinition definition -> new OtherManualTemplateModel(
+                definition.name(),
+                new SemanticVersion(definition.version())
+            );
             case NoExplicitlyDefinedTemplate ignored -> new NoTemplateModel();
         };
     }

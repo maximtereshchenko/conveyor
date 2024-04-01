@@ -27,7 +27,11 @@ final class DependencyDefinitionDeserializer extends StdDeserializer<SchematicDe
         var scope = scope(node);
         var schematic = node.get("schematic");
         if (schematic == null) {
-            return new DependencyOnArtifactDefinition(node.get("name").asText(), version(node), scope);
+            return new DependencyOnArtifactDefinition(
+                node.get("name").asText(),
+                version(node),
+                scope
+            );
         }
         return new DependencyOnSchematicDefinition(schematic.asText(), scope);
     }

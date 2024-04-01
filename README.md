@@ -87,10 +87,10 @@ A build tool for Java projects
       together with its schematic templates, inclusions and also with other schematics and their schematic templates, on
       which targeted schematic depends either directly or transitively
 * Repositories
-    * Repositories are defined in a schematic with a name, a path to the directory containing artifacts and manuals and
-      an optional `enabled` flag
-    * The path to the directory containing artifacts and manuals is relative to the directory, where the schematic
-      definition is located
-    * Repositories are inherited from a schematic used as a template
-    * The path can be overridden in a schematic
+    * Repositories are defined in a schematic
+    * Every repository has a name and an optional `enabled` flag
     * A repository can be disabled with the `enabled` flag equal to `false`
+    * Repositories are inherited from a schematic used as a template
+    * Local directory can be used as a source of artifacts and manuals. It is defined by a path relative to the
+      directory, where the schematic definition is located. The path can be overridden in a schematic
+    * Remote repository is defined with a URL to a repository with Maven2 layout. 

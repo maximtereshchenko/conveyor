@@ -43,12 +43,19 @@ final class Plugin extends StoredArtifact<ArtifactDependencyModel> {
 
     @Override
     Set<ArtifactDependencyModel> dependencyModels() {
-        return modelFactory.manualHierarchy(pluginModel.name(), version(), repositories()).dependencies();
+        return modelFactory.manualHierarchy(pluginModel.name(), version(), repositories())
+            .dependencies();
     }
 
     @Override
     Dependency dependency(ArtifactDependencyModel dependencyModel) {
-        return new TransitiveDependency(dependencyModel, modelFactory, properties, preferences, repositories());
+        return new TransitiveDependency(
+            dependencyModel,
+            modelFactory,
+            properties,
+            preferences,
+            repositories()
+        );
     }
 
     boolean isEnabled() {

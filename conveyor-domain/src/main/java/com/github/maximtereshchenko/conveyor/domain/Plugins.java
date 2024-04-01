@@ -20,7 +20,12 @@ final class Plugins {
     private final Properties properties;
     private final Dependencies dependencies;
 
-    Plugins(Set<Plugin> all, ModulePathFactory modulePathFactory, Properties properties, Dependencies dependencies) {
+    Plugins(
+        Set<Plugin> all,
+        ModulePathFactory modulePathFactory,
+        Properties properties,
+        Dependencies dependencies
+    ) {
         this.all = all;
         this.modulePathFactory = modulePathFactory;
         this.properties = properties;
@@ -36,7 +41,11 @@ final class Plugins {
             .map(ConveyorTaskBinding::task)
             .reduce(
                 products,
-                (aggregated, task) -> task.execute(scopes -> dependencies.modulePath(Set.of(scopes)), aggregated),
+                (aggregated, task) ->
+                    task.execute(
+                        scopes -> dependencies.modulePath(Set.of(scopes)),
+                        aggregated
+                    ),
                 (a, b) -> a
             );
     }
@@ -49,13 +58,22 @@ final class Plugins {
         return conveyorTaskBinding.stage().compareTo(stage) <= 0;
     }
 
-    private Stream<ConveyorTaskBinding> bindings(ConveyorProperties conveyorProperties, ConveyorPlugin conveyorPlugin) {
-        return conveyorPlugin.bindings(conveyorProperties, named(conveyorPlugin.name()).configuration())
+    private Stream<ConveyorTaskBinding> bindings(
+        ConveyorProperties conveyorProperties,
+        ConveyorPlugin conveyorPlugin
+    ) {
+        return conveyorPlugin.bindings(
+                conveyorProperties,
+                named(conveyorPlugin.name()).configuration()
+            )
             .stream();
     }
 
     private Stream<ConveyorPlugin> conveyorPlugins() {
-        return ServiceLoader.load(moduleLayer(modulePathFactory.modulePath(all)), ConveyorPlugin.class)
+        return ServiceLoader.load(
+                moduleLayer(modulePathFactory.modulePath(all)),
+                ConveyorPlugin.class
+            )
             .stream()
             .map(ServiceLoader.Provider::get);
     }

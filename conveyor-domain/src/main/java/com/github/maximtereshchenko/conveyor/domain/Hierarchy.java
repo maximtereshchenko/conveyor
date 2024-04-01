@@ -5,8 +5,10 @@ import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-abstract class Hierarchy<T extends TemplateModel, D extends DependencyModel, M extends Model<? extends TemplateModel,
-    D>>
+abstract class Hierarchy
+    <T extends TemplateModel,
+        D extends DependencyModel,
+        M extends Model<? extends TemplateModel, D>>
     implements Model<T, D> {
 
     private final LinkedHashSet<? extends M> models;
@@ -65,7 +67,11 @@ abstract class Hierarchy<T extends TemplateModel, D extends DependencyModel, M e
                 .map(extractor)
                 .flatMap(Collection::stream)
                 .collect(
-                    Collectors.toMap(classifier, Function.identity(), (first, second) -> reducer.apply(second, first))
+                    Collectors.toMap(
+                        classifier,
+                        Function.identity(),
+                        (first, second) -> reducer.apply(second, first)
+                    )
                 )
                 .values()
         );
