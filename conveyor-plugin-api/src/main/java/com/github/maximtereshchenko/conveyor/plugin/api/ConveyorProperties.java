@@ -3,6 +3,7 @@ package com.github.maximtereshchenko.conveyor.plugin.api;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
+import java.util.stream.Stream;
 
 public final class ConveyorProperties {
 
@@ -33,6 +34,10 @@ public final class ConveyorProperties {
 
     public Path constructionDirectory() {
         return path(constructionDirectoryKey);
+    }
+
+    public Stream<Map.Entry<String,String>> stream(){
+        return properties.entrySet().stream();
     }
 
     private Path path(String key) {

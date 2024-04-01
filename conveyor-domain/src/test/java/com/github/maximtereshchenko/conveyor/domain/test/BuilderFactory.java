@@ -1,17 +1,17 @@
 package com.github.maximtereshchenko.conveyor.domain.test;
 
-import com.github.maximtereshchenko.conveyor.gson.GsonAdapter;
+import com.github.maximtereshchenko.conveyor.gson.JacksonAdapter;
 
 final class BuilderFactory {
 
-    private final GsonAdapter gsonAdapter;
+    private final JacksonAdapter gsonAdapter;
 
-    BuilderFactory(GsonAdapter gsonAdapter) {
+    BuilderFactory(JacksonAdapter gsonAdapter) {
         this.gsonAdapter = gsonAdapter;
     }
 
     SchematicBuilder schematicBuilder() {
-        return new SchematicBuilder(gsonAdapter).name("project");
+        return new SchematicBuilder(gsonAdapter).name("project"); //TODO
     }
 
     RepositoryBuilder repositoryBuilder() {

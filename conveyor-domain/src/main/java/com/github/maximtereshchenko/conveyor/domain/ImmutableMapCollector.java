@@ -9,26 +9,38 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 
-final class ImmutableMapCollector<T, K> implements Collector<T, Map<K, T>, ImmutableMap<K, T>> {
+final class ImmutableMapCollector<K, V> implements Collector<V, Map<K, V>, ImmutableMap<K, V>> {
 
-    private final Function<T, K> classifier;
+    private final Function<V, K> classifier;
+    private final BinaryOperator<V> merger;
 
-    ImmutableMapCollector(Function<T, K> classifier) {
+    ImmutableMapCollector(Function<V, K> classifier, BinaryOperator<V> merger) {
         this.classifier = classifier;
+        this.merger = merger;
+    }
+
+    ImmutableMapCollector(Function<V, K> classifier) {
+        this(classifier, (present, inserted) -> {
+            throw new IllegalArgumentException("Attempted merging values %s and %s".formatted(present, inserted));
+        });
     }
 
     @Override
-    public Supplier<Map<K, T>> supplier() {
+    public Supplier<Map<K, V>> supplier() {
         return HashMap::new;
     }
 
     @Override
-    public BiConsumer<Map<K, T>, T> accumulator() {
-        return (map, value) -> map.put(classifier.apply(value), value);
+    public BiConsumer<Map<K, V>, V> accumulator() {
+        return (map, value) ->
+            map.compute(
+                classifier.apply(value),
+                (key, present) -> present == null ? value : merger.apply(present, value)
+            );
     }
 
     @Override
-    public BinaryOperator<Map<K, T>> combiner() {
+    public BinaryOperator<Map<K, V>> combiner() {
         return (first, second) -> {
             first.putAll(second);
             return first;
@@ -36,7 +48,7 @@ final class ImmutableMapCollector<T, K> implements Collector<T, Map<K, T>, Immut
     }
 
     @Override
-    public Function<Map<K, T>, ImmutableMap<K, T>> finisher() {
+    public Function<Map<K, V>, ImmutableMap<K, V>> finisher() {
         return ImmutableMap::new;
     }
 

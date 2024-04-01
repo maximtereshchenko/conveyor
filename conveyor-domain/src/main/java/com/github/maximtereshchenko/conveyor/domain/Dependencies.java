@@ -1,19 +1,17 @@
 package com.github.maximtereshchenko.conveyor.domain;
 
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematicDependencies;
 
 import java.nio.file.Path;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-final class Dependencies implements ConveyorSchematicDependencies {
+final class Dependencies {
 
-    private final ImmutableMap<String, Dependency> byName;
+    private final ImmutableMap<String, Dependency> indexed;
 
-    private Dependencies(ImmutableMap<String, Dependency> byName) {
-        this.byName = byName;
+    private Dependencies(ImmutableMap<String, Dependency> indexed) {
+        this.indexed = indexed;
     }
 
     Dependencies() {
@@ -27,28 +25,20 @@ final class Dependencies implements ConveyorSchematicDependencies {
         );
     }
 
-    @Override
-    public Set<Path> modulePath(DependencyScope... scopes) {
+    Set<Path> modulePath(Repository repository, ImmutableSet<DependencyScope> scopes) {
         return ModulePath.from(
-                byName.values()
+                indexed.values()
                     .stream()
-                    .filter(artifact -> artifact.hasAny(scopes))
+                    .filter(dependency -> dependency.in(scopes))
+                    .map(dependency -> dependency.artifact(repository))
                     .collect(new ImmutableSetCollector<>())
             )
-            .modulePath()
+            .resolved()
             .stream()
             .collect(Collectors.toSet());
     }
 
-    Stream<Dependency> stream() {
-        return byName.values().stream();
-    }
-
-    Dependencies with(Dependencies dependencies) {
-        return new Dependencies(byName.withAll(dependencies.byName));
-    }
-
-    boolean contains(String name) {
-        return byName.containsKey(name);
+    Dependencies override(Dependencies base) {
+        return new Dependencies(base.indexed.withAll(indexed));
     }
 }

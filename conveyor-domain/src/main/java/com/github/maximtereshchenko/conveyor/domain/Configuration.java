@@ -1,43 +1,36 @@
 package com.github.maximtereshchenko.conveyor.domain;
 
 import java.util.Map;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 final class Configuration {
 
-    private final Properties properties;
-    private final ImmutableMap<String, String> defined;
-    private final Pattern interpolationPattern;
+    private static final String ENABLED_KEY = "enabled";
 
-    Configuration(Properties properties, ImmutableMap<String, String> defined) {
-        this.properties = properties;
-        this.defined = defined;
-        this.interpolationPattern = Pattern.compile("\\$\\{([^}]+)}");
+    private final ImmutableMap<String, String> map;
+
+    private Configuration(ImmutableMap<String, String> map) {
+        this.map = map;
     }
 
-    Map<String, String> interpolated() {
-        return defined.stream()
-            .collect(
-                Collectors.collectingAndThen(
-                    Collectors.toMap(Map.Entry::getKey, this::interpolated),
-                    Map::copyOf
-                )
-            );
+    static Configuration from(Map<String, String> map) {
+        return new Configuration(new ImmutableMap<>(map));
     }
 
-    Configuration override(Configuration configuration) {
-        return new Configuration(configuration.properties, defined.withAll(configuration.defined));
+    Configuration override(Configuration base) {
+        return new Configuration(base.map.withAll(map));
     }
 
-    private String interpolated(Map.Entry<String, String> entry) {
-        return interpolationPattern.matcher(entry.getValue())
-            .results()
-            .reduce(
-                entry.getValue(),
-                (current, matchResult) ->
-                    current.replace(matchResult.group(), properties.value(matchResult.group(1))),
-                new PickSecond<>()
-            );
+    boolean isEnabled() {
+        return map.value(ENABLED_KEY)
+            .map(Boolean::valueOf)
+            .orElse(Boolean.TRUE);
+    }
+
+    Map<String, String> interpolated(Properties properties) {
+        return map.computeIfAbsent(ENABLED_KEY, () -> "true")
+            .stream()
+            .filter(entry -> !entry.getValue().isBlank())
+            .collect(Collectors.toMap(Map.Entry::getKey, entry -> properties.interpolated(entry.getValue())));
     }
 }

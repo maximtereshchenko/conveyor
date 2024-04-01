@@ -109,7 +109,7 @@ final class ConveyorPluginTests extends ConveyorTest {
 
         assertThat(defaultConstructionDirectory(path).resolve("configuration"))
             .content(StandardCharsets.UTF_8)
-            .isEqualTo("property=value");
+            .contains("property=value");
     }
 
     @Test

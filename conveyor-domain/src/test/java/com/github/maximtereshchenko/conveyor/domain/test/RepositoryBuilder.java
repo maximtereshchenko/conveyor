@@ -1,6 +1,6 @@
 package com.github.maximtereshchenko.conveyor.domain.test;
 
-import com.github.maximtereshchenko.conveyor.gson.GsonAdapter;
+import com.github.maximtereshchenko.conveyor.gson.JacksonAdapter;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -16,15 +16,15 @@ import java.util.function.UnaryOperator;
 
 final class RepositoryBuilder {
 
-    private final GsonAdapter gsonAdapter;
+    private final JacksonAdapter gsonAdapter;
     private final Collection<Installation> installations;
 
-    private RepositoryBuilder(GsonAdapter gsonAdapter, Collection<Installation> installations) {
+    private RepositoryBuilder(JacksonAdapter gsonAdapter, Collection<Installation> installations) {
         this.gsonAdapter = gsonAdapter;
         this.installations = List.copyOf(installations);
     }
 
-    RepositoryBuilder(GsonAdapter gsonAdapter) {
+    RepositoryBuilder(JacksonAdapter gsonAdapter) {
         this(gsonAdapter, List.of());
     }
 

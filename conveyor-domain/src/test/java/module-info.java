@@ -3,8 +3,9 @@ module com.github.maximtereshchenko.conveyor.domain.test {
     requires com.github.maximtereshchenko.conveyor.api;
     requires com.github.maximtereshchenko.conveyor.common.api;
     requires com.github.maximtereshchenko.conveyor.domain;
-    requires com.github.maximtereshchenko.conveyor.gson;
+    requires com.github.maximtereshchenko.conveyor.jackson;
     requires org.junit.jupiter.api;
     requires org.assertj.core;
+    requires com.github.maximtereshchenko.conveyor.plugin.api;
     opens com.github.maximtereshchenko.conveyor.domain.test to org.junit.platform.commons;
 }

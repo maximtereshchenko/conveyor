@@ -142,6 +142,6 @@ final class PropertiesTests extends ConveyorTest {
 
         assertThat(defaultConstructionDirectory(path).resolve("configuration"))
             .content(StandardCharsets.UTF_8)
-            .isEqualTo("property=value-suffix");
+            .contains("property=value-suffix");
     }
 }

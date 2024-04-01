@@ -28,13 +28,13 @@ final class ModulePathTests extends ConveyorTest {
                     .version(1)
                     .dependency("dependency", 1, DependencyScope.IMPLEMENTATION)
             )
-            .jar("module-path-conveyor-plugin", builder -> builder.name("first").version(1))
+            .jar("module-path", builder -> builder.name("first").version(1))
             .manual(builder ->
                 builder.name("second")
                     .version(1)
                     .dependency("dependency", 2, DependencyScope.IMPLEMENTATION)
             )
-            .jar("module-path-conveyor-plugin", builder -> builder.name("second").version(1))
+            .jar("module-path", builder -> builder.name("second").version(1))
             .manual(builder -> builder.name("dependency").version(1))
             .manual(builder -> builder.name("dependency").version(2))
             .jar("dependency", builder -> builder.name("dependency").version(2))
@@ -67,7 +67,7 @@ final class ModulePathTests extends ConveyorTest {
                     .version(1)
                     .dependency("dependency", 1, DependencyScope.IMPLEMENTATION)
             )
-            .jar("module-path-conveyor-plugin", builder -> builder.name("plugin").version(1))
+            .jar("module-path", builder -> builder.name("plugin").version(1))
             .manual(builder ->
                 builder.name("dependency")
                     .version(1)
@@ -104,7 +104,7 @@ final class ModulePathTests extends ConveyorTest {
                     .version(1)
                     .dependency("test", 1, DependencyScope.TEST)
             )
-            .jar("module-path-conveyor-plugin", builder -> builder.name("plugin").version(1))
+            .jar("module-path", builder -> builder.name("plugin").version(1))
             .install(path);
 
         var conveyorJson = factory.schematicBuilder()
@@ -128,13 +128,13 @@ final class ModulePathTests extends ConveyorTest {
                     .version(1)
                     .dependency("common", 1, DependencyScope.IMPLEMENTATION)
             )
-            .jar("module-path-conveyor-plugin", builder -> builder.name("first").version(1))
+            .jar("module-path", builder -> builder.name("first").version(1))
             .manual(builder ->
                 builder.name("second")
                     .version(1)
                     .dependency("dependency", 1, DependencyScope.IMPLEMENTATION)
             )
-            .jar("module-path-conveyor-plugin", builder -> builder.name("second").version(1))
+            .jar("module-path", builder -> builder.name("second").version(1))
             .manual(builder ->
                 builder.name("common")
                     .version(1)
@@ -180,7 +180,7 @@ final class ModulePathTests extends ConveyorTest {
                     .dependency("can-affect-versions", 1, DependencyScope.IMPLEMENTATION)
                     .dependency("will-remove-dependency", 1, DependencyScope.IMPLEMENTATION)
             )
-            .jar("module-path-conveyor-plugin", builder -> builder.name("plugin").version(1))
+            .jar("module-path", builder -> builder.name("plugin").version(1))
             .manual(builder -> builder.name("should-not-be-updated").version(1))
             .jar("dependency", builder -> builder.name("should-not-be-updated").version(1))
             .manual(builder ->

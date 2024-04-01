@@ -1,12 +1,60 @@
 package com.github.maximtereshchenko.conveyor.domain;
 
 import com.github.maximtereshchenko.conveyor.api.SchematicProducts;
+import com.github.maximtereshchenko.conveyor.api.port.*;
 
-interface Manual {
+import java.util.Optional;
 
-    Properties properties();
+final class Manual extends Definition {
 
-    Plugins plugins();
+    private final String name;
+    private final int version;
 
-    Dependencies dependencies(SchematicProducts schematicProducts);
+    Manual(DefinitionReader definitionReader, String name, int version) {
+        super(definitionReader);
+        this.name = name;
+        this.version = version;
+    }
+
+    static Template superManual(DefinitionReader definitionReader) {
+        return new Manual(definitionReader, "super-manual", 1);
+    }
+
+    @Override
+    public Optional<Repository> repository() {
+        return Optional.empty();
+    }
+
+    @Override
+    public Properties properties(Repository repository) {
+        var manualDefinition = manualDefinition(repository);
+        return properties(manualDefinition.properties())
+            .override(template(manualDefinition.template()).properties(repository));
+    }
+
+    @Override
+    public Plugins plugins(Repository repository) {
+        var manualDefinition = manualDefinition(repository);
+        return plugins(manualDefinition.plugins())
+            .override(template(manualDefinition.template()).plugins(repository));
+    }
+
+    @Override
+    public Dependencies dependencies(Repository repository, SchematicProducts schematicProducts) {
+        var manualDefinition = manualDefinition(repository);
+        return dependencies(manualDefinition.dependencies(), schematicProducts)
+            .override(template(manualDefinition.template()).dependencies(repository, schematicProducts));
+    }
+
+    private ManualDefinition manualDefinition(Repository repository) {
+        return repository.manualDefinition(name, version);
+    }
+
+    private Template template(TemplateDefinition templateDefinition) {
+        return switch (templateDefinition) {
+            case ManualTemplateDefinition definition ->
+                new Manual(definitionReader(), definition.name(), definition.version());
+            case NoExplicitTemplate ignored -> new EmptyTemplate();
+        };
+    }
 }

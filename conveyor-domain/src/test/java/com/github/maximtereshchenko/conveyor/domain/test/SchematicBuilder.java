@@ -2,37 +2,33 @@ package com.github.maximtereshchenko.conveyor.domain.test;
 
 import com.github.maximtereshchenko.conveyor.api.port.*;
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
-import com.github.maximtereshchenko.conveyor.gson.GsonAdapter;
+import com.github.maximtereshchenko.conveyor.gson.JacksonAdapter;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 final class SchematicBuilder {
 
-    private final GsonAdapter gsonAdapter;
+    private final JacksonAdapter gsonAdapter;
     private final SchematicDefinition schematicDefinition;
 
-    private SchematicBuilder(GsonAdapter gsonAdapter, SchematicDefinition schematicDefinition) {
+    private SchematicBuilder(JacksonAdapter gsonAdapter, SchematicDefinition schematicDefinition) {
         this.gsonAdapter = gsonAdapter;
         this.schematicDefinition = schematicDefinition;
     }
 
-    SchematicBuilder(GsonAdapter gsonAdapter) {
+    SchematicBuilder(JacksonAdapter gsonAdapter) {
         this(
             gsonAdapter,
             new SchematicDefinition(
                 "",
-                1,
+                0,
                 new NoExplicitTemplate(),
                 List.of(),
-                Paths.get(""),
+                Optional.empty(),
                 Map.of(),
                 List.of(),
                 List.of()
@@ -46,6 +42,22 @@ final class SchematicBuilder {
             new SchematicDefinition(
                 name,
                 schematicDefinition.version(),
+                schematicDefinition.template(),
+                schematicDefinition.inclusions(),
+                schematicDefinition.repository(),
+                schematicDefinition.properties(),
+                schematicDefinition.plugins(),
+                schematicDefinition.dependencies()
+            )
+        );
+    }
+
+    SchematicBuilder version(int version) {
+        return new SchematicBuilder(
+            gsonAdapter,
+            new SchematicDefinition(
+                schematicDefinition.name(),
+                version,
                 schematicDefinition.template(),
                 schematicDefinition.inclusions(),
                 schematicDefinition.repository(),
@@ -80,7 +92,7 @@ final class SchematicBuilder {
                 schematicDefinition.version(),
                 schematicDefinition.template(),
                 schematicDefinition.inclusions(),
-                path,
+                Optional.of(path),
                 schematicDefinition.properties(),
                 schematicDefinition.plugins(),
                 schematicDefinition.dependencies()
@@ -106,9 +118,17 @@ final class SchematicBuilder {
         );
     }
 
+    SchematicBuilder plugin(String name, Map<String, String> configuration) {
+        return plugin(new PluginDefinition(name, OptionalInt.empty(), configuration));
+    }
+
     SchematicBuilder plugin(String name, int version, Map<String, String> configuration) {
+        return plugin(new PluginDefinition(name, OptionalInt.of(version), configuration));
+    }
+
+    SchematicBuilder plugin(PluginDefinition pluginDefinition) {
         var copy = new ArrayList<>(schematicDefinition.plugins());
-        copy.add(new PluginDefinition(name, version, configuration));
+        copy.add(pluginDefinition);
         return new SchematicBuilder(
             gsonAdapter,
             new SchematicDefinition(
