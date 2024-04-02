@@ -585,7 +585,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
         module.construct(
             factory.schematicDefinitionBuilder()
                 .repository(path)
-                .preferenceInclusion("bom", "1.0.0")
+                .preferenceInclusion("bom")
                 .plugin("instant", Map.of("instant", "COMPILE-RUN"))
                 .install(path),
             Stage.COMPILE
@@ -611,7 +611,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("bom")
-                    .preferenceInclusion("parent-bom", "1.0.0")
+                    .preferenceInclusion("parent-bom")
             )
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -624,7 +624,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
             factory.schematicDefinitionBuilder()
 
                 .repository(path)
-                .preferenceInclusion("bom", "1.0.0")
+                .preferenceInclusion("bom")
                 .plugin("instant", Map.of("instant", "COMPILE-RUN"))
                 .install(path),
             Stage.COMPILE
@@ -921,6 +921,83 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                 .repository(path)
                 .property("bom.version", "1.0.0")
                 .preferenceInclusion("bom", "${bom.version}")
+                .plugin("instant", Map.of("instant", "COMPILE-RUN"))
+                .install(path),
+            Stage.COMPILE
+        );
+
+        assertThat(defaultConstructionDirectory(path).resolve("instant")).exists();
+    }
+
+    @Test
+    void givenPreferenceIncludedWithMultipleVersions_whenConstructToStage_thenPreferenceWithHighestVersionIsUsed(
+        Path path,
+        ConveyorModule module,
+        BuilderFactory factory
+    ) {
+        factory.repositoryBuilder()
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("instant")
+                    .version("2.0.0")
+            )
+            .jar(
+                factory.jarBuilder("instant")
+                    .version("2.0.0")
+            )
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("bom-with-lower-version")
+                    .preference("instant", "1.0.0")
+            )
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("bom-with-higher-version")
+                    .preference("instant", "2.0.0")
+            )
+            .install(path);
+
+        module.construct(
+            factory.schematicDefinitionBuilder()
+                .repository(path)
+                .preferenceInclusion("bom-with-higher-version")
+                .preferenceInclusion("bom-with-lower-version")
+                .plugin("instant", Map.of("instant", "COMPILE-RUN"))
+                .install(path),
+            Stage.COMPILE
+        );
+
+        assertThat(defaultConstructionDirectory(path).resolve("instant")).exists();
+    }
+
+    @Test
+    void givenPreferenceFromInclusionDefined_whenConstructToStage_thenPreferenceWithDefinedVersionIsUsed(
+        Path path,
+        ConveyorModule module,
+        BuilderFactory factory
+    ) {
+        factory.repositoryBuilder()
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("instant")
+                    .version("1.0.0")
+            )
+            .jar(
+                factory.jarBuilder("instant")
+                    .version("1.0.0")
+            )
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("bom")
+                    .preference("instant", "2.0.0")
+            )
+            .install(path);
+
+        module.construct(
+            factory.schematicDefinitionBuilder()
+                .repository(path)
+                .preferenceInclusion("bom")
+                .preference("instant", "1.0.0")
                 .plugin("instant", Map.of("instant", "COMPILE-RUN"))
                 .install(path),
             Stage.COMPILE

@@ -7,7 +7,9 @@ import com.github.maximtereshchenko.conveyor.common.api.SchematicCoordinates;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -65,7 +67,7 @@ final class Schematic {
             repositories
         );
         var properties = properties(completeModel);
-        var preferences = preferences(completeModel, repositories, properties);
+        var preferences = preferences(completeModel, properties, repositories);
         var schematicCoordinates = completeModel.id().coordinates(completeModel.version());
         var dependencies = dependencies(completeModel, properties, preferences, repositories);
         return plugins(completeModel, properties, preferences, repositories)
@@ -225,49 +227,85 @@ final class Schematic {
         );
     }
 
-    private Preferences preferences(
-        CompleteInheritanceHierarchyModel completeModel,
-        Repositories repositories,
-        Properties properties
+    private Map<Id, SemanticVersion> preferences(
+        PreferencesModel preferencesModel,
+        Properties properties,
+        Repositories repositories
     ) {
-        return new Preferences(
-            artifactPreferenceModels(
-                completeModel.preferences(),
-                repositories,
-                properties
+        return Stream.of(
+                includedPreferences(preferencesModel.inclusions(), properties, repositories),
+                artifactPreferences(preferencesModel.artifacts(), properties)
             )
-                .collect(
-                    Collectors.toMap(
-                        ArtifactPreferenceModel::id,
-                        artifactPreferenceModel -> new SemanticVersion(
-                            properties.interpolated(artifactPreferenceModel.version())
-                        )
-                    )
-                )
-        );
+            .map(Map::entrySet)
+            .flatMap(Collection::stream)
+            .collect(
+                Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (previous, next) -> next)
+            );
     }
 
-    private Stream<ArtifactPreferenceModel> artifactPreferenceModels(
-        PreferencesModel preferencesModel,
-        Repositories repositories,
+    private Map<Id, SemanticVersion> artifactPreferences(
+        Set<ArtifactPreferenceModel> artifacts,
         Properties properties
     ) {
-        return Stream.concat(
-            preferencesModel.inclusions()
-                .stream()
-                .map(preferencesInclusionModel ->
-                    schematicModelFactory.inheritanceHierarchyModel(
-                        preferencesInclusionModel.id(),
-                        new SemanticVersion(
-                            properties.interpolated(preferencesInclusionModel.version())
-                        ),
-                        repositories
+        return artifacts.stream()
+            .collect(
+                Collectors.toMap(
+                    ArtifactPreferenceModel::id,
+                    artifactPreferenceModel -> new SemanticVersion(
+                        properties.interpolated(artifactPreferenceModel.version())
                     )
                 )
-                .map(InheritanceHierarchyModel::preferences)
-                .flatMap(model -> artifactPreferenceModels(model, repositories, properties)),
-            preferencesModel.artifacts()
-                .stream()
-        );
+            );
+    }
+
+    private Map<Id, SemanticVersion> includedPreferences(
+        Set<PreferencesInclusionModel> inclusions,
+        Properties properties,
+        Repositories repositories
+    ) {
+        return inclusions.stream()
+            .map(preferencesInclusionModel ->
+                schematicModelFactory.inheritanceHierarchyModel(
+                    preferencesInclusionModel.id(),
+                    new SemanticVersion(
+                        properties.interpolated(preferencesInclusionModel.version())
+                    ),
+                    repositories
+                )
+            )
+            .map(inheritanceHierarchyModel ->
+                preferences(
+                    inheritanceHierarchyModel.preferences(),
+                    new Properties(inheritanceHierarchyModel.properties()),
+                    repositories
+                )
+            )
+            .map(Map::entrySet)
+            .flatMap(Collection::stream)
+            .collect(
+                Collectors.toMap(
+                    Map.Entry::getKey,
+                    Map.Entry::getValue,
+                    this::highestVersion
+                )
+            );
+    }
+
+    private Preferences preferences(
+        CompleteInheritanceHierarchyModel completeModel,
+        Properties properties,
+        Repositories repositories
+    ) {
+        return new Preferences(preferences(completeModel.preferences(), properties, repositories));
+    }
+
+    private SemanticVersion highestVersion(
+        SemanticVersion first,
+        SemanticVersion second
+    ) {
+        if (first.compareTo(second) > 0) {
+            return first;
+        }
+        return second;
     }
 }

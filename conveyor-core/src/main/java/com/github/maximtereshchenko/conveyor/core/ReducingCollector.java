@@ -9,12 +9,12 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 
-final class OverridingCollector<T, C> implements Collector<T, Map<C, T>, Set<T>> {
+final class ReducingCollector<T, C> implements Collector<T, Map<C, T>, Set<T>> {
 
     private final Function<T, C> classifier;
     private final BinaryOperator<T> combiner;
 
-    OverridingCollector(Function<T, C> classifier, BinaryOperator<T> combiner) {
+    ReducingCollector(Function<T, C> classifier, BinaryOperator<T> combiner) {
         this.classifier = classifier;
         this.combiner = combiner;
     }

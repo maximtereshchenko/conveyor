@@ -74,7 +74,7 @@ final class ExtendableLocalInheritanceHierarchyModel
             .stream()
             .map(LocalSchematicModel::repositories)
             .flatMap(Collection::stream)
-            .collect(new OverridingCollector<>(RepositoryModel::name, RepositoryModel::override));
+            .collect(new ReducingCollector<>(RepositoryModel::name, RepositoryModel::override));
     }
 
     @Override

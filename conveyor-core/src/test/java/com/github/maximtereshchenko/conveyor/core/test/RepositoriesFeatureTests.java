@@ -423,7 +423,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
             factory.schematicDefinitionBuilder()
                 .repository("local", path, true)
                 .repository("remote", wireMockRuntimeInfo.getHttpBaseUrl(), true)
-                .preferenceInclusion("bom", "1.0.0")
+                .preferenceInclusion("bom")
                 .plugin("dependencies")
                 .dependency("dependency")
                 .install(path),

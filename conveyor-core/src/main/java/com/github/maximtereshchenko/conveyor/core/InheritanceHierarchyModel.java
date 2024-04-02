@@ -81,6 +81,6 @@ record InheritanceHierarchyModel<T extends SchematicModel>(LinkedHashSet<T> mode
         return models.stream()
             .map(extractor)
             .flatMap(Collection::stream)
-            .collect(new OverridingCollector<>(classifier, combiner));
+            .collect(new ReducingCollector<>(classifier, combiner));
     }
 }

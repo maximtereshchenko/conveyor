@@ -20,6 +20,6 @@ record PreferencesModel(
     private <T> Set<T> reduce(Set<T> first, Set<T> second, Function<T, Id> classifier) {
         return Stream.of(first, second)
             .flatMap(Collection::stream)
-            .collect(new OverridingCollector<>(classifier, (next, existing) -> next));
+            .collect(new ReducingCollector<>(classifier, (next, existing) -> next));
     }
 }

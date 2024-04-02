@@ -165,6 +165,10 @@ final class SchematicDefinitionBuilder {
         return this;
     }
 
+    SchematicDefinitionBuilder preferenceInclusion(String name) {
+        return preferenceInclusion(name, version);
+    }
+
     SchematicDefinitionBuilder property(String key, String value) {
         properties.put(key, value);
         return this;

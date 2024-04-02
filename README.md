@@ -10,11 +10,12 @@ A build tool for Java projects
       PUBLISH
 * Dependency version resolution
     * Given the same dependency is required but with different versions, the highest version wins
-      taken into account the
-      presence of the dependency requiring that version in the result module path
+      taken into account the presence of the dependency requiring that version in the result module
+      path
     * Preferences are defined in a schematic with a group, a name and a version
     * Preferences can be imported from a schematic by defining that schematic with a group, a name
-      and a version as the inclusion in preferences
+      and a version as the inclusion in preferences. Given the same artifact preference is imported
+      with different versions, then the highest version wins
     * Plugins are used with defined version. If plugin does not define its version, then version
       defined in preferences is used
     * Direct dependencies are used with defined version. If dependency does not define its version,
@@ -72,7 +73,10 @@ A build tool for Java projects
       scope. In such case the product from this schematic of type MODULE will be used in module path
 * Inheritance
     * A schematic inherits properties, plugins, dependencies and repositories from another schematic
-      used as a template. It is defined with a group, a name and a version
+      used as a template. It is defined with a group, a name and a version. The
+      property `conveyor.schematic.template.location` defines the path to the template. It is
+      relative to the directory, where the schematic definition is located. It is not inherited from
+      the template. The default value is `../conveyor.json`
     * A schematic has zero or more inclusions. It will be used as a template for included schematics
     * A schematic is constructed before its inclusions
     * A schematic is constructed after its schematic template
@@ -92,7 +96,7 @@ A build tool for Java projects
     * Local directory can be used as a source of artifacts and schematics. It is defined by a path
       relative to the directory, where the schematic definition is located. The path can be
       overridden in a schematic
-    * Remote repository is defined with a URL to a repository with Maven2 layout
+    * Remote repository is defined with a URL to a repository with `Maven 2` layout
     * The property `conveyor.repository.remote.cache.directory` defines the directory, where remote
       directories should store downloaded artifacts and schematics. It is relative to the directory,
       where the schematic definition is located. The default value is `.conveyor-modules` located in
