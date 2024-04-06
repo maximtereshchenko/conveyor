@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 final class SchematicDefinitionFactory {
 
@@ -29,7 +30,7 @@ final class SchematicDefinitionFactory {
             template(xml),
             List.of(),
             List.of(),
-            Map.of(),
+            properties(xml),
             new PreferencesDefinition(
                 List.of(),
                 artifacts(xml)
@@ -37,6 +38,14 @@ final class SchematicDefinitionFactory {
             List.of(),
             dependencies(xml)
         );
+    }
+
+    private Map<String, String> properties(Xml xml) {
+        return xml.tags("properties")
+            .stream()
+            .map(Xml::tags)
+            .flatMap(Collection::stream)
+            .collect(Collectors.toMap(Xml::name, Xml::text));
     }
 
     private List<ArtifactPreferenceDefinition> artifacts(Xml xml) {
@@ -66,10 +75,21 @@ final class SchematicDefinitionFactory {
                     groupId(dependency),
                     artifactId(dependency),
                     Optional.of(version(xml)),
-                    Optional.of(DependencyScope.IMPLEMENTATION)
+                    dependency.tags("scope")
+                        .stream()
+                        .map(this::dependencyScope)
+                        .findAny()
+                        .or(() -> Optional.of(DependencyScope.IMPLEMENTATION))
                 )
             )
             .toList();
+    }
+
+    private DependencyScope dependencyScope(Xml xml) {
+        if (xml.text().equals("test")) {
+            return DependencyScope.TEST;
+        }
+        return DependencyScope.IMPLEMENTATION;
     }
 
     private TemplateDefinition template(Xml xml) {
@@ -87,14 +107,18 @@ final class SchematicDefinitionFactory {
     }
 
     private String artifactId(Xml xml) {
-        return xml.text("artifactId");
+        return text(xml, "artifactId");
     }
 
     private String groupId(Xml xml) {
-        return xml.text("groupId");
+        return text(xml, "groupId");
     }
 
     private String version(Xml xml) {
-        return xml.text("version");
+        return text(xml, "version");
+    }
+
+    private String text(Xml xml, String tag) {
+        return xml.tags(tag).getFirst().text();
     }
 }

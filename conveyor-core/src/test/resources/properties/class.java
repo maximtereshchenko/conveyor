@@ -36,7 +36,11 @@ public final class ${normalizedName} implements ConveyorPlugin {
             Files.writeString(
                 Files.createDirectories(schematic.constructionDirectory()).resolve("properties"),
                 keys.stream()
-                    .map(key -> key + '=' + schematic.propertyValue(key).orElse(""))
+                    .map(key ->
+                        schematic.propertyValue(key)
+                            .map(value -> key + '=' + value)
+                    )
+                    .flatMap(Optional::stream)
                     .collect(Collectors.joining(System.lineSeparator()))
             );
         } catch (IOException e) {

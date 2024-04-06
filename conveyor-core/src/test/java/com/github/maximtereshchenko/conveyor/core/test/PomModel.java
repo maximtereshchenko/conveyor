@@ -6,6 +6,7 @@ import com.fasterxml.jackson.dataformat.xml.shadowed.annotation.JacksonXmlProper
 import com.fasterxml.jackson.dataformat.xml.shadowed.annotation.JacksonXmlRootElement;
 
 import java.util.Collection;
+import java.util.Map;
 
 @JacksonXmlRootElement(localName = "project")
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -21,6 +22,7 @@ record PomModel(
     String groupId,
     String artifactId,
     String version,
+    Map<String, String> properties,
     DependencyManagement dependencyManagement,
     @JacksonXmlProperty(localName = "dependency")
     @JacksonXmlElementWrapper(localName = "dependencies")
@@ -32,6 +34,7 @@ record PomModel(
         String groupId,
         String artifactId,
         String version,
+        Map<String, String> properties,
         DependencyManagement dependencyManagement,
         Collection<Dependency> dependencies
     ) {
@@ -44,6 +47,7 @@ record PomModel(
             groupId,
             artifactId,
             version,
+            properties,
             dependencyManagement,
             dependencies
         );
@@ -51,7 +55,7 @@ record PomModel(
 
     record Parent(String groupId, String artifactId, String version) {}
 
-    record Dependency(String groupId, String artifactId, String version) {}
+    record Dependency(String groupId, String artifactId, String version, String scope) {}
 
     record DependencyManagement(
         @JacksonXmlProperty(localName = "dependency")

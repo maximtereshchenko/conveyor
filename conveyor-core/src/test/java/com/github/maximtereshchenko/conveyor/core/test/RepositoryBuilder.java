@@ -1,6 +1,6 @@
 package com.github.maximtereshchenko.conveyor.core.test;
 
-import com.github.tomakehurst.wiremock.shadowed.client.WireMock;
+import com.github.tomakehurst.wiremock.shadowed.WireMockServer;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -65,17 +65,18 @@ final class RepositoryBuilder {
         }
     }
 
-    void install(WireMock wireMock) {
+    void install(WireMockServer wireMockServer) {
         for (var entry : files.entrySet()) {
             var outputStream = new ByteArrayOutputStream();
             entry.getValue().accept(outputStream);
-            wireMock.register(
+            wireMockServer.addStubMapping(
                 get("/" + entry.getKey().toString())
                     .willReturn(
                         ok()
                             .withHeader("Content-Type", contentType(entry.getKey()))
                             .withBody(outputStream.toByteArray())
                     )
+                    .build()
             );
         }
     }

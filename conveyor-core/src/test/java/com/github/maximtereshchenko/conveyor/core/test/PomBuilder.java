@@ -8,12 +8,15 @@ import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 final class PomBuilder {
 
     private final Collection<PomModel.Dependency> dependencies = new ArrayList<>();
     private final Collection<PomModel.Dependency> dependencyManagement = new ArrayList<>();
     private final String groupId = "com.github.maximtereshchenko.conveyor";
+    private final Map<String, String> properties = new HashMap<>();
     private final String version = "1.0.0";
     private final XmlMapper xmlMapper;
     private PomModel.Parent parent = null;
@@ -38,6 +41,7 @@ final class PomBuilder {
                         groupId,
                         artifactId,
                         version,
+                        properties,
                         new PomModel.DependencyManagement(dependencyManagement),
                         dependencies
                     )
@@ -70,12 +74,21 @@ final class PomBuilder {
     }
 
     PomBuilder dependency(String artifactId) {
-        dependencies.add(new PomModel.Dependency(groupId, artifactId, version));
+        return dependency(artifactId, null);
+    }
+
+    PomBuilder dependency(String artifactId, String scope) {
+        dependencies.add(new PomModel.Dependency(groupId, artifactId, version, scope));
         return this;
     }
 
     PomBuilder managedDependency(String artifactId, String version) {
-        dependencyManagement.add(new PomModel.Dependency(groupId, artifactId, version));
+        dependencyManagement.add(new PomModel.Dependency(groupId, artifactId, version, null));
+        return this;
+    }
+
+    PomBuilder property(String key, String value) {
+        properties.put(key, value);
         return this;
     }
 }

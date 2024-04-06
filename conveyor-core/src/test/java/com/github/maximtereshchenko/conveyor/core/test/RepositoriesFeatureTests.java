@@ -1,11 +1,15 @@
 package com.github.maximtereshchenko.conveyor.core.test;
 
 import com.github.maximtereshchenko.conveyor.api.ConveyorModule;
+import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
-import com.github.tomakehurst.wiremock.shadowed.junit5.WireMockExtension;
-import com.github.tomakehurst.wiremock.shadowed.junit5.WireMockRuntimeInfo;
+import com.github.tomakehurst.wiremock.shadowed.WireMockServer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -194,7 +198,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory,
-        WireMockRuntimeInfo wireMockRuntimeInfo
+        WireMockServer wireMockServer
     ) {
         factory.repositoryBuilder()
             .jar(
@@ -204,14 +208,14 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                 factory.pomBuilder()
                     .artifactId("instant")
             )
-            .install(wireMockRuntimeInfo.getWireMock());
+            .install(wireMockServer);
         factory.repositoryBuilder()
             .install(path);
 
         module.construct(
             factory.schematicDefinitionBuilder()
                 .repository("local", path, true)
-                .repository("remote", wireMockRuntimeInfo.getHttpBaseUrl(), true)
+                .repository("remote", wireMockServer.baseUrl(), true)
                 .plugin(
                     "instant",
                     "1.0.0",
@@ -230,7 +234,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory,
-        WireMockRuntimeInfo wireMockRuntimeInfo
+        WireMockServer wireMockServer
     ) {
         factory.repositoryBuilder()
             .jar(
@@ -240,12 +244,12 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                 factory.pomBuilder()
                     .artifactId("instant")
             )
-            .install(wireMockRuntimeInfo.getWireMock());
+            .install(wireMockServer);
         factory.repositoryBuilder()
             .install(path);
         var schematic = factory.schematicDefinitionBuilder()
             .repository("local", path, true)
-            .repository("remote", wireMockRuntimeInfo.getHttpBaseUrl(), true)
+            .repository("remote", wireMockServer.baseUrl(), true)
             .plugin(
                 "instant",
                 "1.0.0",
@@ -256,7 +260,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         module.construct(schematic, Stage.COMPILE);
         module.construct(schematic, Stage.COMPILE);
 
-        assertThat(wireMockRuntimeInfo.getWireMock().getServeEvents())
+        assertThat(wireMockServer.getServeEvents().getRequests())
             .filteredOn(serveEvent -> serveEvent.getRequest().getUrl().contains("instant"))
             .hasSize(2);
         assertThat(defaultCacheDirectory(path))
@@ -269,7 +273,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory,
-        WireMockRuntimeInfo wireMockRuntimeInfo
+        WireMockServer wireMockServer
     ) {
         factory.repositoryBuilder()
             .jar(
@@ -279,7 +283,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                 factory.pomBuilder()
                     .artifactId("instant")
             )
-            .install(wireMockRuntimeInfo.getWireMock());
+            .install(wireMockServer);
         factory.repositoryBuilder()
             .install(path);
         var cache = path.resolve("cache");
@@ -287,7 +291,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         module.construct(
             factory.schematicDefinitionBuilder()
                 .repository("local", path, true)
-                .repository("remote", wireMockRuntimeInfo.getHttpBaseUrl(), true)
+                .repository("remote", wireMockServer.baseUrl(), true)
                 .property("conveyor.repository.remote.cache.directory", cache.toString())
                 .plugin(
                     "instant",
@@ -308,7 +312,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory,
-        WireMockRuntimeInfo wireMockRuntimeInfo
+        WireMockServer wireMockServer
     ) {
         factory.repositoryBuilder()
             .jar(
@@ -318,14 +322,14 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                 factory.pomBuilder()
                     .artifactId("instant")
             )
-            .install(wireMockRuntimeInfo.getWireMock());
+            .install(wireMockServer);
         factory.repositoryBuilder()
             .install(path);
 
         module.construct(
             factory.schematicDefinitionBuilder()
                 .repository("local", path, true)
-                .repository("remote", wireMockRuntimeInfo.getHttpBaseUrl(), true)
+                .repository("remote", wireMockServer.baseUrl(), true)
                 .property("conveyor.repository.remote.cache.directory", "./temp/../cache")
                 .plugin(
                     "instant",
@@ -346,7 +350,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory,
-        WireMockRuntimeInfo wireMockRuntimeInfo
+        WireMockServer wireMockServer
     ) {
         factory.repositoryBuilder()
             .jar(
@@ -369,14 +373,14 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                 factory.pomBuilder()
                     .artifactId("dependency")
             )
-            .install(wireMockRuntimeInfo.getWireMock());
+            .install(wireMockServer);
         factory.repositoryBuilder()
             .install(path);
 
         module.construct(
             factory.schematicDefinitionBuilder()
                 .repository("local", path, true)
-                .repository("remote", wireMockRuntimeInfo.getHttpBaseUrl(), true)
+                .repository("remote", wireMockServer.baseUrl(), true)
                 .plugin("module-path")
                 .install(path),
             Stage.COMPILE
@@ -393,7 +397,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory,
-        WireMockRuntimeInfo wireMockRuntimeInfo
+        WireMockServer wireMockServer
     ) {
         factory.repositoryBuilder()
             .pom(
@@ -408,7 +412,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                 factory.pomBuilder()
                     .artifactId("dependency")
             )
-            .install(wireMockRuntimeInfo.getWireMock());
+            .install(wireMockServer);
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -422,10 +426,114 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         module.construct(
             factory.schematicDefinitionBuilder()
                 .repository("local", path, true)
-                .repository("remote", wireMockRuntimeInfo.getHttpBaseUrl(), true)
+                .repository("remote", wireMockServer.baseUrl(), true)
                 .preferenceInclusion("bom")
                 .plugin("dependencies")
                 .dependency("dependency")
+                .install(path),
+            Stage.COMPILE
+        );
+
+        assertThat(defaultConstructionDirectory(path).resolve("dependencies"))
+            .content()
+            .isEqualTo("dependency-1.0.0");
+    }
+
+    @Test
+    @ExtendWith(WireMockExtension.class)
+    void givenSchematicDefinitionFromRemoteRepository_whenConstructToStage_thenPropertiesAreTranslated(
+        Path path,
+        ConveyorModule module,
+        BuilderFactory factory,
+        WireMockServer wireMockServer
+    ) {
+        factory.repositoryBuilder()
+            .pom(
+                factory.pomBuilder()
+                    .artifactId("template")
+                    .property("pom.key", "value")
+            )
+            .install(wireMockServer);
+        factory.repositoryBuilder()
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("properties")
+            )
+            .jar(
+                factory.jarBuilder("properties")
+            )
+            .install(path);
+
+        module.construct(
+            factory.schematicDefinitionBuilder()
+                .template("template")
+                .repository("local", path, true)
+                .repository("remote", wireMockServer.baseUrl(), true)
+                .plugin("properties", "1.0.0", Map.of("keys", "pom.key"))
+                .install(path),
+            Stage.COMPILE
+        );
+
+        assertThat(defaultConstructionDirectory(path).resolve("properties"))
+            .content()
+            .isEqualTo("pom.key=value");
+    }
+
+    @ParameterizedTest
+    @ExtendWith(WireMockExtension.class)
+    @Execution(ExecutionMode.SAME_THREAD)
+    @CsvSource(
+        textBlock = """
+                    compile, IMPLEMENTATION
+                    runtime, IMPLEMENTATION
+                    test, TEST
+                    system, IMPLEMENTATION
+                    provided, IMPLEMENTATION
+                    , IMPLEMENTATION
+                    """
+    )
+    void givenSchematicDefinitionFromRemoteRepository_whenConstructToStage_thenScopeIsTranslated(
+        String originalScope,
+        DependencyScope dependencyScope,
+        Path path,
+        ConveyorModule module,
+        BuilderFactory factory,
+        WireMockServer wireMockServer
+    ) {
+        factory.repositoryBuilder()
+            .pom(
+                factory.pomBuilder()
+                    .artifactId("template")
+                    .dependency("dependency", originalScope)
+            )
+            .pom(
+                factory.pomBuilder()
+                    .artifactId("dependency")
+            )
+            .jar(
+                factory.jarBuilder("dependency")
+            )
+            .install(wireMockServer);
+        factory.repositoryBuilder()
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("dependencies")
+            )
+            .jar(
+                factory.jarBuilder("dependencies")
+            )
+            .install(path);
+
+        module.construct(
+            factory.schematicDefinitionBuilder()
+                .template("template")
+                .repository("local", path, true)
+                .repository("remote", wireMockServer.baseUrl(), true)
+                .plugin(
+                    "dependencies",
+                    "1.0.0",
+                    Map.of("scope", dependencyScope.toString())
+                )
                 .install(path),
             Stage.COMPILE
         );
