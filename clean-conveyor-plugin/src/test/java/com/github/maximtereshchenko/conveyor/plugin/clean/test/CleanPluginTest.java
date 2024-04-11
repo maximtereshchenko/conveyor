@@ -3,7 +3,6 @@ package com.github.maximtereshchenko.conveyor.plugin.clean.test;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import com.github.maximtereshchenko.conveyor.common.api.Step;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskBinding;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -73,18 +72,14 @@ final class CleanPluginTest {
     }
 
     private void executeTask(Path constructionDirectory) {
-        var schematic = new FakeConveyorSchematic(constructionDirectory);
-        bindings(schematic)
+        bindings(constructionDirectory)
             .stream()
             .map(ConveyorTaskBinding::task)
-            .forEach(task -> task.execute(schematic, Set.of()));
+            .forEach(task -> task.execute(Set.of()));
     }
 
-    private List<ConveyorTaskBinding> bindings(Path path) {
-        return bindings(new FakeConveyorSchematic(path));
-    }
-
-    private List<ConveyorTaskBinding> bindings(ConveyorSchematic schematic) {
+    private List<ConveyorTaskBinding> bindings(Path constructionDirectory) {
+        var schematic = new FakeConveyorSchematic(constructionDirectory);
         return ServiceLoader.load(ConveyorPlugin.class)
             .stream()
             .map(ServiceLoader.Provider::get)

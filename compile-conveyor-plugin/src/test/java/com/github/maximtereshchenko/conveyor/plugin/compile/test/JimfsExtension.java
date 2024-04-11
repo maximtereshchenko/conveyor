@@ -1,4 +1,4 @@
-package com.github.maximtereshchenko.conveyor.plugin.clean.test;
+package com.github.maximtereshchenko.conveyor.plugin.compile.test;
 
 import com.google.common.jimfs.Configuration;
 import com.google.common.jimfs.Jimfs;

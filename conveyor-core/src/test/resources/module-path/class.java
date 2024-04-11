@@ -22,7 +22,7 @@ public final class ${normalizedName} implements ConveyorPlugin {
             new ConveyorTaskBinding(
                 Stage.COMPILE,
                 Step.RUN,
-                (conveyorSchematic, products) -> execute(schematic.constructionDirectory().resolve("module-path"))
+                (products) -> execute(schematic.constructionDirectory().resolve("module-path"))
             )
         );
     }

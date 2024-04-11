@@ -6,5 +6,5 @@ import java.util.Set;
 
 public interface ConveyorTask {
 
-    Set<Product> execute(ConveyorSchematic schematic, Set<Product> products);
+    Set<Product> execute(Set<Product> products);
 }

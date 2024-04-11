@@ -23,10 +23,12 @@ public final class ${normalizedName} implements ConveyorPlugin {
             new ConveyorTaskBinding(
                 Stage.COMPILE,
                 Step.RUN,
-                (conveyorSchematic, products) -> execute(
+                (products) -> execute(
                     schematic.modulePath(
-                        DependencyScope.valueOf(
-                            configuration.getOrDefault("scope", "IMPLEMENTATION")
+                        Set.of(
+                            DependencyScope.valueOf(
+                                configuration.getOrDefault("scope", "IMPLEMENTATION")
+                            )
                         )
                     ),
                     schematic.constructionDirectory().resolve("dependencies")

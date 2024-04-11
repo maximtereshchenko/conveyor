@@ -7,6 +7,7 @@ include("jackson-adapter")
 include("jackson-dataformat-xml")
 include("wiremock")
 include("clean-conveyor-plugin")
+include("compile-conveyor-plugin")
 dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {

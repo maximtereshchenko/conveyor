@@ -19,7 +19,7 @@ public final class ${normalizedName} implements ConveyorPlugin {
             new ConveyorTaskBinding(
                 Stage.ARCHIVE,
                 Step.RUN,
-                (conveyorSchematic, products) -> Set.of(
+                (products) -> Set.of(
                     schematic.product(
                         schematic.discoveryDirectory().resolve(configuration.get("path")),
                         ProductType.MODULE

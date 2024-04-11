@@ -1,7 +1,6 @@
 package com.github.maximtereshchenko.conveyor.plugin.clean;
 
 import com.github.maximtereshchenko.conveyor.common.api.Product;
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
 
 import java.io.IOException;
@@ -12,10 +11,16 @@ import java.util.Set;
 
 final class CleanTask implements ConveyorTask {
 
+    private final Path path;
+
+    CleanTask(Path path) {
+        this.path = path;
+    }
+
     @Override
-    public Set<Product> execute(ConveyorSchematic schematic, Set<Product> products) {
-        if (Files.exists(schematic.constructionDirectory())) {
-            deleteRecursively(schematic.constructionDirectory());
+    public Set<Product> execute(Set<Product> products) {
+        if (Files.exists(path)) {
+            deleteRecursively(path);
         }
         return Set.of();
     }

@@ -21,7 +21,7 @@ public final class ${normalizedName} implements ConveyorPlugin {
             new ConveyorTaskBinding(
                 Stage.PUBLISH,
                 Step.RUN,
-                (conveyorSchematic, products) -> execute(products, schematic.constructionDirectory().resolve("products"))
+                (products) -> execute(products, schematic.constructionDirectory().resolve("products"))
             )
         );
     }

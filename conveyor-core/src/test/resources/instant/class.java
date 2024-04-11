@@ -30,7 +30,7 @@ public final class ${normalizedName} implements ConveyorPlugin {
         return new ConveyorTaskBinding(
             Stage.valueOf(stageAndStep[0]),
             Step.valueOf(stageAndStep[1]),
-            (conveyorSchematic, products) -> execute(path)
+            (products) -> execute(path)
         );
     }
 

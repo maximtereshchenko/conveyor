@@ -21,6 +21,12 @@ public final class CleanPlugin implements ConveyorPlugin {
         ConveyorSchematic schematic,
         Map<String, String> configuration
     ) {
-        return List.of(new ConveyorTaskBinding(Stage.CLEAN, Step.RUN, new CleanTask()));
+        return List.of(
+            new ConveyorTaskBinding(
+                Stage.CLEAN,
+                Step.RUN,
+                new CleanTask(schematic.constructionDirectory())
+            )
+        );
     }
 }

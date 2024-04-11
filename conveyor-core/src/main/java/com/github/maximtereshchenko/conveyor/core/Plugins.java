@@ -29,7 +29,7 @@ final class Plugins {
     ) {
         var copy = new HashSet<>(products);
         for (var task : tasks(conveyorSchematic, stage)) {
-            copy.addAll(task.execute(conveyorSchematic, copy));
+            copy.addAll(task.execute(copy));
         }
         return copy;
     }
