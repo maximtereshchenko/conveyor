@@ -28,7 +28,7 @@ public final class CompilePlugin implements ConveyorPlugin {
                 Stage.COMPILE,
                 Step.PREPARE,
                 new DiscoverJavaFilesTask(
-                    java(src(schematic.discoveryDirectory()).resolve("main")),
+                    javaFilesDirectory(schematic.discoveryDirectory(), "main"),
                     ProductType.SOURCE,
                     schematic
                 )
@@ -45,7 +45,7 @@ public final class CompilePlugin implements ConveyorPlugin {
                 Stage.TEST,
                 Step.PREPARE,
                 new DiscoverJavaFilesTask(
-                    java(src(schematic.discoveryDirectory()).resolve("test")),
+                    javaFilesDirectory(schematic.discoveryDirectory(), "test"),
                     ProductType.TEST_SOURCE,
                     schematic
                 )
@@ -61,11 +61,7 @@ public final class CompilePlugin implements ConveyorPlugin {
         );
     }
 
-    private Path src(Path path) {
-        return path.resolve("src");
-    }
-
-    private Path java(Path path) {
-        return path.resolve("java");
+    private Path javaFilesDirectory(Path path, String sourceSet) {
+        return path.resolve("src").resolve(sourceSet).resolve("java");
     }
 }

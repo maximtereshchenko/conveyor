@@ -3,12 +3,14 @@ package com.github.maximtereshchenko.conveyor.plugin.compile.test;
 import com.github.maximtereshchenko.conveyor.common.api.Product;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskBinding;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
+@ExtendWith(JimfsExtension.class)
 abstract class CompilePluginTest {
 
     Path constructionDirectory(Path path) {
