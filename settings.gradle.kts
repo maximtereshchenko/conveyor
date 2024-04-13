@@ -9,6 +9,7 @@ include("wiremock")
 include("clean-conveyor-plugin")
 include("compile-conveyor-plugin")
 include("resources-conveyor-plugin")
+include("jimfs-junit5-extension")
 dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {

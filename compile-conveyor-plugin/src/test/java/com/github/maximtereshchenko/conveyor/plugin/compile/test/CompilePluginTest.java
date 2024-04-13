@@ -3,6 +3,7 @@ package com.github.maximtereshchenko.conveyor.plugin.compile.test;
 import com.github.maximtereshchenko.conveyor.common.api.Product;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskBinding;
+import com.github.maximtereshchenko.jimfs.JimfsExtension;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.IOException;

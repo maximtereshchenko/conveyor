@@ -1,4 +1,4 @@
-package com.github.maximtereshchenko.conveyor.plugin.clean.test;
+package com.github.maximtereshchenko.jimfs;
 
 import com.google.common.jimfs.Configuration;
 import com.google.common.jimfs.Jimfs;
@@ -13,7 +13,7 @@ import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-final class JimfsExtension implements ParameterResolver {
+public final class JimfsExtension implements ParameterResolver {
 
     private final Namespace namespace = Namespace.create(JimfsExtension.class);
 
@@ -31,27 +31,23 @@ final class JimfsExtension implements ParameterResolver {
         ExtensionContext extensionContext
     ) {
         try {
-            return Files.createDirectories(
-                extensionContext.getStore(namespace)
-                    .getOrComputeIfAbsent(
-                        ClosableFileSystem.class,
-                        ignored -> new ClosableFileSystem(Jimfs.newFileSystem(Configuration.unix())),
-                        ClosableFileSystem.class
-                    )
-                    .fileSystem()
-                    .getPath("/test")
-            );
+            return Files.createDirectories(jimfsFileSystem(extensionContext).getPath("/test"));
         } catch (IOException e) {
             throw new ParameterResolutionException("Could not create virtual directory", e);
         }
     }
 
-    private record ClosableFileSystem(FileSystem fileSystem)
-        implements ExtensionContext.Store.CloseableResource {
-
-        @Override
-        public void close() throws Throwable {
-            fileSystem.close();
-        }
+    private FileSystem jimfsFileSystem(ExtensionContext extensionContext) {
+        var store = extensionContext.getStore(namespace);
+        var fileSystem = store.getOrComputeIfAbsent(
+            FileSystem.class,
+            key -> Jimfs.newFileSystem(Configuration.unix()),
+            FileSystem.class
+        );
+        store.put(
+            ExtensionContext.Store.CloseableResource.class,
+            (ExtensionContext.Store.CloseableResource) fileSystem::close
+        );
+        return fileSystem;
     }
 }

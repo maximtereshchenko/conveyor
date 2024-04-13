@@ -5,6 +5,7 @@ import com.github.maximtereshchenko.conveyor.common.api.ProductType;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskBinding;
+import com.github.maximtereshchenko.jimfs.JimfsExtension;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.IOException;

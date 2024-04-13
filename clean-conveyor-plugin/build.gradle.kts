@@ -5,8 +5,8 @@ plugins {
 
 dependencies {
     implementation(project(":conveyor-plugin-api"))
+    testImplementation(project(":jimfs-junit5-extension"))
     testImplementation(platform(libs.junit.bom))
     testImplementation(libs.junit.jupiter)
     testImplementation(libs.assertj.core)
-    testImplementation(libs.jimfs)
 }
