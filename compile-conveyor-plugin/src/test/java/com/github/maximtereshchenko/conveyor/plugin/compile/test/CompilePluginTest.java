@@ -1,6 +1,7 @@
 package com.github.maximtereshchenko.conveyor.plugin.compile.test;
 
-import com.github.maximtereshchenko.jimfs.JimfsExtension;
+import com.github.maximtereshchenko.test.common.Directories;
+import com.github.maximtereshchenko.test.common.JimfsExtension;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.IOException;
@@ -27,7 +28,6 @@ abstract class CompilePluginTest {
     }
 
     void write(Path path, String content) throws IOException {
-        Files.createDirectories(path.getParent());
-        Files.writeString(path, content);
+        Files.writeString(Directories.createDirectoriesForFile(path), content);
     }
 }

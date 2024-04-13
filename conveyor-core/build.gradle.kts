@@ -6,10 +6,12 @@ plugins {
 dependencies {
     api(project(":conveyor-api"))
     api(project(":conveyor-plugin-api"))
+    testImplementation(project(":compiler"))
+    testImplementation(project(":zip-archive"))
     testImplementation(project(":jackson-adapter"))
     testImplementation(project(":wiremock"))
     testImplementation(project(":jackson-dataformat-xml"))
-    testImplementation(project(":jimfs-junit5-extension"))
+    testImplementation(project(":test-common"))
     testImplementation(platform(libs.jackson.bom))
     testImplementation(platform(libs.junit.bom))
     testImplementation(libs.junit.jupiter.api)

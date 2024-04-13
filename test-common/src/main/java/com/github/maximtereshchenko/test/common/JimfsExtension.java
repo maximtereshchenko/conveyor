@@ -1,4 +1,4 @@
-package com.github.maximtereshchenko.jimfs;
+package com.github.maximtereshchenko.test.common;
 
 import com.google.common.jimfs.Configuration;
 import com.google.common.jimfs.Jimfs;

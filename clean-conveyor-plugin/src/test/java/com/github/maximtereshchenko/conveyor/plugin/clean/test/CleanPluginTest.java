@@ -5,19 +5,29 @@ import com.github.maximtereshchenko.conveyor.common.api.Step;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskBinding;
 import com.github.maximtereshchenko.conveyor.plugin.test.ConveyorTaskBindings;
 import com.github.maximtereshchenko.conveyor.plugin.test.FakeConveyorSchematicBuilder;
-import com.github.maximtereshchenko.jimfs.JimfsExtension;
+import com.github.maximtereshchenko.test.common.Directories;
+import com.github.maximtereshchenko.test.common.JimfsExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Set;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
 @ExtendWith(JimfsExtension.class)
 final class CleanPluginTest {
+
+    static Stream<Arguments> entries() {
+        return Directories.differentDirectoryEntries()
+            .map(Arguments::arguments);
+    }
 
     @Test
     void givenPlugin_whenBindings_thenTaskBindToCleanRun(Path path) {
@@ -37,58 +47,13 @@ final class CleanPluginTest {
         assertThatCode(bindings::executeTasks).doesNotThrowAnyException();
     }
 
-    @Test
-    void givenEmptyDirectory_whenExecuteTasks_thenDirectoryIsDeleted(Path path) {
-        ConveyorTaskBindings.from(
-                FakeConveyorSchematicBuilder.discoveryDirectory(path)
-                    .constructionDirectory(path)
-                    .build()
-            )
-            .executeTasks();
-
-        assertThat(path).doesNotExist();
-    }
-
-    @Test
-    void givenDirectoryContainsFile_whenExecuteTasks_thenDirectoryIsDeleted(Path path)
+    @ParameterizedTest
+    @MethodSource("entries")
+    void givenDirectory_whenExecuteTasks_thenDirectoryIsDeleted(Set<String> entries, Path path)
         throws IOException {
-        Files.createFile(path.resolve("file"));
-
         ConveyorTaskBindings.from(
                 FakeConveyorSchematicBuilder.discoveryDirectory(path)
-                    .constructionDirectory(path)
-                    .build()
-            )
-            .executeTasks();
-
-        assertThat(path).doesNotExist();
-    }
-
-    @Test
-    void givenDirectoryContainsOtherDirectory_whenExecuteTasks_thenDirectoryIsDeleted(Path path)
-        throws IOException {
-        Files.createDirectory(path.resolve("directory"));
-
-        ConveyorTaskBindings.from(
-                FakeConveyorSchematicBuilder.discoveryDirectory(path)
-                    .constructionDirectory(path)
-                    .build()
-            )
-            .executeTasks();
-
-        assertThat(path).doesNotExist();
-    }
-
-    @Test
-    void givenDirectoryContainsNotEmptyDirectory_whenExecuteTasks_thenDirectoryIsDeleted(Path path)
-        throws IOException {
-        Files.createFile(
-            Files.createDirectory(path.resolve("directory")).resolve("file")
-        );
-
-        ConveyorTaskBindings.from(
-                FakeConveyorSchematicBuilder.discoveryDirectory(path)
-                    .constructionDirectory(path)
+                    .constructionDirectory(Directories.writeFiles(path, entries))
                     .build()
             )
             .executeTasks();

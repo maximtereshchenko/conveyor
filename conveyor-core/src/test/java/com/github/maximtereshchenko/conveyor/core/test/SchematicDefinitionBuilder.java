@@ -3,10 +3,9 @@ package com.github.maximtereshchenko.conveyor.core.test;
 import com.github.maximtereshchenko.conveyor.api.schematic.*;
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 import com.github.maximtereshchenko.conveyor.jackson.JacksonAdapter;
+import com.github.maximtereshchenko.test.common.Directories;
 
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.nio.file.Files;
@@ -33,25 +32,27 @@ final class SchematicDefinitionBuilder {
         this.jacksonAdapter = jacksonAdapter;
     }
 
-    void install(OutputStream outputStream) {
-        jacksonAdapter.write(
-            new SchematicDefinition(
-                group,
-                name,
-                version,
-                template,
-                inclusions,
-                repositories,
-                properties,
-                new PreferencesDefinition(
-                    preferenceInclusions,
-                    artifactPreferences
+    void write(Path path) throws IOException {
+        try (var outputStream = Files.newOutputStream(path)) {
+            jacksonAdapter.write(
+                new SchematicDefinition(
+                    group,
+                    name,
+                    version,
+                    template,
+                    inclusions,
+                    repositories,
+                    properties,
+                    new PreferencesDefinition(
+                        preferenceInclusions,
+                        artifactPreferences
+                    ),
+                    plugins,
+                    dependencies
                 ),
-                plugins,
-                dependencies
-            ),
-            outputStream
-        );
+                outputStream
+            );
+        }
     }
 
     String group() {
@@ -77,25 +78,18 @@ final class SchematicDefinitionBuilder {
         return this;
     }
 
-    SchematicDefinitionBuilder repository(String name, String url, boolean enabled) {
-        try {
-            repositories.add(
-                new RemoteRepositoryDefinition(name, URI.create(url).toURL(), Optional.of(enabled))
-            );
-            return this;
-        } catch (MalformedURLException e) {
-            throw new IllegalArgumentException(e);
-        }
+    SchematicDefinitionBuilder repository(String name, String url, boolean enabled)
+        throws MalformedURLException {
+        repositories.add(
+            new RemoteRepositoryDefinition(name, URI.create(url).toURL(), Optional.of(enabled))
+        );
+        return this;
     }
 
-    Path install(Path directory) {
-        var path = directory.resolve("conveyor.json");
-        try (var outputStream = outputStream(path)) {
-            install(outputStream);
-            return path;
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+    Path conveyorJson(Path directory) throws IOException {
+        var path = Directories.createDirectoriesForFile(directory.resolve("conveyor.json"));
+        write(path);
+        return path;
     }
 
     SchematicDefinitionBuilder template(String name) {
@@ -172,10 +166,5 @@ final class SchematicDefinitionBuilder {
     SchematicDefinitionBuilder property(String key, String value) {
         properties.put(key, value);
         return this;
-    }
-
-    private OutputStream outputStream(Path path) throws IOException {
-        Files.createDirectories(path.getParent());
-        return Files.newOutputStream(path);
     }
 }

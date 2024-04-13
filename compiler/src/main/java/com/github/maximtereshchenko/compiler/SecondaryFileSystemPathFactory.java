@@ -1,4 +1,4 @@
-package com.github.maximtereshchenko.conveyor.plugin.compile;
+package com.github.maximtereshchenko.compiler;
 
 import javax.tools.StandardJavaFileManager;
 import java.nio.file.FileSystem;

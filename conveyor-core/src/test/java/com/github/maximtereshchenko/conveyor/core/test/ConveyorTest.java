@@ -3,7 +3,6 @@ package com.github.maximtereshchenko.conveyor.core.test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
@@ -23,11 +22,7 @@ abstract class ConveyorTest {
         return path.resolve("conveyor.json");
     }
 
-    Instant instant(Path path) {
-        try {
-            return Instant.parse(Files.readString(path));
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+    Instant instant(Path path) throws IOException {
+        return Instant.parse(Files.readString(path));
     }
 }

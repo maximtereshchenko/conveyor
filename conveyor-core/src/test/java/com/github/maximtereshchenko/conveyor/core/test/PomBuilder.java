@@ -3,9 +3,9 @@ package com.github.maximtereshchenko.conveyor.core.test;
 import com.fasterxml.jackson.dataformat.xml.shadowed.XmlMapper;
 
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -26,8 +26,8 @@ final class PomBuilder {
         this.xmlMapper = xmlMapper;
     }
 
-    void write(OutputStream outputStream) {
-        try {
+    void write(Path path) throws IOException {
+        try (var outputStream = Files.newOutputStream(path)) {
             outputStream.write(
                 """
                 <?xml version="1.0" encoding="UTF-8"?>
@@ -46,8 +46,6 @@ final class PomBuilder {
                         dependencies
                     )
                 );
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
         }
     }
 

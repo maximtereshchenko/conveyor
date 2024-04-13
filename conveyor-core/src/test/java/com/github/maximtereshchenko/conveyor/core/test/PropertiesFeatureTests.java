@@ -16,7 +16,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -42,7 +42,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
                     "1.0.0",
                     Map.of("keys", "template.key,key")
                 )
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -57,7 +57,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -79,7 +79,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
                 .template("template")
                 .property("key", "value")
                 .plugin("properties", "1.0.0", Map.of("keys", "key"))
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -93,7 +93,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -115,7 +115,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
                 .template("template")
                 .property("to.be.removed", "")
                 .plugin("properties", "1.0.0", Map.of("keys", "to.be.removed"))
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -129,7 +129,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -149,7 +149,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
                     "1.0.0",
                     Map.of("keys", "conveyor.schematic.name")
                 )
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -163,7 +163,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -184,7 +184,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
                     "1.0.0",
                     Map.of("keys", "conveyor.discovery.directory")
                 )
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -198,7 +198,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -218,7 +218,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
                     "1.0.0",
                     Map.of("keys", "conveyor.discovery.directory")
                 )
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -232,7 +232,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -253,7 +253,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
                     "1.0.0",
                     Map.of("keys", "conveyor.construction.directory")
                 )
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -267,7 +267,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -287,7 +287,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
                     "1.0.0",
                     Map.of("keys", "conveyor.construction.directory")
                 )
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -302,7 +302,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -323,7 +323,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
                     "1.0.0",
                     Map.of("keys", "templated,key")
                 )
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -338,7 +338,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -359,7 +359,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
                     "1.0.0",
                     Map.of("key", "prefix-${templated}")
                 )
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 

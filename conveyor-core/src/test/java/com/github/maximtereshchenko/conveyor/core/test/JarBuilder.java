@@ -1,17 +1,21 @@
 package com.github.maximtereshchenko.conveyor.core.test;
 
-import javax.tools.*;
-import java.io.*;
-import java.net.URI;
+import com.github.maximtereshchenko.compiler.Compiler;
+import com.github.maximtereshchenko.test.common.Directories;
+import com.github.maximtereshchenko.zip.ArchiveContainer;
+
+import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.regex.Pattern;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 final class JarBuilder {
 
@@ -19,31 +23,32 @@ final class JarBuilder {
 
     private final Path templateDirectory;
     private final Map<String, String> values = new HashMap<>();
+    private final Path temporaryDirectory;
+    private final Compiler compiler;
 
-    private JarBuilder(Path templateDirectory) {
+    private JarBuilder(Path templateDirectory, Path temporaryDirectory, Compiler compiler) {
         this.templateDirectory = templateDirectory;
+        this.temporaryDirectory = temporaryDirectory;
+        this.compiler = compiler;
     }
 
-    static JarBuilder from(String templateDirectory) {
-        return new JarBuilder(path(templateDirectory))
+    static JarBuilder from(String templateDirectory, Path temporaryDirectory, Compiler compiler)
+        throws URISyntaxException {
+        return new JarBuilder(path(templateDirectory), temporaryDirectory, compiler)
             .group("com.github.maximtereshchenko.conveyor")
             .name(templateDirectory)
             .version("1.0.0");
     }
 
-    private static Path path(String templateDirectory) {
-        try {
-            return Paths.get(
-                Objects.requireNonNull(
-                        Thread.currentThread()
-                            .getContextClassLoader()
-                            .getResource(templateDirectory)
-                    )
-                    .toURI()
-            );
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
+    private static Path path(String templateDirectory) throws URISyntaxException {
+        return Paths.get(
+            Objects.requireNonNull(
+                    Thread.currentThread()
+                        .getContextClassLoader()
+                        .getResource(templateDirectory)
+                )
+                .toURI()
+        );
     }
 
     JarBuilder group(String group) {
@@ -74,18 +79,31 @@ final class JarBuilder {
         return values.get("version");
     }
 
-    void write(OutputStream outputStream) {
-        try (var zipOutputStream = new ZipOutputStream(outputStream)) {
-            for (var fileObject : compiled()) {
-                zipOutputStream.putNextEntry(new ZipEntry(fileObject.toUri().toString()));
-                try (var inputStream = fileObject.openInputStream()) {
-                    inputStream.transferTo(zipOutputStream);
-                }
-                zipOutputStream.closeEntry();
-            }
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+    void write(Path path) throws IOException {
+        var sources = temporaryDirectory.resolve("sources");
+        var classes = temporaryDirectory.resolve("classes");
+        compiler.compile(
+            Set.of(
+                Files.writeString(
+                    Directories.createDirectoriesForFile(
+                        sources.resolve(normalizedName())
+                            .resolve(normalizedName() + ".java")
+                    ),
+                    interpolated(Files.readString(templateDirectory.resolve("class.java")))
+                ),
+                Files.writeString(
+                    sources.resolve("module-info.java"),
+                    interpolated(
+                        Files.readString(templateDirectory.resolve("module-info.java"))
+                    )
+                )
+            ),
+            Stream.of(System.getProperty("jdk.module.path").split(":"))
+                .map(temporaryDirectory.getFileSystem()::getPath)
+                .collect(Collectors.toSet()),
+            classes
+        );
+        new ArchiveContainer(classes).archive(path);
     }
 
     private String interpolated(String original) {
@@ -99,111 +117,7 @@ final class JarBuilder {
             );
     }
 
-    private Collection<FileObject> compiled() throws IOException {
-        var compiler = ToolProvider.getSystemJavaCompiler();
-        var fileManager = new InMemoryFileManager(standardJavaFileManager(compiler));
-        if (!compile(compiler, fileManager)) {
-            throw new IllegalStateException("Could not compile");
-        }
-        return fileManager.compiled();
-    }
-
-    private boolean compile(JavaCompiler compiler, InMemoryFileManager fileManager)
-        throws IOException {
-        return compiler.getTask(
-                null,
-                fileManager,
-                null,
-                List.of("--module-path", System.getProperty("jdk.module.path")),
-                List.of(),
-                List.of(
-                    new StringJavaFileObject(
-                        Paths.get(normalizedName()).resolve(normalizedName() + ".java"),
-                        interpolated(Files.readString(templateDirectory.resolve("class.java")))
-                    ),
-                    new StringJavaFileObject(
-                        Paths.get("module-info.java"),
-                        interpolated(
-                            Files.readString(templateDirectory.resolve("module-info.java"))
-                        )
-                    )
-                )
-            )
-            .call();
-    }
-
     private String normalizedName() {
         return values.get("normalizedName");
-    }
-
-    private StandardJavaFileManager standardJavaFileManager(JavaCompiler compiler) {
-        return compiler.getStandardFileManager(null, Locale.ROOT, StandardCharsets.UTF_8);
-    }
-
-    private static final class InMemoryFileManager extends ForwardingJavaFileManager<StandardJavaFileManager> {
-
-        private final Collection<InMemoryJavaFileObject> inMemoryJavaFileObjects =
-            new ArrayList<>();
-
-        InMemoryFileManager(StandardJavaFileManager fileManager) {
-            super(fileManager);
-        }
-
-        @Override
-        public JavaFileObject getJavaFileForOutput(
-            Location location,
-            String className,
-            JavaFileObject.Kind kind,
-            FileObject sibling
-        ) {
-            var inMemoryJavaFileObject = new InMemoryJavaFileObject(className);
-            inMemoryJavaFileObjects.add(inMemoryJavaFileObject);
-            return inMemoryJavaFileObject;
-        }
-
-        Collection<FileObject> compiled() {
-            return List.copyOf(inMemoryJavaFileObjects);
-        }
-    }
-
-    private static final class InMemoryJavaFileObject extends SimpleJavaFileObject {
-
-        private final String className;
-        private final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-
-        InMemoryJavaFileObject(String className) {
-            super(URI.create(className.replace('.', '/') + ".class"), Kind.CLASS);
-            this.className = className;
-        }
-
-        @Override
-        public String getName() {
-            return className;
-        }
-
-        @Override
-        public InputStream openInputStream() {
-            return new ByteArrayInputStream(outputStream.toByteArray());
-        }
-
-        @Override
-        public OutputStream openOutputStream() {
-            return outputStream;
-        }
-    }
-
-    private static final class StringJavaFileObject extends SimpleJavaFileObject {
-
-        private final String source;
-
-        StringJavaFileObject(Path path, String source) {
-            super(path.toUri(), Kind.SOURCE);
-            this.source = source;
-        }
-
-        @Override
-        public CharSequence getCharContent(boolean ignoreEncodingErrors) {
-            return source;
-        }
     }
 }

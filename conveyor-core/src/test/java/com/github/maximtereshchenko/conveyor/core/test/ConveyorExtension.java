@@ -1,6 +1,7 @@
 package com.github.maximtereshchenko.conveyor.core.test;
 
 import com.fasterxml.jackson.dataformat.xml.shadowed.XmlMapper;
+import com.github.maximtereshchenko.compiler.Compiler;
 import com.github.maximtereshchenko.conveyor.api.ConveyorModule;
 import com.github.maximtereshchenko.conveyor.core.ConveyorFacade;
 import com.github.maximtereshchenko.conveyor.jackson.JacksonAdapter;
@@ -11,7 +12,6 @@ import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolver;
 
-import java.nio.file.FileSystem;
 import java.nio.file.Path;
 
 final class ConveyorExtension implements ParameterResolver {
@@ -33,12 +33,16 @@ final class ConveyorExtension implements ParameterResolver {
         ExtensionContext extensionContext
     ) {
         var store = extensionContext.getStore(namespace);
-        var fileSystem = store.getOrComputeIfAbsent(
-                ClosableFileSystem.class,
-                ignored -> new ClosableFileSystem(Jimfs.newFileSystem(Configuration.unix())),
-                ClosableFileSystem.class
-            )
-            .fileSystem();
+        var fileSystem = Jimfs.newFileSystem(Configuration.unix());
+        store.put(
+            ExtensionContext.Store.CloseableResource.class,
+            (ExtensionContext.Store.CloseableResource) fileSystem::close
+        );
+        var path = store.getOrComputeIfAbsent(
+            Path.class,
+            key -> fileSystem.getPath("/test"),
+            Path.class
+        );
         var jacksonAdapter = store.getOrComputeIfAbsent(
             JacksonAdapter.class,
             key -> JacksonAdapter.configured(fileSystem),
@@ -50,18 +54,9 @@ final class ConveyorExtension implements ParameterResolver {
         );
         store.getOrComputeIfAbsent(
             BuilderFactory.class,
-            key -> new BuilderFactory(jacksonAdapter, new XmlMapper())
+            key -> new BuilderFactory(jacksonAdapter, new XmlMapper(), new Compiler(), path)
         );
-        store.getOrComputeIfAbsent(Path.class, key -> fileSystem.getPath("/test"));
+        store.getOrComputeIfAbsent(Path.class, key -> path);
         return store.get(parameterContext.getParameter().getType());
-    }
-
-    private record ClosableFileSystem(FileSystem fileSystem)
-        implements ExtensionContext.Store.CloseableResource {
-
-        @Override
-        public void close() throws Throwable {
-            fileSystem.close();
-        }
     }
 }

@@ -20,7 +20,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -62,7 +62,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
             factory.schematicDefinitionBuilder()
                 .repository(path)
                 .plugin("module-path")
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -76,7 +76,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -120,7 +120,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                 .repository(path)
                 .plugin("first")
                 .plugin("second")
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -134,7 +134,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder().name("first")
@@ -207,7 +207,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                 .repository(path)
                 .plugin("first")
                 .plugin("second")
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -226,7 +226,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -264,7 +264,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                 .plugin("dependencies")
                 .dependency("dependency")
                 .dependency("test", "1.0.0", DependencyScope.TEST)
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -278,7 +278,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -331,7 +331,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                 .plugin("dependencies")
                 .dependency("first")
                 .dependency("second")
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -346,7 +346,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -428,7 +428,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                 .plugin("dependencies")
                 .dependency("first")
                 .dependency("second")
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -449,7 +449,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -485,7 +485,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                 .plugin("dependencies")
                 .preference("transitive", "2.0.0")
                 .dependency("dependency")
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -500,7 +500,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -516,7 +516,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                 .repository(path)
                 .preference("instant", "1.0.0")
                 .plugin("instant", Map.of("instant", "COMPILE-RUN"))
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -528,7 +528,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -552,7 +552,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                 .preference("dependency", "1.0.0")
                 .plugin("dependencies")
                 .dependency("dependency", DependencyScope.IMPLEMENTATION)
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -566,7 +566,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -587,7 +587,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                 .repository(path)
                 .preferenceInclusion("bom")
                 .plugin("instant", Map.of("instant", "COMPILE-RUN"))
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -599,7 +599,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -626,7 +626,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                 .repository(path)
                 .preferenceInclusion("bom")
                 .plugin("instant", Map.of("instant", "COMPILE-RUN"))
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -655,7 +655,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -699,7 +699,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                 .plugin("dependencies")
                 .dependency("dependency")
                 .dependency("common", lower, DependencyScope.IMPLEMENTATION)
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -714,7 +714,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -742,7 +742,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                     "${dependency.version}",
                     DependencyScope.IMPLEMENTATION
                 )
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -756,7 +756,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -814,7 +814,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                             "${library.version}",
                             DependencyScope.IMPLEMENTATION
                         )
-                        .install(path.resolve("dependency"))
+                        .conveyorJson(path.resolve("dependency"))
                 )
                 .inclusion(
                     factory.schematicDefinitionBuilder()
@@ -822,9 +822,9 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                         .template("project")
                         .plugin("dependencies", "1.0.0", Map.of())
                         .dependency("dependency")
-                        .install(depends)
+                        .conveyorJson(depends)
                 )
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -839,7 +839,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -859,7 +859,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                     "${instant.version}",
                     Map.of("instant", "COMPILE-RUN")
                 )
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -871,7 +871,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -888,7 +888,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                 .property("instant.version", "1.0.0")
                 .preference("instant", "${instant.version}")
                 .plugin("instant", Map.of("instant", "COMPILE-RUN"))
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -900,7 +900,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -922,7 +922,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                 .property("bom.version", "1.0.0")
                 .preferenceInclusion("bom", "${bom.version}")
                 .plugin("instant", Map.of("instant", "COMPILE-RUN"))
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -934,7 +934,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -963,7 +963,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                 .preferenceInclusion("bom-with-higher-version")
                 .preferenceInclusion("bom-with-lower-version")
                 .plugin("instant", Map.of("instant", "COMPILE-RUN"))
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -975,7 +975,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -999,7 +999,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                 .preferenceInclusion("bom")
                 .preference("instant", "1.0.0")
                 .plugin("instant", Map.of("instant", "COMPILE-RUN"))
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 

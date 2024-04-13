@@ -18,7 +18,7 @@ final class PluginsFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -38,7 +38,7 @@ final class PluginsFeatureTests extends ConveyorTest {
                     "1.0.0",
                     Map.of("keys", "user.defined.property")
                 )
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -52,7 +52,7 @@ final class PluginsFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -72,7 +72,7 @@ final class PluginsFeatureTests extends ConveyorTest {
                     "1.0.0",
                     Map.of("configuration", "${property}-suffix")
                 )
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -87,7 +87,7 @@ final class PluginsFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -106,7 +106,7 @@ final class PluginsFeatureTests extends ConveyorTest {
                     "1.0.0",
                     Map.of("user.defined.configuration", "value")
                 )
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -124,7 +124,7 @@ final class PluginsFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -146,7 +146,7 @@ final class PluginsFeatureTests extends ConveyorTest {
                         "instant", "COMPILE-RUN"
                     )
                 )
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -158,7 +158,7 @@ final class PluginsFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -181,7 +181,7 @@ final class PluginsFeatureTests extends ConveyorTest {
             factory.schematicDefinitionBuilder()
                 .repository(path)
                 .plugin("module-path")
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -195,7 +195,7 @@ final class PluginsFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -227,7 +227,7 @@ final class PluginsFeatureTests extends ConveyorTest {
             factory.schematicDefinitionBuilder()
                 .repository(path)
                 .plugin("module-path")
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -242,7 +242,7 @@ final class PluginsFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -270,7 +270,7 @@ final class PluginsFeatureTests extends ConveyorTest {
             factory.schematicDefinitionBuilder()
                 .repository(path)
                 .plugin("module-path")
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -284,7 +284,7 @@ final class PluginsFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -308,7 +308,7 @@ final class PluginsFeatureTests extends ConveyorTest {
             factory.schematicDefinitionBuilder()
                 .repository(path)
                 .template("template")
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -320,7 +320,7 @@ final class PluginsFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -351,7 +351,7 @@ final class PluginsFeatureTests extends ConveyorTest {
                     "2.0.0",
                     Map.of("instant", "COMPILE-RUN")
                 )
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -363,7 +363,7 @@ final class PluginsFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -391,7 +391,7 @@ final class PluginsFeatureTests extends ConveyorTest {
                     "configuration",
                     Map.of("key", "schematic-value")
                 )
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -409,7 +409,7 @@ final class PluginsFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -437,7 +437,7 @@ final class PluginsFeatureTests extends ConveyorTest {
                     "configuration",
                     Map.of("to.be.removed", "")
                 )
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -451,7 +451,7 @@ final class PluginsFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -476,7 +476,7 @@ final class PluginsFeatureTests extends ConveyorTest {
                 .repository(path)
                 .template("template")
                 .plugin("configuration", Map.of("key", "value"))
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 

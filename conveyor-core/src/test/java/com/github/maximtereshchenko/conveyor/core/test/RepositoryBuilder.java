@@ -1,83 +1,85 @@
 package com.github.maximtereshchenko.conveyor.core.test;
 
+import com.github.maximtereshchenko.test.common.Directories;
 import com.github.tomakehurst.wiremock.shadowed.WireMockServer;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.UncheckedIOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Consumer;
+import java.util.HashSet;
+import java.util.Set;
 
 import static com.github.tomakehurst.wiremock.shadowed.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.shadowed.client.WireMock.ok;
 
 final class RepositoryBuilder {
 
-    private final Map<URI, Consumer<OutputStream>> files = new HashMap<>();
+    private final Set<URI> uris = new HashSet<>();
+    private final Path temporaryDirectory;
 
-    RepositoryBuilder schematicDefinition(SchematicDefinitionBuilder schematicDefinitionBuilder) {
-        files.put(
-            uri(
-                schematicDefinitionBuilder.group(),
-                schematicDefinitionBuilder.name(),
-                schematicDefinitionBuilder.version(),
-                "json"
-            ),
-            schematicDefinitionBuilder::install
+    RepositoryBuilder(Path temporaryDirectory) {
+        this.temporaryDirectory = temporaryDirectory;
+    }
+
+    RepositoryBuilder schematicDefinition(SchematicDefinitionBuilder schematicDefinitionBuilder)
+        throws IOException {
+        var uri = uri(
+            schematicDefinitionBuilder.group(),
+            schematicDefinitionBuilder.name(),
+            schematicDefinitionBuilder.version(),
+            "json"
         );
+        uris.add(uri);
+        schematicDefinitionBuilder.write(path(uri));
         return this;
     }
 
-    RepositoryBuilder jar(JarBuilder jarBuilder) {
-        files.put(
-            uri(jarBuilder.group(), jarBuilder.name(), jarBuilder.version(), "jar"),
-            jarBuilder::write
-        );
+    RepositoryBuilder jar(JarBuilder jarBuilder) throws IOException {
+        var uri = uri(jarBuilder.group(), jarBuilder.name(), jarBuilder.version(), "jar");
+        uris.add(uri);
+        jarBuilder.write(path(uri));
         return this;
     }
 
-    RepositoryBuilder pom(PomBuilder pomBuilder) {
-        files.put(
-            uri(
-                pomBuilder.groupId(),
-                pomBuilder.artifactId(),
-                pomBuilder.version(),
-                "pom"
-            ),
-            pomBuilder::write
+    RepositoryBuilder pom(PomBuilder pomBuilder) throws IOException {
+        var uri = uri(
+            pomBuilder.groupId(),
+            pomBuilder.artifactId(),
+            pomBuilder.version(),
+            "pom"
         );
+        uris.add(uri);
+        pomBuilder.write(path(uri));
         return this;
     }
 
-    void install(Path directory) {
-        for (var entry : files.entrySet()) {
-            try (var outputStream = outputStream(directory, entry.getKey())) {
-                entry.getValue().accept(outputStream);
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            }
+    void install(Path directory) throws IOException {
+        for (var uri : uris) {
+            var source = path(uri);
+            Files.copy(
+                source,
+                Directories.createDirectoriesForFile(
+                    directory.resolve(temporaryDirectory.relativize(source))
+                )
+            );
         }
     }
 
-    void install(WireMockServer wireMockServer) {
-        for (var entry : files.entrySet()) {
-            var outputStream = new ByteArrayOutputStream();
-            entry.getValue().accept(outputStream);
-            wireMockServer.addStubMapping(
-                get("/" + entry.getKey().toString())
-                    .willReturn(
-                        ok()
-                            .withHeader("Content-Type", contentType(entry.getKey()))
-                            .withBody(outputStream.toByteArray())
-                    )
-                    .build()
-            );
+    void install(WireMockServer wireMockServer) throws IOException {
+        for (var uri : uris) {
+            try (var inputStream = Files.newInputStream(path(uri))) {
+                wireMockServer.addStubMapping(
+                    get("/" + uri)
+                        .willReturn(
+                            ok()
+                                .withHeader("Content-Type", contentType(uri))
+                                .withBody(inputStream.readAllBytes())
+                        )
+                        .build()
+                );
+            }
         }
     }
 
@@ -88,10 +90,10 @@ final class RepositoryBuilder {
         return "application/octet-stream";
     }
 
-    private OutputStream outputStream(Path directory, URI uri) throws IOException {
-        var path = Paths.get(URI.create(directory.toUri().toString() + '/' + uri));
-        Files.createDirectories(path.getParent());
-        return Files.newOutputStream(path);
+    private Path path(URI uri) throws IOException {
+        return Directories.createDirectoriesForFile(
+            Paths.get(URI.create(temporaryDirectory.toUri().toString() + '/' + uri))
+        );
     }
 
     private URI uri(String group, String name, String version, String extension) {

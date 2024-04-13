@@ -24,7 +24,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         var first = path.resolve("first");
         var second = path.resolve("second");
         factory.repositoryBuilder()
@@ -54,9 +54,9 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                             "1.0.0",
                             Map.of("instant", "COMPILE-RUN")
                         )
-                        .install(project)
+                        .conveyorJson(project)
                 )
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -68,7 +68,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         var templateRepository = path.resolve("template-repository");
         factory.repositoryBuilder()
             .install(templateRepository);
@@ -98,9 +98,9 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                             "1.0.0",
                             Map.of("instant", "COMPILE-RUN")
                         )
-                        .install(project)
+                        .conveyorJson(project)
                 )
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -112,7 +112,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         var templateRepository = path.resolve("template-repository");
         factory.repositoryBuilder()
             .schematicDefinition(
@@ -154,9 +154,9 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                         .repository("project-repository", projectRepository, true)
                         .repository("template-repository", templateRepository, false)
                         .plugin("module-path")
-                        .install(project)
+                        .conveyorJson(project)
                 )
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -170,7 +170,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -185,7 +185,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
             factory.schematicDefinitionBuilder()
                 .repository(Paths.get("./temp/../repository"))
                 .plugin("instant", "1.0.0", Map.of("instant", "COMPILE-RUN"))
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -199,7 +199,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         ConveyorModule module,
         BuilderFactory factory,
         WireMockServer wireMockServer
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .jar(
                 factory.jarBuilder("instant")
@@ -221,7 +221,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                     "1.0.0",
                     Map.of("instant", "COMPILE-RUN")
                 )
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -235,7 +235,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         ConveyorModule module,
         BuilderFactory factory,
         WireMockServer wireMockServer
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .jar(
                 factory.jarBuilder("instant")
@@ -255,7 +255,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                 "1.0.0",
                 Map.of("instant", "COMPILE-RUN")
             )
-            .install(path);
+            .conveyorJson(path);
 
         module.construct(schematic, Stage.COMPILE);
         module.construct(schematic, Stage.COMPILE);
@@ -274,7 +274,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         ConveyorModule module,
         BuilderFactory factory,
         WireMockServer wireMockServer
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .jar(
                 factory.jarBuilder("instant")
@@ -298,7 +298,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                     "1.0.0",
                     Map.of("instant", "COMPILE-RUN")
                 )
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -313,7 +313,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         ConveyorModule module,
         BuilderFactory factory,
         WireMockServer wireMockServer
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .jar(
                 factory.jarBuilder("instant")
@@ -336,7 +336,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                     "1.0.0",
                     Map.of("instant", "COMPILE-RUN")
                 )
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -351,7 +351,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         ConveyorModule module,
         BuilderFactory factory,
         WireMockServer wireMockServer
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .jar(
                 factory.jarBuilder("module-path")
@@ -382,7 +382,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                 .repository("local", path, true)
                 .repository("remote", wireMockServer.baseUrl(), true)
                 .plugin("module-path")
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -398,7 +398,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         ConveyorModule module,
         BuilderFactory factory,
         WireMockServer wireMockServer
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .pom(
                 factory.pomBuilder()
@@ -430,7 +430,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                 .preferenceInclusion("bom")
                 .plugin("dependencies")
                 .dependency("dependency")
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -446,7 +446,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         ConveyorModule module,
         BuilderFactory factory,
         WireMockServer wireMockServer
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .pom(
                 factory.pomBuilder()
@@ -470,7 +470,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                 .repository("local", path, true)
                 .repository("remote", wireMockServer.baseUrl(), true)
                 .plugin("properties", "1.0.0", Map.of("keys", "pom.key"))
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -499,7 +499,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         ConveyorModule module,
         BuilderFactory factory,
         WireMockServer wireMockServer
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .pom(
                 factory.pomBuilder()
@@ -534,7 +534,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                     "1.0.0",
                     Map.of("scope", dependencyScope.toString())
                 )
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 

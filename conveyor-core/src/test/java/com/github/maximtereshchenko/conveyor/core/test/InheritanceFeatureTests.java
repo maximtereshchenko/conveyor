@@ -5,6 +5,8 @@ import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.Map;
@@ -19,7 +21,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -40,7 +42,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
                 .template("template")
                 .repository(path)
                 .plugin("properties", "1.0.0", Map.of("keys", "template.key"))
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -54,7 +56,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -78,7 +80,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
             factory.schematicDefinitionBuilder()
                 .template("template")
                 .repository(path)
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -90,7 +92,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -118,7 +120,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
                 .template("template")
                 .repository(path)
                 .plugin("dependencies")
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -132,7 +134,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -164,7 +166,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
                 .template("template")
                 .repository(path)
                 .plugin("dependencies", "1.0.0", Map.of("scope", "TEST"))
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -178,7 +180,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -194,13 +196,13 @@ final class InheritanceFeatureTests extends ConveyorTest {
             .repository(path)
             .inclusion(conveyorJson(project))
             .property("template.key", "value")
-            .install(path);
+            .conveyorJson(path);
 
         module.construct(
             factory.schematicDefinitionBuilder()
                 .template("template")
                 .plugin("properties", "1.0.0", Map.of("keys", "template.key"))
-                .install(project),
+                .conveyorJson(project),
             Stage.COMPILE
         );
 
@@ -214,7 +216,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -230,12 +232,12 @@ final class InheritanceFeatureTests extends ConveyorTest {
             .repository(path)
             .inclusion(conveyorJson(project))
             .plugin("instant", "1.0.0", Map.of("instant", "COMPILE-RUN"))
-            .install(path);
+            .conveyorJson(path);
 
         module.construct(
             factory.schematicDefinitionBuilder()
                 .template("template")
-                .install(project),
+                .conveyorJson(project),
             Stage.COMPILE
         );
 
@@ -247,7 +249,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -270,13 +272,13 @@ final class InheritanceFeatureTests extends ConveyorTest {
             .repository(path)
             .inclusion(conveyorJson(project))
             .dependency("dependency")
-            .install(path);
+            .conveyorJson(path);
 
         module.construct(
             factory.schematicDefinitionBuilder()
                 .template("template")
                 .plugin("dependencies")
-                .install(project),
+                .conveyorJson(project),
             Stage.COMPILE
         );
 
@@ -290,7 +292,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -313,13 +315,13 @@ final class InheritanceFeatureTests extends ConveyorTest {
             .repository(path)
             .inclusion(conveyorJson(project))
             .dependency("dependency", "1.0.0", DependencyScope.TEST)
-            .install(path);
+            .conveyorJson(path);
 
         module.construct(
             factory.schematicDefinitionBuilder()
                 .template("template")
                 .plugin("dependencies", "1.0.0", Map.of("scope", "TEST"))
-                .install(project),
+                .conveyorJson(project),
             Stage.COMPILE
         );
 
@@ -333,7 +335,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         var repository = path.resolve("repository");
         factory.repositoryBuilder()
             .schematicDefinition(
@@ -349,13 +351,13 @@ final class InheritanceFeatureTests extends ConveyorTest {
             .name("template")
             .repository(repository)
             .inclusion(conveyorJson(project))
-            .install(path);
+            .conveyorJson(path);
 
         module.construct(
             factory.schematicDefinitionBuilder()
                 .template("template")
                 .plugin("instant", "1.0.0", Map.of("instant", "COMPILE-RUN"))
-                .install(project),
+                .conveyorJson(project),
             Stage.COMPILE
         );
 
@@ -367,7 +369,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -392,10 +394,10 @@ final class InheritanceFeatureTests extends ConveyorTest {
                             "1.0.0",
                             Map.of("keys", "template.key")
                         )
-                        .install(included)
+                        .conveyorJson(included)
                 )
                 .property("template.key", "value")
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -409,7 +411,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -429,10 +431,10 @@ final class InheritanceFeatureTests extends ConveyorTest {
                     factory.schematicDefinitionBuilder()
                         .name("included")
                         .template("template")
-                        .install(included)
+                        .conveyorJson(included)
                 )
                 .plugin("instant", "1.0.0", Map.of("instant", "COMPILE-RUN"))
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -444,7 +446,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -472,10 +474,10 @@ final class InheritanceFeatureTests extends ConveyorTest {
                         .name("included")
                         .template("template")
                         .plugin("dependencies")
-                        .install(included)
+                        .conveyorJson(included)
                 )
                 .dependency("dependency")
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -489,7 +491,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -521,10 +523,10 @@ final class InheritanceFeatureTests extends ConveyorTest {
                             "1.0.0",
                             Map.of("scope", "TEST")
                         )
-                        .install(included)
+                        .conveyorJson(included)
                 )
                 .dependency("dependency", "1.0.0", DependencyScope.TEST)
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -538,7 +540,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         var repository = path.resolve("repository");
         factory.repositoryBuilder()
             .schematicDefinition(
@@ -564,9 +566,9 @@ final class InheritanceFeatureTests extends ConveyorTest {
                             "1.0.0",
                             Map.of("instant", "COMPILE-RUN")
                         )
-                        .install(included)
+                        .conveyorJson(included)
                 )
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -578,7 +580,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -598,10 +600,10 @@ final class InheritanceFeatureTests extends ConveyorTest {
                     factory.schematicDefinitionBuilder()
                         .name("included")
                         .template("template")
-                        .install(included)
+                        .conveyorJson(included)
                 )
                 .plugin("instant", "1.0.0", Map.of("instant", "COMPILE-RUN"))
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -613,7 +615,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -649,7 +651,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
                         .name("depends")
                         .template("template")
                         .dependency("dependency")
-                        .install(depends)
+                        .conveyorJson(depends)
                 )
                 .inclusion(
                     factory.schematicDefinitionBuilder()
@@ -660,10 +662,10 @@ final class InheritanceFeatureTests extends ConveyorTest {
                             "1.0.0",
                             Map.of("path", path.resolve("dependency-1.0.0").toString())
                         )
-                        .install(dependency)
+                        .conveyorJson(dependency)
                 )
                 .plugin("instant", "1.0.0", Map.of("instant", "COMPILE-RUN"))
-                .install(path),
+                .conveyorJson(path),
             Stage.ARCHIVE
         );
 
@@ -675,7 +677,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -691,13 +693,13 @@ final class InheritanceFeatureTests extends ConveyorTest {
             .repository(path)
             .inclusion(conveyorJson(included))
             .plugin("instant", "1.0.0", Map.of("instant", "COMPILE-RUN"))
-            .install(path);
+            .conveyorJson(path);
 
         module.construct(
             factory.schematicDefinitionBuilder()
                 .name("included")
                 .template("template")
-                .install(included),
+                .conveyorJson(included),
             Stage.COMPILE
         );
 
@@ -709,7 +711,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -735,9 +737,9 @@ final class InheritanceFeatureTests extends ConveyorTest {
                         factory.schematicDefinitionBuilder()
                             .name("project-depth-2a")
                             .template("project-depth-1a")
-                            .install(projectDepth2a)
+                            .conveyorJson(projectDepth2a)
                     )
-                    .install(projectDepth1a)
+                    .conveyorJson(projectDepth1a)
             )
             .inclusion(
                 factory.schematicDefinitionBuilder()
@@ -747,17 +749,17 @@ final class InheritanceFeatureTests extends ConveyorTest {
                         factory.schematicDefinitionBuilder()
                             .name("project-depth-2b")
                             .template("project-depth-1b")
-                            .install(projectDepth2b)
+                            .conveyorJson(projectDepth2b)
                     )
-                    .install(projectDepth1b)
+                    .conveyorJson(projectDepth1b)
             )
-            .install(project);
+            .conveyorJson(project);
         factory.schematicDefinitionBuilder()
             .name("template")
             .repository(path)
             .plugin("instant", "1.0.0", Map.of("instant", "COMPILE-RUN"))
             .inclusion(projectSchematic)
-            .install(path);
+            .conveyorJson(path);
 
         module.construct(projectSchematic, Stage.COMPILE);
 
@@ -773,7 +775,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -803,7 +805,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
             .template("template")
             .plugin("dependencies")
             .dependency("dependency")
-            .install(depends);
+            .conveyorJson(depends);
         factory.schematicDefinitionBuilder()
             .name("template")
             .repository(path)
@@ -827,9 +829,9 @@ final class InheritanceFeatureTests extends ConveyorTest {
                                 .toString()
                         )
                     )
-                    .install(path.resolve("dependency"))
+                    .conveyorJson(path.resolve("dependency"))
             )
-            .install(path);
+            .conveyorJson(path);
 
         module.construct(dependsSchematic, Stage.ARCHIVE);
 
@@ -843,7 +845,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -856,7 +858,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
         var unrelated = path.resolve("unrelated");
         var includedSchematic = factory.schematicDefinitionBuilder()
             .name("included")
-            .install(path.resolve("included"));
+            .conveyorJson(path.resolve("included"));
         factory.schematicDefinitionBuilder()
             .repository(path)
             .inclusion(includedSchematic)
@@ -864,9 +866,9 @@ final class InheritanceFeatureTests extends ConveyorTest {
                 factory.schematicDefinitionBuilder()
                     .name("unrelated")
                     .plugin("instant", "1.0.0", Map.of("instant", "COMPILE-RUN"))
-                    .install(unrelated)
+                    .conveyorJson(unrelated)
             )
-            .install(path);
+            .conveyorJson(path);
 
         module.construct(includedSchematic, Stage.COMPILE);
 
@@ -878,7 +880,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -893,7 +895,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
             .name("included")
             .template("template")
             .dependency("dependency")
-            .install(path.resolve("included"));
+            .conveyorJson(path.resolve("included"));
         factory.schematicDefinitionBuilder()
             .name("template")
             .repository(path)
@@ -903,16 +905,16 @@ final class InheritanceFeatureTests extends ConveyorTest {
                     .name("dependency")
                     .template("template")
                     .dependency("transitive")
-                    .install(path.resolve("dependency"))
+                    .conveyorJson(path.resolve("dependency"))
             )
             .inclusion(
                 factory.schematicDefinitionBuilder()
                     .name("transitive")
                     .template("template")
                     .plugin("instant", "1.0.0", Map.of("instant", "COMPILE-RUN"))
-                    .install(transitive)
+                    .conveyorJson(transitive)
             )
-            .install(path);
+            .conveyorJson(path);
 
         module.construct(includedSchematic, Stage.COMPILE);
 
@@ -924,7 +926,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -946,16 +948,16 @@ final class InheritanceFeatureTests extends ConveyorTest {
                         .name("depends")
                         .template("template")
                         .dependency("dependency")
-                        .install(depends)
+                        .conveyorJson(depends)
                 )
                 .inclusion(
                     factory.schematicDefinitionBuilder()
                         .name("dependency")
                         .template("template")
-                        .install(dependency)
+                        .conveyorJson(dependency)
                 )
                 .plugin("instant", "1.0.0", Map.of("instant", "ARCHIVE-RUN"))
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -969,7 +971,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -991,16 +993,16 @@ final class InheritanceFeatureTests extends ConveyorTest {
                         .name("depends")
                         .template("template")
                         .dependency("dependency")
-                        .install(depends)
+                        .conveyorJson(depends)
                 )
                 .inclusion(
                     factory.schematicDefinitionBuilder()
                         .name("dependency")
                         .template("template")
-                        .install(dependency)
+                        .conveyorJson(dependency)
                 )
                 .plugin("instant", "1.0.0", Map.of("instant", "PUBLISH-RUN"))
-                .install(path),
+                .conveyorJson(path),
             Stage.PUBLISH
         );
 
@@ -1010,7 +1012,11 @@ final class InheritanceFeatureTests extends ConveyorTest {
     }
 
     private Instant constructed(Path path) {
-        return instant(instantPath(path));
+        try {
+            return instant(instantPath(path));
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     private Path instantPath(Path path) {

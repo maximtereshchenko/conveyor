@@ -5,6 +5,7 @@ import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.List;
@@ -19,7 +20,7 @@ final class TasksFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -34,7 +35,7 @@ final class TasksFeatureTests extends ConveyorTest {
             factory.schematicDefinitionBuilder()
                 .repository(path)
                 .plugin("instant", "1.0.0", Map.of("instant", "COMPILE-RUN"))
-                .install(path),
+                .conveyorJson(path),
             Stage.TEST
         );
 
@@ -46,7 +47,7 @@ final class TasksFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -61,7 +62,7 @@ final class TasksFeatureTests extends ConveyorTest {
             factory.schematicDefinitionBuilder()
                 .repository(path)
                 .plugin("instant", "1.0.0", Map.of("instant", "COMPILE-RUN"))
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -73,7 +74,7 @@ final class TasksFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -88,7 +89,7 @@ final class TasksFeatureTests extends ConveyorTest {
             factory.schematicDefinitionBuilder()
                 .repository(path)
                 .plugin("instant")
-                .install(path),
+                .conveyorJson(path),
             Stage.CLEAN
         );
 
@@ -100,7 +101,7 @@ final class TasksFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -125,7 +126,7 @@ final class TasksFeatureTests extends ConveyorTest {
                         "publish", "PUBLISH-RUN"
                     )
                 )
-                .install(path),
+                .conveyorJson(path),
             Stage.PUBLISH
         );
 
@@ -146,7 +147,7 @@ final class TasksFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -169,7 +170,7 @@ final class TasksFeatureTests extends ConveyorTest {
                         "finalize", "COMPILE-FINALIZE"
                     )
                 )
-                .install(path),
+                .conveyorJson(path),
             Stage.PUBLISH
         );
 
@@ -188,7 +189,7 @@ final class TasksFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -211,7 +212,7 @@ final class TasksFeatureTests extends ConveyorTest {
                 .repository(path)
                 .plugin("dependencies")
                 .dependency("dependency")
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -225,7 +226,7 @@ final class TasksFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -257,7 +258,7 @@ final class TasksFeatureTests extends ConveyorTest {
                 .repository(path)
                 .plugin("dependencies")
                 .dependency("dependency")
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -272,7 +273,7 @@ final class TasksFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -300,7 +301,7 @@ final class TasksFeatureTests extends ConveyorTest {
                     Map.of("scope", "TEST")
                 )
                 .dependency("test", "1.0.0", DependencyScope.TEST)
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -314,7 +315,7 @@ final class TasksFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -336,7 +337,7 @@ final class TasksFeatureTests extends ConveyorTest {
             .repository(path)
             .plugin("product", "1.0.0", Map.of("path", product.toString()))
             .plugin("products")
-            .install(path);
+            .conveyorJson(path);
 
         module.construct(schematicDefinition, Stage.PUBLISH);
 
@@ -346,7 +347,7 @@ final class TasksFeatureTests extends ConveyorTest {
             .contains("SCHEMATIC_DEFINITION=" + schematicDefinition, "MODULE=" + product);
     }
 
-    private Instant instant(Path path, String fileName) {
+    private Instant instant(Path path, String fileName) throws IOException {
         return instant(defaultConstructionDirectory(path).resolve(fileName));
     }
 }

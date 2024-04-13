@@ -1,5 +1,6 @@
 package com.github.maximtereshchenko.conveyor.plugin.compile;
 
+import com.github.maximtereshchenko.compiler.Compiler;
 import com.github.maximtereshchenko.conveyor.common.api.ProductType;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import com.github.maximtereshchenko.conveyor.common.api.Step;
@@ -23,6 +24,7 @@ public final class CompilePlugin implements ConveyorPlugin {
         ConveyorSchematic schematic,
         Map<String, String> configuration
     ) {
+        var compiler = new Compiler();
         return List.of(
             new ConveyorTaskBinding(
                 Stage.COMPILE,
@@ -38,7 +40,8 @@ public final class CompilePlugin implements ConveyorPlugin {
                 Step.RUN,
                 new CompileSourcesTask(
                     schematic,
-                    schematic.constructionDirectory().resolve("exploded-module")
+                    schematic.constructionDirectory().resolve("exploded-module"),
+                    compiler
                 )
             ),
             new ConveyorTaskBinding(
@@ -55,7 +58,8 @@ public final class CompilePlugin implements ConveyorPlugin {
                 Step.PREPARE,
                 new CompileTestSourcesTask(
                     schematic,
-                    schematic.constructionDirectory().resolve("exploded-test-module")
+                    schematic.constructionDirectory().resolve("exploded-test-module"),
+                    compiler
                 )
             )
         );

@@ -17,7 +17,7 @@ final class DependenciesFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -55,7 +55,7 @@ final class DependenciesFeatureTests extends ConveyorTest {
                 .template("template")
                 .plugin("dependencies")
                 .dependency("schematic-dependency")
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -70,7 +70,7 @@ final class DependenciesFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -106,7 +106,7 @@ final class DependenciesFeatureTests extends ConveyorTest {
                 .template("template")
                 .plugin("dependencies")
                 .dependency("dependency", "2.0.0", DependencyScope.IMPLEMENTATION)
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -121,7 +121,7 @@ final class DependenciesFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -150,7 +150,7 @@ final class DependenciesFeatureTests extends ConveyorTest {
                 .template("template")
                 .plugin("dependencies")
                 .dependency("dependency")
-                .install(path),
+                .conveyorJson(path),
             Stage.COMPILE
         );
 
@@ -165,7 +165,7 @@ final class DependenciesFeatureTests extends ConveyorTest {
         Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) {
+    ) throws Exception {
         factory.repositoryBuilder()
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -210,7 +210,7 @@ final class DependenciesFeatureTests extends ConveyorTest {
                                     .toString()
                             )
                         )
-                        .install(path.resolve("first"))
+                        .conveyorJson(path.resolve("first"))
                 )
                 .inclusion(
                     factory.schematicDefinitionBuilder()
@@ -218,9 +218,9 @@ final class DependenciesFeatureTests extends ConveyorTest {
                         .template("project")
                         .plugin("dependencies")
                         .dependency("first")
-                        .install(second)
+                        .conveyorJson(second)
                 )
-                .install(path),
+                .conveyorJson(path),
             Stage.ARCHIVE
         );
 
