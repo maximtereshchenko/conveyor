@@ -11,6 +11,8 @@ include("compile-conveyor-plugin")
 include("resources-conveyor-plugin")
 include("jimfs-junit5-extension")
 include("conveyor-plugin-test")
+include("archive-conveyor-plugin")
+include("zip-archive")
 dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {
@@ -19,7 +21,6 @@ dependencyResolutionManagement {
             library("jackson-bom", "com.fasterxml.jackson", "jackson-bom").version("2.17.0")
             library("wiremock", "org.wiremock", "wiremock").version("3.4.2")
             library("jimfs", "com.google.jimfs", "jimfs").version("1.3.0")
-            library("junit-jupiter", "org.junit.jupiter", "junit-jupiter").withoutVersion()
             library("junit-jupiter-engine", "org.junit.jupiter", "junit-jupiter-engine")
                 .withoutVersion()
             library("junit-jupiter-params", "org.junit.jupiter", "junit-jupiter-params")

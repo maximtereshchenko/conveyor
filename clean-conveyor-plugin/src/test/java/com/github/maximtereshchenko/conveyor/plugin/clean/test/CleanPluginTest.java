@@ -21,11 +21,7 @@ final class CleanPluginTest {
 
     @Test
     void givenPlugin_whenBindings_thenTaskBindToCleanRun(Path path) {
-        ConveyorTaskBindings.from(
-                FakeConveyorSchematicBuilder.discoveryDirectory(path)
-                    .constructionDirectory(path)
-                    .build()
-            )
+        ConveyorTaskBindings.from(FakeConveyorSchematicBuilder.discoveryDirectory(path).build())
             .assertThat()
             .hasSize(1)
             .first()
