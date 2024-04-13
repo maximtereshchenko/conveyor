@@ -2,8 +2,9 @@ package com.github.maximtereshchenko.conveyor.plugin.clean.test;
 
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import com.github.maximtereshchenko.conveyor.common.api.Step;
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskBinding;
+import com.github.maximtereshchenko.conveyor.plugin.test.ConveyorTaskBindings;
+import com.github.maximtereshchenko.conveyor.plugin.test.FakeConveyorSchematicBuilder;
 import com.github.maximtereshchenko.jimfs.JimfsExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,7 +12,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -21,7 +21,12 @@ final class CleanPluginTest {
 
     @Test
     void givenPlugin_whenBindings_thenTaskBindToCleanRun(Path path) {
-        assertThat(bindings(path))
+        ConveyorTaskBindings.from(
+                FakeConveyorSchematicBuilder.discoveryDirectory(path)
+                    .constructionDirectory(path)
+                    .build()
+            )
+            .assertThat()
             .hasSize(1)
             .first()
             .extracting(ConveyorTaskBinding::stage, ConveyorTaskBinding::step)
@@ -30,12 +35,20 @@ final class CleanPluginTest {
 
     @Test
     void givenNoDirectory_whenExecuteTasks_thenTaskDidNotFail(Path path) {
-        assertThatCode(() -> executeTask(path)).doesNotThrowAnyException();
+        var schematic = FakeConveyorSchematicBuilder.discoveryDirectory(path).build();
+        var bindings = ConveyorTaskBindings.from(schematic);
+
+        assertThatCode(bindings::executeTasks).doesNotThrowAnyException();
     }
 
     @Test
     void givenEmptyDirectory_whenExecuteTasks_thenDirectoryIsDeleted(Path path) {
-        executeTask(path);
+        ConveyorTaskBindings.from(
+                FakeConveyorSchematicBuilder.discoveryDirectory(path)
+                    .constructionDirectory(path)
+                    .build()
+            )
+            .executeTasks();
 
         assertThat(path).doesNotExist();
     }
@@ -45,7 +58,12 @@ final class CleanPluginTest {
         throws IOException {
         Files.createFile(path.resolve("file"));
 
-        executeTask(path);
+        ConveyorTaskBindings.from(
+                FakeConveyorSchematicBuilder.discoveryDirectory(path)
+                    .constructionDirectory(path)
+                    .build()
+            )
+            .executeTasks();
 
         assertThat(path).doesNotExist();
     }
@@ -55,7 +73,12 @@ final class CleanPluginTest {
         throws IOException {
         Files.createDirectory(path.resolve("directory"));
 
-        executeTask(path);
+        ConveyorTaskBindings.from(
+                FakeConveyorSchematicBuilder.discoveryDirectory(path)
+                    .constructionDirectory(path)
+                    .build()
+            )
+            .executeTasks();
 
         assertThat(path).doesNotExist();
     }
@@ -67,25 +90,13 @@ final class CleanPluginTest {
             Files.createDirectory(path.resolve("directory")).resolve("file")
         );
 
-        executeTask(path);
+        ConveyorTaskBindings.from(
+                FakeConveyorSchematicBuilder.discoveryDirectory(path)
+                    .constructionDirectory(path)
+                    .build()
+            )
+            .executeTasks();
 
         assertThat(path).doesNotExist();
-    }
-
-    private void executeTask(Path constructionDirectory) {
-        bindings(constructionDirectory)
-            .stream()
-            .map(ConveyorTaskBinding::task)
-            .forEach(task -> task.execute(Set.of()));
-    }
-
-    private List<ConveyorTaskBinding> bindings(Path constructionDirectory) {
-        var schematic = new FakeConveyorSchematic(constructionDirectory);
-        return ServiceLoader.load(ConveyorPlugin.class)
-            .stream()
-            .map(ServiceLoader.Provider::get)
-            .map(conveyorPlugin -> conveyorPlugin.bindings(schematic, Map.of()))
-            .flatMap(Collection::stream)
-            .toList();
     }
 }

@@ -5,6 +5,8 @@ import com.github.maximtereshchenko.conveyor.common.api.ProductType;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import com.github.maximtereshchenko.conveyor.common.api.Step;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskBinding;
+import com.github.maximtereshchenko.conveyor.plugin.test.ConveyorTaskBindings;
+import com.github.maximtereshchenko.conveyor.plugin.test.FakeConveyorSchematicBuilder;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -17,7 +19,8 @@ final class CompileTestSourcesTests extends CompilePluginTest {
 
     @Test
     void givenPlugin_whenBindings_thenDiscoverTestsAndCompileTestsBindingsReturned(Path path) {
-        assertThat(bindings(path))
+        ConveyorTaskBindings.from(FakeConveyorSchematicBuilder.discoveryDirectory(path).build())
+            .assertThat()
             .extracting(ConveyorTaskBinding::stage, ConveyorTaskBinding::step)
             .contains(tuple(Stage.TEST, Step.PREPARE), tuple(Stage.TEST, Step.PREPARE));
     }
@@ -35,7 +38,13 @@ final class CompileTestSourcesTests extends CompilePluginTest {
             """
         );
 
-        assertThat(executeTasks(path))
+        var products = ConveyorTaskBindings.from(
+                FakeConveyorSchematicBuilder.discoveryDirectory(path)
+                    .build()
+            )
+            .executeTasks();
+
+        assertThat(products)
             .isNotEmpty()
             .extracting(Product::type)
             .doesNotContain(ProductType.TEST_SOURCE, ProductType.EXPLODED_TEST_MODULE);
@@ -62,24 +71,35 @@ final class CompileTestSourcesTests extends CompilePluginTest {
             class Test {}
             """
         );
+        var schematic = FakeConveyorSchematicBuilder.discoveryDirectory(path).build();
 
-        var products = executeTasks(path);
+        var products = ConveyorTaskBindings.from(schematic).executeTasks();
 
-        var mainClass = explodedModule(path).resolve("main").resolve("Main.class");
-        var testClass = explodedTestModule(path).resolve("test").resolve("Test.class");
-        assertThat(moduleInfoClass(explodedModule(path))).exists();
+        var mainClass = explodedModule(schematic.constructionDirectory())
+            .resolve("main")
+            .resolve("Main.class");
+        var testClass = explodedTestModule(schematic.constructionDirectory())
+            .resolve("test")
+            .resolve("Test.class");
+        assertThat(moduleInfoClass(explodedModule(schematic.constructionDirectory()))).exists();
         assertThat(mainClass).exists();
-        assertThat(moduleInfoClass(explodedTestModule(path))).exists();
+        assertThat(moduleInfoClass(explodedTestModule(schematic.constructionDirectory()))).exists();
         assertThat(testClass).exists();
         assertThat(products)
             .extracting(Product::path, Product::type)
             .containsOnly(
                 tuple(moduleInfoJava(srcMainJava(path)), ProductType.SOURCE),
                 tuple(mainJava, ProductType.SOURCE),
-                tuple(explodedModule(path), ProductType.EXPLODED_MODULE),
+                tuple(
+                    explodedModule(schematic.constructionDirectory()),
+                    ProductType.EXPLODED_MODULE
+                ),
                 tuple(moduleInfoJava(srcTestJava(path)), ProductType.TEST_SOURCE),
                 tuple(testJava, ProductType.TEST_SOURCE),
-                tuple(explodedTestModule(path), ProductType.EXPLODED_TEST_MODULE)
+                tuple(
+                    explodedTestModule(schematic.constructionDirectory()),
+                    ProductType.EXPLODED_TEST_MODULE
+                )
             );
     }
 
@@ -123,24 +143,35 @@ final class CompileTestSourcesTests extends CompilePluginTest {
             }
             """
         );
+        var schematic = FakeConveyorSchematicBuilder.discoveryDirectory(path).build();
 
-        var products = executeTasks(path);
+        var products = ConveyorTaskBindings.from(schematic).executeTasks();
 
-        var mainClass = explodedModule(path).resolve("main").resolve("Main.class");
-        var testClass = explodedTestModule(path).resolve("test").resolve("Test.class");
-        assertThat(moduleInfoClass(explodedModule(path))).exists();
+        var mainClass = explodedModule(schematic.constructionDirectory())
+            .resolve("main")
+            .resolve("Main.class");
+        var testClass = explodedTestModule(schematic.constructionDirectory())
+            .resolve("test")
+            .resolve("Test.class");
+        assertThat(moduleInfoClass(explodedModule(schematic.constructionDirectory()))).exists();
         assertThat(mainClass).exists();
-        assertThat(moduleInfoClass(explodedTestModule(path))).exists();
+        assertThat(moduleInfoClass(explodedTestModule(schematic.constructionDirectory()))).exists();
         assertThat(testClass).exists();
         assertThat(products)
             .extracting(Product::path, Product::type)
             .containsOnly(
                 tuple(moduleInfoJava(srcMainJava(path)), ProductType.SOURCE),
                 tuple(mainJava, ProductType.SOURCE),
-                tuple(explodedModule(path), ProductType.EXPLODED_MODULE),
+                tuple(
+                    explodedModule(schematic.constructionDirectory()),
+                    ProductType.EXPLODED_MODULE
+                ),
                 tuple(moduleInfoJava(srcTestJava(path)), ProductType.TEST_SOURCE),
                 tuple(testJava, ProductType.TEST_SOURCE),
-                tuple(explodedTestModule(path), ProductType.EXPLODED_TEST_MODULE)
+                tuple(
+                    explodedTestModule(schematic.constructionDirectory()),
+                    ProductType.EXPLODED_TEST_MODULE
+                )
             );
     }
 
@@ -149,6 +180,6 @@ final class CompileTestSourcesTests extends CompilePluginTest {
     }
 
     private Path explodedTestModule(Path path) {
-        return constructionDirectory(path).resolve("exploded-test-module");
+        return path.resolve("exploded-test-module");
     }
 }

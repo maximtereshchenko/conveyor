@@ -5,6 +5,8 @@ import com.github.maximtereshchenko.conveyor.common.api.ProductType;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import com.github.maximtereshchenko.conveyor.common.api.Step;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskBinding;
+import com.github.maximtereshchenko.conveyor.plugin.test.ConveyorTaskBindings;
+import com.github.maximtereshchenko.conveyor.plugin.test.FakeConveyorSchematicBuilder;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -17,14 +19,21 @@ final class CompileSourcesTests extends CompilePluginTest {
 
     @Test
     void givenPlugin_whenBindings_thenDiscoverSourcesAndCompileSourcesBindingsReturned(Path path) {
-        assertThat(bindings(path))
+        ConveyorTaskBindings.from(FakeConveyorSchematicBuilder.discoveryDirectory(path).build())
+            .assertThat()
             .extracting(ConveyorTaskBinding::stage, ConveyorTaskBinding::step)
             .contains(tuple(Stage.COMPILE, Step.PREPARE), tuple(Stage.COMPILE, Step.RUN));
     }
 
     @Test
     void givenNoSources_whenExecuteTasks_thenNoProducts(Path path) {
-        assertThat(executeTasks(path)).isEmpty();
+        var products = ConveyorTaskBindings.from(
+                FakeConveyorSchematicBuilder.discoveryDirectory(path)
+                    .build()
+            )
+            .executeTasks();
+
+        assertThat(products).isEmpty();
     }
 
     @Test
@@ -38,18 +47,24 @@ final class CompileSourcesTests extends CompilePluginTest {
             class Main {}
             """
         );
+        var schematic = FakeConveyorSchematicBuilder.discoveryDirectory(path).build();
 
-        var products = executeTasks(path);
+        var products = ConveyorTaskBindings.from(schematic).executeTasks();
 
-        var mainClass = explodedModule(path).resolve("main").resolve("Main.class");
-        assertThat(moduleInfoClass(explodedModule(path))).exists();
+        var mainClass = explodedModule(schematic.constructionDirectory())
+            .resolve("main")
+            .resolve("Main.class");
+        assertThat(moduleInfoClass(explodedModule(schematic.constructionDirectory()))).exists();
         assertThat(mainClass).exists();
         assertThat(products)
             .extracting(Product::path, Product::type)
             .containsOnly(
                 tuple(moduleInfoJava(srcMainJava(path)), ProductType.SOURCE),
                 tuple(mainJava, ProductType.SOURCE),
-                tuple(explodedModule(path), ProductType.EXPLODED_MODULE)
+                tuple(
+                    explodedModule(schematic.constructionDirectory()),
+                    ProductType.EXPLODED_MODULE
+                )
             );
     }
 
@@ -72,7 +87,9 @@ final class CompileSourcesTests extends CompilePluginTest {
             public class Dependency {}
             """
         );
-        executeTasks(dependency);
+        var dependencySchematic = FakeConveyorSchematicBuilder.discoveryDirectory(dependency)
+            .build();
+        ConveyorTaskBindings.from(dependencySchematic).executeTasks();
         var dependent = path.resolve("dependent");
         write(
             moduleInfoJava(srcMainJava(dependent)),
@@ -95,18 +112,26 @@ final class CompileSourcesTests extends CompilePluginTest {
             }
             """
         );
+        var schematic = FakeConveyorSchematicBuilder.discoveryDirectory(dependent)
+            .dependency(explodedModule(dependencySchematic.constructionDirectory()))
+            .build();
 
-        var products = executeTasks(dependent, explodedModule(dependency));
+        var products = ConveyorTaskBindings.from(schematic).executeTasks();
 
-        var mainClass = explodedModule(dependent).resolve("main").resolve("Main.class");
-        assertThat(moduleInfoClass(explodedModule(dependent))).exists();
+        var mainClass = explodedModule(schematic.constructionDirectory())
+            .resolve("main")
+            .resolve("Main.class");
+        assertThat(moduleInfoClass(explodedModule(schematic.constructionDirectory()))).exists();
         assertThat(mainClass).exists();
         assertThat(products)
             .extracting(Product::path, Product::type)
             .containsOnly(
                 tuple(moduleInfoJava(srcMainJava(dependent)), ProductType.SOURCE),
                 tuple(mainJava, ProductType.SOURCE),
-                tuple(explodedModule(dependent), ProductType.EXPLODED_MODULE)
+                tuple(
+                    explodedModule(schematic.constructionDirectory()),
+                    ProductType.EXPLODED_MODULE
+                )
             );
     }
 
@@ -148,8 +173,16 @@ final class CompileSourcesTests extends CompilePluginTest {
             public class SecondDependency {}
             """
         );
-        executeTasks(firstDependency);
-        executeTasks(secondDependency);
+        var firstDependencySchematic = FakeConveyorSchematicBuilder.discoveryDirectory(
+                firstDependency
+            )
+            .build();
+        var secondDependencySchematic = FakeConveyorSchematicBuilder.discoveryDirectory(
+                secondDependency
+            )
+            .build();
+        ConveyorTaskBindings.from(firstDependencySchematic).executeTasks();
+        ConveyorTaskBindings.from(secondDependencySchematic).executeTasks();
         var dependent = path.resolve("dependent");
         write(
             moduleInfoJava(srcMainJava(dependent)),
@@ -175,22 +208,27 @@ final class CompileSourcesTests extends CompilePluginTest {
             }
             """
         );
+        var schematic = FakeConveyorSchematicBuilder.discoveryDirectory(dependent)
+            .dependency(explodedModule(firstDependencySchematic.constructionDirectory()))
+            .dependency(explodedModule(secondDependencySchematic.constructionDirectory()))
+            .build();
 
-        var products = executeTasks(
-            dependent,
-            explodedModule(firstDependency),
-            explodedModule(secondDependency)
-        );
+        var products = ConveyorTaskBindings.from(schematic).executeTasks();
 
-        var mainClass = explodedModule(dependent).resolve("main").resolve("Main.class");
-        assertThat(moduleInfoClass(explodedModule(dependent))).exists();
+        var mainClass = explodedModule(schematic.constructionDirectory())
+            .resolve("main")
+            .resolve("Main.class");
+        assertThat(moduleInfoClass(explodedModule(schematic.constructionDirectory()))).exists();
         assertThat(mainClass).exists();
         assertThat(products)
             .extracting(Product::path, Product::type)
             .containsOnly(
                 tuple(moduleInfoJava(srcMainJava(dependent)), ProductType.SOURCE),
                 tuple(mainJava, ProductType.SOURCE),
-                tuple(explodedModule(dependent), ProductType.EXPLODED_MODULE)
+                tuple(
+                    explodedModule(schematic.constructionDirectory()),
+                    ProductType.EXPLODED_MODULE
+                )
             );
     }
 }
