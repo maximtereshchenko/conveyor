@@ -14,6 +14,7 @@ include("conveyor-plugin-test")
 include("archive-conveyor-plugin")
 include("zip-archive")
 include("compiler")
+include("junit-jupiter-conveyor-plugin")
 dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {
@@ -22,11 +23,14 @@ dependencyResolutionManagement {
             library("jackson-bom", "com.fasterxml.jackson", "jackson-bom").version("2.17.0")
             library("wiremock", "org.wiremock", "wiremock").version("3.4.2")
             library("jimfs", "com.google.jimfs", "jimfs").version("1.3.0")
+            library("apiguardian-api", "org.apiguardian", "apiguardian-api").version("1.1.2")
+            library("junit-jupiter-api", "org.junit.jupiter", "junit-jupiter-api").withoutVersion()
             library("junit-jupiter-engine", "org.junit.jupiter", "junit-jupiter-engine")
                 .withoutVersion()
             library("junit-jupiter-params", "org.junit.jupiter", "junit-jupiter-params")
                 .withoutVersion()
-            library("junit-jupiter-api", "org.junit.jupiter", "junit-jupiter-api").withoutVersion()
+            library("junit-platform-launcher", "org.junit.platform", "junit-platform-launcher")
+                .withoutVersion()
             library("jackson-databind", "com.fasterxml.jackson.core", "jackson-databind")
                 .withoutVersion()
             library("jackson-datatype-jdk8", "com.fasterxml.jackson.datatype", "jackson-datatype-jdk8")
