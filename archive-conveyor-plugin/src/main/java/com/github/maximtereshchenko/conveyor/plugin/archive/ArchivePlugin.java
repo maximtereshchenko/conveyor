@@ -21,11 +21,16 @@ public final class ArchivePlugin implements ConveyorPlugin {
         ConveyorSchematic schematic,
         Map<String, String> configuration
     ) {
+        var coordinates = schematic.coordinates();
         return List.of(
             new ConveyorTaskBinding(
                 Stage.ARCHIVE,
                 Step.RUN,
-                new ArchiveTask(schematic.constructionDirectory().resolve("archive"), schematic)
+                new ArchiveTask(
+                    schematic.constructionDirectory()
+                        .resolve("%s-%s.jar".formatted(coordinates.name(), coordinates.version())),
+                    schematic.coordinates()
+                )
             )
         );
     }

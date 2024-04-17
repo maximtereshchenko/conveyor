@@ -2,7 +2,7 @@ package com.github.maximtereshchenko.conveyor.plugin.archive;
 
 import com.github.maximtereshchenko.conveyor.common.api.Product;
 import com.github.maximtereshchenko.conveyor.common.api.ProductType;
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
+import com.github.maximtereshchenko.conveyor.common.api.SchematicCoordinates;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
 import com.github.maximtereshchenko.zip.ArchiveContainer;
 
@@ -16,16 +16,17 @@ import java.util.stream.Collectors;
 final class ArchiveTask implements ConveyorTask {
 
     private final Path target;
-    private final ConveyorSchematic schematic;
+    private final SchematicCoordinates coordinates;
 
-    ArchiveTask(Path target, ConveyorSchematic schematic) {
+    ArchiveTask(Path target, SchematicCoordinates coordinates) {
         this.target = target;
-        this.schematic = schematic;
+        this.coordinates = coordinates;
     }
 
     @Override
     public Set<Product> execute(Set<Product> products) {
         return products.stream()
+            .filter(product -> product.schematicCoordinates().equals(coordinates))
             .filter(product -> product.type() == ProductType.EXPLODED_MODULE)
             .map(Product::path)
             .map(this::module)
@@ -36,7 +37,7 @@ final class ArchiveTask implements ConveyorTask {
         try {
             Files.createDirectories(target.getParent());
             new ArchiveContainer(explodedModule).archive(target);
-            return schematic.product(target, ProductType.MODULE);
+            return new Product(coordinates, target, ProductType.MODULE);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

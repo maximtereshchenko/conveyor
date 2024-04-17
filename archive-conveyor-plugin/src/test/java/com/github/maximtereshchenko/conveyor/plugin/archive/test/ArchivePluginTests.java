@@ -1,9 +1,6 @@
 package com.github.maximtereshchenko.conveyor.plugin.archive.test;
 
-import com.github.maximtereshchenko.conveyor.common.api.Product;
-import com.github.maximtereshchenko.conveyor.common.api.ProductType;
-import com.github.maximtereshchenko.conveyor.common.api.Stage;
-import com.github.maximtereshchenko.conveyor.common.api.Step;
+import com.github.maximtereshchenko.conveyor.common.api.*;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskBinding;
 import com.github.maximtereshchenko.conveyor.plugin.test.ConveyorTaskBindings;
 import com.github.maximtereshchenko.conveyor.plugin.test.FakeConveyorSchematicBuilder;
@@ -64,7 +61,42 @@ final class ArchivePluginTests {
         var schematic = FakeConveyorSchematicBuilder.discoveryDirectory(path).build();
 
         var products = ConveyorTaskBindings.from(schematic)
-            .executeTasks(schematic.product(explodedModule, ProductType.EXPLODED_MODULE));
+            .executeTasks(
+                new Product(schematic.coordinates(), explodedModule, ProductType.EXPLODED_MODULE)
+            );
+
+        assertThat(products)
+            .filteredOn(product -> product.type() == ProductType.MODULE)
+            .map(Product::path)
+            .first()
+            .satisfies(module -> {
+                var extracted = Files.createDirectory(path.resolve("extracted"));
+                new ZipArchive(module).extract(extracted);
+                Directories.assertThatDirectoryContentsEqual(extracted, explodedModule);
+            });
+    }
+
+    @Test
+    void givenProductsFromDifferentSchematic_whenExecuteTask_thenArchiveCreatedForCurrentSchematic(
+        Path path
+    ) throws IOException {
+        var explodedModule = path.resolve("exploded-module");
+        Files.createFile(Directories.createDirectoriesForFile(explodedModule.resolve("file")));
+        var schematic = FakeConveyorSchematicBuilder.discoveryDirectory(path).build();
+
+        var products = ConveyorTaskBindings.from(schematic)
+            .executeTasks(
+                new Product(
+                    new SchematicCoordinates(
+                        "group",
+                        "other-schematic",
+                        "1.0.0"
+                    ),
+                    path.resolve("incorrect"),
+                    ProductType.EXPLODED_MODULE
+                ),
+                new Product(schematic.coordinates(), explodedModule, ProductType.EXPLODED_MODULE)
+            );
 
         assertThat(products)
             .filteredOn(product -> product.type() == ProductType.MODULE)
