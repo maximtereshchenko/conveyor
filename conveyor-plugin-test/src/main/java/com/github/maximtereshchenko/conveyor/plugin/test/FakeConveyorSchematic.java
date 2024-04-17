@@ -1,8 +1,6 @@
 package com.github.maximtereshchenko.conveyor.plugin.test;
 
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
-import com.github.maximtereshchenko.conveyor.common.api.Product;
-import com.github.maximtereshchenko.conveyor.common.api.ProductType;
 import com.github.maximtereshchenko.conveyor.common.api.SchematicCoordinates;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
 
@@ -27,6 +25,11 @@ final class FakeConveyorSchematic implements ConveyorSchematic {
     }
 
     @Override
+    public SchematicCoordinates coordinates() {
+        return new SchematicCoordinates("", "", "");
+    }
+
+    @Override
     public Path discoveryDirectory() {
         return discoveryDirectory;
     }
@@ -44,10 +47,5 @@ final class FakeConveyorSchematic implements ConveyorSchematic {
     @Override
     public Set<Path> modulePath(Set<DependencyScope> scopes) {
         return dependencies;
-    }
-
-    @Override
-    public Product product(Path path, ProductType type) {
-        return new Product(new SchematicCoordinates("", "", ""), path, type);
     }
 }
