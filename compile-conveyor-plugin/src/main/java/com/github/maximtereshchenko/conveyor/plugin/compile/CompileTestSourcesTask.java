@@ -29,6 +29,9 @@ final class CompileTestSourcesTask extends CompileJavaFilesTask {
                 schematic.modulePath(Set.of(DependencyScope.IMPLEMENTATION, DependencyScope.TEST))
                     .stream(),
                 products.stream()
+                    .filter(product ->
+                        product.schematicCoordinates().equals(schematic.coordinates())
+                    )
                     .filter(product -> product.type() == ProductType.EXPLODED_MODULE)
                     .map(Product::path)
             )

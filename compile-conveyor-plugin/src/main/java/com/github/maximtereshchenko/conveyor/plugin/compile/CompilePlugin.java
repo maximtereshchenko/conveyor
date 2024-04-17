@@ -32,7 +32,7 @@ public final class CompilePlugin implements ConveyorPlugin {
                 new DiscoverJavaFilesTask(
                     javaFilesDirectory(schematic.discoveryDirectory(), "main"),
                     ProductType.SOURCE,
-                    schematic
+                    schematic.coordinates()
                 )
             ),
             new ConveyorTaskBinding(
@@ -50,7 +50,7 @@ public final class CompilePlugin implements ConveyorPlugin {
                 new DiscoverJavaFilesTask(
                     javaFilesDirectory(schematic.discoveryDirectory(), "test"),
                     ProductType.TEST_SOURCE,
-                    schematic
+                    schematic.coordinates()
                 )
             ),
             new ConveyorTaskBinding(

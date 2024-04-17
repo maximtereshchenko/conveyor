@@ -2,7 +2,7 @@ package com.github.maximtereshchenko.conveyor.plugin.compile;
 
 import com.github.maximtereshchenko.conveyor.common.api.Product;
 import com.github.maximtereshchenko.conveyor.common.api.ProductType;
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
+import com.github.maximtereshchenko.conveyor.common.api.SchematicCoordinates;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
 
 import java.io.IOException;
@@ -17,12 +17,12 @@ final class DiscoverJavaFilesTask implements ConveyorTask {
 
     private final Path path;
     private final ProductType productType;
-    private final ConveyorSchematic schematic;
+    private final SchematicCoordinates coordinates;
 
-    DiscoverJavaFilesTask(Path path, ProductType productType, ConveyorSchematic schematic) {
+    DiscoverJavaFilesTask(Path path, ProductType productType, SchematicCoordinates coordinates) {
         this.path = path;
         this.productType = productType;
-        this.schematic = schematic;
+        this.coordinates = coordinates;
     }
 
     @Override
@@ -33,7 +33,7 @@ final class DiscoverJavaFilesTask implements ConveyorTask {
         return files(path)
             .stream()
             .filter(file -> file.toString().endsWith(".java"))
-            .map(file -> schematic.product(file, productType))
+            .map(file -> new Product(coordinates, file, productType))
             .collect(Collectors.toSet());
     }
 

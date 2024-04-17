@@ -1,9 +1,6 @@
 package com.github.maximtereshchenko.conveyor.plugin.compile.test;
 
-import com.github.maximtereshchenko.conveyor.common.api.Product;
-import com.github.maximtereshchenko.conveyor.common.api.ProductType;
-import com.github.maximtereshchenko.conveyor.common.api.Stage;
-import com.github.maximtereshchenko.conveyor.common.api.Step;
+import com.github.maximtereshchenko.conveyor.common.api.*;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskBinding;
 import com.github.maximtereshchenko.conveyor.plugin.test.ConveyorTaskBindings;
 import com.github.maximtereshchenko.conveyor.plugin.test.FakeConveyorSchematicBuilder;
@@ -173,6 +170,40 @@ final class CompileTestSourcesTests extends CompilePluginTest {
                     ProductType.EXPLODED_TEST_MODULE
                 )
             );
+    }
+
+    @Test
+    void givenSourcesFromDifferentSchematics_whenExecuteTasks_thenTestSourcesAreCompiledForCurrentSchematic(
+        Path path
+    ) throws IOException {
+        write(
+            srcTestJava(path).resolve("test").resolve("Test.java"),
+            """
+            package test;
+            class Test {}
+            """
+        );
+        var schematic = FakeConveyorSchematicBuilder.discoveryDirectory(path).build();
+
+        ConveyorTaskBindings.from(schematic)
+            .executeTasks(
+                new Product(
+                    new SchematicCoordinates(
+                        "group",
+                        "other-schematic",
+                        "1.0.0"
+                    ),
+                    path.resolve("incorrect"),
+                    ProductType.TEST_SOURCE
+                )
+            );
+
+        assertThat(
+            explodedTestModule(schematic.constructionDirectory())
+                .resolve("test")
+                .resolve("Test.class")
+        )
+            .exists();
     }
 
     private Path srcTestJava(Path path) {
