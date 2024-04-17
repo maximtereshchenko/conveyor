@@ -1,3 +1,3 @@
 plugins {
-    `java-library`
+    `conveyor-component`
 }
