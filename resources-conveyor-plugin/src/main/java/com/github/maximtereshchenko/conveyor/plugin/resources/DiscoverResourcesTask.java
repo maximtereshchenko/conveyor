@@ -1,4 +1,4 @@
-package com.github.maximtereshchenko.conveyor.plugin.compile;
+package com.github.maximtereshchenko.conveyor.plugin.resources;
 
 import com.github.maximtereshchenko.conveyor.common.api.Product;
 import com.github.maximtereshchenko.conveyor.common.api.ProductType;
@@ -13,27 +13,30 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-final class DiscoverJavaFilesTask implements ConveyorTask {
+final class DiscoverResourcesTask implements ConveyorTask {
 
-    private final Path path;
-    private final ProductType productType;
-    private final SchematicCoordinates coordinates;
+    private final Path directory;
+    private final ProductType resourceType;
+    private final SchematicCoordinates schematicCoordinates;
 
-    DiscoverJavaFilesTask(Path path, ProductType productType, SchematicCoordinates coordinates) {
-        this.path = path;
-        this.productType = productType;
-        this.coordinates = coordinates;
+    DiscoverResourcesTask(
+        Path directory,
+        ProductType resourceType,
+        SchematicCoordinates schematicCoordinates
+    ) {
+        this.directory = directory;
+        this.resourceType = resourceType;
+        this.schematicCoordinates = schematicCoordinates;
     }
 
     @Override
     public Set<Product> execute(Set<Product> products) {
-        if (!Files.exists(path)) {
+        if (!Files.exists(directory)) {
             return Set.of();
         }
-        return files(path)
+        return files(directory)
             .stream()
-            .filter(file -> file.toString().endsWith(".java"))
-            .map(file -> new Product(coordinates, file, productType))
+            .map(resource -> new Product(schematicCoordinates, resource, resourceType))
             .collect(Collectors.toSet());
     }
 

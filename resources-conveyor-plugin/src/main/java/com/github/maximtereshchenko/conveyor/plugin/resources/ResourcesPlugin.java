@@ -23,21 +23,45 @@ public final class ResourcesPlugin implements ConveyorPlugin {
         ConveyorSchematic schematic,
         Map<String, String> configuration
     ) {
+        var mainResources = resourcesDirectory(schematic.discoveryDirectory(), "main");
+        var testResources = resourcesDirectory(schematic.discoveryDirectory(), "test");
         return List.of(
             new ConveyorTaskBinding(
                 Stage.COMPILE,
                 Step.PREPARE,
+                new DiscoverResourcesTask(
+                    mainResources,
+                    ProductType.RESOURCE,
+                    schematic.coordinates()
+                )
+            ),
+            new ConveyorTaskBinding(
+                Stage.COMPILE,
+                Step.FINALIZE,
                 new CopyResourcesTask(
-                    resourcesDirectory(schematic.discoveryDirectory(), "main"),
-                    ProductType.EXPLODED_MODULE
+                    ProductType.EXPLODED_MODULE,
+                    ProductType.RESOURCE,
+                    schematic.coordinates(),
+                    mainResources
+                )
+            ),
+            new ConveyorTaskBinding(
+                Stage.TEST,
+                Step.PREPARE,
+                new DiscoverResourcesTask(
+                    testResources,
+                    ProductType.TEST_RESOURCE,
+                    schematic.coordinates()
                 )
             ),
             new ConveyorTaskBinding(
                 Stage.TEST,
                 Step.PREPARE,
                 new CopyResourcesTask(
-                    resourcesDirectory(schematic.discoveryDirectory(), "test"),
-                    ProductType.EXPLODED_TEST_MODULE
+                    ProductType.EXPLODED_TEST_MODULE,
+                    ProductType.TEST_RESOURCE,
+                    schematic.coordinates(),
+                    testResources
                 )
             )
         );
