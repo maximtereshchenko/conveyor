@@ -51,7 +51,7 @@ final class CompleteInheritanceHierarchyModel
     }
 
     @Override
-    public Set<PluginModel> plugins() {
+    public LinkedHashSet<PluginModel> plugins() {
         return hierarchyModel.plugins();
     }
 
@@ -81,7 +81,7 @@ final class CompleteInheritanceHierarchyModel
     }
 
     @Override
-    public Set<RepositoryModel> repositories() {
+    public LinkedHashSet<RepositoryModel> repositories() {
         return localModel.repositories();
     }
 }

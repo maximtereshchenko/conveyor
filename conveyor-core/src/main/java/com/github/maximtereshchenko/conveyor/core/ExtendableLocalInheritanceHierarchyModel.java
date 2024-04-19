@@ -44,7 +44,7 @@ final class ExtendableLocalInheritanceHierarchyModel
     }
 
     @Override
-    public Set<PluginModel> plugins() {
+    public LinkedHashSet<PluginModel> plugins() {
         return original.plugins();
     }
 
@@ -69,7 +69,7 @@ final class ExtendableLocalInheritanceHierarchyModel
     }
 
     @Override
-    public Set<RepositoryModel> repositories() {
+    public LinkedHashSet<RepositoryModel> repositories() {
         return original.models()
             .stream()
             .map(LocalSchematicModel::repositories)

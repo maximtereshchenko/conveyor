@@ -50,7 +50,7 @@ final class StandaloneLocalSchematicModel implements LocalSchematicModel {
     }
 
     @Override
-    public Set<PluginModel> plugins() {
+    public LinkedHashSet<PluginModel> plugins() {
         return standaloneSchematicModel.plugins();
     }
 
@@ -75,7 +75,7 @@ final class StandaloneLocalSchematicModel implements LocalSchematicModel {
     }
 
     @Override
-    public Set<RepositoryModel> repositories() {
+    public LinkedHashSet<RepositoryModel> repositories() {
         return standaloneSchematicModel.schematicDefinition()
             .repositories()
             .stream()
@@ -94,7 +94,7 @@ final class StandaloneLocalSchematicModel implements LocalSchematicModel {
                     );
                 }
             )
-            .collect(Collectors.toSet());
+            .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     @Override

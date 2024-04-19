@@ -7,10 +7,7 @@ import com.github.maximtereshchenko.conveyor.common.api.SchematicCoordinates;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 
 import java.nio.file.Path;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -72,7 +69,7 @@ final class Schematic {
         var dependencies = dependencies(completeModel, properties, preferences, repositories);
         return plugins(completeModel, properties, preferences, repositories)
             .executeTasks(
-                new ConveyorSchematicAdapter(schematicCoordinates, properties,dependencies ),
+                new ConveyorSchematicAdapter(schematicCoordinates, properties, dependencies),
                 withSchematicDefinition(products, schematicCoordinates, completeModel),
                 stage
             );
@@ -199,7 +196,7 @@ final class Schematic {
                         properties
                     )
                 )
-                .collect(Collectors.toSet()),
+                .collect(Collectors.toCollection(LinkedHashSet::new)),
             modulePathFactory
         );
     }

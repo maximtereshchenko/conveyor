@@ -14,10 +14,10 @@ import java.util.stream.Stream;
 
 final class Plugins {
 
-    private final Set<Plugin> all;
+    private final LinkedHashSet<Plugin> all;
     private final ModulePathFactory modulePathFactory;
 
-    Plugins(Set<Plugin> all, ModulePathFactory modulePathFactory) {
+    Plugins(LinkedHashSet<Plugin> all, ModulePathFactory modulePathFactory) {
         this.all = all;
         this.modulePathFactory = modulePathFactory;
     }
@@ -37,11 +37,25 @@ final class Plugins {
     private List<ConveyorTask> tasks(ConveyorSchematic conveyorSchematic, Stage stage) {
         return conveyorPlugins()
             .filter(conveyorPlugin -> named(conveyorPlugin.name()).isEnabled())
+            .sorted(this::byPosition)
             .flatMap(conveyorPlugin -> bindings(conveyorSchematic, conveyorPlugin))
             .filter(binding -> isBeforeOrEqual(binding, stage))
             .sorted(byStageAndStep())
             .map(ConveyorTaskBinding::task)
             .toList();
+    }
+
+    private int byPosition(ConveyorPlugin first, ConveyorPlugin second) {
+        for (var plugin : all) {
+            var name = plugin.id().name();
+            if (name.equals(first.name())) {
+                return -1;
+            }
+            if (name.equals(second.name())) {
+                return 1;
+            }
+        }
+        return 0;
     }
 
     private Comparator<ConveyorTaskBinding> byStageAndStep() {

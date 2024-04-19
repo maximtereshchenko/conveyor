@@ -1,7 +1,7 @@
 package com.github.maximtereshchenko.conveyor.core;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
@@ -9,7 +9,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 
-final class ReducingCollector<T, C> implements Collector<T, Map<C, T>, Set<T>> {
+final class ReducingCollector<T, C> implements Collector<T, LinkedHashMap<C, T>, LinkedHashSet<T>> {
 
     private final Function<T, C> classifier;
     private final BinaryOperator<T> combiner;
@@ -19,13 +19,17 @@ final class ReducingCollector<T, C> implements Collector<T, Map<C, T>, Set<T>> {
         this.combiner = combiner;
     }
 
-    @Override
-    public Supplier<Map<C, T>> supplier() {
-        return HashMap::new;
+    ReducingCollector(Function<T, C> classifier) {
+        this(classifier, (next, existing) -> next);
     }
 
     @Override
-    public BiConsumer<Map<C, T>, T> accumulator() {
+    public Supplier<LinkedHashMap<C, T>> supplier() {
+        return LinkedHashMap::new;
+    }
+
+    @Override
+    public BiConsumer<LinkedHashMap<C, T>, T> accumulator() {
         return (map, element) -> map.compute(
             classifier.apply(element),
             (key, existing) -> existing == null ? element : combiner.apply(element, existing)
@@ -33,13 +37,16 @@ final class ReducingCollector<T, C> implements Collector<T, Map<C, T>, Set<T>> {
     }
 
     @Override
-    public BinaryOperator<Map<C, T>> combiner() {
-        return (a, b) -> a;
+    public BinaryOperator<LinkedHashMap<C, T>> combiner() {
+        return (first, second) -> {
+            first.putAll(second);
+            return first;
+        };
     }
 
     @Override
-    public Function<Map<C, T>, Set<T>> finisher() {
-        return map -> Set.copyOf(map.values());
+    public Function<LinkedHashMap<C, T>, LinkedHashSet<T>> finisher() {
+        return map -> new LinkedHashSet<>(map.values());
     }
 
     @Override

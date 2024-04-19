@@ -185,6 +185,44 @@ final class TasksFeatureTests extends ConveyorTest {
     }
 
     @Test
+    void givenTasksBoundToSameStageAndStep_whenConstructToStage_thenTasksWereExecutedInPluginsOrder(
+        Path path,
+        ConveyorModule module,
+        BuilderFactory factory
+    ) throws Exception {
+        factory.repositoryBuilder()
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("first")
+            )
+            .jar(
+                factory.jarBuilder("instant")
+                    .name("first")
+            )
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("second")
+            )
+            .jar(
+                factory.jarBuilder("instant")
+                    .name("second")
+            )
+            .install(path);
+
+        module.construct(
+            factory.schematicDefinitionBuilder()
+                .repository(path)
+                .plugin("second", "1.0.0", Map.of("second", "COMPILE-RUN"))
+                .plugin("first", "1.0.0", Map.of("first", "COMPILE-RUN"))
+                .conveyorJson(path),
+            Stage.PUBLISH
+        );
+
+        assertThat(List.of(instant(path, "second"), instant(path, "first")))
+            .isSorted();
+    }
+
+    @Test
     void givenSchematicRequiresDependency_whenConstructToStage_thenDependencyIsUsedInTask(
         Path path,
         ConveyorModule module,

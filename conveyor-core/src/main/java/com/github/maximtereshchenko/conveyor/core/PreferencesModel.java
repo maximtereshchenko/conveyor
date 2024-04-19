@@ -1,13 +1,14 @@
 package com.github.maximtereshchenko.conveyor.core;
 
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
 record PreferencesModel(
-    Set<PreferencesInclusionModel> inclusions,
-    Set<ArtifactPreferenceModel> artifacts
+    LinkedHashSet<PreferencesInclusionModel> inclusions,
+    LinkedHashSet<ArtifactPreferenceModel> artifacts
 ) {
 
     PreferencesModel override(PreferencesModel base) {
@@ -17,9 +18,9 @@ record PreferencesModel(
         );
     }
 
-    private <T> Set<T> reduce(Set<T> first, Set<T> second, Function<T, Id> classifier) {
+    private <T> LinkedHashSet<T> reduce(Set<T> first, Set<T> second, Function<T, Id> classifier) {
         return Stream.of(first, second)
             .flatMap(Collection::stream)
-            .collect(new ReducingCollector<>(classifier, (next, existing) -> next));
+            .collect(new ReducingCollector<>(classifier));
     }
 }

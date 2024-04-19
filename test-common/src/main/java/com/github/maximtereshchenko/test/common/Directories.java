@@ -57,7 +57,7 @@ public final class Directories {
     }
 
     public static List<Path> files(Path path) {
-        if (!Files.exists(path)){
+        if (!Files.exists(path)) {
             return List.of();
         }
         if (Files.isRegularFile(path)) {

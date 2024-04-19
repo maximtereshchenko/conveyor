@@ -1,7 +1,6 @@
 package com.github.maximtereshchenko.conveyor.core;
 
 import java.net.URI;
-import java.net.URL;
 import java.util.Optional;
 
 record RemoteRepositoryModel(

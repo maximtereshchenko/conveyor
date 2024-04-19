@@ -1,5 +1,6 @@
 package com.github.maximtereshchenko.conveyor.core;
 
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 interface SchematicModel {
@@ -14,7 +15,7 @@ interface SchematicModel {
 
     PreferencesModel preferences();
 
-    Set<PluginModel> plugins();
+    LinkedHashSet<PluginModel> plugins();
 
     Set<DependencyModel> dependencies();
 }

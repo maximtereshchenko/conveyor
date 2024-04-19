@@ -48,7 +48,7 @@ record InheritanceHierarchyModel<T extends SchematicModel>(LinkedHashSet<T> mode
     }
 
     @Override
-    public Set<PluginModel> plugins() {
+    public LinkedHashSet<PluginModel> plugins() {
         return combine(SchematicModel::plugins, PluginModel::id, PluginModel::override);
     }
 
@@ -73,7 +73,7 @@ record InheritanceHierarchyModel<T extends SchematicModel>(LinkedHashSet<T> mode
         return models.containsAll(inheritanceHierarchyModel.models);
     }
 
-    private <O, I> Set<O> combine(
+    private <O, I> LinkedHashSet<O> combine(
         Function<T, Set<O>> extractor,
         Function<O, I> classifier,
         BinaryOperator<O> combiner

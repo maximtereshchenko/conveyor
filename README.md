@@ -44,6 +44,8 @@ A build tool for Java projects
       construction of the schematic
     * Tasks are executed in stage ascending order (CLEAN, COMPILE, TEST, ARCHIVE, PUBLISH)
     * Tasks bound to the same stage are executed in step ascending order (PREPARE, RUN, FINALIZE)
+    * Tasks bound to the same stage and step are executed in order of originating plugins in the
+      schematic definition
     * Given schematic dependencies and products, task performs operations on the project and
       produces products to be used in subsequent tasks
 * Properties

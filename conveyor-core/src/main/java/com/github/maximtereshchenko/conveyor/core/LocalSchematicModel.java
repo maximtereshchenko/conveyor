@@ -2,7 +2,6 @@ package com.github.maximtereshchenko.conveyor.core;
 
 import java.nio.file.Path;
 import java.util.LinkedHashSet;
-import java.util.Set;
 
 interface LocalSchematicModel extends SchematicModel {
 
@@ -12,5 +11,5 @@ interface LocalSchematicModel extends SchematicModel {
 
     LinkedHashSet<Path> inclusions();
 
-    Set<RepositoryModel> repositories();
+    LinkedHashSet<RepositoryModel> repositories();
 }

@@ -4,6 +4,7 @@ import com.github.maximtereshchenko.conveyor.api.schematic.NoTemplateDefinition;
 import com.github.maximtereshchenko.conveyor.api.schematic.SchematicDefinition;
 import com.github.maximtereshchenko.conveyor.api.schematic.SchematicTemplateDefinition;
 
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -49,7 +50,7 @@ record StandaloneSchematicModel(SchematicDefinition schematicDefinition) impleme
                         definition.version()
                     )
                 )
-                .collect(Collectors.toSet()),
+                .collect(Collectors.toCollection(LinkedHashSet::new)),
             schematicDefinition.preferences()
                 .artifacts()
                 .stream()
@@ -59,12 +60,12 @@ record StandaloneSchematicModel(SchematicDefinition schematicDefinition) impleme
                         definition.version()
                     )
                 )
-                .collect(Collectors.toSet())
+                .collect(Collectors.toCollection(LinkedHashSet::new))
         );
     }
 
     @Override
-    public Set<PluginModel> plugins() {
+    public LinkedHashSet<PluginModel> plugins() {
         return schematicDefinition.plugins()
             .stream()
             .map(pluginDefinition ->
@@ -74,7 +75,7 @@ record StandaloneSchematicModel(SchematicDefinition schematicDefinition) impleme
                     pluginDefinition.configuration()
                 )
             )
-            .collect(Collectors.toSet());
+            .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     @Override
