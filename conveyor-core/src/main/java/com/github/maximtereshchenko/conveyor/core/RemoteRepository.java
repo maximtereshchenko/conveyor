@@ -29,14 +29,6 @@ final class RemoteRepository extends UriRepository {
     }
 
     @Override
-    String extension(Classifier classifier) {
-        return switch (classifier) {
-            case SCHEMATIC_DEFINITION -> "pom";
-            case MODULE -> "jar";
-        };
-    }
-
-    @Override
     Optional<Path> path(URI uri, Classifier classifier) {
         return cache.path(uri, classifier).or(() -> cachedPath(uri, classifier));
     }
@@ -54,12 +46,12 @@ final class RemoteRepository extends UriRepository {
     }
 
     private void storeModule(URI uri) {
-        http.get(baseUri.resolve(uri), inputStream -> cache.stored(uri, inputStream::transferTo));
+        http.get(absoluteUri(uri), inputStream -> cache.stored(uri, inputStream::transferTo));
     }
 
     private void storeSchematicDefinition(URI uri) {
         http.get(
-            baseUri.resolve(uri),
+            absoluteUri(URI.create(uri.toString().replaceAll("\\.json$", ".pom"))),
             inputStream -> cache.stored(
                 uri,
                 outputStream -> schematicDefinitionTranslator.write(
@@ -68,5 +60,9 @@ final class RemoteRepository extends UriRepository {
                 )
             )
         );
+    }
+
+    private URI absoluteUri(URI uri) {
+        return baseUri.resolve(uri);
     }
 }

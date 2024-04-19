@@ -264,7 +264,8 @@ final class RepositoriesFeatureTests extends ConveyorTest {
             .filteredOn(serveEvent -> serveEvent.getRequest().getUrl().contains("instant"))
             .hasSize(2);
         assertThat(defaultCacheDirectory(path))
-            .isDirectoryRecursivelyContaining("glob:**instant-1.0.0.{json,jar}");
+            .isDirectoryRecursivelyContaining("glob:**instant-1.0.0.jar")
+            .isDirectoryRecursivelyContaining("glob:**instant-1.0.0.json");
     }
 
     @Test
@@ -303,7 +304,8 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         );
 
         assertThat(cache)
-            .isDirectoryRecursivelyContaining("glob:**instant-1.0.0.{json,jar}");
+            .isDirectoryRecursivelyContaining("glob:**instant-1.0.0.jar")
+            .isDirectoryRecursivelyContaining("glob:**instant-1.0.0.json");
     }
 
     @Test
@@ -341,7 +343,8 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         );
 
         assertThat(path.resolve("cache"))
-            .isDirectoryRecursivelyContaining("glob:**instant-1.0.0.{json,jar}");
+            .isDirectoryRecursivelyContaining("glob:**instant-1.0.0.jar")
+            .isDirectoryRecursivelyContaining("glob:**instant-1.0.0.json");
     }
 
     @Test

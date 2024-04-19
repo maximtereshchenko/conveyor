@@ -26,14 +26,6 @@ final class LocalDirectoryRepository extends UriRepository {
     }
 
     @Override
-    String extension(Classifier classifier) {
-        return switch (classifier) {
-            case SCHEMATIC_DEFINITION -> "json";
-            case MODULE -> "jar";
-        };
-    }
-
-    @Override
     Optional<Path> path(URI uri, Classifier classifier) {
         var requested = absolutePath(uri);
         if (Files.exists(requested)) {

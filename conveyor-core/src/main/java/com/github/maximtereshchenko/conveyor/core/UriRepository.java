@@ -15,9 +15,14 @@ abstract class UriRepository implements Repository {
         return path(uri(id, semanticVersion, extension(classifier)), classifier);
     }
 
-    abstract String extension(Classifier classifier);
-
     abstract Optional<Path> path(URI uri, Classifier classifier);
+
+    private String extension(Classifier classifier) {
+        return switch (classifier) {
+            case SCHEMATIC_DEFINITION -> "json";
+            case MODULE -> "jar";
+        };
+    }
 
     private URI uri(Id id, SemanticVersion semanticVersion, String extension) {
         return URI.create(
