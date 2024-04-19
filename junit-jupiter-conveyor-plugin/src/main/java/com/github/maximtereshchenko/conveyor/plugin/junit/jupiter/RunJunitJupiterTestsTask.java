@@ -14,9 +14,11 @@ import java.lang.module.ModuleDescriptor;
 import java.lang.module.ModuleFinder;
 import java.lang.module.ModuleReference;
 import java.nio.file.Path;
-import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 final class RunJunitJupiterTestsTask implements ConveyorTask {
 
@@ -28,18 +30,28 @@ final class RunJunitJupiterTestsTask implements ConveyorTask {
 
     @Override
     public Set<Product> execute(Set<Product> products) {
-        var explodedTestModule = product(products, ProductType.EXPLODED_TEST_MODULE);
+        product(products, ProductType.EXPLODED_TEST_MODULE)
+            .ifPresent(explodedTestModule -> executeTests(explodedTestModule, products));
+        return Set.of();
+    }
+
+    private void executeTests(Path explodedTestModule, Set<Product> products) {
         var testModule = testModule(
-            moduleLayer(
-                modulePath(
-                    product(products, ProductType.EXPLODED_MODULE),
-                    explodedTestModule
-                )
-            ),
+            moduleLayer(modulePath(explodedTestModule, products)),
             explodedTestModule
         );
         runWithContextClassLoader(testModule.getClassLoader(), () -> executeTests(testModule));
-        return Set.of();
+    }
+
+    private Set<Path> modulePath(Path explodedTestModule, Set<Product> products) {
+        return Stream.of(
+                schematic.modulePath(Set.of(DependencyScope.IMPLEMENTATION, DependencyScope.TEST))
+                    .stream(),
+                product(products, ProductType.EXPLODED_MODULE).stream(),
+                Stream.of(explodedTestModule)
+            )
+            .flatMap(Function.identity())
+            .collect(Collectors.toSet());
     }
 
     private void executeTests(Module testModule) {
@@ -75,21 +87,12 @@ final class RunJunitJupiterTestsTask implements ConveyorTask {
             .orElseThrow();
     }
 
-    private HashSet<Path> modulePath(Path explodedModule, Path explodedTestModule) {
-        var paths = new HashSet<>(
-            schematic.modulePath(Set.of(DependencyScope.IMPLEMENTATION, DependencyScope.TEST))
-        );
-        paths.add(explodedModule);
-        paths.add(explodedTestModule);
-        return paths;
-    }
-
-    private Path product(Set<Product> products, ProductType explodedModule) {
+    private Optional<Path> product(Set<Product> products, ProductType explodedModule) {
         return products.stream()
+            .filter(product -> product.schematicCoordinates().equals(schematic.coordinates()))
             .filter(product -> product.type() == explodedModule)
             .map(Product::path)
-            .findAny()
-            .orElseThrow();
+            .findAny();
     }
 
     private ModuleLayer moduleLayer(Set<Path> paths) {

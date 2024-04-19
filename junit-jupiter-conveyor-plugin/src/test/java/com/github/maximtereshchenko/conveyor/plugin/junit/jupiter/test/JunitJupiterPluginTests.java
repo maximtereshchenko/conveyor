@@ -1,9 +1,7 @@
 package com.github.maximtereshchenko.conveyor.plugin.junit.jupiter.test;
 
 import com.github.maximtereshchenko.compiler.Compiler;
-import com.github.maximtereshchenko.conveyor.common.api.ProductType;
-import com.github.maximtereshchenko.conveyor.common.api.Stage;
-import com.github.maximtereshchenko.conveyor.common.api.Step;
+import com.github.maximtereshchenko.conveyor.common.api.*;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskBinding;
 import com.github.maximtereshchenko.conveyor.plugin.test.ConveyorTaskBindings;
 import com.github.maximtereshchenko.conveyor.plugin.test.FakeConveyorSchematicBuilder;
@@ -22,8 +20,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.groups.Tuple.tuple;
 
 @ExtendWith(JimfsExtension.class)
@@ -44,7 +41,7 @@ final class JunitJupiterPluginTests {
         var testSources = path.resolve("test-sources");
         var testClasses = path.resolve("test-classes");
         var modulePath = Stream.of(System.getProperty("jdk.module.path").split(":"))
-            .map(path.getFileSystem()::getPath)
+            .map(Paths::get)
             .collect(Collectors.toSet());
         compiler.compile(
             Set.of(
@@ -74,9 +71,7 @@ final class JunitJupiterPluginTests {
                     """
                 )
             ),
-            Stream.of(System.getProperty("jdk.module.path").split(":"))
-                .map(Paths::get)
-                .collect(Collectors.toSet()),
+            modulePath,
             testClasses
         );
         var schematic = modulePath.stream()
@@ -92,8 +87,8 @@ final class JunitJupiterPluginTests {
 
         ConveyorTaskBindings.from(schematic)
             .executeTasks(
-                schematic.product(path, ProductType.EXPLODED_MODULE),
-                schematic.product(testClasses, ProductType.EXPLODED_TEST_MODULE)
+                new Product(schematic.coordinates(), path, ProductType.EXPLODED_MODULE),
+                new Product(schematic.coordinates(), testClasses, ProductType.EXPLODED_TEST_MODULE)
             );
 
         System.setOut(standardOut);
@@ -105,7 +100,7 @@ final class JunitJupiterPluginTests {
         var testSources = path.resolve("test-sources");
         var testClasses = path.resolve("test-classes");
         var modulePath = Stream.of(System.getProperty("jdk.module.path").split(":"))
-            .map(path.getFileSystem()::getPath)
+            .map(Paths::get)
             .collect(Collectors.toSet());
         compiler.compile(
             Set.of(
@@ -135,9 +130,7 @@ final class JunitJupiterPluginTests {
                     """
                 )
             ),
-            Stream.of(System.getProperty("jdk.module.path").split(":"))
-                .map(Paths::get)
-                .collect(Collectors.toSet()),
+            modulePath,
             testClasses
         );
         var schematic = modulePath.stream()
@@ -148,8 +141,16 @@ final class JunitJupiterPluginTests {
             )
             .build();
         var bindings = ConveyorTaskBindings.from(schematic);
-        var explodedModule = schematic.product(path, ProductType.EXPLODED_MODULE);
-        var explodedTestModule = schematic.product(testClasses, ProductType.EXPLODED_TEST_MODULE);
+        var explodedModule = new Product(
+            schematic.coordinates(),
+            path,
+            ProductType.EXPLODED_MODULE
+        );
+        var explodedTestModule = new Product(
+            schematic.coordinates(),
+            testClasses,
+            ProductType.EXPLODED_TEST_MODULE
+        );
         var outputStream = new ByteArrayOutputStream();
         var standardOut = System.out;
         System.setOut(new PrintStream(outputStream));
@@ -164,5 +165,141 @@ final class JunitJupiterPluginTests {
                          org.opentest4j.AssertionFailedError: expected: <true> but was: <false>
                            at test/test.MyTest.test(MyTest.java:7)
                          """);
+    }
+
+    @Test
+    void givenNoExplodedTestModule_whenExecuteTasks_thenNoTestsAreExecuted(Path path) {
+        var schematic = FakeConveyorSchematicBuilder.discoveryDirectory(path).build();
+        var bindings = ConveyorTaskBindings.from(schematic);
+        var explodedModule = new Product(
+            schematic.coordinates(),
+            path,
+            ProductType.EXPLODED_MODULE
+        );
+
+        assertThatCode(() -> bindings.executeTasks(explodedModule)).doesNotThrowAnyException();
+    }
+
+    @Test
+    void givenNoExplodedModule_whenExecuteTasks_thenNoTestsAreExecuted(Path path)
+        throws IOException {
+        var testSources = path.resolve("test-sources");
+        var testClasses = path.resolve("test-classes");
+        var modulePath = Stream.of(System.getProperty("jdk.module.path").split(":"))
+            .map(Paths::get)
+            .collect(Collectors.toSet());
+        compiler.compile(
+            Set.of(
+                Files.writeString(
+                    Directories.createDirectoriesForFile(testSources.resolve("module-info.java")),
+                    """
+                    module test {
+                        requires org.junit.jupiter.api;
+                        opens test to org.junit.platform.commons;
+                    }
+                    """
+                ),
+                Files.writeString(
+                    Directories.createDirectoriesForFile(
+                        testSources.resolve("test").resolve("MyTest.java")
+                    ),
+                    """
+                    package test;
+                    import org.junit.jupiter.api.Test;
+                    import static org.junit.jupiter.api.Assertions.assertTrue;
+                    final class MyTest {
+                        @Test
+                        void test() {
+                            assertTrue(true);
+                        }
+                    }
+                    """
+                )
+            ),
+            modulePath,
+            testClasses
+        );
+        var schematic = modulePath.stream()
+            .reduce(
+                FakeConveyorSchematicBuilder.discoveryDirectory(path),
+                FakeConveyorSchematicBuilder::dependency,
+                (a, b) -> a
+            )
+            .build();
+        var bindings = ConveyorTaskBindings.from(schematic);
+        var explodedTestModule = new Product(
+            schematic.coordinates(),
+            testClasses,
+            ProductType.EXPLODED_TEST_MODULE
+        );
+
+        assertThatCode(() -> bindings.executeTasks(explodedTestModule)).doesNotThrowAnyException();
+    }
+
+    @Test
+    void givenProductsFromOtherSchematics_whenExecuteTasks_thenTestsAreExecutedForCurrentSchematic(
+        Path path
+    ) throws IOException {
+        var testSources = path.resolve("test-sources");
+        var testClasses = path.resolve("test-classes");
+        var modulePath = Stream.of(System.getProperty("jdk.module.path").split(":"))
+            .map(Paths::get)
+            .collect(Collectors.toSet());
+        compiler.compile(
+            Set.of(
+                Files.writeString(
+                    Directories.createDirectoriesForFile(testSources.resolve("module-info.java")),
+                    """
+                    module test {
+                        requires org.junit.jupiter.api;
+                        opens test to org.junit.platform.commons;
+                    }
+                    """
+                ),
+                Files.writeString(
+                    Directories.createDirectoriesForFile(
+                        testSources.resolve("test").resolve("MyTest.java")
+                    ),
+                    """
+                    package test;
+                    import org.junit.jupiter.api.Test;
+                    import static org.junit.jupiter.api.Assertions.assertTrue;
+                    final class MyTest {
+                        @Test
+                        void test() {
+                            assertTrue(true);
+                        }
+                    }
+                    """
+                )
+            ),
+            modulePath,
+            testClasses
+        );
+        var schematic = modulePath.stream()
+            .reduce(
+                FakeConveyorSchematicBuilder.discoveryDirectory(path),
+                FakeConveyorSchematicBuilder::dependency,
+                (a, b) -> a
+            )
+            .build();
+        var bindings = ConveyorTaskBindings.from(schematic);
+        var explodedTestModule = new Product(
+            schematic.coordinates(),
+            testClasses,
+            ProductType.EXPLODED_TEST_MODULE
+        );
+        var otherExplodedTestModule = new Product(
+            new SchematicCoordinates(
+                "group",
+                "other-schematic",
+                "1.0.0"
+            ),
+            path.resolve("other-exploded-test-module"),
+            ProductType.EXPLODED_TEST_MODULE
+        );
+
+        assertThatCode(() -> bindings.executeTasks(otherExplodedTestModule, explodedTestModule))
+            .doesNotThrowAnyException();
     }
 }
