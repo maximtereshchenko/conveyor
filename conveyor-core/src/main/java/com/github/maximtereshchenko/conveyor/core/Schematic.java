@@ -72,7 +72,7 @@ final class Schematic {
         var dependencies = dependencies(completeModel, properties, preferences, repositories);
         return plugins(completeModel, properties, preferences, repositories)
             .executeTasks(
-                new ConveyorSchematicAdapter(dependencies, properties, schematicCoordinates),
+                new ConveyorSchematicAdapter(schematicCoordinates, properties,dependencies ),
                 withSchematicDefinition(products, schematicCoordinates, completeModel),
                 stage
             );
@@ -168,7 +168,7 @@ final class Schematic {
                 http,
                 schematicDefinitionFactory,
                 schematicDefinitionTranslator,
-                model.url()
+                model.uri()
             );
         };
     }

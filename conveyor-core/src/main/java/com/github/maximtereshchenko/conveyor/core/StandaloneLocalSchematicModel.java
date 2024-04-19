@@ -89,7 +89,7 @@ final class StandaloneLocalSchematicModel implements LocalSchematicModel {
                         );
                     case RemoteRepositoryDefinition definition -> new RemoteRepositoryModel(
                         definition.name(),
-                        definition.url(),
+                        definition.uri(),
                         definition.enabled()
                     );
                 }

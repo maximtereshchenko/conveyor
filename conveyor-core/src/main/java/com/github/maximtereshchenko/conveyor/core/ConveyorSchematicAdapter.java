@@ -12,18 +12,23 @@ import java.util.Set;
 
 final class ConveyorSchematicAdapter implements ConveyorSchematic {
 
-    private final Dependencies dependencies;
-    private final Properties properties;
     private final SchematicCoordinates schematicCoordinates;
+    private final Properties properties;
+    private final Dependencies dependencies;
 
     ConveyorSchematicAdapter(
-        Dependencies dependencies,
+        SchematicCoordinates schematicCoordinates,
         Properties properties,
-        SchematicCoordinates schematicCoordinates
+        Dependencies dependencies
     ) {
-        this.dependencies = dependencies;
-        this.properties = properties;
         this.schematicCoordinates = schematicCoordinates;
+        this.properties = properties;
+        this.dependencies = dependencies;
+    }
+
+    @Override
+    public SchematicCoordinates coordinates() {
+        return schematicCoordinates;
     }
 
     @Override
@@ -44,10 +49,5 @@ final class ConveyorSchematicAdapter implements ConveyorSchematic {
     @Override
     public Set<Path> modulePath(Set<DependencyScope> scopes) {
         return dependencies.modulePath(scopes);
-    }
-
-    @Override
-    public Product product(Path path, ProductType type) {
-        return new Product(schematicCoordinates, path, type);
     }
 }

@@ -29,7 +29,7 @@ final class RepositoryDefinitionDeserializer extends StdDeserializer<RepositoryD
         if (path == null) {
             return new RemoteRepositoryDefinition(
                 name,
-                URI.create(jsonNode.get("url").asText()).toURL(),
+                URI.create(jsonNode.get("uri").asText()),
                 enabled
             );
         }

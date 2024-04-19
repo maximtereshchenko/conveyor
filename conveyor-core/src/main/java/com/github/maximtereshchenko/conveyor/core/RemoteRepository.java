@@ -3,8 +3,6 @@ package com.github.maximtereshchenko.conveyor.core;
 import com.github.maximtereshchenko.conveyor.api.port.SchematicDefinitionTranslator;
 
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.Path;
 import java.util.Optional;
 
@@ -14,20 +12,20 @@ final class RemoteRepository extends UriRepository {
     private final Http http;
     private final SchematicDefinitionFactory schematicDefinitionFactory;
     private final SchematicDefinitionTranslator schematicDefinitionTranslator;
-    private final URL url;
+    private final URI baseUri;
 
     RemoteRepository(
         LocalDirectoryRepository cache,
         Http http,
         SchematicDefinitionFactory schematicDefinitionFactory,
         SchematicDefinitionTranslator schematicDefinitionTranslator,
-        URL url
+        URI baseUri
     ) {
         this.cache = cache;
         this.http = http;
         this.schematicDefinitionFactory = schematicDefinitionFactory;
         this.schematicDefinitionTranslator = schematicDefinitionTranslator;
-        this.url = url;
+        this.baseUri = baseUri;
     }
 
     @Override
@@ -56,12 +54,12 @@ final class RemoteRepository extends UriRepository {
     }
 
     private void storeModule(URI uri) {
-        http.get(absoluteUri(uri), inputStream -> cache.stored(uri, inputStream::transferTo));
+        http.get(baseUri.resolve(uri), inputStream -> cache.stored(uri, inputStream::transferTo));
     }
 
     private void storeSchematicDefinition(URI uri) {
         http.get(
-            absoluteUri(uri),
+            baseUri.resolve(uri),
             inputStream -> cache.stored(
                 uri,
                 outputStream -> schematicDefinitionTranslator.write(
@@ -70,13 +68,5 @@ final class RemoteRepository extends UriRepository {
                 )
             )
         );
-    }
-
-    private URI absoluteUri(URI uri) {
-        try {
-            return url.toURI().resolve(uri);
-        } catch (URISyntaxException e) {
-            throw new IllegalArgumentException(e);
-        }
     }
 }

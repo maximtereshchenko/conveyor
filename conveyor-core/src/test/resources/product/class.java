@@ -20,7 +20,8 @@ public final class ${normalizedName} implements ConveyorPlugin {
                 Stage.ARCHIVE,
                 Step.RUN,
                 (products) -> Set.of(
-                    schematic.product(
+                    new Product(
+                        schematic.coordinates(),
                         schematic.discoveryDirectory().resolve(configuration.get("path")),
                         ProductType.MODULE
                     )

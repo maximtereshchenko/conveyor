@@ -6,7 +6,6 @@ import com.github.maximtereshchenko.conveyor.jackson.JacksonAdapter;
 import com.github.maximtereshchenko.test.common.Directories;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -78,10 +77,9 @@ final class SchematicDefinitionBuilder {
         return this;
     }
 
-    SchematicDefinitionBuilder repository(String name, String url, boolean enabled)
-        throws MalformedURLException {
+    SchematicDefinitionBuilder repository(String name, String uri, boolean enabled) {
         repositories.add(
-            new RemoteRepositoryDefinition(name, URI.create(url).toURL(), Optional.of(enabled))
+            new RemoteRepositoryDefinition(name, URI.create(uri), Optional.of(enabled))
         );
         return this;
     }

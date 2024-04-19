@@ -1,11 +1,12 @@
 package com.github.maximtereshchenko.conveyor.core;
 
+import java.net.URI;
 import java.net.URL;
 import java.util.Optional;
 
 record RemoteRepositoryModel(
     String name,
-    URL url,
+    URI uri,
     Optional<Boolean> enabled
 ) implements RepositoryModel {
 
@@ -14,7 +15,7 @@ record RemoteRepositoryModel(
         return switch (base) {
             case LocalDirectoryRepositoryModel ignored -> throw new IllegalArgumentException();
             case RemoteRepositoryModel model ->
-                new RemoteRepositoryModel(name, url, enabled.or(model::enabled));
+                new RemoteRepositoryModel(name, uri, enabled.or(model::enabled));
         };
     }
 }
