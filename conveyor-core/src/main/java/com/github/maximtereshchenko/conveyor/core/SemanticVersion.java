@@ -123,12 +123,16 @@ final class SemanticVersion implements Comparable<SemanticVersion> {
     }
 
     private int patch() {
-        return Integer.parseInt(patchAndPreRelease().split("-")[0]);
+        var patch = patchAndPreRelease().split("-")[0];
+        if (patch.isBlank()) {
+            return 0;
+        }
+        return Integer.parseInt(patch);
     }
 
     private String[] preReleaseIdentifiers() {
         var patchAndPreRelease = patchAndPreRelease().split("-");
-        if (patchAndPreRelease.length == 1) {
+        if (patchAndPreRelease.length <= 1) {
             return new String[0];
         }
         return dotSeparated(patchAndPreRelease[1]);

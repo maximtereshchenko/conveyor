@@ -20,7 +20,7 @@ final class Schematics {
 
     void construct(Stage stage) {
         var products = Set.<Product>of();
-        for (var schematic : schematicsInContructionOrder()) {
+        for (var schematic : schematicsInConstructionOrder()) {
             products = schematic.construct(products, stage(stage, schematic));
         }
     }
@@ -31,7 +31,7 @@ final class Schematics {
             .findAny();
     }
 
-    private List<Schematic> schematicsInContructionOrder() {
+    private List<Schematic> schematicsInConstructionOrder() {
         return all.stream()
             .filter(this::toBeConstructed)
             .sorted(this::comparedByMutualRequirement)
