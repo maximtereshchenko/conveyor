@@ -1011,6 +1011,47 @@ final class InheritanceFeatureTests extends ConveyorTest {
         assertThat(instantPath(dependency)).exists();
     }
 
+    @Test
+    void givenRelativeInclusion_whenConstructToStage_thenInclusionResolvedRelativeToSchematicDefinitionDirectory(
+        Path path,
+        ConveyorModule module,
+        BuilderFactory factory
+    ) throws Exception {
+        factory.repositoryBuilder()
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("instant")
+            )
+            .jar(
+                factory.jarBuilder("instant")
+            )
+            .install(path);
+        var inclusion = path.resolve("inclusion");
+        factory.schematicDefinitionBuilder()
+            .name("inclusion")
+            .template("template")
+            .property(
+                "conveyor.schematic.template.location",
+                "../template/conveyor.json"
+            )
+            .plugin("instant", "1.0.0", Map.of("instant", "COMPILE-RUN"))
+            .conveyorJson(inclusion);
+
+        module.construct(
+            factory.schematicDefinitionBuilder()
+                .name("template")
+                .repository(path)
+                .inclusion(
+                    path.getFileSystem()
+                        .getPath("..", "inclusion", "conveyor.json")
+                )
+                .conveyorJson(path.resolve("template")),
+            Stage.COMPILE
+        );
+
+        assertThat(instantPath(inclusion)).exists();
+    }
+
     private Instant constructed(Path path) {
         try {
             return instant(instantPath(path));

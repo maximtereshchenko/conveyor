@@ -79,7 +79,9 @@ A build tool for Java projects
       property `conveyor.schematic.template.location` defines the path to the template. It is
       relative to the directory, where the schematic definition is located. It is not inherited from
       the template. The default value is `../conveyor.json`
-    * A schematic has zero or more inclusions. It will be used as a template for included schematics
+    * A schematic has zero or more inclusions. It will be used as a template for included
+      schematics. The path to the included schematic is relative to the directory, where the
+      schematic definition is located
     * A schematic is constructed before its inclusions
     * A schematic is constructed after its schematic template
     * A schematic is constructed before other schematics, which require it as a dependency

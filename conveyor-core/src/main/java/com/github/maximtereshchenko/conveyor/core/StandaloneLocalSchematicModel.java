@@ -71,7 +71,12 @@ final class StandaloneLocalSchematicModel implements LocalSchematicModel {
 
     @Override
     public LinkedHashSet<Path> inclusions() {
-        return new LinkedHashSet<>(standaloneSchematicModel.schematicDefinition().inclusions());
+        return standaloneSchematicModel.schematicDefinition()
+            .inclusions()
+            .stream()
+            .map(path.getParent()::resolve)
+            .map(Path::normalize)
+            .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     @Override
