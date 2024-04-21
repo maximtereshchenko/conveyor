@@ -1,7 +1,7 @@
 package com.github.maximtereshchenko.conveyor.core;
 
 import java.io.IOException;
-import java.io.OutputStream;
+import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.net.URI;
 import java.nio.file.Files;
@@ -9,7 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 
-final class LocalDirectoryRepository extends UriRepository {
+final class LocalDirectoryRepository implements UriRepository<Path> {
 
     private final Path path;
 
@@ -17,16 +17,8 @@ final class LocalDirectoryRepository extends UriRepository {
         this.path = path;
     }
 
-    void stored(URI uri, IOConsumer<OutputStream> consumer) {
-        try (var outputStream = outputStream(absolutePath(uri))) {
-            consumer.accept(outputStream);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-    }
-
     @Override
-    Optional<Path> path(URI uri, Classifier classifier) {
+    public Optional<Path> artifact(URI uri) {
         var requested = absolutePath(uri);
         if (Files.exists(requested)) {
             return Optional.of(requested);
@@ -34,9 +26,18 @@ final class LocalDirectoryRepository extends UriRepository {
         return Optional.empty();
     }
 
-    private OutputStream outputStream(Path target) throws IOException {
-        Files.createDirectories(target.getParent());
-        return Files.newOutputStream(target);
+    Path publish(URI uri, InputStream inputStream) {
+        var destination = absolutePath(uri);
+        try {
+            Files.deleteIfExists(destination);
+            Files.createDirectories(destination.getParent());
+            try (var outputStream = Files.newOutputStream(destination)) {
+                inputStream.transferTo(outputStream);
+                return destination;
+            }
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     private Path absolutePath(URI uri) {

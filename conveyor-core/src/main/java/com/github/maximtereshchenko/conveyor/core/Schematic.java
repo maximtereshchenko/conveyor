@@ -1,6 +1,6 @@
 package com.github.maximtereshchenko.conveyor.core;
 
-import com.github.maximtereshchenko.conveyor.api.port.SchematicDefinitionTranslator;
+import com.github.maximtereshchenko.conveyor.api.port.SchematicDefinitionConverter;
 import com.github.maximtereshchenko.conveyor.common.api.Product;
 import com.github.maximtereshchenko.conveyor.common.api.ProductType;
 import com.github.maximtereshchenko.conveyor.common.api.SchematicCoordinates;
@@ -13,26 +13,23 @@ import java.util.stream.Stream;
 
 final class Schematic {
 
-    private final Http http;
     private final ExtendableLocalInheritanceHierarchyModel localModel;
     private final ModulePathFactory modulePathFactory;
     private final SchematicDefinitionFactory schematicDefinitionFactory;
-    private final SchematicDefinitionTranslator schematicDefinitionTranslator;
+    private final SchematicDefinitionConverter schematicDefinitionConverter;
     private final SchematicModelFactory schematicModelFactory;
 
     Schematic(
         ExtendableLocalInheritanceHierarchyModel localModel,
-        Http http,
         ModulePathFactory modulePathFactory,
         SchematicDefinitionFactory schematicDefinitionFactory,
-        SchematicDefinitionTranslator schematicDefinitionTranslator,
+        SchematicDefinitionConverter schematicDefinitionConverter,
         SchematicModelFactory schematicModelFactory
     ) {
         this.localModel = localModel;
-        this.http = http;
         this.modulePathFactory = modulePathFactory;
         this.schematicDefinitionFactory = schematicDefinitionFactory;
-        this.schematicDefinitionTranslator = schematicDefinitionTranslator;
+        this.schematicDefinitionConverter = schematicDefinitionConverter;
         this.schematicModelFactory = schematicModelFactory;
     }
 
@@ -142,7 +139,7 @@ final class Schematic {
                         )
                 )
                 .collect(Collectors.toSet()),
-            schematicDefinitionTranslator
+            schematicDefinitionConverter
         );
     }
 
@@ -155,19 +152,36 @@ final class Schematic {
             return new DisabledRepository();
         }
         return switch (repositoryModel) {
-            case LocalDirectoryRepositoryModel model -> new LocalDirectoryRepository(
-                absolutePath(path.getParent(), model.path())
-            );
-            case RemoteRepositoryModel model -> new RemoteRepository(
+            case LocalDirectoryRepositoryModel model -> new UriRepositoryAdapter(
                 new LocalDirectoryRepository(
-                    absolutePath(path.getParent(), properties.remoteRepositoryCacheDirectory())
-                ),
-                http,
-                schematicDefinitionFactory,
-                schematicDefinitionTranslator,
-                model.uri()
+                    absolutePath(path.getParent(), model.path())
+                )
             );
+            case RemoteRepositoryModel model -> remoteRepository(path, properties, model);
         };
+    }
+
+    private UriRepositoryAdapter remoteRepository(
+        Path path,
+        Properties properties,
+        RemoteRepositoryModel remoteRepositoryModel
+    ) {
+        var cache = new LocalDirectoryRepository(
+            absolutePath(path.getParent(), properties.remoteRepositoryCacheDirectory())
+        );
+        return new UriRepositoryAdapter(
+            new CachingUriRepository(
+                new MavenRepositoryAdapter(
+                    new CachingUriRepository(
+                        new RemoteMavenRepository(remoteRepositoryModel.uri()),
+                        cache
+                    ),
+                    schematicDefinitionFactory,
+                    schematicDefinitionConverter
+                ),
+                cache
+            )
+        );
     }
 
     private Path absolutePath(Path base, Path relative) {

@@ -1,23 +1,23 @@
 package com.github.maximtereshchenko.conveyor.jackson;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-import com.github.maximtereshchenko.conveyor.api.port.SchematicDefinitionTranslator;
+import com.github.maximtereshchenko.conveyor.api.port.SchematicDefinitionConverter;
 import com.github.maximtereshchenko.conveyor.api.schematic.NoTemplateDefinition;
 import com.github.maximtereshchenko.conveyor.api.schematic.RepositoryDefinition;
 import com.github.maximtereshchenko.conveyor.api.schematic.SchematicDefinition;
 import com.github.maximtereshchenko.conveyor.api.schematic.TemplateDefinition;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.UncheckedIOException;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public final class JacksonAdapter implements SchematicDefinitionTranslator {
+public final class JacksonAdapter implements SchematicDefinitionConverter {
 
     private final ObjectMapper objectMapper;
 
@@ -53,10 +53,10 @@ public final class JacksonAdapter implements SchematicDefinitionTranslator {
     }
 
     @Override
-    public void write(SchematicDefinition schematicDefinition, OutputStream outputStream) {
+    public byte[] bytes(SchematicDefinition schematicDefinition) {
         try {
-            objectMapper.writeValue(outputStream, schematicDefinition);
-        } catch (IOException e) {
+            return objectMapper.writeValueAsBytes(schematicDefinition);
+        } catch (JsonProcessingException e) {
             throw new UncheckedIOException(e);
         }
     }

@@ -33,23 +33,24 @@ final class SchematicDefinitionBuilder {
 
     void write(Path path) throws IOException {
         try (var outputStream = Files.newOutputStream(path)) {
-            jacksonAdapter.write(
-                new SchematicDefinition(
-                    group,
-                    name,
-                    version,
-                    template,
-                    inclusions,
-                    repositories,
-                    properties,
-                    new PreferencesDefinition(
-                        preferenceInclusions,
-                        artifactPreferences
-                    ),
-                    plugins,
-                    dependencies
-                ),
-                outputStream
+            outputStream.write(
+                jacksonAdapter.bytes(
+                    new SchematicDefinition(
+                        group,
+                        name,
+                        version,
+                        template,
+                        inclusions,
+                        repositories,
+                        properties,
+                        new PreferencesDefinition(
+                            preferenceInclusions,
+                            artifactPreferences
+                        ),
+                        plugins,
+                        dependencies
+                    )
+                )
             );
         }
     }

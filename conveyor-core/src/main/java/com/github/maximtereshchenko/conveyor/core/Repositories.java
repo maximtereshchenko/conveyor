@@ -1,6 +1,6 @@
 package com.github.maximtereshchenko.conveyor.core;
 
-import com.github.maximtereshchenko.conveyor.api.port.SchematicDefinitionTranslator;
+import com.github.maximtereshchenko.conveyor.api.port.SchematicDefinitionConverter;
 import com.github.maximtereshchenko.conveyor.api.schematic.SchematicDefinition;
 
 import java.nio.file.Path;
@@ -10,15 +10,15 @@ import java.util.Set;
 final class Repositories {
 
     private final Set<Repository> all;
-    private final SchematicDefinitionTranslator schematicDefinitionTranslator;
+    private final SchematicDefinitionConverter schematicDefinitionConverter;
 
-    Repositories(Set<Repository> all, SchematicDefinitionTranslator schematicDefinitionTranslator) {
+    Repositories(Set<Repository> all, SchematicDefinitionConverter schematicDefinitionConverter) {
         this.all = all;
-        this.schematicDefinitionTranslator = schematicDefinitionTranslator;
+        this.schematicDefinitionConverter = schematicDefinitionConverter;
     }
 
     SchematicDefinition schematicDefinition(Id id, SemanticVersion semanticVersion) {
-        return schematicDefinitionTranslator.schematicDefinition(
+        return schematicDefinitionConverter.schematicDefinition(
             path(id, semanticVersion, Repository.Classifier.SCHEMATIC_DEFINITION)
         );
     }

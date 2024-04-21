@@ -1,6 +1,6 @@
 package com.github.maximtereshchenko.conveyor.core;
 
-import com.github.maximtereshchenko.conveyor.api.port.SchematicDefinitionTranslator;
+import com.github.maximtereshchenko.conveyor.api.port.SchematicDefinitionConverter;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -11,10 +11,10 @@ import java.util.stream.Stream;
 
 final class SchematicModelFactory {
 
-    private final SchematicDefinitionTranslator schematicDefinitionTranslator;
+    private final SchematicDefinitionConverter schematicDefinitionConverter;
 
-    SchematicModelFactory(SchematicDefinitionTranslator schematicDefinitionTranslator) {
-        this.schematicDefinitionTranslator = schematicDefinitionTranslator;
+    SchematicModelFactory(SchematicDefinitionConverter schematicDefinitionConverter) {
+        this.schematicDefinitionConverter = schematicDefinitionConverter;
     }
 
     LinkedHashSet<ExtendableLocalInheritanceHierarchyModel> extendableLocalInheritanceHierarchyModels(
@@ -74,7 +74,7 @@ final class SchematicModelFactory {
     private StandaloneLocalSchematicModel standaloneLocalSchematicModel(Path path) {
         return new StandaloneLocalSchematicModel(
             path,
-            new StandaloneSchematicModel(schematicDefinitionTranslator.schematicDefinition(path))
+            new StandaloneSchematicModel(schematicDefinitionConverter.schematicDefinition(path))
         );
     }
 

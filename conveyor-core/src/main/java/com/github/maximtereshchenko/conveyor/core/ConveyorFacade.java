@@ -1,7 +1,7 @@
 package com.github.maximtereshchenko.conveyor.core;
 
 import com.github.maximtereshchenko.conveyor.api.ConveyorModule;
-import com.github.maximtereshchenko.conveyor.api.port.SchematicDefinitionTranslator;
+import com.github.maximtereshchenko.conveyor.api.port.SchematicDefinitionConverter;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 
 import java.nio.file.Path;
@@ -10,18 +10,16 @@ import java.util.stream.Collectors;
 
 public final class ConveyorFacade implements ConveyorModule {
 
-    private final Http http;
     private final SchematicModelFactory modelFactory;
     private final ModulePathFactory modulePathFactory;
     private final SchematicDefinitionFactory schematicDefinitionFactory;
-    private final SchematicDefinitionTranslator schematicDefinitionTranslator;
+    private final SchematicDefinitionConverter schematicDefinitionConverter;
 
-    public ConveyorFacade(SchematicDefinitionTranslator schematicDefinitionTranslator) {
-        this.http = new Http();
-        this.modelFactory = new SchematicModelFactory(schematicDefinitionTranslator);
+    public ConveyorFacade(SchematicDefinitionConverter schematicDefinitionConverter) {
+        this.modelFactory = new SchematicModelFactory(schematicDefinitionConverter);
         this.modulePathFactory = new ModulePathFactory();
         this.schematicDefinitionFactory = new SchematicDefinitionFactory(XmlFactory.newInstance());
-        this.schematicDefinitionTranslator = schematicDefinitionTranslator;
+        this.schematicDefinitionConverter = schematicDefinitionConverter;
     }
 
     @Override
@@ -35,10 +33,9 @@ public final class ConveyorFacade implements ConveyorModule {
             .map(extendableLocalInheritanceHierarchyModel ->
                 new Schematic(
                     extendableLocalInheritanceHierarchyModel,
-                    http,
                     modulePathFactory,
                     schematicDefinitionFactory,
-                    schematicDefinitionTranslator,
+                    schematicDefinitionConverter,
                     modelFactory
                 )
             )

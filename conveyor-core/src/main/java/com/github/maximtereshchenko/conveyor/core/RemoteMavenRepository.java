@@ -7,21 +7,24 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.Optional;
 
-final class Http {
+final class RemoteMavenRepository implements UriRepository<InputStream> {
 
     private final HttpClient httpClient = HttpClient.newHttpClient();
+    private final URI baseUri;
 
-    void get(URI uri, IOConsumer<InputStream> consumer) {
-        var response = getResponse(uri);
+    RemoteMavenRepository(URI baseUri) {
+        this.baseUri = baseUri;
+    }
+
+    @Override
+    public Optional<InputStream> artifact(URI uri) {
+        var response = getResponse(URI.create(baseUri.toString() + '/' + uri));
         if (response.statusCode() != 200) {
-            return;
+            return Optional.empty();
         }
-        try (var inputStream = response.body()) {
-            consumer.accept(inputStream);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        return Optional.of(response.body());
     }
 
     private HttpResponse<InputStream> getResponse(URI uri) {
