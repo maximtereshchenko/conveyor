@@ -61,6 +61,9 @@ final class PomBuilder {
     }
 
     String version() {
+        if (version == null) {
+            return parent.version();
+        }
         return version;
     }
 

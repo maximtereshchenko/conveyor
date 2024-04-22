@@ -590,4 +590,47 @@ final class RepositoriesFeatureTests extends ConveyorTest {
 
         assertThat(defaultConstructionDirectory(path).resolve("instant")).exists();
     }
+
+    @Test
+    @ExtendWith(WireMockExtension.class)
+    void givenNoVersionInPom_whenConstructToStage_thenVersionIsFromParent(
+        Path path,
+        ConveyorModule module,
+        BuilderFactory factory,
+        WireMockServer wireMockServer
+    ) throws Exception {
+        factory.repositoryBuilder()
+            .pom(
+                factory.pomBuilder()
+                    .groupId("group")
+                    .artifactId("template")
+                    .version(null)
+                    .parent("group", "parent", "2.0.0")
+            )
+            .pom(
+                factory.pomBuilder()
+                    .groupId("group")
+                    .artifactId("parent")
+                    .version("2.0.0")
+            )
+            .jar(
+                factory.jarBuilder("instant")
+            )
+            .pom(
+                factory.pomBuilder()
+                    .artifactId("instant")
+            )
+            .install(wireMockServer);
+
+        module.construct(
+            factory.schematicDefinitionBuilder()
+                .template("group", "template", "2.0.0")
+                .repository("remote", wireMockServer.baseUrl(), true)
+                .plugin("instant", "1.0.0", Map.of("instant", "COMPILE-RUN"))
+                .conveyorJson(path),
+            Stage.COMPILE
+        );
+
+        assertThat(defaultConstructionDirectory(path).resolve("instant")).exists();
+    }
 }
