@@ -166,7 +166,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
     }
 
     @Test
-    void givenRelativeRepositoryPath_whenConstructToStage_thenRepositoryPathResolvedRelativeToDiscoveryDirectory(
+    void givenRelativeRepositoryPath_whenConstructToStage_thenRepositoryPathResolvedRelativeToSchematicDefinitionDirectory(
         Path path,
         ConveyorModule module,
         BuilderFactory factory
@@ -190,6 +190,40 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         );
 
         assertThat(defaultConstructionDirectory(path).resolve("instant")).exists();
+    }
+
+    @Test
+    void givenInheritedRelativeRepositoryPath_whenConstructToStage_thenRepositoryPathResolvedRelativeToDefiningSchematicDefinitionDirectory(
+        Path path,
+        ConveyorModule module,
+        BuilderFactory factory
+    ) throws Exception {
+        factory.repositoryBuilder()
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("instant")
+            )
+            .jar(
+                factory.jarBuilder("instant")
+            )
+            .install(path.resolve("repository"));
+        var included = path.resolve("included");
+
+        module.construct(
+            factory.schematicDefinitionBuilder()
+                .name("template")
+                .repository(Paths.get("./repository"))
+                .inclusion(
+                    factory.schematicDefinitionBuilder()
+                        .template("template")
+                        .plugin("instant", "1.0.0", Map.of("instant", "COMPILE-RUN"))
+                        .conveyorJson(included)
+                )
+                .conveyorJson(path),
+            Stage.COMPILE
+        );
+
+        assertThat(defaultConstructionDirectory(included).resolve("instant")).exists();
     }
 
     @Test
