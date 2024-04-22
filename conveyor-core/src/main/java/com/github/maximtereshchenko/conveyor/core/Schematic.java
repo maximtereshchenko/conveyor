@@ -15,20 +15,20 @@ final class Schematic {
 
     private final ExtendableLocalInheritanceHierarchyModel localModel;
     private final ModulePathFactory modulePathFactory;
-    private final PomModelFactory pomModelFactory;
+    private final PomDefinitionFactory pomDefinitionFactory;
     private final SchematicDefinitionConverter schematicDefinitionConverter;
     private final SchematicModelFactory schematicModelFactory;
 
     Schematic(
         ExtendableLocalInheritanceHierarchyModel localModel,
         ModulePathFactory modulePathFactory,
-        PomModelFactory pomModelFactory,
+        PomDefinitionFactory pomDefinitionFactory,
         SchematicDefinitionConverter schematicDefinitionConverter,
         SchematicModelFactory schematicModelFactory
     ) {
         this.localModel = localModel;
         this.modulePathFactory = modulePathFactory;
-        this.pomModelFactory = pomModelFactory;
+        this.pomDefinitionFactory = pomDefinitionFactory;
         this.schematicDefinitionConverter = schematicDefinitionConverter;
         this.schematicModelFactory = schematicModelFactory;
     }
@@ -173,7 +173,7 @@ final class Schematic {
                     new RemoteMavenRepository(remoteRepositoryModel.uri()),
                     cache
                 ),
-                pomModelFactory,
+                pomDefinitionFactory,
                 schematicDefinitionConverter
             ),
             cache

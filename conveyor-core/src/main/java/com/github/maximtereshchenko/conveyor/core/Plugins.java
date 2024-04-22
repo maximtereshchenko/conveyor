@@ -7,9 +7,12 @@ import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskBinding;
 
+import java.lang.module.ModuleDescriptor;
 import java.lang.module.ModuleFinder;
+import java.lang.module.ModuleReference;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 final class Plugins {
@@ -95,12 +98,17 @@ final class Plugins {
 
     private ModuleLayer moduleLayer(Set<Path> paths) {
         var parent = getClass().getModule().getLayer();
+        var moduleFinder = ModuleFinder.of(paths.toArray(Path[]::new));
         return parent.defineModulesWithOneLoader(
             parent.configuration()
                 .resolveAndBind(
-                    ModuleFinder.of(paths.toArray(Path[]::new)),
                     ModuleFinder.of(),
-                    Set.of()
+                    moduleFinder,
+                    moduleFinder.findAll()
+                        .stream()
+                        .map(ModuleReference::descriptor)
+                        .map(ModuleDescriptor::name)
+                        .collect(Collectors.toSet())
                 ),
             Thread.currentThread().getContextClassLoader()
         );

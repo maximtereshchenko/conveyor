@@ -4,26 +4,37 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-record PomModel(
+record PomDefinition(
     Optional<Parent> parent,
     Optional<String> groupId,
     String artifactId,
     Optional<String> version,
     Map<String, String> properties,
-    List<Reference> dependencyManagement,
-    List<Reference> dependencies
+    List<ManagedDependencyDefinition> dependencyManagement,
+    List<DependencyDefinition> dependencies
 ) {
 
-    enum ReferenceScope {
+    enum ManagedDependencyScope {
         COMPILE, RUNTIME, TEST, SYSTEM, PROVIDED, IMPORT
+    }
+
+    enum DependencyScope {
+        COMPILE, RUNTIME, TEST, SYSTEM, PROVIDED
     }
 
     record Parent(String groupId, String artifactId, String version) {}
 
-    record Reference(
+    record ManagedDependencyDefinition(
         String groupId,
         String artifactId,
         String version,
-        Optional<ReferenceScope> scope
+        Optional<ManagedDependencyScope> scope
+    ) {}
+
+    record DependencyDefinition(
+        String groupId,
+        String artifactId,
+        Optional<String> version,
+        Optional<DependencyScope> scope
     ) {}
 }

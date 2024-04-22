@@ -15,20 +15,21 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-final class PomModelFactory {
+final class PomDefinitionFactory {
 
     private final DocumentBuilder documentBuilder;
 
-    private PomModelFactory(DocumentBuilder documentBuilder) {
+    private PomDefinitionFactory(DocumentBuilder documentBuilder) {
         this.documentBuilder = documentBuilder;
     }
 
-    static PomModelFactory configured() {
+    static PomDefinitionFactory configured() {
         var factory = DocumentBuilderFactory.newInstance();
         factory.setAttribute(XMLConstants.FEATURE_SECURE_PROCESSING, true);
         factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
@@ -52,24 +53,24 @@ final class PomModelFactory {
                 "http://apache.org/xml/features/nonvalidating/load-external-dtd",
                 false
             );
-            return new PomModelFactory(factory.newDocumentBuilder());
+            return new PomDefinitionFactory(factory.newDocumentBuilder());
         } catch (ParserConfigurationException e) {
             throw new IllegalArgumentException(e);
         }
     }
 
-    PomModel pomModel(InputStream inputStream) {
+    PomDefinition pomDefinition(InputStream inputStream) {
         try {
             var root = documentBuilder.parse(inputStream).getDocumentElement();
             root.normalize();
-            return new PomModel(
+            return new PomDefinition(
                 parent(root),
                 groupId(root),
                 artifactId(root),
                 version(root),
                 properties(root),
                 dependencyManagement(root),
-                dependencies(root)
+                dependencies(root, this::dependencyDefinition)
             );
         } catch (SAXException e) {
             throw new IllegalArgumentException(e);
@@ -78,10 +79,10 @@ final class PomModelFactory {
         }
     }
 
-    private Optional<PomModel.Parent> parent(Node root) {
+    private Optional<PomDefinition.Parent> parent(Node root) {
         return namedChildren(root, "parent")
             .map(parent ->
-                new PomModel.Parent(
+                new PomDefinition.Parent(
                     groupId(parent).orElseThrow(),
                     artifactId(parent),
                     version(parent).orElseThrow()
@@ -90,9 +91,11 @@ final class PomModelFactory {
             .findAny();
     }
 
-    private List<PomModel.Reference> dependencyManagement(Element root) {
+    private List<PomDefinition.ManagedDependencyDefinition> dependencyManagement(Element root) {
         return namedChildren(root, "dependencyManagement")
-            .map(this::dependencies)
+            .map(dependencyManagement ->
+                dependencies(dependencyManagement, this::managedDependencyDefinition)
+            )
             .flatMap(Collection::stream)
             .toList();
     }
@@ -103,21 +106,32 @@ final class PomModelFactory {
             .collect(Collectors.toMap(Node::getNodeName, Node::getTextContent));
     }
 
-    private List<PomModel.Reference> dependencies(Node node) {
+    private <T> List<T> dependencies(Node node, Function<Node, T> mapper) {
         return namedChildren(node, "dependencies")
             .flatMap(dependencies -> namedChildren(dependencies, "dependency"))
-            .map(this::reference)
+            .map(mapper)
             .toList();
     }
 
-    private PomModel.Reference reference(Node node) {
-        return new PomModel.Reference(
+    private PomDefinition.DependencyDefinition dependencyDefinition(Node node) {
+        return new PomDefinition.DependencyDefinition(
+            groupId(node).orElseThrow(),
+            artifactId(node),
+            version(node),
+            singleValue(node, "scope")
+                .map(String::toUpperCase)
+                .map(PomDefinition.DependencyScope::valueOf)
+        );
+    }
+
+    private PomDefinition.ManagedDependencyDefinition managedDependencyDefinition(Node node) {
+        return new PomDefinition.ManagedDependencyDefinition(
             groupId(node).orElseThrow(),
             artifactId(node),
             version(node).orElseThrow(),
             singleValue(node, "scope")
                 .map(String::toUpperCase)
-                .map(PomModel.ReferenceScope::valueOf)
+                .map(PomDefinition.ManagedDependencyScope::valueOf)
         );
     }
 

@@ -510,7 +510,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
             .pom(
                 factory.pomBuilder()
                     .artifactId("template")
-                    .dependency("dependency", originalScope)
+                    .dependency("dependency", "1.0.0", originalScope)
             )
             .pom(
                 factory.pomBuilder()
@@ -672,5 +672,50 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         );
 
         assertThat(defaultConstructionDirectory(path).resolve("instant")).exists();
+    }
+
+    @Test
+    @ExtendWith(WireMockExtension.class)
+    void givenNoDependencyVersion_whenConstructToStage_thenVersionIsFromDependencyManagement(
+        Path path,
+        ConveyorModule module,
+        BuilderFactory factory,
+        WireMockServer wireMockServer
+    ) throws Exception {
+        factory.repositoryBuilder()
+            .pom(
+                factory.pomBuilder()
+                    .artifactId("template")
+                    .managedDependency("dependency", "1.0.0")
+                    .dependency("dependency", null, null)
+            )
+            .pom(
+                factory.pomBuilder()
+                    .artifactId("dependency")
+            )
+            .jar(
+                factory.jarBuilder("dependency")
+            )
+            .pom(
+                factory.pomBuilder()
+                    .artifactId("dependencies")
+            )
+            .jar(
+                factory.jarBuilder("dependencies")
+            )
+            .install(wireMockServer);
+
+        module.construct(
+            factory.schematicDefinitionBuilder()
+                .template("template")
+                .repository("remote", wireMockServer.baseUrl(), true)
+                .plugin("dependencies")
+                .conveyorJson(path),
+            Stage.COMPILE
+        );
+
+        assertThat(defaultConstructionDirectory(path).resolve("dependencies"))
+            .content()
+            .isEqualTo("dependency-1.0.0");
     }
 }

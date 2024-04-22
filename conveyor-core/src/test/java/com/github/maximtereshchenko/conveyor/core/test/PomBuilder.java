@@ -92,10 +92,10 @@ final class PomBuilder {
     }
 
     PomBuilder dependency(String artifactId) {
-        return dependency(artifactId, null);
+        return dependency(artifactId, version, null);
     }
 
-    PomBuilder dependency(String artifactId, String scope) {
+    PomBuilder dependency(String artifactId, String version, String scope) {
         dependencies.add(new PomModel.Dependency(groupId, artifactId, version, scope));
         return this;
     }

@@ -12,13 +12,13 @@ public final class ConveyorFacade implements ConveyorModule {
 
     private final SchematicModelFactory modelFactory;
     private final ModulePathFactory modulePathFactory;
-    private final PomModelFactory pomModelFactory;
+    private final PomDefinitionFactory pomDefinitionFactory;
     private final SchematicDefinitionConverter schematicDefinitionConverter;
 
     public ConveyorFacade(SchematicDefinitionConverter schematicDefinitionConverter) {
         this.modelFactory = new SchematicModelFactory(schematicDefinitionConverter);
         this.modulePathFactory = new ModulePathFactory();
-        this.pomModelFactory = PomModelFactory.configured();
+        this.pomDefinitionFactory = PomDefinitionFactory.configured();
         this.schematicDefinitionConverter = schematicDefinitionConverter;
     }
 
@@ -34,7 +34,7 @@ public final class ConveyorFacade implements ConveyorModule {
                 new Schematic(
                     extendableLocalInheritanceHierarchyModel,
                     modulePathFactory,
-                    pomModelFactory,
+                    pomDefinitionFactory,
                     schematicDefinitionConverter,
                     modelFactory
                 )

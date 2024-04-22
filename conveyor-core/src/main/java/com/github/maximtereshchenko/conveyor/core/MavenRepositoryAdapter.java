@@ -18,16 +18,16 @@ import java.util.function.Function;
 final class MavenRepositoryAdapter implements Repository<InputStream> {
 
     private final Repository<Path> original;
-    private final PomModelFactory pomModelFactory;
+    private final PomDefinitionFactory pomDefinitionFactory;
     private final SchematicDefinitionConverter schematicDefinitionConverter;
 
     MavenRepositoryAdapter(
         Repository<Path> original,
-        PomModelFactory pomModelFactory,
+        PomDefinitionFactory pomDefinitionFactory,
         SchematicDefinitionConverter schematicDefinitionConverter
     ) {
         this.original = original;
-        this.pomModelFactory = pomModelFactory;
+        this.pomDefinitionFactory = pomDefinitionFactory;
         this.schematicDefinitionConverter = schematicDefinitionConverter;
     }
 
@@ -59,19 +59,19 @@ final class MavenRepositoryAdapter implements Repository<InputStream> {
         return new ByteArrayInputStream(schematicDefinitionConverter.bytes(schematicDefinition));
     }
 
-    private PomModel pomModel(Path path) {
+    private PomDefinition pomModel(Path path) {
         try (var inputStream = Files.newInputStream(path)) {
-            return pomModelFactory.pomModel(inputStream);
+            return pomDefinitionFactory.pomDefinition(inputStream);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
     }
 
-    private SchematicDefinition schematicDefinition(PomModel pomModel) {
+    private SchematicDefinition schematicDefinition(PomDefinition pomModel) {
         return new SchematicDefinition(
-            either(pomModel, PomModel::groupId, PomModel.Parent::groupId),
+            either(pomModel, PomDefinition::groupId, PomDefinition.Parent::groupId),
             pomModel.artifactId(),
-            either(pomModel, PomModel::version, PomModel.Parent::version),
+            either(pomModel, PomDefinition::version, PomDefinition.Parent::version),
             template(pomModel),
             List.of(),
             List.of(),
@@ -82,21 +82,20 @@ final class MavenRepositoryAdapter implements Repository<InputStream> {
         );
     }
 
-    private List<DependencyDefinition> dependencies(PomModel pomModel) {
+    private List<DependencyDefinition> dependencies(PomDefinition pomModel) {
         return pomModel.dependencies()
             .stream()
             .map(reference ->
                 new DependencyDefinition(
                     reference.groupId(),
                     reference.artifactId(),
-                    Optional.of(reference.version()),
+                    reference.version(),
                     reference.scope()
                         .map(scope ->
                             switch (scope) {
                                 case COMPILE, RUNTIME, SYSTEM, PROVIDED ->
                                     DependencyScope.IMPLEMENTATION;
                                 case TEST -> DependencyScope.TEST;
-                                case IMPORT -> throw new IllegalArgumentException();
                             }
                         )
                 )
@@ -104,24 +103,24 @@ final class MavenRepositoryAdapter implements Repository<InputStream> {
             .toList();
     }
 
-    private PreferencesDefinition preferences(PomModel pomModel) {
+    private PreferencesDefinition preferences(PomDefinition pomModel) {
         var inclusions = new ArrayList<PreferencesInclusionDefinition>();
         var artifacts = new ArrayList<ArtifactPreferenceDefinition>();
-        for (var reference : pomModel.dependencyManagement()) {
-            if (isImportScoped(reference)) {
+        for (var definition : pomModel.dependencyManagement()) {
+            if (isImportScoped(definition)) {
                 inclusions.add(
                     new PreferencesInclusionDefinition(
-                        reference.groupId(),
-                        reference.artifactId(),
-                        reference.version()
+                        definition.groupId(),
+                        definition.artifactId(),
+                        definition.version()
                     )
                 );
             } else {
                 artifacts.add(
                     new ArtifactPreferenceDefinition(
-                        reference.groupId(),
-                        reference.artifactId(),
-                        reference.version()
+                        definition.groupId(),
+                        definition.artifactId(),
+                        definition.version()
                     )
                 );
             }
@@ -129,13 +128,13 @@ final class MavenRepositoryAdapter implements Repository<InputStream> {
         return new PreferencesDefinition(inclusions, artifacts);
     }
 
-    private boolean isImportScoped(PomModel.Reference reference) {
-        return reference.scope()
-            .map(PomModel.ReferenceScope.IMPORT::equals)
+    private boolean isImportScoped(PomDefinition.ManagedDependencyDefinition definition) {
+        return definition.scope()
+            .map(PomDefinition.ManagedDependencyScope.IMPORT::equals)
             .orElse(Boolean.FALSE);
     }
 
-    private TemplateDefinition template(PomModel pomModel) {
+    private TemplateDefinition template(PomDefinition pomModel) {
         return pomModel.parent()
             .<TemplateDefinition>map(parent ->
                 new SchematicTemplateDefinition(
@@ -148,9 +147,9 @@ final class MavenRepositoryAdapter implements Repository<InputStream> {
     }
 
     private String either(
-        PomModel pomModel,
-        Function<PomModel, Optional<String>> pomFunction,
-        Function<PomModel.Parent, String> parentFunction
+        PomDefinition pomModel,
+        Function<PomDefinition, Optional<String>> pomFunction,
+        Function<PomDefinition.Parent, String> parentFunction
     ) {
         return pomFunction.apply(pomModel)
             .or(() -> pomModel.parent().map(parentFunction))
