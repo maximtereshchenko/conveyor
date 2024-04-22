@@ -8,7 +8,7 @@ import java.nio.file.Path;
 import java.util.Optional;
 import java.util.Set;
 
-final class ProductRepository implements Repository {
+final class ProductRepository implements Repository<Path> {
 
     private final Set<Product> products;
 
@@ -17,24 +17,28 @@ final class ProductRepository implements Repository {
     }
 
     @Override
-    public Optional<Path> path(
+    public Optional<Path> artifact(
         Id id,
         SemanticVersion semanticVersion,
         Classifier classifier
     ) {
-        return products.stream()
-            .filter(product ->
-                hasCoordinates(product.schematicCoordinates(), id, semanticVersion)
-            )
-            .filter(product -> product.type() == productType(classifier))
-            .map(Product::path)
-            .findAny();
+        return productType(classifier)
+            .flatMap(productType ->
+                products.stream()
+                    .filter(product ->
+                        hasCoordinates(product.schematicCoordinates(), id, semanticVersion)
+                    )
+                    .filter(product -> product.type() == productType)
+                    .map(Product::path)
+                    .findAny()
+            );
     }
 
-    private ProductType productType(Classifier classifier) {
+    private Optional<ProductType> productType(Classifier classifier) {
         return switch (classifier) {
-            case SCHEMATIC_DEFINITION -> ProductType.SCHEMATIC_DEFINITION;
-            case MODULE -> ProductType.MODULE;
+            case SCHEMATIC_DEFINITION -> Optional.of(ProductType.SCHEMATIC_DEFINITION);
+            case MODULE -> Optional.of(ProductType.MODULE);
+            case POM -> Optional.empty();
         };
     }
 

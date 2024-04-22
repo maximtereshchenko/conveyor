@@ -15,20 +15,20 @@ final class Schematic {
 
     private final ExtendableLocalInheritanceHierarchyModel localModel;
     private final ModulePathFactory modulePathFactory;
-    private final SchematicDefinitionFactory schematicDefinitionFactory;
+    private final PomModelFactory pomModelFactory;
     private final SchematicDefinitionConverter schematicDefinitionConverter;
     private final SchematicModelFactory schematicModelFactory;
 
     Schematic(
         ExtendableLocalInheritanceHierarchyModel localModel,
         ModulePathFactory modulePathFactory,
-        SchematicDefinitionFactory schematicDefinitionFactory,
+        PomModelFactory pomModelFactory,
         SchematicDefinitionConverter schematicDefinitionConverter,
         SchematicModelFactory schematicModelFactory
     ) {
         this.localModel = localModel;
         this.modulePathFactory = modulePathFactory;
-        this.schematicDefinitionFactory = schematicDefinitionFactory;
+        this.pomModelFactory = pomModelFactory;
         this.schematicDefinitionConverter = schematicDefinitionConverter;
         this.schematicModelFactory = schematicModelFactory;
     }
@@ -143,7 +143,7 @@ final class Schematic {
         );
     }
 
-    private Repository repository(
+    private Repository<Path> repository(
         RepositoryModel repositoryModel,
         Path path,
         Properties properties
@@ -152,16 +152,14 @@ final class Schematic {
             return new DisabledRepository();
         }
         return switch (repositoryModel) {
-            case LocalDirectoryRepositoryModel model -> new UriRepositoryAdapter(
-                new LocalDirectoryRepository(
-                    absolutePath(path.getParent(), model.path())
-                )
+            case LocalDirectoryRepositoryModel model -> new LocalDirectoryRepository(
+                absolutePath(path.getParent(), model.path())
             );
             case RemoteRepositoryModel model -> remoteRepository(path, properties, model);
         };
     }
 
-    private UriRepositoryAdapter remoteRepository(
+    private Repository<Path> remoteRepository(
         Path path,
         Properties properties,
         RemoteRepositoryModel remoteRepositoryModel
@@ -169,18 +167,16 @@ final class Schematic {
         var cache = new LocalDirectoryRepository(
             absolutePath(path.getParent(), properties.remoteRepositoryCacheDirectory())
         );
-        return new UriRepositoryAdapter(
-            new CachingUriRepository(
-                new MavenRepositoryAdapter(
-                    new CachingUriRepository(
-                        new RemoteMavenRepository(remoteRepositoryModel.uri()),
-                        cache
-                    ),
-                    schematicDefinitionFactory,
-                    schematicDefinitionConverter
+        return new CachingRepository(
+            new MavenRepositoryAdapter(
+                new CachingRepository(
+                    new RemoteMavenRepository(remoteRepositoryModel.uri()),
+                    cache
                 ),
-                cache
-            )
+                pomModelFactory,
+                schematicDefinitionConverter
+            ),
+            cache
         );
     }
 

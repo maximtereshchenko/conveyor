@@ -9,18 +9,17 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Optional;
 
-final class RemoteMavenRepository implements UriRepository<InputStream> {
+final class RemoteMavenRepository extends UriRepository<InputStream> {
 
     private final HttpClient httpClient = HttpClient.newHttpClient();
-    private final URI baseUri;
 
     RemoteMavenRepository(URI baseUri) {
-        this.baseUri = baseUri;
+        super(baseUri);
     }
 
     @Override
     public Optional<InputStream> artifact(URI uri) {
-        var response = getResponse(URI.create(baseUri.toString() + '/' + uri));
+        var response = getResponse(uri);
         if (response.statusCode() != 200) {
             return Optional.empty();
         }

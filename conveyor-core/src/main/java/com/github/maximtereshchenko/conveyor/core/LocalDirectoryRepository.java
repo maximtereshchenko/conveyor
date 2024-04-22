@@ -9,25 +9,28 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 
-final class LocalDirectoryRepository implements UriRepository<Path> {
-
-    private final Path path;
+final class LocalDirectoryRepository extends UriRepository<Path> {
 
     LocalDirectoryRepository(Path path) {
-        this.path = path;
+        super(path.toUri());
     }
 
     @Override
     public Optional<Path> artifact(URI uri) {
-        var requested = absolutePath(uri);
+        var requested = Paths.get(uri);
         if (Files.exists(requested)) {
             return Optional.of(requested);
         }
         return Optional.empty();
     }
 
-    Path publish(URI uri, InputStream inputStream) {
-        var destination = absolutePath(uri);
+    Path publish(
+        Id id,
+        SemanticVersion semanticVersion,
+        Classifier classifier,
+        InputStream inputStream
+    ) {
+        var destination = Paths.get(uri(id, semanticVersion, classifier));
         try {
             Files.deleteIfExists(destination);
             Files.createDirectories(destination.getParent());
@@ -38,9 +41,5 @@ final class LocalDirectoryRepository implements UriRepository<Path> {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
-    }
-
-    private Path absolutePath(URI uri) {
-        return Paths.get(URI.create(path.toUri().toString() + '/' + uri));
     }
 }

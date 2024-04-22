@@ -1,11 +1,12 @@
 package com.github.maximtereshchenko.conveyor.core;
 
-import java.nio.file.Path;
 import java.util.Optional;
 
-interface Repository {
+interface Repository<T> {
 
-    Optional<Path> path(Id id, SemanticVersion semanticVersion, Classifier classifier);
+    Optional<T> artifact(Id id, SemanticVersion semanticVersion, Classifier classifier);
 
-    enum Classifier {SCHEMATIC_DEFINITION, MODULE}
+    enum Classifier {
+        SCHEMATIC_DEFINITION, MODULE, POM
+    }
 }

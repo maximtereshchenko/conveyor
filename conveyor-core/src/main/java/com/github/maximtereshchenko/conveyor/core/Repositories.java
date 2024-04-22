@@ -9,10 +9,13 @@ import java.util.Set;
 
 final class Repositories {
 
-    private final Set<Repository> all;
+    private final Set<Repository<Path>> all;
     private final SchematicDefinitionConverter schematicDefinitionConverter;
 
-    Repositories(Set<Repository> all, SchematicDefinitionConverter schematicDefinitionConverter) {
+    Repositories(
+        Set<Repository<Path>> all,
+        SchematicDefinitionConverter schematicDefinitionConverter
+    ) {
         this.all = all;
         this.schematicDefinitionConverter = schematicDefinitionConverter;
     }
@@ -29,7 +32,7 @@ final class Repositories {
 
     private Path path(Id id, SemanticVersion semanticVersion, Repository.Classifier classifier) {
         return all.stream()
-            .map(repository -> repository.path(id, semanticVersion, classifier))
+            .map(repository -> repository.artifact(id, semanticVersion, classifier))
             .flatMap(Optional::stream)
             .findAny()
             .orElseThrow();
