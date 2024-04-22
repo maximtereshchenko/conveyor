@@ -14,12 +14,8 @@ record PomModel(
     List<Reference> dependencies
 ) {
 
-    enum ReferenceType {
-        POM, JAR
-    }
-
     enum ReferenceScope {
-        COMPILE, RUNTIME, TEST, SYSTEM, PROVIDED
+        COMPILE, RUNTIME, TEST, SYSTEM, PROVIDED, IMPORT
     }
 
     record Parent(String groupId, String artifactId, String version) {}
@@ -28,7 +24,6 @@ record PomModel(
         String groupId,
         String artifactId,
         String version,
-        Optional<ReferenceType> type,
         Optional<ReferenceScope> scope
     ) {}
 }

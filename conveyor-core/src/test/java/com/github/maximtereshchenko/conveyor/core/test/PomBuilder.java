@@ -101,7 +101,13 @@ final class PomBuilder {
     }
 
     PomBuilder managedDependency(String artifactId, String version) {
-        dependencyManagement.add(new PomModel.Dependency(groupId, artifactId, version, null));
+        return managedDependency(artifactId, version, null);
+    }
+
+    PomBuilder managedDependency(String artifactId, String version, String scope) {
+        dependencyManagement.add(
+            new PomModel.Dependency(groupId, artifactId, version, scope)
+        );
         return this;
     }
 

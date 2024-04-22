@@ -15,7 +15,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -116,19 +115,10 @@ final class PomModelFactory {
             groupId(node).orElseThrow(),
             artifactId(node),
             version(node).orElseThrow(),
-            enumValue(node, "type", PomModel.ReferenceType::valueOf),
-            enumValue(node, "scope", PomModel.ReferenceScope::valueOf)
+            singleValue(node, "scope")
+                .map(String::toUpperCase)
+                .map(PomModel.ReferenceScope::valueOf)
         );
-    }
-
-    private <T extends Enum<T>> Optional<T> enumValue(
-        Node node,
-        String tag,
-        Function<String, T> enumFunction
-    ) {
-        return singleValue(node, tag)
-            .map(String::toUpperCase)
-            .map(enumFunction);
     }
 
     private Optional<String> version(Node node) {

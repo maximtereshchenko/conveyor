@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -95,6 +96,7 @@ final class MavenRepositoryAdapter implements Repository<InputStream> {
                                 case COMPILE, RUNTIME, SYSTEM, PROVIDED ->
                                     DependencyScope.IMPLEMENTATION;
                                 case TEST -> DependencyScope.TEST;
+                                case IMPORT -> throw new IllegalArgumentException();
                             }
                         )
                 )
@@ -103,19 +105,34 @@ final class MavenRepositoryAdapter implements Repository<InputStream> {
     }
 
     private PreferencesDefinition preferences(PomModel pomModel) {
-        return new PreferencesDefinition(
-            List.of(),
-            pomModel.dependencyManagement()
-                .stream()
-                .map(reference ->
+        var inclusions = new ArrayList<PreferencesInclusionDefinition>();
+        var artifacts = new ArrayList<ArtifactPreferenceDefinition>();
+        for (var reference : pomModel.dependencyManagement()) {
+            if (isImportScoped(reference)) {
+                inclusions.add(
+                    new PreferencesInclusionDefinition(
+                        reference.groupId(),
+                        reference.artifactId(),
+                        reference.version()
+                    )
+                );
+            } else {
+                artifacts.add(
                     new ArtifactPreferenceDefinition(
                         reference.groupId(),
                         reference.artifactId(),
                         reference.version()
                     )
-                )
-                .toList()
-        );
+                );
+            }
+        }
+        return new PreferencesDefinition(inclusions, artifacts);
+    }
+
+    private boolean isImportScoped(PomModel.Reference reference) {
+        return reference.scope()
+            .map(PomModel.ReferenceScope.IMPORT::equals)
+            .orElse(Boolean.FALSE);
     }
 
     private TemplateDefinition template(PomModel pomModel) {
