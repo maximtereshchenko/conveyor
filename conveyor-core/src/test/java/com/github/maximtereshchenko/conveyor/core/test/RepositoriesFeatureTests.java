@@ -548,4 +548,46 @@ final class RepositoriesFeatureTests extends ConveyorTest {
             .content()
             .isEqualTo("dependency-1.0.0");
     }
+
+    @Test
+    @ExtendWith(WireMockExtension.class)
+    void givenNoGroupIdInPom_whenConstructToStage_thenGroupIsFromParent(
+        Path path,
+        ConveyorModule module,
+        BuilderFactory factory,
+        WireMockServer wireMockServer
+    ) throws Exception {
+        factory.repositoryBuilder()
+            .pom(
+                factory.pomBuilder()
+                    .artifactId("template")
+                    .groupId(null)
+                    .parent("group", "parent", "1.0.0")
+            )
+            .pom(
+                factory.pomBuilder()
+                    .artifactId("parent")
+                    .groupId("group")
+                    .version("1.0.0")
+            )
+            .jar(
+                factory.jarBuilder("instant")
+            )
+            .pom(
+                factory.pomBuilder()
+                    .artifactId("instant")
+            )
+            .install(wireMockServer);
+
+        module.construct(
+            factory.schematicDefinitionBuilder()
+                .template("group", "template", "1.0.0")
+                .repository("remote", wireMockServer.baseUrl(), true)
+                .plugin("instant", "1.0.0", Map.of("instant", "COMPILE-RUN"))
+                .conveyorJson(path),
+            Stage.COMPILE
+        );
+
+        assertThat(defaultConstructionDirectory(path).resolve("instant")).exists();
+    }
 }

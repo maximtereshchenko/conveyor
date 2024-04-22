@@ -15,12 +15,12 @@ final class PomBuilder {
 
     private final Collection<PomModel.Dependency> dependencies = new ArrayList<>();
     private final Collection<PomModel.Dependency> dependencyManagement = new ArrayList<>();
-    private final String groupId = "com.github.maximtereshchenko.conveyor";
     private final Map<String, String> properties = new HashMap<>();
-    private final String version = "1.0.0";
     private final XmlMapper xmlMapper;
-    private PomModel.Parent parent = null;
+    private String groupId = "com.github.maximtereshchenko.conveyor";
     private String artifactId = "";
+    private String version = "1.0.0";
+    private PomModel.Parent parent = null;
 
     PomBuilder(XmlMapper xmlMapper) {
         this.xmlMapper = xmlMapper;
@@ -50,6 +50,9 @@ final class PomBuilder {
     }
 
     String groupId() {
+        if (groupId == null) {
+            return parent.groupId();
+        }
         return groupId;
     }
 
@@ -61,12 +64,26 @@ final class PomBuilder {
         return version;
     }
 
+    PomBuilder groupId(String groupId) {
+        this.groupId = groupId;
+        return this;
+    }
+
+    PomBuilder version(String version) {
+        this.version = version;
+        return this;
+    }
+
     PomBuilder artifactId(String artifactId) {
         this.artifactId = artifactId;
         return this;
     }
 
     PomBuilder parent(String artifactId) {
+        return parent(groupId, artifactId, version);
+    }
+
+    PomBuilder parent(String groupId, String artifactId, String version) {
         parent = new PomModel.Parent(groupId, artifactId, version);
         return this;
     }

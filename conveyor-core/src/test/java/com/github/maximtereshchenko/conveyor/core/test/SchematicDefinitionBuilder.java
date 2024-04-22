@@ -92,6 +92,10 @@ final class SchematicDefinitionBuilder {
     }
 
     SchematicDefinitionBuilder template(String name) {
+        return template(group, name, version);
+    }
+
+    SchematicDefinitionBuilder template(String group, String name, String version) {
         template = new SchematicTemplateDefinition(group, name, version);
         return this;
     }
