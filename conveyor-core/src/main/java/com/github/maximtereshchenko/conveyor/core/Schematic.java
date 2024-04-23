@@ -7,7 +7,9 @@ import com.github.maximtereshchenko.conveyor.common.api.SchematicCoordinates;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 
 import java.nio.file.Path;
-import java.util.*;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -18,19 +20,22 @@ final class Schematic {
     private final PomDefinitionFactory pomDefinitionFactory;
     private final SchematicDefinitionConverter schematicDefinitionConverter;
     private final SchematicModelFactory schematicModelFactory;
+    private final PreferencesFactory preferencesFactory;
 
     Schematic(
         ExtendableLocalInheritanceHierarchyModel localModel,
         ModulePathFactory modulePathFactory,
         PomDefinitionFactory pomDefinitionFactory,
         SchematicDefinitionConverter schematicDefinitionConverter,
-        SchematicModelFactory schematicModelFactory
+        SchematicModelFactory schematicModelFactory,
+        PreferencesFactory preferencesFactory
     ) {
         this.localModel = localModel;
         this.modulePathFactory = modulePathFactory;
         this.pomDefinitionFactory = pomDefinitionFactory;
         this.schematicDefinitionConverter = schematicDefinitionConverter;
         this.schematicModelFactory = schematicModelFactory;
+        this.preferencesFactory = preferencesFactory;
     }
 
     Id id() {
@@ -61,7 +66,11 @@ final class Schematic {
             repositories
         );
         var properties = properties(completeModel);
-        var preferences = preferences(completeModel, properties, repositories);
+        var preferences = preferencesFactory.preferences(
+            completeModel.preferences(),
+            properties,
+            repositories
+        );
         var schematicCoordinates = completeModel.id().coordinates(completeModel.version());
         var dependencies = dependencies(completeModel, properties, preferences, repositories);
         return plugins(completeModel, properties, preferences, repositories)
@@ -114,7 +123,8 @@ final class Schematic {
                             preferences,
                             properties,
                             repositories,
-                            schematicModelFactory
+                            schematicModelFactory,
+                            preferencesFactory
                         ),
                         dependencyModel
                     )
@@ -200,7 +210,8 @@ final class Schematic {
                             preferences,
                             properties,
                             repositories,
-                            schematicModelFactory
+                            schematicModelFactory,
+                            preferencesFactory
                         ),
                         pluginModel,
                         properties
@@ -232,87 +243,5 @@ final class Schematic {
                     ".conveyor-modules"
                 )
         );
-    }
-
-    private Map<Id, SemanticVersion> preferences(
-        PreferencesModel preferencesModel,
-        Properties properties,
-        Repositories repositories
-    ) {
-        return Stream.of(
-                includedPreferences(preferencesModel.inclusions(), properties, repositories),
-                artifactPreferences(preferencesModel.artifacts(), properties)
-            )
-            .map(Map::entrySet)
-            .flatMap(Collection::stream)
-            .collect(
-                Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (previous, next) -> next)
-            );
-    }
-
-    private Map<Id, SemanticVersion> artifactPreferences(
-        Set<ArtifactPreferenceModel> artifacts,
-        Properties properties
-    ) {
-        return artifacts.stream()
-            .collect(
-                Collectors.toMap(
-                    ArtifactPreferenceModel::id,
-                    artifactPreferenceModel -> new SemanticVersion(
-                        properties.interpolated(artifactPreferenceModel.version())
-                    )
-                )
-            );
-    }
-
-    private Map<Id, SemanticVersion> includedPreferences(
-        Set<PreferencesInclusionModel> inclusions,
-        Properties properties,
-        Repositories repositories
-    ) {
-        return inclusions.stream()
-            .map(preferencesInclusionModel ->
-                schematicModelFactory.inheritanceHierarchyModel(
-                    preferencesInclusionModel.id(),
-                    new SemanticVersion(
-                        properties.interpolated(preferencesInclusionModel.version())
-                    ),
-                    repositories
-                )
-            )
-            .map(inheritanceHierarchyModel ->
-                preferences(
-                    inheritanceHierarchyModel.preferences(),
-                    new Properties(inheritanceHierarchyModel.properties()),
-                    repositories
-                )
-            )
-            .map(Map::entrySet)
-            .flatMap(Collection::stream)
-            .collect(
-                Collectors.toMap(
-                    Map.Entry::getKey,
-                    Map.Entry::getValue,
-                    this::highestVersion
-                )
-            );
-    }
-
-    private Preferences preferences(
-        CompleteInheritanceHierarchyModel completeModel,
-        Properties properties,
-        Repositories repositories
-    ) {
-        return new Preferences(preferences(completeModel.preferences(), properties, repositories));
-    }
-
-    private SemanticVersion highestVersion(
-        SemanticVersion first,
-        SemanticVersion second
-    ) {
-        if (first.compareTo(second) > 0) {
-            return first;
-        }
-        return second;
     }
 }

@@ -2,14 +2,26 @@ package com.github.maximtereshchenko.conveyor.core;
 
 final class TransitivelyReferencedArtifact extends StoredArtifact {
 
+    private final Preferences schematicPreferences;
+
     TransitivelyReferencedArtifact(
         ArtifactModel artifactModel,
-        Preferences preferences,
+        Preferences original,
+        Preferences schematicPreferences,
         Properties properties,
         Repositories repositories,
-        SchematicModelFactory schematicModelFactory
+        SchematicModelFactory schematicModelFactory,
+        PreferencesFactory preferencesFactory
     ) {
-        super(artifactModel, preferences, properties, repositories, schematicModelFactory);
+        super(
+            artifactModel,
+            original,
+            properties,
+            repositories,
+            schematicModelFactory,
+            preferencesFactory
+        );
+        this.schematicPreferences = schematicPreferences;
     }
 
     @Override
@@ -23,6 +35,7 @@ final class TransitivelyReferencedArtifact extends StoredArtifact {
                 artifactModel.version()
                     .map(properties::interpolated)
                     .map(SemanticVersion::new)
+                    .or(() -> schematicPreferences.version(artifactModel.id()))
             )
             .orElseThrow();
     }

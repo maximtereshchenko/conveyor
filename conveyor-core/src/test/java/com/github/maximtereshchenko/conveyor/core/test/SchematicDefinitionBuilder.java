@@ -131,10 +131,6 @@ final class SchematicDefinitionBuilder {
         return dependency(name, version, DependencyScope.IMPLEMENTATION);
     }
 
-    SchematicDefinitionBuilder dependency(String name, DependencyScope scope) {
-        return dependency(name, null, scope);
-    }
-
     SchematicDefinitionBuilder dependency(String name, String version, DependencyScope scope) {
         dependencies.add(
             new DependencyDefinition(

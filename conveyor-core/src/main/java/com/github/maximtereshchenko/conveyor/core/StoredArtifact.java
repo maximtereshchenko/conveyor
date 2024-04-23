@@ -13,19 +13,22 @@ abstract class StoredArtifact implements Artifact {
     private final Properties properties;
     private final Repositories repositories;
     private final SchematicModelFactory schematicModelFactory;
+    private final PreferencesFactory preferencesFactory;
 
     StoredArtifact(
         ArtifactModel artifactModel,
         Preferences preferences,
         Properties properties,
         Repositories repositories,
-        SchematicModelFactory schematicModelFactory
+        SchematicModelFactory schematicModelFactory,
+        PreferencesFactory preferencesFactory
     ) {
         this.artifactModel = artifactModel;
         this.preferences = preferences;
         this.properties = properties;
         this.repositories = repositories;
         this.schematicModelFactory = schematicModelFactory;
+        this.preferencesFactory = preferencesFactory;
     }
 
     @Override
@@ -50,6 +53,7 @@ abstract class StoredArtifact implements Artifact {
             semanticVersion(),
             repositories
         );
+        var schematicProperties = new Properties(inheritanceHierarchyModel.properties());
         return inheritanceHierarchyModel.dependencies()
             .stream()
             .map(dependencyModel ->
@@ -57,9 +61,15 @@ abstract class StoredArtifact implements Artifact {
                     new TransitivelyReferencedArtifact(
                         dependencyModel,
                         preferences,
-                        new Properties(inheritanceHierarchyModel.properties()),
+                        preferencesFactory.preferences(
+                            inheritanceHierarchyModel.preferences(),
+                            schematicProperties,
+                            repositories
+                        ),
+                        schematicProperties,
                         repositories,
-                        schematicModelFactory
+                        schematicModelFactory,
+                        preferencesFactory
                     ),
                     dependencyModel
                 )

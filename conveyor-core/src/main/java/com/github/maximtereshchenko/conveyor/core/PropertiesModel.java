@@ -58,11 +58,10 @@ final class PropertiesModel {
     }
 
     Path path(SchematicPropertyKey schematicPropertyKey) {
-        var value = all.get(schematicPropertyKey.fullName());
-        if (!(value instanceof PathValue pathValue)) {
-            throw new IllegalArgumentException();
-        }
-        return pathValue.path();
+        return switch (all.get(schematicPropertyKey.fullName())) {
+            case PathValue pathValue -> pathValue.path();
+            case StringValue ignored -> throw new IllegalArgumentException();
+        };
     }
 
     private sealed interface Value {}

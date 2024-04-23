@@ -7,9 +7,17 @@ final class DirectlyReferencedArtifact extends StoredArtifact {
         Preferences preferences,
         Properties properties,
         Repositories repositories,
-        SchematicModelFactory schematicModelFactory
+        SchematicModelFactory schematicModelFactory,
+        PreferencesFactory preferencesFactory
     ) {
-        super(artifactModel, preferences, properties, repositories, schematicModelFactory);
+        super(
+            artifactModel,
+            preferences,
+            properties,
+            repositories,
+            schematicModelFactory,
+            preferencesFactory
+        );
     }
 
     @Override

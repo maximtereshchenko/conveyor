@@ -551,7 +551,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                 .repository(path)
                 .preference("dependency", "1.0.0")
                 .plugin("dependencies")
-                .dependency("dependency", DependencyScope.IMPLEMENTATION)
+                .dependency("dependency", null, DependencyScope.IMPLEMENTATION)
                 .conveyorJson(path),
             Stage.COMPILE
         );
@@ -1005,5 +1005,54 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
         );
 
         assertThat(defaultConstructionDirectory(path).resolve("instant")).exists();
+    }
+
+    @Test
+    void givenNoTransitiveDependencyVersion_whenConstructToStage_thenVersionFromDependencySchematicPreferencesIsUsed(
+        Path path,
+        ConveyorModule module,
+        BuilderFactory factory
+    ) throws Exception {
+        factory.repositoryBuilder()
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("dependency")
+                    .preference("transitive", "1.0.0")
+                    .dependency("transitive", null, DependencyScope.IMPLEMENTATION)
+            )
+            .jar(
+                factory.jarBuilder("dependency")
+                    .name("dependency")
+            )
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("transitive")
+            )
+            .jar(
+                factory.jarBuilder("dependency")
+                    .name("transitive")
+            )
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("dependencies")
+            )
+            .jar(
+                factory.jarBuilder("dependencies")
+            )
+            .install(path);
+
+        module.construct(
+            factory.schematicDefinitionBuilder()
+                .repository(path)
+                .plugin("dependencies")
+                .dependency("dependency")
+                .conveyorJson(path),
+            Stage.COMPILE
+        );
+
+        assertThat(defaultConstructionDirectory(path).resolve("dependencies"))
+            .content()
+            .hasLineCount(2)
+            .contains("dependency-1.0.0", "transitive-1.0.0");
     }
 }
