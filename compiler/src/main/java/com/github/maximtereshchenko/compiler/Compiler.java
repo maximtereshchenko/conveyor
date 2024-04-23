@@ -17,7 +17,7 @@ public final class Compiler {
     private final JavaCompiler javaCompiler = ToolProvider.getSystemJavaCompiler();
 
     public void compile(Set<Path> sources, Set<Path> modulePath, Path outputDirectory) {
-        if (!Boolean.TRUE.equals(compilationTask(sources, modulePath, outputDirectory).call())) {
+        if (Boolean.FALSE.equals(compilationTask(sources, modulePath, outputDirectory).call())) {
             throw new IllegalArgumentException("Could not compile");
         }
     }

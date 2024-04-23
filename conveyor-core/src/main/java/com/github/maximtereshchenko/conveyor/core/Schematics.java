@@ -3,10 +3,7 @@ package com.github.maximtereshchenko.conveyor.core;
 import com.github.maximtereshchenko.conveyor.common.api.Product;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 final class Schematics {
 
@@ -32,10 +29,22 @@ final class Schematics {
     }
 
     private List<Schematic> schematicsInConstructionOrder() {
-        return all.stream()
-            .filter(this::toBeConstructed)
-            .sorted(this::comparedByMutualRequirement)
-            .toList();
+        var schematics = new ArrayList<Schematic>();
+        for (var schematic : all) {
+            if (toBeConstructed(schematic)) {
+                schematics.add(insertionIndex(schematic, schematics), schematic);
+            }
+        }
+        return schematics;
+    }
+
+    private int insertionIndex(Schematic schematic, List<Schematic> schematics) {
+        for (int i = 0; i < schematics.size(); i++) {
+            if (schematics.get(i).dependsOn(schematic, this)) {
+                return i;
+            }
+        }
+        return schematics.size();
     }
 
     private Stage stage(Stage stage, Schematic schematic) {
@@ -53,21 +62,9 @@ final class Schematics {
             .anyMatch(other -> other.dependsOn(schematic, this));
     }
 
-    private int comparedByMutualRequirement(Schematic first, Schematic second) {
-        if (requirementExistsBetween(first, second)) {
-            return 1;
-        }
-        if (requirementExistsBetween(second, first)) {
-            return -1;
-        }
-        return 0;
-    }
-
     private boolean toBeConstructed(Schematic schematic) {
-        return requirementExistsBetween(initial, schematic) || schematic.inheritsFrom(initial);
-    }
-
-    private boolean requirementExistsBetween(Schematic from, Schematic to) {
-        return from.inheritsFrom(to) || from.dependsOn(to, this);
+        return initial.inheritsFrom(schematic) ||
+               schematic.inheritsFrom(initial) ||
+               initial.dependsOn(schematic, this);
     }
 }

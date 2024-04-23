@@ -1052,6 +1052,69 @@ final class InheritanceFeatureTests extends ConveyorTest {
         assertThat(instantPath(inclusion)).exists();
     }
 
+    @Test
+    void givenCommonTransitiveSchematicDependency_whenConstructToStage_thenSchematicsAreBuiltInCorrectOrder(
+        Path path,
+        ConveyorModule module,
+        BuilderFactory factory
+    ) throws Exception {
+        factory.repositoryBuilder()
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("instant")
+            )
+            .jar(
+                factory.jarBuilder("instant")
+            )
+            .install(path);
+        var dependsTransitively = path.resolve("depends-transitively");
+        var intermediate = path.resolve("intermediate");
+        var dependsOnCommon = path.resolve("depends-on-common");
+        var common = path.resolve("common");
+
+        module.construct(
+            factory.schematicDefinitionBuilder()
+                .name("template")
+                .repository(path)
+                .inclusion(
+                    factory.schematicDefinitionBuilder()
+                        .template("template")
+                        .name("depends-transitively")
+                        .dependency("intermediate")
+                        .conveyorJson(dependsTransitively)
+                )
+                .inclusion(
+                    factory.schematicDefinitionBuilder()
+                        .template("template")
+                        .name("depends-on-common")
+                        .dependency("common")
+                        .conveyorJson(dependsOnCommon)
+                )
+                .inclusion(
+                    factory.schematicDefinitionBuilder()
+                        .template("template")
+                        .name("intermediate")
+                        .dependency("common")
+                        .conveyorJson(intermediate)
+                )
+                .inclusion(
+                    factory.schematicDefinitionBuilder()
+                        .template("template")
+                        .name("common")
+                        .conveyorJson(common)
+                )
+                .plugin("instant", "1.0.0", Map.of("instant", "COMPILE-RUN"))
+                .conveyorJson(path),
+            Stage.COMPILE
+        );
+
+        assertThat(
+            Stream.of(path, common, intermediate, dependsTransitively, dependsOnCommon)
+                .map(this::constructed)
+        )
+            .isSorted();
+    }
+
     private Instant constructed(Path path) {
         try {
             return instant(instantPath(path));
