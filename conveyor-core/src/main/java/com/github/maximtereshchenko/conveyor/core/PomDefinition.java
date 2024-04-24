@@ -14,12 +14,8 @@ record PomDefinition(
     List<DependencyDefinition> dependencies
 ) {
 
-    enum ManagedDependencyScope {
-        COMPILE, RUNTIME, TEST, SYSTEM, PROVIDED, IMPORT
-    }
-
     enum DependencyScope {
-        COMPILE, RUNTIME, TEST, SYSTEM, PROVIDED
+        COMPILE, RUNTIME, TEST, SYSTEM, PROVIDED, IMPORT
     }
 
     record Parent(String groupId, String artifactId, String version) {}
@@ -28,7 +24,7 @@ record PomDefinition(
         String groupId,
         String artifactId,
         String version,
-        Optional<ManagedDependencyScope> scope
+        Optional<DependencyScope> scope
     ) {}
 
     record DependencyDefinition(

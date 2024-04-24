@@ -10,9 +10,7 @@ import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 
 final class MavenRepositoryAdapter implements Repository<InputStream> {
@@ -78,24 +76,54 @@ final class MavenRepositoryAdapter implements Repository<InputStream> {
             pomModel.properties(),
             preferences(pomModel),
             List.of(),
-            dependencies(pomModel)
+            dependencies(pomModel, scopes(pomModel))
         );
     }
 
-    private List<DependencyDefinition> dependencies(PomDefinition pomModel) {
+    private Map<Id, PomDefinition.DependencyScope> scopes(PomDefinition pomModel) {
+        var scopes = pomModel.parent()
+            .flatMap(parent ->
+                original.artifact(
+                    new Id(parent.groupId(), parent.artifactId()),
+                    new SemanticVersion(parent.version()),
+                    Classifier.POM
+                )
+            )
+            .map(this::pomModel)
+            .map(this::scopes)
+            .orElseGet(HashMap::new);
+        for (var definition : pomModel.dependencyManagement()) {
+            definition.scope()
+                .ifPresent(scope ->
+                    scopes.put(new Id(definition.groupId(), definition.artifactId()), scope)
+                );
+        }
+        return scopes;
+    }
+
+    private List<DependencyDefinition> dependencies(
+        PomDefinition pomModel,
+        Map<Id, PomDefinition.DependencyScope> scopes
+    ) {
         return pomModel.dependencies()
             .stream()
-            .map(reference ->
+            .map(definition ->
                 new DependencyDefinition(
-                    reference.groupId(),
-                    reference.artifactId(),
-                    reference.version(),
-                    reference.scope()
+                    definition.groupId(),
+                    definition.artifactId(),
+                    definition.version(),
+                    definition.scope()
+                        .or(() ->
+                            Optional.ofNullable(
+                                scopes.get(new Id(definition.groupId(), definition.artifactId()))
+                            )
+                        )
                         .map(scope ->
                             switch (scope) {
                                 case COMPILE, RUNTIME, SYSTEM, PROVIDED ->
                                     DependencyScope.IMPLEMENTATION;
                                 case TEST -> DependencyScope.TEST;
+                                case IMPORT -> throw new IllegalArgumentException();
                             }
                         )
                 )
@@ -130,7 +158,7 @@ final class MavenRepositoryAdapter implements Repository<InputStream> {
 
     private boolean isImportScoped(PomDefinition.ManagedDependencyDefinition definition) {
         return definition.scope()
-            .map(PomDefinition.ManagedDependencyScope.IMPORT::equals)
+            .map(PomDefinition.DependencyScope.IMPORT::equals)
             .orElse(Boolean.FALSE);
     }
 

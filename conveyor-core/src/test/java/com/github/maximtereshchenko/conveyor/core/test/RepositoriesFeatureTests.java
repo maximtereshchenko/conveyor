@@ -752,4 +752,99 @@ final class RepositoriesFeatureTests extends ConveyorTest {
             .content()
             .isEqualTo("dependency-1.0.0");
     }
+
+    @Test
+    @ExtendWith(WireMockExtension.class)
+    void givenScopeFromDependencyManagement_whenConstructToStage_thenDependencyHasScopeFromDependencyManagement(
+        Path path,
+        ConveyorModule module,
+        BuilderFactory factory,
+        WireMockServer wireMockServer
+    ) throws Exception {
+        factory.repositoryBuilder()
+            .pom(
+                factory.pomBuilder()
+                    .artifactId("template")
+                    .managedDependency("dependency", "1.0.0", "test")
+                    .dependency("dependency", null, null)
+            )
+            .pom(
+                factory.pomBuilder()
+                    .artifactId("dependency")
+            )
+            .jar(
+                factory.jarBuilder("dependency")
+            )
+            .pom(
+                factory.pomBuilder()
+                    .artifactId("dependencies")
+            )
+            .jar(
+                factory.jarBuilder("dependencies")
+            )
+            .install(wireMockServer);
+
+        module.construct(
+            factory.schematicDefinitionBuilder()
+                .template("template")
+                .repository("remote", wireMockServer.baseUrl(), true)
+                .plugin("dependencies", "1.0.0", Map.of("scope", "TEST"))
+                .conveyorJson(path),
+            Stage.COMPILE
+        );
+
+        assertThat(defaultConstructionDirectory(path).resolve("dependencies"))
+            .content()
+            .isEqualTo("dependency-1.0.0");
+    }
+
+    @Test
+    @ExtendWith(WireMockExtension.class)
+    void givenScopeFromParentDependencyManagement_whenConstructToStage_thenDependencyHasScopeFromDependencyManagement(
+        Path path,
+        ConveyorModule module,
+        BuilderFactory factory,
+        WireMockServer wireMockServer
+    ) throws Exception {
+        factory.repositoryBuilder()
+            .pom(
+                factory.pomBuilder()
+                    .artifactId("parent")
+                    .managedDependency("dependency", "1.0.0", "test")
+            )
+            .pom(
+                factory.pomBuilder()
+                    .parent("parent")
+                    .artifactId("template")
+                    .dependency("dependency", null, null)
+            )
+            .pom(
+                factory.pomBuilder()
+                    .artifactId("dependency")
+            )
+            .jar(
+                factory.jarBuilder("dependency")
+            )
+            .pom(
+                factory.pomBuilder()
+                    .artifactId("dependencies")
+            )
+            .jar(
+                factory.jarBuilder("dependencies")
+            )
+            .install(wireMockServer);
+
+        module.construct(
+            factory.schematicDefinitionBuilder()
+                .template("template")
+                .repository("remote", wireMockServer.baseUrl(), true)
+                .plugin("dependencies", "1.0.0", Map.of("scope", "TEST"))
+                .conveyorJson(path),
+            Stage.COMPILE
+        );
+
+        assertThat(defaultConstructionDirectory(path).resolve("dependencies"))
+            .content()
+            .isEqualTo("dependency-1.0.0");
+    }
 }

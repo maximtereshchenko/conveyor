@@ -131,7 +131,7 @@ final class PomDefinitionFactory {
             version(node).orElseThrow(),
             singleValue(node, "scope")
                 .map(String::toUpperCase)
-                .map(PomDefinition.ManagedDependencyScope::valueOf)
+                .map(PomDefinition.DependencyScope::valueOf)
         );
     }
 
