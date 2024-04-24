@@ -37,7 +37,7 @@ final class MavenRepositoryAdapter implements Repository<InputStream> {
     ) {
         return switch (classifier) {
             case SCHEMATIC_DEFINITION -> original.artifact(id, semanticVersion, Classifier.POM)
-                .map(this::pomModel)
+                .map(this::pomDefinition)
                 .map(this::schematicDefinition)
                 .map(this::inputStream);
             case MODULE, POM -> original.artifact(id, semanticVersion, classifier)
@@ -57,7 +57,7 @@ final class MavenRepositoryAdapter implements Repository<InputStream> {
         return new ByteArrayInputStream(schematicDefinitionConverter.bytes(schematicDefinition));
     }
 
-    private PomDefinition pomModel(Path path) {
+    private PomDefinition pomDefinition(Path path) {
         try (var inputStream = Files.newInputStream(path)) {
             return pomDefinitionFactory.pomDefinition(inputStream);
         } catch (IOException e) {
@@ -65,19 +65,32 @@ final class MavenRepositoryAdapter implements Repository<InputStream> {
         }
     }
 
-    private SchematicDefinition schematicDefinition(PomDefinition pomModel) {
+    private SchematicDefinition schematicDefinition(PomDefinition pomDefinition) {
+        var groupId = either(pomDefinition, PomDefinition::groupId, PomDefinition.Parent::groupId);
+        var version = either(pomDefinition, PomDefinition::version, PomDefinition.Parent::version);
         return new SchematicDefinition(
-            either(pomModel, PomDefinition::groupId, PomDefinition.Parent::groupId),
-            pomModel.artifactId(),
-            either(pomModel, PomDefinition::version, PomDefinition.Parent::version),
-            template(pomModel),
+            groupId,
+            pomDefinition.artifactId(),
+            version,
+            template(pomDefinition),
             List.of(),
             List.of(),
-            pomModel.properties(),
-            preferences(pomModel),
+            properties(pomDefinition.properties(), groupId, version),
+            preferences(pomDefinition),
             List.of(),
-            dependencies(pomModel, scopes(pomModel))
+            dependencies(pomDefinition, scopes(pomDefinition))
         );
+    }
+
+    private Map<String, String> properties(
+        Map<String, String> original,
+        String groupId,
+        String version
+    ) {
+        var properties = new HashMap<>(original);
+        properties.put("project.groupId", groupId);
+        properties.put("project.version", version);
+        return properties;
     }
 
     private Map<Id, PomDefinition.DependencyScope> scopes(PomDefinition pomModel) {
@@ -89,7 +102,7 @@ final class MavenRepositoryAdapter implements Repository<InputStream> {
                     Classifier.POM
                 )
             )
-            .map(this::pomModel)
+            .map(this::pomDefinition)
             .map(this::scopes)
             .orElseGet(HashMap::new);
         for (var definition : pomModel.dependencyManagement()) {
