@@ -1,3 +1,3 @@
 package com.github.maximtereshchenko.conveyor.core;
 
-record ArtifactPreferenceModel(Id id, String version) {}
+record ArtifactPreferenceModel(IdModel idModel, String version) {}

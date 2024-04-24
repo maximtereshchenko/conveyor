@@ -50,6 +50,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                         .template("template")
                         .repository("second", second, true)
                         .plugin(
+                            "group",
                             "instant",
                             "1.0.0",
                             Map.of("instant", "COMPILE-RUN")
@@ -94,6 +95,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                         .template("template")
                         .repository("main", projectRepository, true)
                         .plugin(
+                            "group",
                             "instant",
                             "1.0.0",
                             Map.of("instant", "COMPILE-RUN")
@@ -184,7 +186,12 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         module.construct(
             factory.schematicDefinitionBuilder()
                 .repository(Paths.get("./temp/../repository"))
-                .plugin("instant", "1.0.0", Map.of("instant", "COMPILE-RUN"))
+                .plugin(
+                    "group",
+                    "instant",
+                    "1.0.0",
+                    Map.of("instant", "COMPILE-RUN")
+                )
                 .conveyorJson(path),
             Stage.COMPILE
         );
@@ -216,7 +223,12 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                 .inclusion(
                     factory.schematicDefinitionBuilder()
                         .template("template")
-                        .plugin("instant", "1.0.0", Map.of("instant", "COMPILE-RUN"))
+                        .plugin(
+                            "group",
+                            "instant",
+                            "1.0.0",
+                            Map.of("instant", "COMPILE-RUN")
+                        )
                         .conveyorJson(included)
                 )
                 .conveyorJson(path),
@@ -251,6 +263,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                 .repository("local", path, true)
                 .repository("remote", wireMockServer.baseUrl(), true)
                 .plugin(
+                    "group",
                     "instant",
                     "1.0.0",
                     Map.of("instant", "COMPILE-RUN")
@@ -285,6 +298,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
             .repository("local", path, true)
             .repository("remote", wireMockServer.baseUrl(), true)
             .plugin(
+                "group",
                 "instant",
                 "1.0.0",
                 Map.of("instant", "COMPILE-RUN")
@@ -330,6 +344,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                 .repository("remote", wireMockServer.baseUrl(), true)
                 .property("conveyor.repository.remote.cache.directory", cache.toString())
                 .plugin(
+                    "group",
                     "instant",
                     "1.0.0",
                     Map.of("instant", "COMPILE-RUN")
@@ -370,6 +385,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                 .repository("remote", wireMockServer.baseUrl(), true)
                 .property("conveyor.repository.remote.cache.directory", "./temp/../cache")
                 .plugin(
+                    "group",
                     "instant",
                     "1.0.0",
                     Map.of("instant", "COMPILE-RUN")
@@ -509,7 +525,12 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                 .template("template")
                 .repository("local", path, true)
                 .repository("remote", wireMockServer.baseUrl(), true)
-                .plugin("properties", "1.0.0", Map.of("keys", "pom.key"))
+                .plugin(
+                    "group",
+                    "properties",
+                    "1.0.0",
+                    Map.of("keys", "pom.key")
+                )
                 .conveyorJson(path),
             Stage.COMPILE
         );
@@ -570,6 +591,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                 .repository("local", path, true)
                 .repository("remote", wireMockServer.baseUrl(), true)
                 .plugin(
+                    "group",
                     "dependencies",
                     "1.0.0",
                     Map.of("scope", dependencyScope.toString())
@@ -617,7 +639,12 @@ final class RepositoriesFeatureTests extends ConveyorTest {
             factory.schematicDefinitionBuilder()
                 .template("group", "template", "1.0.0")
                 .repository("remote", wireMockServer.baseUrl(), true)
-                .plugin("instant", "1.0.0", Map.of("instant", "COMPILE-RUN"))
+                .plugin(
+                    "group",
+                    "instant",
+                    "1.0.0",
+                    Map.of("instant", "COMPILE-RUN")
+                )
                 .conveyorJson(path),
             Stage.COMPILE
         );
@@ -660,7 +687,12 @@ final class RepositoriesFeatureTests extends ConveyorTest {
             factory.schematicDefinitionBuilder()
                 .template("group", "template", "2.0.0")
                 .repository("remote", wireMockServer.baseUrl(), true)
-                .plugin("instant", "1.0.0", Map.of("instant", "COMPILE-RUN"))
+                .plugin(
+                    "group",
+                    "instant",
+                    "1.0.0",
+                    Map.of("instant", "COMPILE-RUN")
+                )
                 .conveyorJson(path),
             Stage.COMPILE
         );
@@ -700,7 +732,12 @@ final class RepositoriesFeatureTests extends ConveyorTest {
             factory.schematicDefinitionBuilder()
                 .template("template")
                 .repository("remote", wireMockServer.baseUrl(), true)
-                .plugin("instant", null, Map.of("instant", "COMPILE-RUN"))
+                .plugin(
+                    "group",
+                    "instant",
+                    null,
+                    Map.of("instant", "COMPILE-RUN")
+                )
                 .conveyorJson(path),
             Stage.COMPILE
         );
@@ -788,7 +825,12 @@ final class RepositoriesFeatureTests extends ConveyorTest {
             factory.schematicDefinitionBuilder()
                 .template("template")
                 .repository("remote", wireMockServer.baseUrl(), true)
-                .plugin("dependencies", "1.0.0", Map.of("scope", "TEST"))
+                .plugin(
+                    "group",
+                    "dependencies",
+                    "1.0.0",
+                    Map.of("scope", "TEST")
+                )
                 .conveyorJson(path),
             Stage.COMPILE
         );
@@ -838,7 +880,12 @@ final class RepositoriesFeatureTests extends ConveyorTest {
             factory.schematicDefinitionBuilder()
                 .template("template")
                 .repository("remote", wireMockServer.baseUrl(), true)
-                .plugin("dependencies", "1.0.0", Map.of("scope", "TEST"))
+                .plugin(
+                    "group",
+                    "dependencies",
+                    "1.0.0",
+                    Map.of("scope", "TEST")
+                )
                 .conveyorJson(path),
             Stage.COMPILE
         );

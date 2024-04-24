@@ -63,8 +63,8 @@ A build tool for Java projects
     * The property `conveyor.construction.directory` defines the directory, where plugins should
       place created products. It is relative to the directory, where the schematic definition is
       located. The default value is `./.conveyor`
-    * Properties, plugin versions, dependency versions and preference versions can be interpolated
-      with other properties using `${property.key}` syntax
+    * Properties, plugin group and version, dependency group and version and preference group and
+      version can be interpolated with other properties using `${property.key}` syntax
 * Dependencies
     * Dependencies are defined in a schematic with a group, a name, an optional version and an
       optional scope: IMPLEMENTATION (default) or TEST

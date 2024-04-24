@@ -34,6 +34,7 @@ final class PluginsFeatureTests extends ConveyorTest {
                 .repository(path)
                 .property("user.defined.property", "value")
                 .plugin(
+                    "group",
                     "properties",
                     "1.0.0",
                     Map.of("keys", "user.defined.property")
@@ -68,6 +69,7 @@ final class PluginsFeatureTests extends ConveyorTest {
                 .repository(path)
                 .property("property", "value")
                 .plugin(
+                    "group",
                     "configuration",
                     "1.0.0",
                     Map.of("configuration", "${property}-suffix")
@@ -102,6 +104,7 @@ final class PluginsFeatureTests extends ConveyorTest {
             factory.schematicDefinitionBuilder()
                 .repository(path)
                 .plugin(
+                    "group",
                     "configuration",
                     "1.0.0",
                     Map.of("user.defined.configuration", "value")
@@ -139,6 +142,7 @@ final class PluginsFeatureTests extends ConveyorTest {
             factory.schematicDefinitionBuilder()
                 .repository(path)
                 .plugin(
+                    "group",
                     "instant",
                     "1.0.0",
                     Map.of(
@@ -248,6 +252,7 @@ final class PluginsFeatureTests extends ConveyorTest {
                 factory.schematicDefinitionBuilder()
                     .name("module-path")
                     .dependency(
+                        "group",
                         "test",
                         "1.0.0",
                         DependencyScope.TEST
@@ -290,6 +295,7 @@ final class PluginsFeatureTests extends ConveyorTest {
                 factory.schematicDefinitionBuilder()
                     .name("template")
                     .plugin(
+                        "group",
                         "instant",
                         "1.0.0",
                         Map.of("instant", "COMPILE-RUN")
@@ -347,6 +353,7 @@ final class PluginsFeatureTests extends ConveyorTest {
                 .repository(path)
                 .template("template")
                 .plugin(
+                    "group",
                     "instant",
                     "2.0.0",
                     Map.of("instant", "COMPILE-RUN")
@@ -369,6 +376,7 @@ final class PluginsFeatureTests extends ConveyorTest {
                 factory.schematicDefinitionBuilder()
                     .name("template")
                     .plugin(
+                        "group",
                         "configuration",
                         "1.0.0",
                         Map.of("key", "template-value")
@@ -388,7 +396,9 @@ final class PluginsFeatureTests extends ConveyorTest {
                 .repository(path)
                 .template("template")
                 .plugin(
+                    "group",
                     "configuration",
+                    null,
                     Map.of("key", "schematic-value")
                 )
                 .conveyorJson(path),
@@ -415,6 +425,7 @@ final class PluginsFeatureTests extends ConveyorTest {
                 factory.schematicDefinitionBuilder()
                     .name("template")
                     .plugin(
+                        "group",
                         "configuration",
                         "1.0.0",
                         Map.of("to.be.removed", "value")
@@ -434,7 +445,9 @@ final class PluginsFeatureTests extends ConveyorTest {
                 .repository(path)
                 .template("template")
                 .plugin(
+                    "group",
                     "configuration",
+                    null,
                     Map.of("to.be.removed", "")
                 )
                 .conveyorJson(path),
@@ -457,6 +470,7 @@ final class PluginsFeatureTests extends ConveyorTest {
                 factory.schematicDefinitionBuilder()
                     .name("template")
                     .plugin(
+                        "group",
                         "configuration",
                         "1.0.0",
                         Map.of("inherited.key", "inherited.value")
@@ -475,7 +489,12 @@ final class PluginsFeatureTests extends ConveyorTest {
             factory.schematicDefinitionBuilder()
                 .repository(path)
                 .template("template")
-                .plugin("configuration", Map.of("key", "value"))
+                .plugin(
+                    "group",
+                    "configuration",
+                    null,
+                    Map.of("key", "value")
+                )
                 .conveyorJson(path),
             Stage.COMPILE
         );

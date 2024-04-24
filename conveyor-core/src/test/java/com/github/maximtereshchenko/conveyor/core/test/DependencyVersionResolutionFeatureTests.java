@@ -27,6 +27,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                     .name("module-path")
                     .dependency("dependency")
                     .dependency(
+                        "group",
                         "test",
                         "1.0.0",
                         DependencyScope.TEST
@@ -46,6 +47,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                 factory.schematicDefinitionBuilder()
                     .name("test")
                     .dependency(
+                        "group",
                         "dependency",
                         "2.0.0",
                         DependencyScope.IMPLEMENTATION
@@ -91,6 +93,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                 factory.schematicDefinitionBuilder()
                     .name("second")
                     .dependency(
+                        "group",
                         "dependency",
                         "2.0.0",
                         DependencyScope.IMPLEMENTATION
@@ -166,6 +169,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                 factory.schematicDefinitionBuilder()
                     .name("exclude-affecting")
                     .dependency(
+                        "group",
                         "will-affect",
                         "2.0.0",
                         DependencyScope.IMPLEMENTATION
@@ -180,6 +184,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                 factory.schematicDefinitionBuilder()
                     .name("will-affect")
                     .dependency(
+                        "group",
                         "should-not-be-affected",
                         "2.0.0",
                         DependencyScope.IMPLEMENTATION
@@ -246,6 +251,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                 factory.schematicDefinitionBuilder()
                     .name("test")
                     .dependency(
+                        "group",
                         "dependency",
                         "2.0.0",
                         DependencyScope.IMPLEMENTATION
@@ -263,7 +269,12 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                 .repository(path)
                 .plugin("dependencies")
                 .dependency("dependency")
-                .dependency("test", "1.0.0", DependencyScope.TEST)
+                .dependency(
+                    "group",
+                    "test",
+                    "1.0.0",
+                    DependencyScope.TEST
+                )
                 .conveyorJson(path),
             Stage.COMPILE
         );
@@ -300,6 +311,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                 factory.schematicDefinitionBuilder()
                     .name("second")
                     .dependency(
+                        "group",
                         "dependency",
                         "2.0.0",
                         DependencyScope.IMPLEMENTATION
@@ -386,6 +398,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                 factory.schematicDefinitionBuilder()
                     .name("exclude-affecting")
                     .dependency(
+                        "group",
                         "will-affect",
                         "2.0.0",
                         DependencyScope.IMPLEMENTATION
@@ -399,6 +412,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                 factory.schematicDefinitionBuilder()
                     .name("will-affect")
                     .dependency(
+                        "group",
                         "should-not-be-affected",
                         "2.0.0",
                         DependencyScope.IMPLEMENTATION
@@ -515,7 +529,12 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
             factory.schematicDefinitionBuilder()
                 .repository(path)
                 .preference("instant", "1.0.0")
-                .plugin("instant", Map.of("instant", "COMPILE-RUN"))
+                .plugin(
+                    "group",
+                    "instant",
+                    null,
+                    Map.of("instant", "COMPILE-RUN")
+                )
                 .conveyorJson(path),
             Stage.COMPILE
         );
@@ -551,7 +570,12 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                 .repository(path)
                 .preference("dependency", "1.0.0")
                 .plugin("dependencies")
-                .dependency("dependency", null, DependencyScope.IMPLEMENTATION)
+                .dependency(
+                    "group",
+                    "dependency",
+                    null,
+                    DependencyScope.IMPLEMENTATION
+                )
                 .conveyorJson(path),
             Stage.COMPILE
         );
@@ -586,7 +610,12 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
             factory.schematicDefinitionBuilder()
                 .repository(path)
                 .preferenceInclusion("bom")
-                .plugin("instant", Map.of("instant", "COMPILE-RUN"))
+                .plugin(
+                    "group",
+                    "instant",
+                    null,
+                    Map.of("instant", "COMPILE-RUN")
+                )
                 .conveyorJson(path),
             Stage.COMPILE
         );
@@ -625,7 +654,12 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
 
                 .repository(path)
                 .preferenceInclusion("bom")
-                .plugin("instant", Map.of("instant", "COMPILE-RUN"))
+                .plugin(
+                    "group",
+                    "instant",
+                    null,
+                    Map.of("instant", "COMPILE-RUN")
+                )
                 .conveyorJson(path),
             Stage.COMPILE
         );
@@ -669,6 +703,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                 factory.schematicDefinitionBuilder()
                     .name("dependency")
                     .dependency(
+                        "group",
                         "common",
                         higher,
                         DependencyScope.IMPLEMENTATION
@@ -699,48 +734,10 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                 .repository(path)
                 .plugin("dependencies")
                 .dependency("dependency")
-                .dependency("common", lower, DependencyScope.IMPLEMENTATION)
-                .conveyorJson(path),
-            Stage.COMPILE
-        );
-
-        assertThat(defaultConstructionDirectory(path).resolve("dependencies"))
-            .content(StandardCharsets.UTF_8)
-            .hasLineCount(2)
-            .contains("dependency-1.0.0", "common-" + higher);
-    }
-
-    @Test
-    void givenInterpolatedArtifactDependencyVersion_whenConstructToStage_thenDependencyWithVersionFromPropertyIsUsed(
-        Path path,
-        ConveyorModule module,
-        BuilderFactory factory
-    ) throws Exception {
-        factory.repositoryBuilder()
-            .schematicDefinition(
-                factory.schematicDefinitionBuilder()
-                    .name("dependencies")
-            )
-            .jar(
-                factory.jarBuilder("dependencies")
-            )
-            .schematicDefinition(
-                factory.schematicDefinitionBuilder()
-                    .name("dependency")
-            )
-            .jar(
-                factory.jarBuilder("dependency")
-            )
-            .install(path);
-
-        module.construct(
-            factory.schematicDefinitionBuilder()
-                .repository(path)
-                .property("dependency.version", "1.0.0")
-                .plugin("dependencies")
                 .dependency(
-                    "dependency",
-                    "${dependency.version}",
+                    "group",
+                    "common",
+                    lower,
                     DependencyScope.IMPLEMENTATION
                 )
                 .conveyorJson(path),
@@ -749,185 +746,8 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
 
         assertThat(defaultConstructionDirectory(path).resolve("dependencies"))
             .content(StandardCharsets.UTF_8)
-            .isEqualTo("dependency-1.0.0");
-    }
-
-    @Test
-    void givenInterpolatedArtifactDependencyVersionInSchematicDependency_whenConstructToStage_thenDependencyWithVersionFromOtherSchematicPropertyIsUsed(
-        Path path,
-        ConveyorModule module,
-        BuilderFactory factory
-    ) throws Exception {
-        factory.repositoryBuilder()
-            .schematicDefinition(
-                factory.schematicDefinitionBuilder()
-                    .name("dependencies")
-            )
-            .jar(
-                factory.jarBuilder("dependencies")
-            )
-            .schematicDefinition(
-                factory.schematicDefinitionBuilder()
-                    .name("product")
-            )
-            .jar(
-                factory.jarBuilder("product")
-            )
-            .schematicDefinition(
-                factory.schematicDefinitionBuilder()
-                    .name("library")
-            )
-            .jar(
-                factory.jarBuilder("dependency")
-                    .name("library")
-            )
-            .jar(
-                factory.jarBuilder("dependency")
-            )
-            .install(path);
-        var depends = path.resolve("depends");
-
-        module.construct(
-            factory.schematicDefinitionBuilder()
-                .repository(path)
-                .inclusion(
-                    factory.schematicDefinitionBuilder()
-                        .name("dependency")
-                        .template("project")
-                        .property("library.version", "1.0.0")
-                        .plugin(
-                            "product",
-                            "1.0.0",
-                            Map.of(
-                                "path",
-                                path.resolve("com")
-                                    .resolve("github")
-                                    .resolve("maximtereshchenko")
-                                    .resolve("conveyor")
-                                    .resolve("dependency")
-                                    .resolve("1.0.0")
-                                    .resolve("dependency-1.0.0.jar")
-                                    .toString()
-                            )
-                        )
-                        .dependency(
-                            "library",
-                            "${library.version}",
-                            DependencyScope.IMPLEMENTATION
-                        )
-                        .conveyorJson(path.resolve("dependency"))
-                )
-                .inclusion(
-                    factory.schematicDefinitionBuilder()
-                        .name("depends")
-                        .template("project")
-                        .plugin("dependencies", "1.0.0", Map.of())
-                        .dependency("dependency")
-                        .conveyorJson(depends)
-                )
-                .conveyorJson(path),
-            Stage.COMPILE
-        );
-
-        assertThat(defaultConstructionDirectory(depends).resolve("dependencies"))
-            .content(StandardCharsets.UTF_8)
             .hasLineCount(2)
-            .contains("dependency-1.0.0", "library-1.0.0");
-    }
-
-    @Test
-    void givenInterpolatedPluginVersion_whenConstructToStage_thenPluginWithVersionFromPropertyIsUsed(
-        Path path,
-        ConveyorModule module,
-        BuilderFactory factory
-    ) throws Exception {
-        factory.repositoryBuilder()
-            .schematicDefinition(
-                factory.schematicDefinitionBuilder()
-                    .name("instant")
-            )
-            .jar(
-                factory.jarBuilder("instant")
-            )
-            .install(path);
-
-        module.construct(
-            factory.schematicDefinitionBuilder()
-                .repository(path)
-                .property("instant.version", "1.0.0")
-                .plugin(
-                    "instant",
-                    "${instant.version}",
-                    Map.of("instant", "COMPILE-RUN")
-                )
-                .conveyorJson(path),
-            Stage.COMPILE
-        );
-
-        assertThat(defaultConstructionDirectory(path).resolve("instant")).exists();
-    }
-
-    @Test
-    void givenInterpolatedArtifactPreferenceVersion_whenConstructToStage_thenPluginWithVersionFromPropertyIsUsed(
-        Path path,
-        ConveyorModule module,
-        BuilderFactory factory
-    ) throws Exception {
-        factory.repositoryBuilder()
-            .schematicDefinition(
-                factory.schematicDefinitionBuilder()
-                    .name("instant")
-            )
-            .jar(
-                factory.jarBuilder("instant")
-            )
-            .install(path);
-
-        module.construct(
-            factory.schematicDefinitionBuilder()
-                .repository(path)
-                .property("instant.version", "1.0.0")
-                .preference("instant", "${instant.version}")
-                .plugin("instant", Map.of("instant", "COMPILE-RUN"))
-                .conveyorJson(path),
-            Stage.COMPILE
-        );
-
-        assertThat(defaultConstructionDirectory(path).resolve("instant")).exists();
-    }
-
-    @Test
-    void givenInterpolatedPreferenceInclusionVersion_whenConstructToStage_thenPluginWithVersionFromPropertyIsUsed(
-        Path path,
-        ConveyorModule module,
-        BuilderFactory factory
-    ) throws Exception {
-        factory.repositoryBuilder()
-            .schematicDefinition(
-                factory.schematicDefinitionBuilder()
-                    .name("instant")
-            )
-            .jar(
-                factory.jarBuilder("instant")
-            )
-            .schematicDefinition(
-                factory.schematicDefinitionBuilder()
-                    .name("bom")
-                    .preference("instant", "1.0.0")
-            )
-            .install(path);
-
-        module.construct(
-            factory.schematicDefinitionBuilder()
-                .repository(path)
-                .property("bom.version", "1.0.0")
-                .preferenceInclusion("bom", "${bom.version}")
-                .plugin("instant", Map.of("instant", "COMPILE-RUN"))
-                .conveyorJson(path),
-            Stage.COMPILE
-        );
-
-        assertThat(defaultConstructionDirectory(path).resolve("instant")).exists();
+            .contains("dependency-1.0.0", "common-" + higher);
     }
 
     @Test
@@ -963,7 +783,12 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                 .repository(path)
                 .preferenceInclusion("bom-with-higher-version")
                 .preferenceInclusion("bom-with-lower-version")
-                .plugin("instant", Map.of("instant", "COMPILE-RUN"))
+                .plugin(
+                    "group",
+                    "instant",
+                    null,
+                    Map.of("instant", "COMPILE-RUN")
+                )
                 .conveyorJson(path),
             Stage.COMPILE
         );
@@ -999,7 +824,12 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                 .repository(path)
                 .preferenceInclusion("bom")
                 .preference("instant", "1.0.0")
-                .plugin("instant", Map.of("instant", "COMPILE-RUN"))
+                .plugin(
+                    "group",
+                    "instant",
+                    null,
+                    Map.of("instant", "COMPILE-RUN")
+                )
                 .conveyorJson(path),
             Stage.COMPILE
         );
@@ -1018,7 +848,12 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                 factory.schematicDefinitionBuilder()
                     .name("dependency")
                     .preference("transitive", "1.0.0")
-                    .dependency("transitive", null, DependencyScope.IMPLEMENTATION)
+                    .dependency(
+                        "group",
+                        "transitive",
+                        null,
+                        DependencyScope.IMPLEMENTATION
+                    )
             )
             .jar(
                 factory.jarBuilder("dependency")

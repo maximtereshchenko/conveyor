@@ -17,7 +17,7 @@ final class PomBuilder {
     private final Collection<PomModel.Dependency> dependencyManagement = new ArrayList<>();
     private final Map<String, String> properties = new HashMap<>();
     private final XmlMapper xmlMapper;
-    private String groupId = "com.github.maximtereshchenko.conveyor";
+    private String groupId = "group";
     private String artifactId = "";
     private String version = "1.0.0";
     private PomModel.Parent parent = null;
@@ -96,6 +96,10 @@ final class PomBuilder {
     }
 
     PomBuilder dependency(String artifactId, String version, String scope) {
+        return dependency(groupId, artifactId, version, scope);
+    }
+
+    PomBuilder dependency(String groupId, String artifactId, String version, String scope) {
         dependencies.add(new PomModel.Dependency(groupId, artifactId, version, scope));
         return this;
     }

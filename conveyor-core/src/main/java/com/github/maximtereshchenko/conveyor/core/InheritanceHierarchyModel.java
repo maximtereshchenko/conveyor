@@ -49,14 +49,14 @@ record InheritanceHierarchyModel<T extends SchematicModel>(LinkedHashSet<T> mode
 
     @Override
     public LinkedHashSet<PluginModel> plugins() {
-        return combine(SchematicModel::plugins, PluginModel::id, PluginModel::override);
+        return combine(SchematicModel::plugins, PluginModel::idModel, PluginModel::override);
     }
 
     @Override
     public Set<DependencyModel> dependencies() {
         return combine(
             SchematicModel::dependencies,
-            DependencyModel::id,
+            DependencyModel::idModel,
             DependencyModel::override
         );
     }

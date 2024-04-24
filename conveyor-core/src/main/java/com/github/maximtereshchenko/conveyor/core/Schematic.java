@@ -51,11 +51,11 @@ final class Schematic {
     }
 
     boolean dependsOn(Schematic schematic, Schematics schematics) {
+        var properties = properties(localModel);
         return localModel.dependencies()
             .stream()
             .anyMatch(dependencyModel ->
-                dependencyModel.id().equals(schematic.id()) ||
-                dependencyExistsBetweenSchematics(dependencyModel.id(), schematic, schematics)
+                dependencyExists(schematic, schematics, dependencyModel.idModel().id(properties))
             );
     }
 
@@ -79,6 +79,15 @@ final class Schematic {
                 withSchematicDefinition(products, schematicCoordinates, completeModel),
                 stage
             );
+    }
+
+    private boolean dependencyExists(
+        Schematic schematic,
+        Schematics schematics,
+        Id id
+    ) {
+        return schematic.id().equals(id) ||
+               dependencyExistsBetweenSchematics(id, schematic, schematics);
     }
 
     private Set<Product> withSchematicDefinition(

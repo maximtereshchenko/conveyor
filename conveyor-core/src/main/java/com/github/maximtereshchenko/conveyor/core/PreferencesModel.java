@@ -13,12 +13,16 @@ record PreferencesModel(
 
     PreferencesModel override(PreferencesModel base) {
         return new PreferencesModel(
-            reduce(base.inclusions(), inclusions, PreferencesInclusionModel::id),
-            reduce(base.artifacts(), artifacts, ArtifactPreferenceModel::id)
+            reduce(base.inclusions(), inclusions, PreferencesInclusionModel::idModel),
+            reduce(base.artifacts(), artifacts, ArtifactPreferenceModel::idModel)
         );
     }
 
-    private <T> LinkedHashSet<T> reduce(Set<T> first, Set<T> second, Function<T, Id> classifier) {
+    private <T> LinkedHashSet<T> reduce(
+        Set<T> first,
+        Set<T> second,
+        Function<T, IdModel> classifier
+    ) {
         return Stream.of(first, second)
             .flatMap(Collection::stream)
             .collect(new ReducingCollector<>(classifier));

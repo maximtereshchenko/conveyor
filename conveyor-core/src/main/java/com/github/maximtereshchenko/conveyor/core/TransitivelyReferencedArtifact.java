@@ -30,12 +30,13 @@ final class TransitivelyReferencedArtifact extends StoredArtifact {
         Properties properties,
         Preferences preferences
     ) {
-        return preferences.version(artifactModel.id())
+        var id = artifactModel.idModel().id(properties);
+        return preferences.version(id)
             .or(() ->
                 artifactModel.version()
                     .map(properties::interpolated)
                     .map(SemanticVersion::new)
-                    .or(() -> schematicPreferences.version(artifactModel.id()))
+                    .or(() -> schematicPreferences.version(id))
             )
             .orElseThrow();
     }

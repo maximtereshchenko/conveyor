@@ -15,7 +15,6 @@ final class SchematicDefinitionBuilder {
 
     private final List<ArtifactPreferenceDefinition> artifactPreferences = new ArrayList<>();
     private final List<DependencyDefinition> dependencies = new ArrayList<>();
-    private final String group = "com.github.maximtereshchenko.conveyor";
     private final List<Path> inclusions = new ArrayList<>();
     private final JacksonAdapter jacksonAdapter;
     private final List<PluginDefinition> plugins = new ArrayList<>();
@@ -23,6 +22,7 @@ final class SchematicDefinitionBuilder {
         new ArrayList<>();
     private final Map<String, String> properties = new HashMap<>();
     private final List<RepositoryDefinition> repositories = new ArrayList<>();
+    private String group = "group";
     private String name = "project";
     private String version = "1.0.0";
     private TemplateDefinition template = new NoTemplateDefinition();
@@ -101,19 +101,21 @@ final class SchematicDefinitionBuilder {
     }
 
     SchematicDefinitionBuilder plugin(String name) {
-        return plugin(name, version, Map.of());
-    }
-
-    SchematicDefinitionBuilder plugin(String name, Map<String, String> configuration) {
-        return plugin(name, null, configuration);
+        return plugin(group, name, version, Map.of());
     }
 
     SchematicDefinitionBuilder plugin(
+        String group,
         String name,
         String version,
         Map<String, String> configuration
     ) {
         plugins.add(new PluginDefinition(group, name, Optional.ofNullable(version), configuration));
+        return this;
+    }
+
+    SchematicDefinitionBuilder group(String group) {
+        this.group = group;
         return this;
     }
 
@@ -128,10 +130,15 @@ final class SchematicDefinitionBuilder {
     }
 
     SchematicDefinitionBuilder dependency(String name) {
-        return dependency(name, version, DependencyScope.IMPLEMENTATION);
+        return dependency(group, name, version, DependencyScope.IMPLEMENTATION);
     }
 
-    SchematicDefinitionBuilder dependency(String name, String version, DependencyScope scope) {
+    SchematicDefinitionBuilder dependency(
+        String group,
+        String name,
+        String version,
+        DependencyScope scope
+    ) {
         dependencies.add(
             new DependencyDefinition(
                 group,
@@ -149,17 +156,21 @@ final class SchematicDefinitionBuilder {
     }
 
     SchematicDefinitionBuilder preference(String name, String version) {
+        return preference(group, name, version);
+    }
+
+    SchematicDefinitionBuilder preference(String group, String name, String version) {
         artifactPreferences.add(new ArtifactPreferenceDefinition(group, name, version));
         return this;
     }
 
-    SchematicDefinitionBuilder preferenceInclusion(String name, String version) {
+    SchematicDefinitionBuilder preferenceInclusion(String group, String name, String version) {
         preferenceInclusions.add(new PreferencesInclusionDefinition(group, name, version));
         return this;
     }
 
     SchematicDefinitionBuilder preferenceInclusion(String name) {
-        return preferenceInclusion(name, version);
+        return preferenceInclusion(group, name, version);
     }
 
     SchematicDefinitionBuilder property(String key, String value) {

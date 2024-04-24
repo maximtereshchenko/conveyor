@@ -46,7 +46,7 @@ record StandaloneSchematicModel(SchematicDefinition schematicDefinition) impleme
                 .stream()
                 .map(definition ->
                     new PreferencesInclusionModel(
-                        new Id(definition.group(), definition.name()),
+                        new IdModel(definition.group(), definition.name()),
                         definition.version()
                     )
                 )
@@ -56,7 +56,7 @@ record StandaloneSchematicModel(SchematicDefinition schematicDefinition) impleme
                 .stream()
                 .map(definition ->
                     new ArtifactPreferenceModel(
-                        new Id(definition.group(), definition.name()),
+                        new IdModel(definition.group(), definition.name()),
                         definition.version()
                     )
                 )
@@ -70,7 +70,7 @@ record StandaloneSchematicModel(SchematicDefinition schematicDefinition) impleme
             .stream()
             .map(pluginDefinition ->
                 new PluginModel(
-                    new Id(pluginDefinition.group(), pluginDefinition.name()),
+                    new IdModel(pluginDefinition.group(), pluginDefinition.name()),
                     pluginDefinition.version(),
                     pluginDefinition.configuration()
                 )
@@ -84,7 +84,7 @@ record StandaloneSchematicModel(SchematicDefinition schematicDefinition) impleme
             .stream()
             .map(dependencyDefinition ->
                 new DependencyModel(
-                    new Id(dependencyDefinition.group(), dependencyDefinition.name()),
+                    new IdModel(dependencyDefinition.group(), dependencyDefinition.name()),
                     dependencyDefinition.version(),
                     dependencyDefinition.scope()
                 )

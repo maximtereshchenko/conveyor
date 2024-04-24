@@ -33,7 +33,7 @@ abstract class StoredArtifact implements Artifact {
 
     @Override
     public Id id() {
-        return artifactModel.id();
+        return artifactModel.idModel().id(properties);
     }
 
     @Override
@@ -43,13 +43,13 @@ abstract class StoredArtifact implements Artifact {
 
     @Override
     public Path path() {
-        return repositories.module(artifactModel.id(), semanticVersion());
+        return repositories.module(id(), semanticVersion());
     }
 
     @Override
     public Set<Artifact> dependencies() {
         var inheritanceHierarchyModel = schematicModelFactory.inheritanceHierarchyModel(
-            artifactModel.id(),
+            id(),
             semanticVersion(),
             repositories
         );

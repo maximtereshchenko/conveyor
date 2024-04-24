@@ -46,7 +46,7 @@ final class PreferencesFactory {
         return inclusions.stream()
             .map(preferencesInclusionModel ->
                 schematicModelFactory.inheritanceHierarchyModel(
-                    preferencesInclusionModel.id(),
+                    preferencesInclusionModel.idModel().id(properties),
                     new SemanticVersion(
                         properties.interpolated(preferencesInclusionModel.version())
                     ),
@@ -88,7 +88,7 @@ final class PreferencesFactory {
         return artifacts.stream()
             .collect(
                 Collectors.toMap(
-                    ArtifactPreferenceModel::id,
+                    artifactPreferenceModel -> artifactPreferenceModel.idModel().id(properties),
                     artifactPreferenceModel -> new SemanticVersion(
                         properties.interpolated(artifactPreferenceModel.version())
                     )

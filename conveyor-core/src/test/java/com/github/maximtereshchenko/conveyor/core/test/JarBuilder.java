@@ -35,7 +35,7 @@ final class JarBuilder {
     static JarBuilder from(String templateDirectory, Path temporaryDirectory, Compiler compiler)
         throws URISyntaxException {
         return new JarBuilder(path(templateDirectory), temporaryDirectory, compiler)
-            .group("com.github.maximtereshchenko.conveyor")
+            .group("group")
             .name(templateDirectory)
             .version("1.0.0");
     }

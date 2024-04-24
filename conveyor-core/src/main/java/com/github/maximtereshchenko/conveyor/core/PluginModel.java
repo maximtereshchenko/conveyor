@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 
 record PluginModel(
-    Id id,
+    IdModel idModel,
     Optional<String> version,
     Map<String, String> configuration
 ) implements ArtifactModel {
@@ -13,6 +13,6 @@ record PluginModel(
     PluginModel override(PluginModel base) {
         var copy = new HashMap<>(base.configuration());
         copy.putAll(configuration);
-        return new PluginModel(id, version.or(base::version), copy);
+        return new PluginModel(idModel, version.or(base::version), copy);
     }
 }

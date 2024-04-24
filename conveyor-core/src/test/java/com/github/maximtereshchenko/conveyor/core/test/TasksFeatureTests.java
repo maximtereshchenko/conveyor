@@ -34,7 +34,12 @@ final class TasksFeatureTests extends ConveyorTest {
         module.construct(
             factory.schematicDefinitionBuilder()
                 .repository(path)
-                .plugin("instant", "1.0.0", Map.of("instant", "COMPILE-RUN"))
+                .plugin(
+                    "group",
+                    "instant",
+                    "1.0.0",
+                    Map.of("instant", "COMPILE-RUN")
+                )
                 .conveyorJson(path),
             Stage.TEST
         );
@@ -61,7 +66,12 @@ final class TasksFeatureTests extends ConveyorTest {
         module.construct(
             factory.schematicDefinitionBuilder()
                 .repository(path)
-                .plugin("instant", "1.0.0", Map.of("instant", "COMPILE-RUN"))
+                .plugin(
+                    "group",
+                    "instant",
+                    "1.0.0",
+                    Map.of("instant", "COMPILE-RUN")
+                )
                 .conveyorJson(path),
             Stage.COMPILE
         );
@@ -116,6 +126,7 @@ final class TasksFeatureTests extends ConveyorTest {
             factory.schematicDefinitionBuilder()
                 .repository(path)
                 .plugin(
+                    "group",
                     "instant",
                     "1.0.0",
                     Map.of(
@@ -162,6 +173,7 @@ final class TasksFeatureTests extends ConveyorTest {
             factory.schematicDefinitionBuilder()
                 .repository(path)
                 .plugin(
+                    "group",
                     "instant",
                     "1.0.0",
                     Map.of(
@@ -212,8 +224,18 @@ final class TasksFeatureTests extends ConveyorTest {
         module.construct(
             factory.schematicDefinitionBuilder()
                 .repository(path)
-                .plugin("second", "1.0.0", Map.of("second", "COMPILE-RUN"))
-                .plugin("first", "1.0.0", Map.of("first", "COMPILE-RUN"))
+                .plugin(
+                    "group",
+                    "second",
+                    "1.0.0",
+                    Map.of("second", "COMPILE-RUN")
+                )
+                .plugin(
+                    "group",
+                    "first",
+                    "1.0.0",
+                    Map.of("first", "COMPILE-RUN")
+                )
                 .conveyorJson(path),
             Stage.PUBLISH
         );
@@ -334,11 +356,17 @@ final class TasksFeatureTests extends ConveyorTest {
             factory.schematicDefinitionBuilder()
                 .repository(path)
                 .plugin(
+                    "group",
                     "dependencies",
                     "1.0.0",
                     Map.of("scope", "TEST")
                 )
-                .dependency("test", "1.0.0", DependencyScope.TEST)
+                .dependency(
+                    "group",
+                    "test",
+                    "1.0.0",
+                    DependencyScope.TEST
+                )
                 .conveyorJson(path),
             Stage.COMPILE
         );
@@ -373,7 +401,12 @@ final class TasksFeatureTests extends ConveyorTest {
         var product = path.resolve("product");
         var schematicDefinition = factory.schematicDefinitionBuilder()
             .repository(path)
-            .plugin("product", "1.0.0", Map.of("path", product.toString()))
+            .plugin(
+                "group",
+                "product",
+                "1.0.0",
+                Map.of("path", product.toString())
+            )
             .plugin("products")
             .conveyorJson(path);
 

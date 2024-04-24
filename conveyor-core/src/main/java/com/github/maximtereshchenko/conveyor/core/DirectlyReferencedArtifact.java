@@ -29,7 +29,7 @@ final class DirectlyReferencedArtifact extends StoredArtifact {
         return artifactModel.version()
             .map(properties::interpolated)
             .map(SemanticVersion::new)
-            .or(() -> preferences.version(artifactModel.id()))
+            .or(() -> preferences.version(artifactModel.idModel().id(properties)))
             .orElseThrow();
     }
 }

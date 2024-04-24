@@ -105,7 +105,12 @@ final class DependenciesFeatureTests extends ConveyorTest {
                 .repository(path)
                 .template("template")
                 .plugin("dependencies")
-                .dependency("dependency", "2.0.0", DependencyScope.IMPLEMENTATION)
+                .dependency(
+                    "group",
+                    "dependency",
+                    "2.0.0",
+                    DependencyScope.IMPLEMENTATION
+                )
                 .conveyorJson(path),
             Stage.COMPILE
         );
@@ -196,14 +201,12 @@ final class DependenciesFeatureTests extends ConveyorTest {
                         .name("first")
                         .template("project")
                         .plugin(
+                            "group",
                             "product",
                             "1.0.0",
                             Map.of(
                                 "path",
-                                path.resolve("com")
-                                    .resolve("github")
-                                    .resolve("maximtereshchenko")
-                                    .resolve("conveyor")
+                                path.resolve("group")
                                     .resolve("first")
                                     .resolve("1.0.0")
                                     .resolve("first-1.0.0.jar")

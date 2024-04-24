@@ -4,7 +4,7 @@ import java.util.Optional;
 
 interface ArtifactModel {
 
-    Id id();
+    IdModel idModel();
 
     Optional<String> version();
 }

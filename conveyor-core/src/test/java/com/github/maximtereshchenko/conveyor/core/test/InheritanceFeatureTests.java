@@ -41,7 +41,12 @@ final class InheritanceFeatureTests extends ConveyorTest {
             factory.schematicDefinitionBuilder()
                 .template("template")
                 .repository(path)
-                .plugin("properties", "1.0.0", Map.of("keys", "template.key"))
+                .plugin(
+                    "group",
+                    "properties",
+                    "1.0.0",
+                    Map.of("keys", "template.key")
+                )
                 .conveyorJson(path),
             Stage.COMPILE
         );
@@ -62,6 +67,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
                 factory.schematicDefinitionBuilder()
                     .name("template")
                     .plugin(
+                        "group",
                         "instant",
                         "1.0.0",
                         Map.of("instant", "COMPILE-RUN")
@@ -140,6 +146,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
                 factory.schematicDefinitionBuilder()
                     .name("template")
                     .dependency(
+                        "group",
                         "dependency",
                         "1.0.0",
                         DependencyScope.TEST
@@ -165,7 +172,12 @@ final class InheritanceFeatureTests extends ConveyorTest {
             factory.schematicDefinitionBuilder()
                 .template("template")
                 .repository(path)
-                .plugin("dependencies", "1.0.0", Map.of("scope", "TEST"))
+                .plugin(
+                    "group",
+                    "dependencies",
+                    "1.0.0",
+                    Map.of("scope", "TEST")
+                )
                 .conveyorJson(path),
             Stage.COMPILE
         );
@@ -201,7 +213,12 @@ final class InheritanceFeatureTests extends ConveyorTest {
         module.construct(
             factory.schematicDefinitionBuilder()
                 .template("template")
-                .plugin("properties", "1.0.0", Map.of("keys", "template.key"))
+                .plugin(
+                    "group",
+                    "properties",
+                    "1.0.0",
+                    Map.of("keys", "template.key")
+                )
                 .conveyorJson(project),
             Stage.COMPILE
         );
@@ -231,7 +248,12 @@ final class InheritanceFeatureTests extends ConveyorTest {
             .name("template")
             .repository(path)
             .inclusion(conveyorJson(project))
-            .plugin("instant", "1.0.0", Map.of("instant", "COMPILE-RUN"))
+            .plugin(
+                "group",
+                "instant",
+                "1.0.0",
+                Map.of("instant", "COMPILE-RUN")
+            )
             .conveyorJson(path);
 
         module.construct(
@@ -314,13 +336,23 @@ final class InheritanceFeatureTests extends ConveyorTest {
             .name("template")
             .repository(path)
             .inclusion(conveyorJson(project))
-            .dependency("dependency", "1.0.0", DependencyScope.TEST)
+            .dependency(
+                "group",
+                "dependency",
+                "1.0.0",
+                DependencyScope.TEST
+            )
             .conveyorJson(path);
 
         module.construct(
             factory.schematicDefinitionBuilder()
                 .template("template")
-                .plugin("dependencies", "1.0.0", Map.of("scope", "TEST"))
+                .plugin(
+                    "group",
+                    "dependencies",
+                    "1.0.0",
+                    Map.of("scope", "TEST")
+                )
                 .conveyorJson(project),
             Stage.COMPILE
         );
@@ -356,7 +388,12 @@ final class InheritanceFeatureTests extends ConveyorTest {
         module.construct(
             factory.schematicDefinitionBuilder()
                 .template("template")
-                .plugin("instant", "1.0.0", Map.of("instant", "COMPILE-RUN"))
+                .plugin(
+                    "group",
+                    "instant",
+                    "1.0.0",
+                    Map.of("instant", "COMPILE-RUN")
+                )
                 .conveyorJson(project),
             Stage.COMPILE
         );
@@ -390,6 +427,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
                         .name("included")
                         .template("template")
                         .plugin(
+                            "group",
                             "properties",
                             "1.0.0",
                             Map.of("keys", "template.key")
@@ -433,7 +471,12 @@ final class InheritanceFeatureTests extends ConveyorTest {
                         .template("template")
                         .conveyorJson(included)
                 )
-                .plugin("instant", "1.0.0", Map.of("instant", "COMPILE-RUN"))
+                .plugin(
+                    "group",
+                    "instant",
+                    "1.0.0",
+                    Map.of("instant", "COMPILE-RUN")
+                )
                 .conveyorJson(path),
             Stage.COMPILE
         );
@@ -519,13 +562,19 @@ final class InheritanceFeatureTests extends ConveyorTest {
                         .name("included")
                         .template("template")
                         .plugin(
+                            "group",
                             "dependencies",
                             "1.0.0",
                             Map.of("scope", "TEST")
                         )
                         .conveyorJson(included)
                 )
-                .dependency("dependency", "1.0.0", DependencyScope.TEST)
+                .dependency(
+                    "group",
+                    "dependency",
+                    "1.0.0",
+                    DependencyScope.TEST
+                )
                 .conveyorJson(path),
             Stage.COMPILE
         );
@@ -562,6 +611,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
                         .name("included")
                         .template("template")
                         .plugin(
+                            "group",
                             "instant",
                             "1.0.0",
                             Map.of("instant", "COMPILE-RUN")
@@ -602,7 +652,12 @@ final class InheritanceFeatureTests extends ConveyorTest {
                         .template("template")
                         .conveyorJson(included)
                 )
-                .plugin("instant", "1.0.0", Map.of("instant", "COMPILE-RUN"))
+                .plugin(
+                    "group",
+                    "instant",
+                    "1.0.0",
+                    Map.of("instant", "COMPILE-RUN")
+                )
                 .conveyorJson(path),
             Stage.COMPILE
         );
@@ -658,13 +713,19 @@ final class InheritanceFeatureTests extends ConveyorTest {
                         .name("dependency")
                         .template("template")
                         .plugin(
+                            "group",
                             "product",
                             "1.0.0",
                             Map.of("path", path.resolve("dependency-1.0.0").toString())
                         )
                         .conveyorJson(dependency)
                 )
-                .plugin("instant", "1.0.0", Map.of("instant", "COMPILE-RUN"))
+                .plugin(
+                    "group",
+                    "instant",
+                    "1.0.0",
+                    Map.of("instant", "COMPILE-RUN")
+                )
                 .conveyorJson(path),
             Stage.ARCHIVE
         );
@@ -692,7 +753,12 @@ final class InheritanceFeatureTests extends ConveyorTest {
             .name("template")
             .repository(path)
             .inclusion(conveyorJson(included))
-            .plugin("instant", "1.0.0", Map.of("instant", "COMPILE-RUN"))
+            .plugin(
+                "group",
+                "instant",
+                "1.0.0",
+                Map.of("instant", "COMPILE-RUN")
+            )
             .conveyorJson(path);
 
         module.construct(
@@ -757,7 +823,12 @@ final class InheritanceFeatureTests extends ConveyorTest {
         factory.schematicDefinitionBuilder()
             .name("template")
             .repository(path)
-            .plugin("instant", "1.0.0", Map.of("instant", "COMPILE-RUN"))
+            .plugin(
+                "group",
+                "instant",
+                "1.0.0",
+                Map.of("instant", "COMPILE-RUN")
+            )
             .inclusion(projectSchematic)
             .conveyorJson(path);
 
@@ -815,14 +886,12 @@ final class InheritanceFeatureTests extends ConveyorTest {
                     .name("dependency")
                     .template("template")
                     .plugin(
+                        "group",
                         "product",
                         "1.0.0",
                         Map.of(
                             "path",
-                            path.resolve("com")
-                                .resolve("github")
-                                .resolve("maximtereshchenko")
-                                .resolve("conveyor")
+                            path.resolve("group")
                                 .resolve("dependency")
                                 .resolve("1.0.0")
                                 .resolve("dependency-1.0.0.jar")
@@ -865,7 +934,12 @@ final class InheritanceFeatureTests extends ConveyorTest {
             .inclusion(
                 factory.schematicDefinitionBuilder()
                     .name("unrelated")
-                    .plugin("instant", "1.0.0", Map.of("instant", "COMPILE-RUN"))
+                    .plugin(
+                        "group",
+                        "instant",
+                        "1.0.0",
+                        Map.of("instant", "COMPILE-RUN")
+                    )
                     .conveyorJson(unrelated)
             )
             .conveyorJson(path);
@@ -911,7 +985,12 @@ final class InheritanceFeatureTests extends ConveyorTest {
                 factory.schematicDefinitionBuilder()
                     .name("transitive")
                     .template("template")
-                    .plugin("instant", "1.0.0", Map.of("instant", "COMPILE-RUN"))
+                    .plugin(
+                        "group",
+                        "instant",
+                        "1.0.0",
+                        Map.of("instant", "COMPILE-RUN")
+                    )
                     .conveyorJson(transitive)
             )
             .conveyorJson(path);
@@ -956,7 +1035,12 @@ final class InheritanceFeatureTests extends ConveyorTest {
                         .template("template")
                         .conveyorJson(dependency)
                 )
-                .plugin("instant", "1.0.0", Map.of("instant", "ARCHIVE-RUN"))
+                .plugin(
+                    "group",
+                    "instant",
+                    "1.0.0",
+                    Map.of("instant", "ARCHIVE-RUN")
+                )
                 .conveyorJson(path),
             Stage.COMPILE
         );
@@ -1001,7 +1085,12 @@ final class InheritanceFeatureTests extends ConveyorTest {
                         .template("template")
                         .conveyorJson(dependency)
                 )
-                .plugin("instant", "1.0.0", Map.of("instant", "PUBLISH-RUN"))
+                .plugin(
+                    "group",
+                    "instant",
+                    "1.0.0",
+                    Map.of("instant", "PUBLISH-RUN")
+                )
                 .conveyorJson(path),
             Stage.PUBLISH
         );
@@ -1034,7 +1123,12 @@ final class InheritanceFeatureTests extends ConveyorTest {
                 "conveyor.schematic.template.location",
                 "../template/conveyor.json"
             )
-            .plugin("instant", "1.0.0", Map.of("instant", "COMPILE-RUN"))
+            .plugin(
+                "group",
+                "instant",
+                "1.0.0",
+                Map.of("instant", "COMPILE-RUN")
+            )
             .conveyorJson(inclusion);
 
         module.construct(
@@ -1103,7 +1197,12 @@ final class InheritanceFeatureTests extends ConveyorTest {
                         .name("common")
                         .conveyorJson(common)
                 )
-                .plugin("instant", "1.0.0", Map.of("instant", "COMPILE-RUN"))
+                .plugin(
+                    "group",
+                    "instant",
+                    "1.0.0",
+                    Map.of("instant", "COMPILE-RUN")
+                )
                 .conveyorJson(path),
             Stage.COMPILE
         );
