@@ -1,9 +1,10 @@
 package com.github.maximtereshchenko.conveyor.core;
 
-import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 final class SemanticVersion implements Comparable<SemanticVersion> {
 
@@ -57,12 +58,12 @@ final class SemanticVersion implements Comparable<SemanticVersion> {
     }
 
     private int compareByPreReleaseIdentifiers(
-        String[] preReleaseIdentifiers,
-        String[] otherPreReleaseIdentifiers
+        List<String> preReleaseIdentifiers,
+        List<String> otherPreReleaseIdentifiers
     ) {
-        for (int i = 0; i < preReleaseIdentifiers.length && i < otherPreReleaseIdentifiers.length; i++) {
-            var identifier = preReleaseIdentifiers[i];
-            var otherIdentifier = otherPreReleaseIdentifiers[i];
+        for (int i = 0; i < preReleaseIdentifiers.size() && i < otherPreReleaseIdentifiers.size(); i++) {
+            var identifier = preReleaseIdentifiers.get(i);
+            var otherIdentifier = otherPreReleaseIdentifiers.get(i);
             var comparedNumericallyOrLexically = compareNumericallyOrLexically(
                 identifier,
                 otherIdentifier
@@ -71,7 +72,7 @@ final class SemanticVersion implements Comparable<SemanticVersion> {
                 return comparedNumericallyOrLexically;
             }
         }
-        return Integer.compare(preReleaseIdentifiers.length, otherPreReleaseIdentifiers.length);
+        return Integer.compare(preReleaseIdentifiers.size(), otherPreReleaseIdentifiers.size());
     }
 
     private int compareNumericallyOrLexically(String identifier, String otherIdentifier) {
@@ -95,13 +96,13 @@ final class SemanticVersion implements Comparable<SemanticVersion> {
     }
 
     private int compareByPreReleaseVersion(
-        String[] preReleaseIdentifiers,
-        String[] otherPreReleaseIdentifiers
+        List<String> preReleaseIdentifiers,
+        List<String> otherPreReleaseIdentifiers
     ) {
-        if (preReleaseIdentifiers.length == 0 && otherPreReleaseIdentifiers.length != 0) {
+        if (preReleaseIdentifiers.isEmpty() && !otherPreReleaseIdentifiers.isEmpty()) {
             return 1;
         }
-        if (otherPreReleaseIdentifiers.length == 0 && preReleaseIdentifiers.length != 0) {
+        if (otherPreReleaseIdentifiers.isEmpty() && !preReleaseIdentifiers.isEmpty()) {
             return -1;
         }
         return 0;
@@ -115,40 +116,45 @@ final class SemanticVersion implements Comparable<SemanticVersion> {
     }
 
     private int major() {
-        return numberAt(0);
+        return versionNumbers().getFirst();
     }
 
     private int minor() {
-        return numberAt(1);
+        return versionNumbers().get(1);
     }
 
     private int patch() {
-        var patch = patchAndPreRelease().split("-")[0];
-        if (patch.isBlank()) {
-            return 0;
+        var versionNumbers = versionNumbers();
+        if (versionNumbers.size() == 3) {
+            return versionNumbers.getLast();
         }
-        return Integer.parseInt(patch);
+        return 0;
     }
 
-    private String[] preReleaseIdentifiers() {
-        var patchAndPreRelease = patchAndPreRelease().split("-");
-        if (patchAndPreRelease.length <= 1) {
-            return new String[0];
-        }
-        return dotSeparated(patchAndPreRelease[1]);
+    private List<String> preReleaseIdentifiers() {
+        return dashSeparated()
+            .skip(1L)
+            .flatMap(this::dotSeparated)
+            .toList();
     }
 
-    private String patchAndPreRelease() {
-        var dotSeparated = dotSeparated(raw);
-        return String.join(".", Arrays.copyOfRange(dotSeparated, 2, dotSeparated.length))
-            .split("\\+")[0];
+    private List<Integer> versionNumbers() {
+        return dashSeparated()
+            .limit(1L)
+            .flatMap(this::dotSeparated)
+            .map(Integer::valueOf)
+            .toList();
     }
 
-    private int numberAt(int index) {
-        return Integer.parseInt(dotSeparated(raw)[index]);
+    private Stream<String> dashSeparated() {
+        return separated(raw, '-');
     }
 
-    private String[] dotSeparated(String line) {
-        return line.split("\\.");
+    private Stream<String> dotSeparated(String numbers) {
+        return separated(numbers, '.');
+    }
+
+    private Stream<String> separated(String string, char separator) {
+        return Stream.of(string.split("[%c]".formatted(separator)));
     }
 }
