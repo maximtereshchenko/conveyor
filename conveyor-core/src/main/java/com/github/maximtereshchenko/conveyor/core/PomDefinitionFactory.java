@@ -120,8 +120,21 @@ final class PomDefinitionFactory {
             version(node),
             singleValue(node, "scope")
                 .map(String::toUpperCase)
-                .map(PomDefinition.DependencyScope::valueOf)
+                .map(PomDefinition.DependencyScope::valueOf),
+            exclusions(node)
         );
+    }
+
+    private List<PomDefinition.Exclusion> exclusions(Node node) {
+        return namedChildren(node, "exclusions")
+            .flatMap(exclusions -> namedChildren(exclusions, "exclusion"))
+            .map(exclusion ->
+                new PomDefinition.Exclusion(
+                    groupId(exclusion).orElseThrow(),
+                    artifactId(exclusion)
+                )
+            )
+            .toList();
     }
 
     private PomDefinition.ManagedDependencyDefinition managedDependencyDefinition(Node node) {

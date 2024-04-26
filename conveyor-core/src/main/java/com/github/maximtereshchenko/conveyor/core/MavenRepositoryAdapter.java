@@ -125,23 +125,39 @@ final class MavenRepositoryAdapter implements Repository<InputStream> {
                     definition.groupId(),
                     definition.artifactId(),
                     definition.version(),
-                    definition.scope()
-                        .or(() ->
-                            Optional.ofNullable(
-                                scopes.get(new Id(definition.groupId(), definition.artifactId()))
-                            )
-                        )
-                        .map(scope ->
-                            switch (scope) {
-                                case COMPILE, RUNTIME, SYSTEM, PROVIDED ->
-                                    DependencyScope.IMPLEMENTATION;
-                                case TEST -> DependencyScope.TEST;
-                                case IMPORT -> throw new IllegalArgumentException();
-                            }
-                        )
+                    scope(scopes, definition),
+                    exclusions(definition)
                 )
             )
             .toList();
+    }
+
+    private List<ExclusionDefinition> exclusions(PomDefinition.DependencyDefinition definition) {
+        return definition.exclusions()
+            .stream()
+            .map(exclusion ->
+                new ExclusionDefinition(exclusion.groupId(), exclusion.artifactId())
+            )
+            .toList();
+    }
+
+    private Optional<DependencyScope> scope(
+        Map<Id, PomDefinition.DependencyScope> scopes,
+        PomDefinition.DependencyDefinition definition
+    ) {
+        return definition.scope()
+            .or(() ->
+                Optional.ofNullable(
+                    scopes.get(new Id(definition.groupId(), definition.artifactId()))
+                )
+            )
+            .map(scope ->
+                switch (scope) {
+                    case COMPILE, RUNTIME, SYSTEM, PROVIDED -> DependencyScope.IMPLEMENTATION;
+                    case TEST -> DependencyScope.TEST;
+                    case IMPORT -> throw new IllegalArgumentException();
+                }
+            );
     }
 
     private PreferencesDefinition preferences(PomDefinition pomModel) {

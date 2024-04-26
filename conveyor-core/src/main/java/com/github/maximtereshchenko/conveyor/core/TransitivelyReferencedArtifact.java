@@ -1,5 +1,7 @@
 package com.github.maximtereshchenko.conveyor.core;
 
+import java.util.Set;
+
 final class TransitivelyReferencedArtifact extends StoredArtifact {
 
     private final Preferences schematicPreferences;
@@ -13,13 +15,36 @@ final class TransitivelyReferencedArtifact extends StoredArtifact {
         SchematicModelFactory schematicModelFactory,
         PreferencesFactory preferencesFactory
     ) {
+        this(
+            artifactModel,
+            original,
+            schematicPreferences,
+            properties,
+            repositories,
+            schematicModelFactory,
+            preferencesFactory,
+            Set.of()
+        );
+    }
+
+    TransitivelyReferencedArtifact(
+        ArtifactModel artifactModel,
+        Preferences original,
+        Preferences schematicPreferences,
+        Properties properties,
+        Repositories repositories,
+        SchematicModelFactory schematicModelFactory,
+        PreferencesFactory preferencesFactory,
+        Set<Id> propagatedExclusions
+    ) {
         super(
             artifactModel,
             original,
             properties,
             repositories,
             schematicModelFactory,
-            preferencesFactory
+            preferencesFactory,
+            propagatedExclusions
         );
         this.schematicPreferences = schematicPreferences;
     }

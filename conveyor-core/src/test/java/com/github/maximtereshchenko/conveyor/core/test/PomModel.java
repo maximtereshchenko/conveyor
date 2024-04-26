@@ -55,11 +55,21 @@ record PomModel(
 
     record Parent(String groupId, String artifactId, String version) {}
 
-    record Dependency(String groupId, String artifactId, String version, String scope) {}
+    record Dependency(
+        String groupId,
+        String artifactId,
+        String version,
+        String scope,
+        @JacksonXmlProperty(localName = "exclusion")
+        @JacksonXmlElementWrapper(localName = "exclusions")
+        Collection<Exclusion> exclusions
+    ) {}
 
     record DependencyManagement(
         @JacksonXmlProperty(localName = "dependency")
         @JacksonXmlElementWrapper(localName = "dependencies")
         Collection<Dependency> dependencies
     ) {}
+
+    record Exclusion(String groupId, String artifactId) {}
 }

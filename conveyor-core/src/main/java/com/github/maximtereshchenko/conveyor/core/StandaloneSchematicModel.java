@@ -1,5 +1,6 @@
 package com.github.maximtereshchenko.conveyor.core;
 
+import com.github.maximtereshchenko.conveyor.api.schematic.DependencyDefinition;
 import com.github.maximtereshchenko.conveyor.api.schematic.NoTemplateDefinition;
 import com.github.maximtereshchenko.conveyor.api.schematic.SchematicDefinition;
 import com.github.maximtereshchenko.conveyor.api.schematic.SchematicTemplateDefinition;
@@ -86,8 +87,18 @@ record StandaloneSchematicModel(SchematicDefinition schematicDefinition) impleme
                 new DependencyModel(
                     new IdModel(dependencyDefinition.group(), dependencyDefinition.name()),
                     dependencyDefinition.version(),
-                    dependencyDefinition.scope()
+                    dependencyDefinition.scope(),
+                    exclusions(dependencyDefinition)
                 )
+            )
+            .collect(Collectors.toSet());
+    }
+
+    private Set<Id> exclusions(DependencyDefinition dependencyDefinition) {
+        return dependencyDefinition.exclusions()
+            .stream()
+            .map(exclusionDefinition ->
+                new Id(exclusionDefinition.group(), exclusionDefinition.name())
             )
             .collect(Collectors.toSet());
     }

@@ -1,5 +1,7 @@
 package com.github.maximtereshchenko.conveyor.core;
 
+import java.util.Set;
+
 final class DirectlyReferencedArtifact extends StoredArtifact {
 
     DirectlyReferencedArtifact(
@@ -16,7 +18,8 @@ final class DirectlyReferencedArtifact extends StoredArtifact {
             properties,
             repositories,
             schematicModelFactory,
-            preferencesFactory
+            preferencesFactory,
+            Set.of()
         );
     }
 

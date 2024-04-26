@@ -17,6 +17,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@ExtendWith(WireMockExtension.class)
 final class RepositoriesFeatureTests extends ConveyorTest {
 
     @Test
@@ -239,7 +240,6 @@ final class RepositoriesFeatureTests extends ConveyorTest {
     }
 
     @Test
-    @ExtendWith(WireMockExtension.class)
     void givenRemoteRepository_whenConstructToStage_thenArtifactDownloadedFromUrl(
         Path path,
         ConveyorModule module,
@@ -276,7 +276,6 @@ final class RepositoriesFeatureTests extends ConveyorTest {
     }
 
     @Test
-    @ExtendWith(WireMockExtension.class)
     void givenRemoteRepository_whenConstructToStage_thenArtifactsAreCachedInDefaultDirectory(
         Path path,
         ConveyorModule module,
@@ -318,7 +317,6 @@ final class RepositoriesFeatureTests extends ConveyorTest {
     }
 
     @Test
-    @ExtendWith(WireMockExtension.class)
     void givenRemoteRepositoryCacheDirectoryProperty_whenConstructToStage_thenArtifactsAreCachedInSpecifiedDirectory(
         Path path,
         ConveyorModule module,
@@ -360,7 +358,6 @@ final class RepositoriesFeatureTests extends ConveyorTest {
     }
 
     @Test
-    @ExtendWith(WireMockExtension.class)
     void givenRemoteRepositoryCacheDirectoryProperty_whenConstructToStage_thenArtifactsAreCachedInSpecifiedDirectoryRelativeToSchematic(
         Path path,
         ConveyorModule module,
@@ -401,7 +398,6 @@ final class RepositoriesFeatureTests extends ConveyorTest {
     }
 
     @Test
-    @ExtendWith(WireMockExtension.class)
     void givenSchematicDefinitionFromRemoteRepository_whenConstructToStage_thenTemplateIsTranslated(
         Path path,
         ConveyorModule module,
@@ -448,7 +444,6 @@ final class RepositoriesFeatureTests extends ConveyorTest {
     }
 
     @Test
-    @ExtendWith(WireMockExtension.class)
     void givenSchematicDefinitionFromRemoteRepository_whenConstructToStage_thenPreferencesAreTranslated(
         Path path,
         ConveyorModule module,
@@ -496,7 +491,6 @@ final class RepositoriesFeatureTests extends ConveyorTest {
     }
 
     @Test
-    @ExtendWith(WireMockExtension.class)
     void givenSchematicDefinitionFromRemoteRepository_whenConstructToStage_thenPropertiesAreTranslated(
         Path path,
         ConveyorModule module,
@@ -541,7 +535,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
     }
 
     @ParameterizedTest
-    @ExtendWith(WireMockExtension.class)
+
     @Execution(ExecutionMode.SAME_THREAD)
     @CsvSource(
         textBlock = """
@@ -565,7 +559,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
             .pom(
                 factory.pomBuilder()
                     .artifactId("template")
-                    .dependency("dependency", "1.0.0", originalScope)
+                    .dependency("group", "dependency", "1.0.0", originalScope)
             )
             .pom(
                 factory.pomBuilder()
@@ -606,7 +600,6 @@ final class RepositoriesFeatureTests extends ConveyorTest {
     }
 
     @Test
-    @ExtendWith(WireMockExtension.class)
     void givenNoGroupIdInPom_whenConstructToStage_thenGroupIsFromParent(
         Path path,
         ConveyorModule module,
@@ -653,7 +646,6 @@ final class RepositoriesFeatureTests extends ConveyorTest {
     }
 
     @Test
-    @ExtendWith(WireMockExtension.class)
     void givenNoVersionInPom_whenConstructToStage_thenVersionIsFromParent(
         Path path,
         ConveyorModule module,
@@ -701,7 +693,6 @@ final class RepositoriesFeatureTests extends ConveyorTest {
     }
 
     @Test
-    @ExtendWith(WireMockExtension.class)
     void givenImportScopedManagedDependency_whenConstructToStage_thenPreferencesIncludedFromThatDependency(
         Path path,
         ConveyorModule module,
@@ -746,7 +737,6 @@ final class RepositoriesFeatureTests extends ConveyorTest {
     }
 
     @Test
-    @ExtendWith(WireMockExtension.class)
     void givenNoDependencyVersion_whenConstructToStage_thenVersionIsFromDependencyManagement(
         Path path,
         ConveyorModule module,
@@ -758,7 +748,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                 factory.pomBuilder()
                     .artifactId("template")
                     .managedDependency("dependency", "1.0.0")
-                    .dependency("dependency", null, null)
+                    .dependency("group", "dependency", null, null)
             )
             .pom(
                 factory.pomBuilder()
@@ -791,7 +781,6 @@ final class RepositoriesFeatureTests extends ConveyorTest {
     }
 
     @Test
-    @ExtendWith(WireMockExtension.class)
     void givenScopeFromDependencyManagement_whenConstructToStage_thenDependencyHasScopeFromDependencyManagement(
         Path path,
         ConveyorModule module,
@@ -803,7 +792,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                 factory.pomBuilder()
                     .artifactId("template")
                     .managedDependency("dependency", "1.0.0", "test")
-                    .dependency("dependency", null, null)
+                    .dependency("group", "dependency", null, null)
             )
             .pom(
                 factory.pomBuilder()
@@ -841,7 +830,6 @@ final class RepositoriesFeatureTests extends ConveyorTest {
     }
 
     @Test
-    @ExtendWith(WireMockExtension.class)
     void givenScopeFromParentDependencyManagement_whenConstructToStage_thenDependencyHasScopeFromDependencyManagement(
         Path path,
         ConveyorModule module,
@@ -858,7 +846,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                 factory.pomBuilder()
                     .parent("parent")
                     .artifactId("template")
-                    .dependency("dependency", null, null)
+                    .dependency("group", "dependency", null, null)
             )
             .pom(
                 factory.pomBuilder()
@@ -896,7 +884,6 @@ final class RepositoriesFeatureTests extends ConveyorTest {
     }
 
     @Test
-    @ExtendWith(WireMockExtension.class)
     void givenProjectGroupIdProperty_whenConstructToStage_thenPropertyInterpolated(
         Path path,
         ConveyorModule module,
@@ -945,7 +932,6 @@ final class RepositoriesFeatureTests extends ConveyorTest {
     }
 
     @Test
-    @ExtendWith(WireMockExtension.class)
     void givenProjectVersionProperty_whenConstructToStage_thenPropertyInterpolated(
         Path path,
         ConveyorModule module,
@@ -991,5 +977,68 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         assertThat(defaultConstructionDirectory(path).resolve("dependencies"))
             .content()
             .isEqualTo("dependency-1.0.0");
+    }
+
+    @Test
+    void givenExcludedPomDependency_whenConstructToStage_thenDependencyIsExcluded(
+        Path path,
+        ConveyorModule module,
+        BuilderFactory factory,
+        WireMockServer wireMockServer
+    ) throws Exception {
+        factory.repositoryBuilder()
+            .pom(
+                factory.pomBuilder()
+                    .artifactId("dependency")
+                    .dependency(
+                        "group",
+                        "transitive",
+                        "1.0.0",
+                        null,
+                        new PomModel.Exclusion("group", "excluded")
+                    )
+            )
+            .jar(
+                factory.jarBuilder("dependency")
+            )
+            .pom(
+                factory.pomBuilder()
+                    .artifactId("transitive")
+                    .dependency("excluded")
+            )
+            .jar(
+                factory.jarBuilder("dependency")
+                    .name("transitive")
+            )
+            .pom(
+                factory.pomBuilder()
+                    .artifactId("excluded")
+            )
+            .jar(
+                factory.jarBuilder("dependency")
+                    .name("excluded")
+            )
+            .pom(
+                factory.pomBuilder()
+                    .artifactId("dependencies")
+            )
+            .jar(
+                factory.jarBuilder("dependencies")
+            )
+            .install(wireMockServer);
+
+        module.construct(
+            factory.schematicDefinitionBuilder()
+                .repository(wireMockServer.baseUrl())
+                .plugin("dependencies")
+                .dependency("dependency")
+                .conveyorJson(path),
+            Stage.COMPILE
+        );
+
+        assertThat(defaultConstructionDirectory(path).resolve("dependencies"))
+            .content()
+            .hasLineCount(2)
+            .contains("dependency-1.0.0", "transitive-1.0.0");
     }
 }

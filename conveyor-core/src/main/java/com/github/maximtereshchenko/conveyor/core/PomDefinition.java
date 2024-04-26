@@ -31,6 +31,9 @@ record PomDefinition(
         String groupId,
         String artifactId,
         Optional<String> version,
-        Optional<DependencyScope> scope
+        Optional<DependencyScope> scope,
+        List<Exclusion> exclusions
     ) {}
+
+    record Exclusion(String groupId, String artifactId) {}
 }

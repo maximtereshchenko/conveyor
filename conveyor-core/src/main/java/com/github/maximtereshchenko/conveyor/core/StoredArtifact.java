@@ -3,6 +3,7 @@ package com.github.maximtereshchenko.conveyor.core;
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 
 import java.nio.file.Path;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -14,6 +15,7 @@ abstract class StoredArtifact implements Artifact {
     private final Repositories repositories;
     private final SchematicModelFactory schematicModelFactory;
     private final PreferencesFactory preferencesFactory;
+    private final Set<Id> propagatedExclusions;
 
     StoredArtifact(
         ArtifactModel artifactModel,
@@ -21,7 +23,8 @@ abstract class StoredArtifact implements Artifact {
         Properties properties,
         Repositories repositories,
         SchematicModelFactory schematicModelFactory,
-        PreferencesFactory preferencesFactory
+        PreferencesFactory preferencesFactory,
+        Set<Id> propagatedExclusions
     ) {
         this.artifactModel = artifactModel;
         this.preferences = preferences;
@@ -29,6 +32,7 @@ abstract class StoredArtifact implements Artifact {
         this.repositories = repositories;
         this.schematicModelFactory = schematicModelFactory;
         this.preferencesFactory = preferencesFactory;
+        this.propagatedExclusions = propagatedExclusions;
     }
 
     @Override
@@ -54,8 +58,11 @@ abstract class StoredArtifact implements Artifact {
             repositories
         );
         var schematicProperties = new Properties(inheritanceHierarchyModel.properties());
+        var exclusions = new HashSet<>(propagatedExclusions);
+        exclusions.addAll(artifactModel.exclusions());
         return inheritanceHierarchyModel.dependencies()
             .stream()
+            .filter(dependencyModel -> !exclusions.contains(dependencyModel.idModel().id(properties)))
             .map(dependencyModel ->
                 new Dependency(
                     new TransitivelyReferencedArtifact(
@@ -69,7 +76,8 @@ abstract class StoredArtifact implements Artifact {
                         schematicProperties,
                         repositories,
                         schematicModelFactory,
-                        preferencesFactory
+                        preferencesFactory,
+                        exclusions
                     ),
                     dependencyModel
                 )

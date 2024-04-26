@@ -73,6 +73,8 @@ A build tool for Java projects
     * Version and scope of the inherited dependency can be overridden
     * Schematic can define a dependency on other schematic with a group, a name and an optional
       scope. In such case the product from this schematic of type MODULE will be used in module path
+    * A transitive dependency can be excluded from a dependency by defining the dependency as the
+      exclusion
 * Inheritance
     * A schematic inherits properties, plugins, dependencies and repositories from another schematic
       used as a template. It is defined with a group, a name and a version. The

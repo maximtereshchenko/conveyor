@@ -2,19 +2,25 @@ package com.github.maximtereshchenko.conveyor.core;
 
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 record DependencyModel(
     IdModel idModel,
     Optional<String> version,
-    Optional<DependencyScope> scope
+    Optional<DependencyScope> scope,
+    Set<Id> exclusions
 ) implements ArtifactModel {
 
     DependencyModel override(DependencyModel base) {
+        var copy = new HashSet<>(base.exclusions());
+        copy.addAll(exclusions);
         return new DependencyModel(
             idModel,
             version.or(base::version),
-            scope.or(base::scope)
+            scope.or(base::scope),
+            copy
         );
     }
 }

@@ -78,6 +78,10 @@ final class SchematicDefinitionBuilder {
         return this;
     }
 
+    SchematicDefinitionBuilder repository(String uri) {
+        return repository(uri, uri, true);
+    }
+
     SchematicDefinitionBuilder repository(String name, String uri, boolean enabled) {
         repositories.add(
             new RemoteRepositoryDefinition(name, URI.create(uri), Optional.of(enabled))
@@ -137,14 +141,16 @@ final class SchematicDefinitionBuilder {
         String group,
         String name,
         String version,
-        DependencyScope scope
+        DependencyScope scope,
+        ExclusionDefinition... exclusionDefinitions
     ) {
         dependencies.add(
             new DependencyDefinition(
                 group,
                 name,
                 Optional.ofNullable(version),
-                Optional.of(scope)
+                Optional.of(scope),
+                List.of(exclusionDefinitions)
             )
         );
         return this;

@@ -1,6 +1,7 @@
 package com.github.maximtereshchenko.conveyor.core.test;
 
 import com.github.maximtereshchenko.conveyor.api.ConveyorModule;
+import com.github.maximtereshchenko.conveyor.api.schematic.ExclusionDefinition;
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import org.junit.jupiter.api.Test;
@@ -230,5 +231,181 @@ final class DependenciesFeatureTests extends ConveyorTest {
         assertThat(defaultConstructionDirectory(second).resolve("dependencies"))
             .content()
             .isEqualTo("first-1.0.0");
+    }
+
+    @Test
+    void givenExcludedDependency_whenConstructToStage_thenDependencyIsNotInModulePath(
+        Path path,
+        ConveyorModule module,
+        BuilderFactory factory
+    ) throws Exception {
+        factory.repositoryBuilder()
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("dependency")
+                    .dependency("excluded")
+            )
+            .jar(
+                factory.jarBuilder("dependency")
+            )
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("excluded")
+            )
+            .jar(
+                factory.jarBuilder("dependency")
+                    .name("excluded")
+            )
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("dependencies")
+            )
+            .jar(
+                factory.jarBuilder("dependencies")
+            )
+            .install(path);
+
+        module.construct(
+            factory.schematicDefinitionBuilder()
+                .repository(path)
+                .plugin("dependencies")
+                .dependency(
+                    "group",
+                    "dependency",
+                    "1.0.0",
+                    DependencyScope.IMPLEMENTATION,
+                    new ExclusionDefinition("group", "excluded")
+                )
+                .conveyorJson(path),
+            Stage.COMPILE
+        );
+
+        assertThat(defaultConstructionDirectory(path).resolve("dependencies"))
+            .content()
+            .isEqualTo("dependency-1.0.0");
+    }
+
+    @Test
+    void givenExcludedTransitiveDependency_whenConstructToStage_thenDependencyIsNotInModulePath(
+        Path path,
+        ConveyorModule module,
+        BuilderFactory factory
+    ) throws Exception {
+        factory.repositoryBuilder()
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("dependency")
+                    .dependency("transitive")
+            )
+            .jar(
+                factory.jarBuilder("dependency")
+            )
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("transitive")
+                    .dependency("excluded")
+            )
+            .jar(
+                factory.jarBuilder("dependency")
+                    .name("transitive")
+            )
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("excluded")
+            )
+            .jar(
+                factory.jarBuilder("dependency")
+                    .name("excluded")
+            )
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("dependencies")
+            )
+            .jar(
+                factory.jarBuilder("dependencies")
+            )
+            .install(path);
+
+        module.construct(
+            factory.schematicDefinitionBuilder()
+                .repository(path)
+                .plugin("dependencies")
+                .dependency(
+                    "group",
+                    "dependency",
+                    "1.0.0",
+                    DependencyScope.IMPLEMENTATION,
+                    new ExclusionDefinition("group", "excluded")
+                )
+                .conveyorJson(path),
+            Stage.COMPILE
+        );
+
+        assertThat(defaultConstructionDirectory(path).resolve("dependencies"))
+            .content()
+            .hasLineCount(2)
+            .contains("dependency-1.0.0", "transitive-1.0.0");
+    }
+
+    @Test
+    void givenTransitivelyExcludedDependency_whenConstructToStage_thenDependencyIsNotInModulePath(
+        Path path,
+        ConveyorModule module,
+        BuilderFactory factory
+    ) throws Exception {
+        factory.repositoryBuilder()
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("dependency")
+                    .dependency(
+                        "group",
+                        "transitive",
+                        "1.0.0",
+                        DependencyScope.IMPLEMENTATION,
+                        new ExclusionDefinition("group", "excluded")
+                    )
+            )
+            .jar(
+                factory.jarBuilder("dependency")
+            )
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("transitive")
+                    .dependency("excluded")
+            )
+            .jar(
+                factory.jarBuilder("dependency")
+                    .name("transitive")
+            )
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("excluded")
+            )
+            .jar(
+                factory.jarBuilder("dependency")
+                    .name("excluded")
+            )
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("dependencies")
+            )
+            .jar(
+                factory.jarBuilder("dependencies")
+            )
+            .install(path);
+
+        module.construct(
+            factory.schematicDefinitionBuilder()
+                .repository(path)
+                .plugin("dependencies")
+                .dependency("dependency")
+                .conveyorJson(path),
+            Stage.COMPILE
+        );
+
+        assertThat(defaultConstructionDirectory(path).resolve("dependencies"))
+            .content()
+            .hasLineCount(2)
+            .contains("dependency-1.0.0", "transitive-1.0.0");
     }
 }

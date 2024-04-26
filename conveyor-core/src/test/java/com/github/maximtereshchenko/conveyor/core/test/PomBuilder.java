@@ -6,10 +6,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 final class PomBuilder {
 
@@ -92,15 +89,25 @@ final class PomBuilder {
     }
 
     PomBuilder dependency(String artifactId) {
-        return dependency(artifactId, version, null);
+        return dependency(groupId, artifactId, version, null);
     }
 
-    PomBuilder dependency(String artifactId, String version, String scope) {
-        return dependency(groupId, artifactId, version, scope);
-    }
-
-    PomBuilder dependency(String groupId, String artifactId, String version, String scope) {
-        dependencies.add(new PomModel.Dependency(groupId, artifactId, version, scope));
+    PomBuilder dependency(
+        String groupId,
+        String artifactId,
+        String version,
+        String scope,
+        PomModel.Exclusion... exclusions
+    ) {
+        dependencies.add(
+            new PomModel.Dependency(
+                groupId,
+                artifactId,
+                version,
+                scope,
+                List.of(exclusions)
+            )
+        );
         return this;
     }
 
@@ -110,7 +117,7 @@ final class PomBuilder {
 
     PomBuilder managedDependency(String artifactId, String version, String scope) {
         dependencyManagement.add(
-            new PomModel.Dependency(groupId, artifactId, version, scope)
+            new PomModel.Dependency(groupId, artifactId, version, scope, null)
         );
         return this;
     }
