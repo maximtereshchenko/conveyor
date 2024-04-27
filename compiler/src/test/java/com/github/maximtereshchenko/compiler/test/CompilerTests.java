@@ -1,5 +1,6 @@
-package com.github.maximtereshchenko.compiler;
+package com.github.maximtereshchenko.compiler.test;
 
+import com.github.maximtereshchenko.compiler.Compiler;
 import com.github.maximtereshchenko.test.common.Directories;
 import com.github.maximtereshchenko.test.common.JimfsExtension;
 import org.junit.jupiter.api.Test;
