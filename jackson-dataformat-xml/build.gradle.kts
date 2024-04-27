@@ -1,6 +1,7 @@
 plugins {
     java
     `shadow-conventions`
+    `conveyor-component`
 }
 
 shadowConventions {
