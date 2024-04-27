@@ -103,7 +103,9 @@ final class PomDefinitionFactory {
     private Map<String, String> properties(Node root) {
         return namedChildren(root, "properties")
             .flatMap(node -> children(node, child -> child.getNodeType() == Node.ELEMENT_NODE))
-            .collect(Collectors.toMap(Node::getNodeName, Node::getTextContent));
+            .collect(
+                Collectors.toMap(Node::getNodeName, Node::getTextContent, (previous, next) -> next)
+            );
     }
 
     private <T> List<T> dependencies(Node node, Function<Node, T> mapper) {

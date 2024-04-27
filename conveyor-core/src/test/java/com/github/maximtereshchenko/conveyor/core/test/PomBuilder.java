@@ -6,13 +6,14 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 final class PomBuilder {
 
-    private final Collection<PomModel.Dependency> dependencies = new ArrayList<>();
-    private final Collection<PomModel.Dependency> dependencyManagement = new ArrayList<>();
-    private final Map<String, String> properties = new HashMap<>();
+    private final List<PomModel.Dependency> dependencies = new ArrayList<>();
+    private final List<PomModel.Dependency> dependencyManagement = new ArrayList<>();
+    private final PomModel.Properties properties = new PomModel.Properties();
     private final XmlMapper xmlMapper;
     private String groupId = "group";
     private String artifactId = "";

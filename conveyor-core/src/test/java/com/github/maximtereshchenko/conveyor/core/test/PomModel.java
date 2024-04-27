@@ -5,8 +5,7 @@ import com.fasterxml.jackson.dataformat.xml.shadowed.annotation.JacksonXmlElemen
 import com.fasterxml.jackson.dataformat.xml.shadowed.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.shadowed.annotation.JacksonXmlRootElement;
 
-import java.util.Collection;
-import java.util.Map;
+import java.util.*;
 
 @JacksonXmlRootElement(localName = "project")
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -22,11 +21,11 @@ record PomModel(
     String groupId,
     String artifactId,
     String version,
-    Map<String, String> properties,
+    Properties properties,
     DependencyManagement dependencyManagement,
     @JacksonXmlProperty(localName = "dependency")
     @JacksonXmlElementWrapper(localName = "dependencies")
-    Collection<Dependency> dependencies
+    List<Dependency> dependencies
 ) {
 
     PomModel(
@@ -34,9 +33,9 @@ record PomModel(
         String groupId,
         String artifactId,
         String version,
-        Map<String, String> properties,
+        Properties properties,
         DependencyManagement dependencyManagement,
-        Collection<Dependency> dependencies
+        List<Dependency> dependencies
     ) {
         this(
             "http://www.w3.org/2001/XMLSchema-instance",
@@ -72,4 +71,70 @@ record PomModel(
     ) {}
 
     record Exclusion(String groupId, String artifactId) {}
+
+    public static class Properties implements Map<String, String> {
+
+        private final List<Map.Entry<String, String>> entries = new ArrayList<>();
+
+        @Override
+        public int size() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return entries.isEmpty();
+        }
+
+        @Override
+        public boolean containsKey(Object key) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean containsValue(Object value) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public String get(Object key) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public String put(String key, String value) {
+            entries.add(Map.entry(key, value));
+            return "";
+        }
+
+        @Override
+        public String remove(Object key) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void putAll(Map<? extends String, ? extends String> m) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void clear() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Set<String> keySet() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Collection<String> values() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Set<Entry<String, String>> entrySet() {
+            return new LinkedHashSet<>(entries);
+        }
+    }
 }

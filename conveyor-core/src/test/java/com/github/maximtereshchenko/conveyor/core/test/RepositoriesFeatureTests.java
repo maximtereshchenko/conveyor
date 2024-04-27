@@ -1041,4 +1041,46 @@ final class RepositoriesFeatureTests extends ConveyorTest {
             .hasLineCount(2)
             .contains("dependency-1.0.0", "transitive-1.0.0");
     }
+
+    @Test
+    void givenDuplicatePomProperty_whenConstructToStage_thenPropertyValueOverridden(
+        Path path,
+        ConveyorModule module,
+        BuilderFactory factory,
+        WireMockServer wireMockServer
+    ) throws Exception {
+        factory.repositoryBuilder()
+            .pom(
+                factory.pomBuilder()
+                    .artifactId("template")
+                    .property("duplicate.key", "initial")
+                    .property("duplicate.key", "overridden")
+            )
+            .pom(
+                factory.pomBuilder()
+                    .artifactId("properties")
+            )
+            .jar(
+                factory.jarBuilder("properties")
+            )
+            .install(wireMockServer);
+
+        module.construct(
+            factory.schematicDefinitionBuilder()
+                .template("template")
+                .repository(wireMockServer.baseUrl())
+                .plugin(
+                    "group",
+                    "properties",
+                    "1.0.0",
+                    Map.of("keys", "duplicate.key")
+                )
+                .conveyorJson(path),
+            Stage.COMPILE
+        );
+
+        assertThat(defaultConstructionDirectory(path).resolve("properties"))
+            .content()
+            .isEqualTo("duplicate.key=overridden");
+    }
 }
