@@ -24,7 +24,7 @@ final class Properties {
                         matchResult.group(),
                         value(matchResult.group(1))
                             .map(this::interpolated)
-                            .orElseThrow()
+                            .orElse("")
                     ),
                 (a, b) -> a
             );

@@ -60,6 +60,11 @@ abstract class StoredArtifact implements Artifact {
         var schematicProperties = new Properties(inheritanceHierarchyModel.properties());
         var exclusions = new HashSet<>(propagatedExclusions);
         exclusions.addAll(artifactModel.exclusions());
+        var schematicPreferences = preferencesFactory.preferences(
+            inheritanceHierarchyModel.preferences(),
+            schematicProperties,
+            repositories
+        );
         return inheritanceHierarchyModel.dependencies()
             .stream()
             .filter(dependencyModel -> !exclusions.contains(dependencyModel.idModel().id(properties)))
@@ -68,11 +73,7 @@ abstract class StoredArtifact implements Artifact {
                     new TransitivelyReferencedArtifact(
                         dependencyModel,
                         preferences,
-                        preferencesFactory.preferences(
-                            inheritanceHierarchyModel.preferences(),
-                            schematicProperties,
-                            repositories
-                        ),
+                        schematicPreferences,
                         schematicProperties,
                         repositories,
                         schematicModelFactory,

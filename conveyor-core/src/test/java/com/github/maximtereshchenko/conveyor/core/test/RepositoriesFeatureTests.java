@@ -16,6 +16,7 @@ import java.nio.file.Paths;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 
 @ExtendWith(WireMockExtension.class)
 final class RepositoriesFeatureTests extends ConveyorTest {
@@ -1082,5 +1083,31 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         assertThat(defaultConstructionDirectory(path).resolve("properties"))
             .content()
             .isEqualTo("duplicate.key=overridden");
+    }
+
+    @Test
+    void givenNoPropertyToInterpolateInImportedManagedDependency_whenConstructToStage_thenSkipIt(
+        Path path,
+        ConveyorModule module,
+        BuilderFactory factory,
+        WireMockServer wireMockServer
+    ) throws Exception {
+        factory.repositoryBuilder()
+            .pom(
+                factory.pomBuilder()
+                    .artifactId("instant")
+                    .managedDependency("without-version", "${no.such.property}")
+            )
+            .jar(
+                factory.jarBuilder("instant")
+            )
+            .install(wireMockServer);
+        var conveyorJson = factory.schematicDefinitionBuilder()
+            .repository(wireMockServer.baseUrl())
+            .plugin("instant")
+            .conveyorJson(path);
+
+        assertThatCode(() -> module.construct(conveyorJson, Stage.COMPILE))
+            .doesNotThrowAnyException();
     }
 }
