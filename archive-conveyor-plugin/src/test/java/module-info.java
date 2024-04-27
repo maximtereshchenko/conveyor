@@ -1,4 +1,5 @@
 module com.github.maximtereshchenko.conveyor.plugin.archive.test {
+    requires com.github.maximtereshchenko.conveyor.plugin.archive;
     requires com.github.maximtereshchenko.conveyor.plugin.api;
     requires com.github.maximtereshchenko.conveyor.common.api;
     requires com.github.maximtereshchenko.conveyor.plugin.test;
@@ -8,5 +9,4 @@ module com.github.maximtereshchenko.conveyor.plugin.archive.test {
     requires org.junit.jupiter.params;
     requires org.assertj.core;
     opens com.github.maximtereshchenko.conveyor.plugin.archive.test to org.junit.platform.commons;
-    uses com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
 }

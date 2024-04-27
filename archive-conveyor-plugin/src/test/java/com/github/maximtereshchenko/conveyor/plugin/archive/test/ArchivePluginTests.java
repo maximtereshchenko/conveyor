@@ -1,8 +1,10 @@
 package com.github.maximtereshchenko.conveyor.plugin.archive.test;
 
 import com.github.maximtereshchenko.conveyor.common.api.*;
+import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskBinding;
-import com.github.maximtereshchenko.conveyor.plugin.test.ConveyorTaskBindings;
+import com.github.maximtereshchenko.conveyor.plugin.archive.ArchivePlugin;
+import com.github.maximtereshchenko.conveyor.plugin.test.ConveyorTasks;
 import com.github.maximtereshchenko.conveyor.plugin.test.FakeConveyorSchematicBuilder;
 import com.github.maximtereshchenko.test.common.Directories;
 import com.github.maximtereshchenko.test.common.JimfsExtension;
@@ -16,6 +18,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -24,6 +27,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(JimfsExtension.class)
 final class ArchivePluginTests {
 
+    private final ConveyorPlugin plugin = new ArchivePlugin();
+
     static Stream<Arguments> entries() {
         return Directories.differentDirectoryEntries()
             .map(Arguments::arguments);
@@ -31,8 +36,12 @@ final class ArchivePluginTests {
 
     @Test
     void givenPlugin_whenBindings_thenTaskBindToArchiveRun(Path path) {
-        ConveyorTaskBindings.from(FakeConveyorSchematicBuilder.discoveryDirectory(path).build())
-            .assertThat()
+        assertThat(
+            plugin.bindings(
+                FakeConveyorSchematicBuilder.discoveryDirectory(path).build(),
+                Map.of()
+            )
+        )
             .hasSize(1)
             .first()
             .extracting(ConveyorTaskBinding::stage, ConveyorTaskBinding::step)
@@ -41,11 +50,11 @@ final class ArchivePluginTests {
 
     @Test
     void givenNoExplodedModule_whenExecuteTask_thenNoModuleProduct(Path path) {
-        var products = ConveyorTaskBindings.from(
-                FakeConveyorSchematicBuilder.discoveryDirectory(path)
-                    .build()
-            )
-            .executeTasks();
+        var products = ConveyorTasks.executeTasks(
+            FakeConveyorSchematicBuilder.discoveryDirectory(path)
+                .build(),
+            plugin
+        );
 
         assertThat(products).isEmpty();
     }
@@ -60,10 +69,11 @@ final class ArchivePluginTests {
         Directories.writeFiles(explodedModule, entries);
         var schematic = FakeConveyorSchematicBuilder.discoveryDirectory(path).build();
 
-        var products = ConveyorTaskBindings.from(schematic)
-            .executeTasks(
-                new Product(schematic.coordinates(), explodedModule, ProductType.EXPLODED_MODULE)
-            );
+        var products = ConveyorTasks.executeTasks(
+            schematic,
+            plugin,
+            new Product(schematic.coordinates(), explodedModule, ProductType.EXPLODED_MODULE)
+        );
 
         assertThat(products)
             .filteredOn(product -> product.type() == ProductType.MODULE)
@@ -84,19 +94,20 @@ final class ArchivePluginTests {
         Files.createFile(Directories.createDirectoriesForFile(explodedModule.resolve("file")));
         var schematic = FakeConveyorSchematicBuilder.discoveryDirectory(path).build();
 
-        var products = ConveyorTaskBindings.from(schematic)
-            .executeTasks(
-                new Product(
-                    new SchematicCoordinates(
-                        "group",
-                        "other-schematic",
-                        "1.0.0"
-                    ),
-                    path.resolve("incorrect"),
-                    ProductType.EXPLODED_MODULE
+        var products = ConveyorTasks.executeTasks(
+            schematic,
+            plugin,
+            new Product(
+                new SchematicCoordinates(
+                    "group",
+                    "other-schematic",
+                    "1.0.0"
                 ),
-                new Product(schematic.coordinates(), explodedModule, ProductType.EXPLODED_MODULE)
-            );
+                path.resolve("incorrect"),
+                ProductType.EXPLODED_MODULE
+            ),
+            new Product(schematic.coordinates(), explodedModule, ProductType.EXPLODED_MODULE)
+        );
 
         assertThat(products)
             .filteredOn(product -> product.type() == ProductType.MODULE)

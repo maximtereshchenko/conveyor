@@ -109,7 +109,7 @@ final class RunJunitJupiterTestsTask implements ConveyorTask {
                         .map(ModuleDescriptor::name)
                         .collect(Collectors.toSet())
                 ),
-            Thread.currentThread().getContextClassLoader()
+            getClass().getClassLoader()
         );
     }
 

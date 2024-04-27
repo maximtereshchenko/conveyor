@@ -1,4 +1,5 @@
 module com.github.maximtereshchenko.conveyor.plugin.junit.jupiter.test {
+    requires com.github.maximtereshchenko.conveyor.plugin.junit.jupiter;
     requires com.github.maximtereshchenko.conveyor.common.api;
     requires com.github.maximtereshchenko.conveyor.plugin.api;
     requires com.github.maximtereshchenko.conveyor.plugin.test;

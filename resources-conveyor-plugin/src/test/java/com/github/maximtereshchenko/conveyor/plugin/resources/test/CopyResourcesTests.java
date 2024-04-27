@@ -1,8 +1,10 @@
 package com.github.maximtereshchenko.conveyor.plugin.resources.test;
 
 import com.github.maximtereshchenko.conveyor.common.api.*;
+import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskBinding;
-import com.github.maximtereshchenko.conveyor.plugin.test.ConveyorTaskBindings;
+import com.github.maximtereshchenko.conveyor.plugin.resources.ResourcesPlugin;
+import com.github.maximtereshchenko.conveyor.plugin.test.ConveyorTasks;
 import com.github.maximtereshchenko.conveyor.plugin.test.FakeConveyorSchematicBuilder;
 import com.github.maximtereshchenko.test.common.Directories;
 import com.github.maximtereshchenko.test.common.JimfsExtension;
@@ -14,6 +16,7 @@ import org.junit.jupiter.params.provider.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -24,6 +27,8 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 @ExtendWith(JimfsExtension.class)
 final class CopyResourcesTests {
+
+    private final ConveyorPlugin plugin = new ResourcesPlugin();
 
     public static Stream<Arguments> resources() {
         return Directories.differentDirectoryEntries()
@@ -42,8 +47,12 @@ final class CopyResourcesTests {
 
     @Test
     void givenPlugin_whenBindings_thenCopyResourcesBindingReturned(Path path) {
-        ConveyorTaskBindings.from(FakeConveyorSchematicBuilder.discoveryDirectory(path).build())
-            .assertThat()
+        assertThat(
+            plugin.bindings(
+                FakeConveyorSchematicBuilder.discoveryDirectory(path).build(),
+                Map.of()
+            )
+        )
             .extracting(ConveyorTaskBinding::stage, ConveyorTaskBinding::step)
             .contains(tuple(Stage.COMPILE, Step.FINALIZE), tuple(Stage.TEST, Step.PREPARE));
     }
@@ -58,8 +67,7 @@ final class CopyResourcesTests {
         var schematic = FakeConveyorSchematicBuilder.discoveryDirectory(path).build();
         var product = new Product(schematic.coordinates(), explodedModule, productType);
 
-        var products = ConveyorTaskBindings.from(schematic)
-            .executeTasks(product);
+        var products = ConveyorTasks.executeTasks(schematic, plugin, product);
 
         assertThat(explodedModule).isEmptyDirectory();
         assertThat(products).containsExactly(product);
@@ -81,8 +89,11 @@ final class CopyResourcesTests {
         );
         var schematic = FakeConveyorSchematicBuilder.discoveryDirectory(path).build();
 
-        var products = ConveyorTaskBindings.from(schematic)
-            .executeTasks(new Product(schematic.coordinates(), explodedModule, productType));
+        var products = ConveyorTasks.executeTasks(
+            schematic,
+            plugin,
+            new Product(schematic.coordinates(), explodedModule, productType)
+        );
 
         Directories.assertThatDirectoryContentsEqual(explodedModule, resourcesDirectory);
         assertThat(products)
@@ -96,12 +107,11 @@ final class CopyResourcesTests {
     void givenNoExplodedModule_whenExecuteTasks_thenNoFilesCopied(String sourceSet, Path path)
         throws IOException {
         Files.createDirectories(resourcesDirectory(path, sourceSet));
-        var bindings = ConveyorTaskBindings.from(
-            FakeConveyorSchematicBuilder.discoveryDirectory(path)
-                .build()
-        );
+        var schematic = FakeConveyorSchematicBuilder.discoveryDirectory(path)
+            .build();
 
-        assertThatCode(bindings::executeTasks).doesNotThrowAnyException();
+        assertThatCode(() -> ConveyorTasks.executeTasks(schematic, plugin))
+            .doesNotThrowAnyException();
     }
 
     @ParameterizedTest
@@ -124,19 +134,20 @@ final class CopyResourcesTests {
         );
         var schematic = FakeConveyorSchematicBuilder.discoveryDirectory(path).build();
 
-        ConveyorTaskBindings.from(schematic)
-            .executeTasks(
-                new Product(
-                    new SchematicCoordinates(
-                        "group",
-                        "other-schematic",
-                        "1.0.0"
-                    ),
-                    otherExplodedModule,
-                    productType
+        ConveyorTasks.executeTasks(
+            schematic,
+            plugin,
+            new Product(
+                new SchematicCoordinates(
+                    "group",
+                    "other-schematic",
+                    "1.0.0"
                 ),
-                new Product(schematic.coordinates(), explodedModule, productType)
-            );
+                otherExplodedModule,
+                productType
+            ),
+            new Product(schematic.coordinates(), explodedModule, productType)
+        );
 
         assertThat(otherExplodedModule).isEmptyDirectory();
         Directories.assertThatDirectoryContentsEqual(explodedModule, resourcesDirectory);

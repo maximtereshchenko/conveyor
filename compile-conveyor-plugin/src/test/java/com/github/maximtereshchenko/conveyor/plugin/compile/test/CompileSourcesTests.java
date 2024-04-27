@@ -2,12 +2,13 @@ package com.github.maximtereshchenko.conveyor.plugin.compile.test;
 
 import com.github.maximtereshchenko.conveyor.common.api.*;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskBinding;
-import com.github.maximtereshchenko.conveyor.plugin.test.ConveyorTaskBindings;
+import com.github.maximtereshchenko.conveyor.plugin.test.ConveyorTasks;
 import com.github.maximtereshchenko.conveyor.plugin.test.FakeConveyorSchematicBuilder;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.groups.Tuple.tuple;
@@ -16,19 +17,23 @@ final class CompileSourcesTests extends CompilePluginTest {
 
     @Test
     void givenPlugin_whenBindings_thenDiscoverSourcesAndCompileSourcesBindingsReturned(Path path) {
-        ConveyorTaskBindings.from(FakeConveyorSchematicBuilder.discoveryDirectory(path).build())
-            .assertThat()
+        assertThat(
+            plugin.bindings(
+                FakeConveyorSchematicBuilder.discoveryDirectory(path).build(),
+                Map.of()
+            )
+        )
             .extracting(ConveyorTaskBinding::stage, ConveyorTaskBinding::step)
             .contains(tuple(Stage.COMPILE, Step.PREPARE), tuple(Stage.COMPILE, Step.RUN));
     }
 
     @Test
     void givenNoSources_whenExecuteTasks_thenNoProducts(Path path) {
-        var products = ConveyorTaskBindings.from(
-                FakeConveyorSchematicBuilder.discoveryDirectory(path)
-                    .build()
-            )
-            .executeTasks();
+        var products = ConveyorTasks.executeTasks(
+            FakeConveyorSchematicBuilder.discoveryDirectory(path)
+                .build(),
+            plugin
+        );
 
         assertThat(products).isEmpty();
     }
@@ -46,7 +51,7 @@ final class CompileSourcesTests extends CompilePluginTest {
         );
         var schematic = FakeConveyorSchematicBuilder.discoveryDirectory(path).build();
 
-        var products = ConveyorTaskBindings.from(schematic).executeTasks();
+        var products = ConveyorTasks.executeTasks(schematic, plugin);
 
         var mainClass = explodedModule(schematic.constructionDirectory())
             .resolve("main")
@@ -86,7 +91,7 @@ final class CompileSourcesTests extends CompilePluginTest {
         );
         var dependencySchematic = FakeConveyorSchematicBuilder.discoveryDirectory(dependency)
             .build();
-        ConveyorTaskBindings.from(dependencySchematic).executeTasks();
+        ConveyorTasks.executeTasks(dependencySchematic, plugin);
         var dependent = path.resolve("dependent");
         write(
             moduleInfoJava(srcMainJava(dependent)),
@@ -113,7 +118,7 @@ final class CompileSourcesTests extends CompilePluginTest {
             .dependency(explodedModule(dependencySchematic.constructionDirectory()))
             .build();
 
-        var products = ConveyorTaskBindings.from(schematic).executeTasks();
+        var products = ConveyorTasks.executeTasks(schematic, plugin);
 
         var mainClass = explodedModule(schematic.constructionDirectory())
             .resolve("main")
@@ -178,8 +183,8 @@ final class CompileSourcesTests extends CompilePluginTest {
                 secondDependency
             )
             .build();
-        ConveyorTaskBindings.from(firstDependencySchematic).executeTasks();
-        ConveyorTaskBindings.from(secondDependencySchematic).executeTasks();
+        ConveyorTasks.executeTasks(firstDependencySchematic, plugin);
+        ConveyorTasks.executeTasks(secondDependencySchematic, plugin);
         var dependent = path.resolve("dependent");
         write(
             moduleInfoJava(srcMainJava(dependent)),
@@ -210,7 +215,7 @@ final class CompileSourcesTests extends CompilePluginTest {
             .dependency(explodedModule(secondDependencySchematic.constructionDirectory()))
             .build();
 
-        var products = ConveyorTaskBindings.from(schematic).executeTasks();
+        var products = ConveyorTasks.executeTasks(schematic, plugin);
 
         var mainClass = explodedModule(schematic.constructionDirectory())
             .resolve("main")
@@ -242,19 +247,19 @@ final class CompileSourcesTests extends CompilePluginTest {
         );
         var schematic = FakeConveyorSchematicBuilder.discoveryDirectory(path).build();
 
-        ConveyorTaskBindings.from(schematic)
-            .executeTasks(
-                new Product(
-                    new SchematicCoordinates(
-                        "group",
-                        "other-schematic",
-                        "1.0.0"
-                    ),
-                    path.resolve("incorrect"),
-                    ProductType.SOURCE
-                )
-            );
-
+        ConveyorTasks.executeTasks(
+            schematic,
+            plugin,
+            new Product(
+                new SchematicCoordinates(
+                    "group",
+                    "other-schematic",
+                    "1.0.0"
+                ),
+                path.resolve("incorrect"),
+                ProductType.SOURCE
+            )
+        );
         assertThat(
             explodedModule(schematic.constructionDirectory())
                 .resolve("main")

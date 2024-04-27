@@ -1,5 +1,7 @@
 package com.github.maximtereshchenko.conveyor.plugin.compile.test;
 
+import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
+import com.github.maximtereshchenko.conveyor.plugin.compile.CompilePlugin;
 import com.github.maximtereshchenko.test.common.Directories;
 import com.github.maximtereshchenko.test.common.JimfsExtension;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,6 +12,8 @@ import java.nio.file.Path;
 
 @ExtendWith(JimfsExtension.class)
 abstract class CompilePluginTest {
+
+    ConveyorPlugin plugin = new CompilePlugin();
 
     Path srcMainJava(Path path) {
         return path.resolve("src").resolve("main").resolve("java");

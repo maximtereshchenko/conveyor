@@ -2,8 +2,10 @@ package com.github.maximtereshchenko.conveyor.plugin.junit.jupiter.test;
 
 import com.github.maximtereshchenko.compiler.Compiler;
 import com.github.maximtereshchenko.conveyor.common.api.*;
+import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskBinding;
-import com.github.maximtereshchenko.conveyor.plugin.test.ConveyorTaskBindings;
+import com.github.maximtereshchenko.conveyor.plugin.junit.jupiter.JunitJupiterPlugin;
+import com.github.maximtereshchenko.conveyor.plugin.test.ConveyorTasks;
 import com.github.maximtereshchenko.conveyor.plugin.test.FakeConveyorSchematicBuilder;
 import com.github.maximtereshchenko.test.common.Directories;
 import com.github.maximtereshchenko.test.common.JimfsExtension;
@@ -13,9 +15,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.lang.module.ModuleReference;
+import java.lang.module.ResolvedModule;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -26,12 +32,17 @@ import static org.assertj.core.groups.Tuple.tuple;
 @ExtendWith(JimfsExtension.class)
 final class JunitJupiterPluginTests {
 
+    private final ConveyorPlugin plugin = new JunitJupiterPlugin();
     private final Compiler compiler = new Compiler();
 
     @Test
     void givenPlugin_whenBindings_thenRunJunitJupiterTestsBindingReturned(Path path) {
-        ConveyorTaskBindings.from(FakeConveyorSchematicBuilder.discoveryDirectory(path).build())
-            .assertThat()
+        assertThat(
+            plugin.bindings(
+                FakeConveyorSchematicBuilder.discoveryDirectory(path).build(),
+                Map.of()
+            )
+        )
             .extracting(ConveyorTaskBinding::stage, ConveyorTaskBinding::step)
             .contains(tuple(Stage.TEST, Step.RUN));
     }
@@ -40,9 +51,7 @@ final class JunitJupiterPluginTests {
     void givenTests_whenExecuteTasks_thenTestsExecuted(Path path) throws IOException {
         var testSources = path.resolve("test-sources");
         var testClasses = path.resolve("test-classes");
-        var modulePath = Stream.of(System.getProperty("jdk.module.path").split(":"))
-            .map(Paths::get)
-            .collect(Collectors.toSet());
+        var modulePath = modulePath();
         compiler.compile(
             Set.of(
                 Files.writeString(
@@ -85,11 +94,12 @@ final class JunitJupiterPluginTests {
         var standardOut = System.out;
         System.setOut(new PrintStream(outputStream));
 
-        ConveyorTaskBindings.from(schematic)
-            .executeTasks(
-                new Product(schematic.coordinates(), path, ProductType.EXPLODED_MODULE),
-                new Product(schematic.coordinates(), testClasses, ProductType.EXPLODED_TEST_MODULE)
-            );
+        ConveyorTasks.executeTasks(
+            schematic,
+            plugin,
+            new Product(schematic.coordinates(), path, ProductType.EXPLODED_MODULE),
+            new Product(schematic.coordinates(), testClasses, ProductType.EXPLODED_TEST_MODULE)
+        );
 
         System.setOut(standardOut);
         assertThat(outputStream.toString().trim()).isEqualTo("test() - OK");
@@ -99,9 +109,7 @@ final class JunitJupiterPluginTests {
     void givenFailingTest_whenExecuteTasks_thenExceptionReported(Path path) throws IOException {
         var testSources = path.resolve("test-sources");
         var testClasses = path.resolve("test-classes");
-        var modulePath = Stream.of(System.getProperty("jdk.module.path").split(":"))
-            .map(Paths::get)
-            .collect(Collectors.toSet());
+        var modulePath = modulePath();
         compiler.compile(
             Set.of(
                 Files.writeString(
@@ -140,7 +148,6 @@ final class JunitJupiterPluginTests {
                 (a, b) -> a
             )
             .build();
-        var bindings = ConveyorTaskBindings.from(schematic);
         var explodedModule = new Product(
             schematic.coordinates(),
             path,
@@ -155,7 +162,9 @@ final class JunitJupiterPluginTests {
         var standardOut = System.out;
         System.setOut(new PrintStream(outputStream));
 
-        assertThatThrownBy(() -> bindings.executeTasks(explodedModule, explodedTestModule))
+        assertThatThrownBy(() ->
+            ConveyorTasks.executeTasks(schematic, plugin, explodedModule, explodedTestModule)
+        )
             .isInstanceOf(IllegalArgumentException.class);
 
         System.setOut(standardOut);
@@ -170,14 +179,14 @@ final class JunitJupiterPluginTests {
     @Test
     void givenNoExplodedTestModule_whenExecuteTasks_thenNoTestsAreExecuted(Path path) {
         var schematic = FakeConveyorSchematicBuilder.discoveryDirectory(path).build();
-        var bindings = ConveyorTaskBindings.from(schematic);
         var explodedModule = new Product(
             schematic.coordinates(),
             path,
             ProductType.EXPLODED_MODULE
         );
 
-        assertThatCode(() -> bindings.executeTasks(explodedModule)).doesNotThrowAnyException();
+        assertThatCode(() -> ConveyorTasks.executeTasks(schematic, plugin, explodedModule))
+            .doesNotThrowAnyException();
     }
 
     @Test
@@ -185,9 +194,7 @@ final class JunitJupiterPluginTests {
         throws IOException {
         var testSources = path.resolve("test-sources");
         var testClasses = path.resolve("test-classes");
-        var modulePath = Stream.of(System.getProperty("jdk.module.path").split(":"))
-            .map(Paths::get)
-            .collect(Collectors.toSet());
+        var modulePath = modulePath();
         compiler.compile(
             Set.of(
                 Files.writeString(
@@ -226,14 +233,14 @@ final class JunitJupiterPluginTests {
                 (a, b) -> a
             )
             .build();
-        var bindings = ConveyorTaskBindings.from(schematic);
         var explodedTestModule = new Product(
             schematic.coordinates(),
             testClasses,
             ProductType.EXPLODED_TEST_MODULE
         );
 
-        assertThatCode(() -> bindings.executeTasks(explodedTestModule)).doesNotThrowAnyException();
+        assertThatCode(() -> ConveyorTasks.executeTasks(schematic, plugin, explodedTestModule))
+            .doesNotThrowAnyException();
     }
 
     @Test
@@ -242,9 +249,7 @@ final class JunitJupiterPluginTests {
     ) throws IOException {
         var testSources = path.resolve("test-sources");
         var testClasses = path.resolve("test-classes");
-        var modulePath = Stream.of(System.getProperty("jdk.module.path").split(":"))
-            .map(Paths::get)
-            .collect(Collectors.toSet());
+        var modulePath = modulePath();
         compiler.compile(
             Set.of(
                 Files.writeString(
@@ -283,7 +288,6 @@ final class JunitJupiterPluginTests {
                 (a, b) -> a
             )
             .build();
-        var bindings = ConveyorTaskBindings.from(schematic);
         var explodedTestModule = new Product(
             schematic.coordinates(),
             testClasses,
@@ -299,7 +303,34 @@ final class JunitJupiterPluginTests {
             ProductType.EXPLODED_TEST_MODULE
         );
 
-        assertThatCode(() -> bindings.executeTasks(otherExplodedTestModule, explodedTestModule))
+        assertThatCode(() ->
+            ConveyorTasks.executeTasks(
+                schematic,
+                plugin,
+                otherExplodedTestModule,
+                explodedTestModule
+            )
+        )
             .doesNotThrowAnyException();
+    }
+
+    private Set<Path> modulePath() {
+        var configuration = getClass()
+            .getModule()
+            .getLayer()
+            .configuration();
+        return Stream.of(
+                "org.junit.jupiter.api",
+                "org.opentest4j",
+                "org.junit.platform.commons",
+                "org.apiguardian.api"
+            )
+            .map(configuration::findModule)
+            .flatMap(Optional::stream)
+            .map(ResolvedModule::reference)
+            .map(ModuleReference::location)
+            .flatMap(Optional::stream)
+            .map(Paths::get)
+            .collect(Collectors.toSet());
     }
 }
