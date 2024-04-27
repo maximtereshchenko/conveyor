@@ -683,6 +683,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                     1.0.0-beta.11, 1.0.0-rc.1
                     1.0, 1.0.1
                     1.0-alpha, 1.0
+                    1, 1.1
                     """
     )
     void givenTransitiveDependency_whenConstructToStage_thenDependencyWithHigherSemanticVersionIsUsed(

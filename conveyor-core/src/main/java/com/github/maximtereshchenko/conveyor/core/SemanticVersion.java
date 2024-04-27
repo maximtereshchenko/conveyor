@@ -116,19 +116,23 @@ final class SemanticVersion implements Comparable<SemanticVersion> {
     }
 
     private int major() {
-        return versionNumbers().getFirst();
+        return versionAt(0);
     }
 
     private int minor() {
-        return versionNumbers().get(1);
+        return versionAt(1);
     }
 
     private int patch() {
+        return versionAt(2);
+    }
+
+    private int versionAt(int index) {
         var versionNumbers = versionNumbers();
-        if (versionNumbers.size() == 3) {
-            return versionNumbers.getLast();
+        if (versionNumbers.size() <= index) {
+            return 0;
         }
-        return 0;
+        return versionNumbers.get(index);
     }
 
     private List<String> preReleaseIdentifiers() {
