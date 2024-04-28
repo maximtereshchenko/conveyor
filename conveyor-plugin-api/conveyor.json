@@ -1,0 +1,17 @@
+{
+  "group": "com.github.maximtereshchenko",
+  "name": "conveyor-plugin-api",
+  "version": "1.0.0",
+  "template": {
+    "group": "com.github.maximtereshchenko",
+    "name": "conveyor-template",
+    "version": "1.0.0"
+  },
+  "dependencies": [
+    {
+      "group": "com.github.maximtereshchenko",
+      "name": "conveyor-common-api",
+      "version": "1.0.0"
+    }
+  ]
+}

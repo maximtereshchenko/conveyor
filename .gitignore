@@ -2,3 +2,6 @@
 .idea
 *.iml
 build
+.conveyor
+.conveyor-cache
+.conveyor-repository

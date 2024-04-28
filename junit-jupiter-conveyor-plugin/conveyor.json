@@ -1,0 +1,69 @@
+{
+  "group": "com.github.maximtereshchenko",
+  "name": "junit-jupiter-conveyor-plugin",
+  "version": "1.0.0",
+  "template": {
+    "group": "com.github.maximtereshchenko",
+    "name": "conveyor-template",
+    "version": "1.0.0"
+  },
+  "preferences": {
+    "inclusions": [
+      {
+        "group": "org.junit",
+        "name": "junit-bom",
+        "version": "5.10.2"
+      }
+    ]
+  },
+  "dependencies": [
+    {
+      "group": "com.github.maximtereshchenko",
+      "name": "conveyor-plugin-api",
+      "version": "1.0.0"
+    },
+    {
+      "group": "org.junit.platform",
+      "name": "junit-platform-launcher"
+    },
+    {
+      "group": "org.junit.jupiter",
+      "name": "junit-jupiter-engine"
+    },
+    {
+      "group": "com.github.maximtereshchenko",
+      "name": "test-common",
+      "version": "1.0.0",
+      "scope": "TEST"
+    },
+    {
+      "group": "com.github.maximtereshchenko",
+      "name": "conveyor-plugin-test",
+      "version": "1.0.0",
+      "scope": "TEST"
+    },
+    {
+      "group": "com.github.maximtereshchenko",
+      "name": "compiler",
+      "version": "1.0.0",
+      "scope": "TEST"
+    },
+    {
+      "group": "org.junit.jupiter",
+      "name": "junit-jupiter-api",
+      "scope": "TEST"
+    },
+    {
+      "group": "org.assertj",
+      "name": "assertj-core",
+      "version": "3.25.1",
+      "scope": "TEST"
+    },
+    {
+      "group": "org.apiguardian",
+      "name": "apiguardian-api",
+      "version": "1.1.2",
+      "scope": "TEST"
+    }
+  ]
+}

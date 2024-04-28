@@ -1,0 +1,58 @@
+{
+  "group": "com.github.maximtereshchenko",
+  "name": "conveyor-template",
+  "version": "1.0.0",
+  "inclusions": [
+    "./archive-conveyor-plugin/conveyor.json",
+    "./clean-conveyor-plugin/conveyor.json",
+    "./compile-conveyor-plugin/conveyor.json",
+    "./compiler/conveyor.json",
+    "./conveyor-api/conveyor.json",
+    "./conveyor-common-api/conveyor.json",
+    "./conveyor-core/conveyor.json",
+    "./conveyor-plugin-api/conveyor.json",
+    "./conveyor-plugin-test/conveyor.json",
+    "./jackson-adapter/conveyor.json",
+    "./junit-jupiter-conveyor-plugin/conveyor.json",
+    "./resources-conveyor-plugin/conveyor.json",
+    "./test-common/conveyor.json",
+    "./zip-archive/conveyor.json"
+  ],
+  "repositories": [
+    {
+      "name": "maven-central",
+      "uri": "https://repo1.maven.org/maven2"
+    },
+    {
+      "name": "local-repository",
+      "path": "./.conveyor-repository"
+    }
+  ],
+  "plugins": [
+    {
+      "group": "com.github.maximtereshchenko",
+      "name": "clean-conveyor-plugin",
+      "version": "1.0.0"
+    },
+    {
+      "group": "com.github.maximtereshchenko",
+      "name": "compile-conveyor-plugin",
+      "version": "1.0.0"
+    },
+    {
+      "group": "com.github.maximtereshchenko",
+      "name": "resources-conveyor-plugin",
+      "version": "1.0.0"
+    },
+    {
+      "group": "com.github.maximtereshchenko",
+      "name": "junit-jupiter-conveyor-plugin",
+      "version": "1.0.0"
+    },
+    {
+      "group": "com.github.maximtereshchenko",
+      "name": "archive-conveyor-plugin",
+      "version": "1.0.0"
+    }
+  ]
+}
