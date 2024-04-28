@@ -1,6 +1,7 @@
 package com.github.maximtereshchenko.conveyor.core.test;
 
 import com.github.maximtereshchenko.compiler.Compiler;
+import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
 import com.github.maximtereshchenko.test.common.Directories;
 import com.github.maximtereshchenko.zip.ArchiveContainer;
 
@@ -13,6 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -20,32 +22,35 @@ import java.util.stream.Stream;
 final class JarBuilder {
 
     private static final Pattern INTERPOLATION_PATTERN = Pattern.compile("\\$\\{([^}]+)}");
+    private static final Pattern IMPLEMENTS_PATTERN = Pattern.compile(
+        "implements ([a-zA-Z<>]+) \\{"
+    );
 
-    private final Path templateDirectory;
+    private final Path template;
     private final Map<String, String> values = new HashMap<>();
     private final Path temporaryDirectory;
     private final Compiler compiler;
 
-    private JarBuilder(Path templateDirectory, Path temporaryDirectory, Compiler compiler) {
-        this.templateDirectory = templateDirectory;
+    private JarBuilder(Path template, Path temporaryDirectory, Compiler compiler) {
+        this.template = template;
         this.temporaryDirectory = temporaryDirectory;
         this.compiler = compiler;
     }
 
-    static JarBuilder from(String templateDirectory, Path temporaryDirectory, Compiler compiler)
+    static JarBuilder from(String template, Path temporaryDirectory, Compiler compiler)
         throws URISyntaxException {
-        return new JarBuilder(path(templateDirectory), temporaryDirectory, compiler)
+        return new JarBuilder(path(template), temporaryDirectory, compiler)
             .group("group")
-            .name(templateDirectory)
+            .name(template)
             .version("1.0.0");
     }
 
-    private static Path path(String templateDirectory) throws URISyntaxException {
+    private static Path path(String template) throws URISyntaxException {
         return Paths.get(
             Objects.requireNonNull(
                     Thread.currentThread()
                         .getContextClassLoader()
-                        .getResource(templateDirectory)
+                        .getResource(template)
                 )
                 .toURI()
         );
@@ -89,21 +94,37 @@ final class JarBuilder {
                         sources.resolve(normalizedName())
                             .resolve(normalizedName() + ".java")
                     ),
-                    interpolated(Files.readString(templateDirectory.resolve("class.java")))
-                ),
-                Files.writeString(
-                    sources.resolve("module-info.java"),
-                    interpolated(
-                        Files.readString(templateDirectory.resolve("module-info.java"))
-                    )
+                    interpolated(classJava())
                 )
             ),
-            Stream.of(System.getProperty("jdk.module.path").split(":"))
+            Stream.of(System.getProperty("java.class.path").split(":"))
                 .map(temporaryDirectory.getFileSystem()::getPath)
                 .collect(Collectors.toSet()),
             classes
         );
+        Files.writeString(
+            Directories.createDirectoriesForFile(
+                classes.resolve("META-INF")
+                    .resolve("services")
+                    .resolve(service())
+            ),
+            normalizedName() + '.' + normalizedName()
+        );
         new ArchiveContainer(classes).archive(path);
+    }
+
+    private String service() throws IOException {
+        var matcher = IMPLEMENTS_PATTERN.matcher(classJava());
+        matcher.find();
+        return switch (matcher.group(1)) {
+            case "ConveyorPlugin" -> ConveyorPlugin.class.getName();
+            case "Supplier<String>" -> Supplier.class.getName();
+            default -> throw new IllegalArgumentException();
+        };
+    }
+
+    private String classJava() throws IOException {
+        return Files.readString(template);
     }
 
     private String interpolated(String original) {

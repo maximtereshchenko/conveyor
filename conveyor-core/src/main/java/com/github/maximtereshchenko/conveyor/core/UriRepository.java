@@ -27,7 +27,7 @@ abstract class UriRepository<T> implements Repository<T> {
                 semanticVersion,
                 switch (classifier) {
                     case SCHEMATIC_DEFINITION -> "json";
-                    case MODULE -> "jar";
+                    case JAR -> "jar";
                     case POM -> "pom";
                 }
             )

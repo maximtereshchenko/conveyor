@@ -5,6 +5,7 @@ import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskBinding;
 import com.github.maximtereshchenko.conveyor.plugin.test.ConveyorTasks;
 import com.github.maximtereshchenko.conveyor.plugin.test.FakeConveyorSchematicBuilder;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -16,7 +17,9 @@ import static org.assertj.core.groups.Tuple.tuple;
 final class CompileSourcesTests extends CompilePluginTest {
 
     @Test
-    void givenPlugin_whenBindings_thenDiscoverSourcesAndCompileSourcesBindingsReturned(Path path) {
+    void givenPlugin_whenBindings_thenDiscoverSourcesAndCompileSourcesBindingsReturned(
+        @TempDir Path path
+    ) {
         assertThat(
             plugin.bindings(
                 FakeConveyorSchematicBuilder.discoveryDirectory(path).build(),
@@ -28,7 +31,7 @@ final class CompileSourcesTests extends CompilePluginTest {
     }
 
     @Test
-    void givenNoSources_whenExecuteTasks_thenNoProducts(Path path) {
+    void givenNoSources_whenExecuteTasks_thenNoProducts(@TempDir Path path) {
         var products = ConveyorTasks.executeTasks(
             FakeConveyorSchematicBuilder.discoveryDirectory(path)
                 .build(),
@@ -39,8 +42,8 @@ final class CompileSourcesTests extends CompilePluginTest {
     }
 
     @Test
-    void givenSources_whenExecuteTasks_thenSourcesAreCompiled(Path path) throws IOException {
-        write(moduleInfoJava(srcMainJava(path)), "module main {}");
+    void givenSources_whenExecuteTasks_thenSourcesAreCompiled(@TempDir Path path)
+        throws IOException {
         var mainJava = srcMainJava(path).resolve("main").resolve("Main.java");
         write(
             mainJava,
@@ -53,35 +56,25 @@ final class CompileSourcesTests extends CompilePluginTest {
 
         var products = ConveyorTasks.executeTasks(schematic, plugin);
 
-        var mainClass = explodedModule(schematic.constructionDirectory())
+        var mainClass = explodedJar(schematic.constructionDirectory())
             .resolve("main")
             .resolve("Main.class");
-        assertThat(moduleInfoClass(explodedModule(schematic.constructionDirectory()))).exists();
         assertThat(mainClass).exists();
         assertThat(products)
             .extracting(Product::path, Product::type)
             .containsOnly(
-                tuple(moduleInfoJava(srcMainJava(path)), ProductType.SOURCE),
                 tuple(mainJava, ProductType.SOURCE),
                 tuple(
-                    explodedModule(schematic.constructionDirectory()),
-                    ProductType.EXPLODED_MODULE
+                    explodedJar(schematic.constructionDirectory()),
+                    ProductType.EXPLODED_JAR
                 )
             );
     }
 
     @Test
-    void givenDependency_whenExecuteTasks_thenSourcesAreCompiledWithDependency(Path path)
+    void givenDependency_whenExecuteTasks_thenSourcesAreCompiledWithDependency(@TempDir Path path)
         throws IOException {
         var dependency = path.resolve("dependency");
-        write(
-            moduleInfoJava(srcMainJava(dependency)),
-            """
-            module dependency {
-                exports dependency;
-            }
-            """
-        );
         write(
             srcMainJava(dependency).resolve("dependency").resolve("Dependency.java"),
             """
@@ -93,14 +86,6 @@ final class CompileSourcesTests extends CompilePluginTest {
             .build();
         ConveyorTasks.executeTasks(dependencySchematic, plugin);
         var dependent = path.resolve("dependent");
-        write(
-            moduleInfoJava(srcMainJava(dependent)),
-            """
-            module main {
-                requires dependency;
-            }
-            """
-        );
         var mainJava = srcMainJava(dependent).resolve("main").resolve("Main.java");
         write(
             mainJava,
@@ -115,41 +100,31 @@ final class CompileSourcesTests extends CompilePluginTest {
             """
         );
         var schematic = FakeConveyorSchematicBuilder.discoveryDirectory(dependent)
-            .dependency(explodedModule(dependencySchematic.constructionDirectory()))
+            .dependency(explodedJar(dependencySchematic.constructionDirectory()))
             .build();
 
         var products = ConveyorTasks.executeTasks(schematic, plugin);
 
-        var mainClass = explodedModule(schematic.constructionDirectory())
+        var mainClass = explodedJar(schematic.constructionDirectory())
             .resolve("main")
             .resolve("Main.class");
-        assertThat(moduleInfoClass(explodedModule(schematic.constructionDirectory()))).exists();
         assertThat(mainClass).exists();
         assertThat(products)
             .extracting(Product::path, Product::type)
             .containsOnly(
-                tuple(moduleInfoJava(srcMainJava(dependent)), ProductType.SOURCE),
                 tuple(mainJava, ProductType.SOURCE),
                 tuple(
-                    explodedModule(schematic.constructionDirectory()),
-                    ProductType.EXPLODED_MODULE
+                    explodedJar(schematic.constructionDirectory()),
+                    ProductType.EXPLODED_JAR
                 )
             );
     }
 
     @Test
     void givenMultipleDependencies_whenExecuteTasks_thenSourcesAreCompiledWithAllDependencies(
-        Path path
+        @TempDir Path path
     ) throws IOException {
         var firstDependency = path.resolve("first-dependency");
-        write(
-            moduleInfoJava(srcMainJava(firstDependency)),
-            """
-            module firstdependency {
-                exports firstdependency;
-            }
-            """
-        );
         write(
             srcMainJava(firstDependency).resolve("firstdependency").resolve("FirstDependency.java"),
             """
@@ -158,14 +133,6 @@ final class CompileSourcesTests extends CompilePluginTest {
             """
         );
         var secondDependency = path.resolve("second-dependency");
-        write(
-            moduleInfoJava(srcMainJava(secondDependency)),
-            """
-            module seconddependency {
-                exports seconddependency;
-            }
-            """
-        );
         write(
             srcMainJava(secondDependency)
                 .resolve("seconddependency")
@@ -186,15 +153,6 @@ final class CompileSourcesTests extends CompilePluginTest {
         ConveyorTasks.executeTasks(firstDependencySchematic, plugin);
         ConveyorTasks.executeTasks(secondDependencySchematic, plugin);
         var dependent = path.resolve("dependent");
-        write(
-            moduleInfoJava(srcMainJava(dependent)),
-            """
-            module main {
-                requires firstdependency;
-                requires seconddependency;
-            }
-            """
-        );
         var mainJava = srcMainJava(dependent).resolve("main").resolve("Main.java");
         write(
             mainJava,
@@ -211,32 +169,30 @@ final class CompileSourcesTests extends CompilePluginTest {
             """
         );
         var schematic = FakeConveyorSchematicBuilder.discoveryDirectory(dependent)
-            .dependency(explodedModule(firstDependencySchematic.constructionDirectory()))
-            .dependency(explodedModule(secondDependencySchematic.constructionDirectory()))
+            .dependency(explodedJar(firstDependencySchematic.constructionDirectory()))
+            .dependency(explodedJar(secondDependencySchematic.constructionDirectory()))
             .build();
 
         var products = ConveyorTasks.executeTasks(schematic, plugin);
 
-        var mainClass = explodedModule(schematic.constructionDirectory())
+        var mainClass = explodedJar(schematic.constructionDirectory())
             .resolve("main")
             .resolve("Main.class");
-        assertThat(moduleInfoClass(explodedModule(schematic.constructionDirectory()))).exists();
         assertThat(mainClass).exists();
         assertThat(products)
             .extracting(Product::path, Product::type)
             .containsOnly(
-                tuple(moduleInfoJava(srcMainJava(dependent)), ProductType.SOURCE),
                 tuple(mainJava, ProductType.SOURCE),
                 tuple(
-                    explodedModule(schematic.constructionDirectory()),
-                    ProductType.EXPLODED_MODULE
+                    explodedJar(schematic.constructionDirectory()),
+                    ProductType.EXPLODED_JAR
                 )
             );
     }
 
     @Test
     void givenSourcesFromDifferentSchematics_whenExecuteTasks_thenSourcesAreCompiledForCurrentSchematic(
-        Path path
+        @TempDir Path path
     ) throws IOException {
         write(
             srcMainJava(path).resolve("main").resolve("Main.java"),
@@ -261,7 +217,7 @@ final class CompileSourcesTests extends CompilePluginTest {
             )
         );
         assertThat(
-            explodedModule(schematic.constructionDirectory())
+            explodedJar(schematic.constructionDirectory())
                 .resolve("main")
                 .resolve("Main.class")
         ).exists();

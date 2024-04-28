@@ -8,7 +8,7 @@ plugins {
 tasks.register<Copy>("installConveyorComponent") {
     group = "distribution"
     description = "Install the Conveyor component to a local Conveyor directory"
-    val jarTask = tasks.withType(Jar::class.java).last()
+    val jarTask = tasks.withType(Jar::class.java).first()
     from(jarTask.archiveFile)
     val directory = project.group.toString()
         .split(".")

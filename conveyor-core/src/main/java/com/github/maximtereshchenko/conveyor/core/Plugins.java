@@ -7,22 +7,22 @@ import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskBinding;
 
-import java.lang.module.ModuleDescriptor;
-import java.lang.module.ModuleFinder;
-import java.lang.module.ModuleReference;
+import java.io.UncheckedIOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 final class Plugins {
 
     private final LinkedHashSet<Plugin> all;
-    private final ModulePathFactory modulePathFactory;
+    private final ClassPathFactory classPathFactory;
 
-    Plugins(LinkedHashSet<Plugin> all, ModulePathFactory modulePathFactory) {
+    Plugins(LinkedHashSet<Plugin> all, ClassPathFactory classPathFactory) {
         this.all = all;
-        this.modulePathFactory = modulePathFactory;
+        this.classPathFactory = classPathFactory;
     }
 
     Set<Product> executeTasks(
@@ -82,8 +82,8 @@ final class Plugins {
 
     private Stream<ConveyorPlugin> conveyorPlugins() {
         return ServiceLoader.load(
-                moduleLayer(modulePathFactory.modulePath(all)),
-                ConveyorPlugin.class
+                ConveyorPlugin.class,
+                classLoader(classPathFactory.classPath(all))
             )
             .stream()
             .map(ServiceLoader.Provider::get);
@@ -96,21 +96,20 @@ final class Plugins {
             .orElseThrow();
     }
 
-    private ModuleLayer moduleLayer(Set<Path> paths) {
-        var parent = getClass().getModule().getLayer();
-        var moduleFinder = ModuleFinder.of(paths.toArray(Path[]::new));
-        return parent.defineModulesWithOneLoader(
-            parent.configuration()
-                .resolveAndBind(
-                    ModuleFinder.of(),
-                    moduleFinder,
-                    moduleFinder.findAll()
-                        .stream()
-                        .map(ModuleReference::descriptor)
-                        .map(ModuleDescriptor::name)
-                        .collect(Collectors.toSet())
-                ),
-            Thread.currentThread().getContextClassLoader()
+    private ClassLoader classLoader(Set<Path> paths) {
+        return URLClassLoader.newInstance(
+            paths.stream()
+                .map(this::url)
+                .toArray(URL[]::new),
+            getClass().getClassLoader()
         );
+    }
+
+    private URL url(Path path) {
+        try {
+            return path.toUri().toURL();
+        } catch (MalformedURLException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 }

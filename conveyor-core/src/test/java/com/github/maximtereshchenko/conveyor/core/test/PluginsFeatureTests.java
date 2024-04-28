@@ -4,6 +4,7 @@ import com.github.maximtereshchenko.conveyor.api.ConveyorModule;
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -15,17 +16,17 @@ final class PluginsFeatureTests extends ConveyorTest {
 
     @Test
     void givenPluginDefined_whenConstructToStage_thenPropertiesAreUsedInPlugin(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("properties")
             )
             .jar(
-                factory.jarBuilder("properties")
+                factory.jarBuilder("properties", path)
             )
             .install(path);
 
@@ -50,17 +51,17 @@ final class PluginsFeatureTests extends ConveyorTest {
 
     @Test
     void givenProperty_whenConstructToStage_thenPropertyIsInterpolatedIntoPluginConfiguration(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("configuration")
             )
             .jar(
-                factory.jarBuilder("configuration")
+                factory.jarBuilder("configuration", path)
             )
             .install(path);
 
@@ -86,17 +87,17 @@ final class PluginsFeatureTests extends ConveyorTest {
 
     @Test
     void givenPluginDefined_whenConstructToStage_thenConfigurationIsUsedInPlugin(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("configuration")
             )
             .jar(
-                factory.jarBuilder("configuration")
+                factory.jarBuilder("configuration", path)
             )
             .install(path);
 
@@ -124,17 +125,17 @@ final class PluginsFeatureTests extends ConveyorTest {
 
     @Test
     void givenPluginIsDisabled_whenConstructToStage_thenPluginTasksAreNotExecuted(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("instant")
             )
             .jar(
-                factory.jarBuilder("instant")
+                factory.jarBuilder("instant", path)
             )
             .install(path);
 
@@ -159,55 +160,55 @@ final class PluginsFeatureTests extends ConveyorTest {
 
     @Test
     void givenPluginRequiresDependency_whenConstructToStage_thenDependencyIsUsed(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
-                    .name("module-path")
+                    .name("class-path")
                     .dependency("dependency")
             )
             .jar(
-                factory.jarBuilder("module-path")
+                factory.jarBuilder("class-path", path)
             )
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("dependency")
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
             )
             .install(path);
 
         module.construct(
             factory.schematicDefinitionBuilder()
                 .repository(path)
-                .plugin("module-path")
+                .plugin("class-path")
                 .conveyorJson(path),
             Stage.COMPILE
         );
 
-        assertThat(defaultConstructionDirectory(path).resolve("module-path"))
+        assertThat(defaultConstructionDirectory(path).resolve("class-path"))
             .content()
-            .isEqualTo("dependency-1.0.0");
+            .isEqualTo("group-dependency-1.0.0");
     }
 
     @Test
     void givenPluginRequireTransitiveDependency_whenConstructToStage_thenTransitiveDependencyIsUsed(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
-                    .name("module-path")
+                    .name("class-path")
                     .dependency("dependency")
             )
             .jar(
-                factory.jarBuilder("module-path")
+                factory.jarBuilder("class-path", path)
             )
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -215,14 +216,14 @@ final class PluginsFeatureTests extends ConveyorTest {
                     .dependency("transitive")
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
             )
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("transitive")
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
                     .name("transitive")
             )
             .install(path);
@@ -230,27 +231,27 @@ final class PluginsFeatureTests extends ConveyorTest {
         module.construct(
             factory.schematicDefinitionBuilder()
                 .repository(path)
-                .plugin("module-path")
+                .plugin("class-path")
                 .conveyorJson(path),
             Stage.COMPILE
         );
 
-        assertThat(defaultConstructionDirectory(path).resolve("module-path"))
+        assertThat(defaultConstructionDirectory(path).resolve("class-path"))
             .content(StandardCharsets.UTF_8)
             .hasLineCount(2)
-            .contains("dependency-1.0.0", "transitive-1.0.0");
+            .contains("group-dependency-1.0.0", "transitive-1.0.0");
     }
 
     @Test
     void givenPluginSchematicDeclareTestDependency_whenConstructToStage_thenThatDependencyIsNotUsed(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
-                    .name("module-path")
+                    .name("class-path")
                     .dependency(
                         "group",
                         "test",
@@ -259,14 +260,14 @@ final class PluginsFeatureTests extends ConveyorTest {
                     )
             )
             .jar(
-                factory.jarBuilder("module-path")
+                factory.jarBuilder("class-path", path)
             )
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("test")
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
                     .name("test")
             )
             .install(path);
@@ -274,23 +275,23 @@ final class PluginsFeatureTests extends ConveyorTest {
         module.construct(
             factory.schematicDefinitionBuilder()
                 .repository(path)
-                .plugin("module-path")
+                .plugin("class-path")
                 .conveyorJson(path),
             Stage.COMPILE
         );
 
-        assertThat(defaultConstructionDirectory(path).resolve("module-path"))
+        assertThat(defaultConstructionDirectory(path).resolve("class-path"))
             .content(StandardCharsets.UTF_8)
             .isEmpty();
     }
 
     @Test
     void givenTemplateWithPlugins_whenConstructToStage_thenSchematicInheritsPlugins(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("template")
@@ -306,7 +307,7 @@ final class PluginsFeatureTests extends ConveyorTest {
                     .name("instant")
             )
             .jar(
-                factory.jarBuilder("instant")
+                factory.jarBuilder("instant", path)
             )
             .install(path);
 
@@ -323,11 +324,11 @@ final class PluginsFeatureTests extends ConveyorTest {
 
     @Test
     void givenSchematicDeclareInheritedPluginWithDifferentVersion_whenConstructToStage_thenOverriddenPluginVersionIsUsed(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("template")
@@ -343,7 +344,7 @@ final class PluginsFeatureTests extends ConveyorTest {
                     .version("2.0.0")
             )
             .jar(
-                factory.jarBuilder("instant")
+                factory.jarBuilder("instant", path)
                     .version("2.0.0")
             )
             .install(path);
@@ -367,11 +368,11 @@ final class PluginsFeatureTests extends ConveyorTest {
 
     @Test
     void givenSchematicDeclareInheritedPluginWithSameConfiguration_whenConstructToStage_thenOverriddenConfigurationIsUsed(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("template")
@@ -387,7 +388,7 @@ final class PluginsFeatureTests extends ConveyorTest {
                     .name("configuration")
             )
             .jar(
-                factory.jarBuilder("configuration")
+                factory.jarBuilder("configuration", path)
             )
             .install(path);
 
@@ -416,11 +417,11 @@ final class PluginsFeatureTests extends ConveyorTest {
 
     @Test
     void givenSchematicDeclareInheritedPluginWithEmptyConfigurationValue_whenConstructToStage_thenConfigurationDoesNotContainKey(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("template")
@@ -436,7 +437,7 @@ final class PluginsFeatureTests extends ConveyorTest {
                     .name("configuration")
             )
             .jar(
-                factory.jarBuilder("configuration")
+                factory.jarBuilder("configuration", path)
             )
             .install(path);
 
@@ -461,11 +462,11 @@ final class PluginsFeatureTests extends ConveyorTest {
 
     @Test
     void givenPluginConfiguration_whenConstructToStage_thenConfigurationIsMergedWithInherited(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("template")
@@ -481,7 +482,7 @@ final class PluginsFeatureTests extends ConveyorTest {
                     .name("configuration")
             )
             .jar(
-                factory.jarBuilder("configuration")
+                factory.jarBuilder("configuration", path)
             )
             .install(path);
 

@@ -4,15 +4,14 @@ import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import com.github.maximtereshchenko.conveyor.core.ConveyorFacade;
 import com.github.maximtereshchenko.conveyor.jackson.JacksonAdapter;
 
-import java.nio.file.FileSystems;
+import java.nio.file.Paths;
 
 final class Main {
 
     public static void main(String[] args) {
-        var fileSystem = FileSystems.getDefault();
-        new ConveyorFacade(JacksonAdapter.configured(fileSystem))
+        new ConveyorFacade(JacksonAdapter.configured())
             .construct(
-                fileSystem.getPath(args[0]).toAbsolutePath().normalize(),
+                Paths.get(args[0]).toAbsolutePath().normalize(),
                 Stage.valueOf(args[1])
             );
     }

@@ -10,7 +10,7 @@ A build tool for Java projects
       PUBLISH
 * Dependency version resolution
     * Given the same dependency is required but with different versions, the highest version wins
-      taken into account the presence of the dependency requiring that version in the result module
+      taken into account the presence of the dependency requiring that version in the result class
       path
     * Preferences are defined in a schematic with a group, a name and a version
     * Preferences can be imported from a schematic by defining that schematic with a group, a name
@@ -25,9 +25,11 @@ A build tool for Java projects
 * Plugins
     * Plugins are defined in a schematic with a group, a name, an optional version and an optional
       configuration in a form of key-value pairs
-    * Plugins are archived in a JAR and exported via Java module system
-    * Plugins are loaded via Java module system from a module layer containing required dependencies
-      from the plugin's schematic
+    * Plugins are archived in a JAR and exported via provider-configuration
+      file `META-INF/services/com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin`
+      containing the name of the implementation class
+    * Plugins are loaded via Java `ServiceLoader` mechanism from the class path containing required
+      dependencies from the plugin's schematic
     * Given properties and the configuration from the schematic, plugin produces zero or more tasks
       bound to a stage and a step withing that stage
     * Configuration values can be interpolated with schematic properties using `${property.key}`
@@ -72,7 +74,7 @@ A build tool for Java projects
     * Dependencies are inherited from a schematic used as a template
     * Version and scope of the inherited dependency can be overridden
     * Schematic can define a dependency on other schematic with a group, a name and an optional
-      scope. In such case the product from this schematic of type MODULE will be used in module path
+      scope. In such case the product from this schematic of type `JAR` will be used in class path
     * A transitive dependency can be excluded from a dependency by defining the dependency as the
       exclusion
 * Inheritance
@@ -105,5 +107,5 @@ A build tool for Java projects
     * Remote repository is defined with a URL to a repository with `Maven 2` layout
     * The property `conveyor.repository.remote.cache.directory` defines the directory, where remote
       directories should store downloaded artifacts and schematics. It is relative to the directory,
-      where the schematic definition is located. The default value is `.conveyor-modules` located in
+      where the schematic definition is located. The default value is `.conveyor-cache` located in
       the root schematic's directory

@@ -10,9 +10,10 @@ import org.junit.platform.launcher.LauncherDiscoveryRequest;
 import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
 import org.junit.platform.launcher.core.LauncherFactory;
 
-import java.lang.module.ModuleDescriptor;
-import java.lang.module.ModuleFinder;
-import java.lang.module.ModuleReference;
+import java.io.UncheckedIOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.Set;
@@ -30,35 +31,34 @@ final class RunJunitJupiterTestsTask implements ConveyorTask {
 
     @Override
     public Set<Product> execute(Set<Product> products) {
-        product(products, ProductType.EXPLODED_TEST_MODULE)
-            .ifPresent(explodedTestModule -> executeTests(explodedTestModule, products));
+        product(products, ProductType.EXPLODED_TEST_JAR)
+            .ifPresent(explodedTestJar -> executeTests(explodedTestJar, products));
         return Set.of();
     }
 
-    private void executeTests(Path explodedTestModule, Set<Product> products) {
-        var testModule = testModule(
-            moduleLayer(modulePath(explodedTestModule, products)),
-            explodedTestModule
+    private void executeTests(Path explodedTestJar, Set<Product> products) {
+        runWithContextClassLoader(
+            classLoader(classPath(explodedTestJar, products)),
+            () -> executeTests(explodedTestJar)
         );
-        runWithContextClassLoader(testModule.getClassLoader(), () -> executeTests(testModule));
     }
 
-    private Set<Path> modulePath(Path explodedTestModule, Set<Product> products) {
+    private Set<Path> classPath(Path explodedTestJar, Set<Product> products) {
         return Stream.of(
-                schematic.modulePath(Set.of(DependencyScope.IMPLEMENTATION, DependencyScope.TEST))
+                schematic.classPath(Set.of(DependencyScope.IMPLEMENTATION, DependencyScope.TEST))
                     .stream(),
-                product(products, ProductType.EXPLODED_MODULE).stream(),
-                Stream.of(explodedTestModule)
+                product(products, ProductType.EXPLODED_JAR).stream(),
+                Stream.of(explodedTestJar)
             )
             .flatMap(Function.identity())
             .collect(Collectors.toSet());
     }
 
-    private void executeTests(Module testModule) {
+    private void executeTests(Path explodedTestJar) {
         var failureTestExecutionListener = new FailureTestExecutionListener();
         LauncherFactory.create()
             .execute(
-                launcherDiscoveryRequest(testModule),
+                launcherDiscoveryRequest(explodedTestJar),
                 new ReportingTestExecutionListener(),
                 failureTestExecutionListener
             );
@@ -67,24 +67,10 @@ final class RunJunitJupiterTestsTask implements ConveyorTask {
         }
     }
 
-    private LauncherDiscoveryRequest launcherDiscoveryRequest(Module testModule) {
-        var request = LauncherDiscoveryRequestBuilder.request();
-        for (var packageName : testModule.getPackages()) {
-            request.selectors(DiscoverySelectors.selectPackage(packageName));
-        }
-        return request.build();
-    }
-
-    private Module testModule(ModuleLayer moduleLayer, Path explodedTestModule) {
-        return moduleLayer.findModule(
-                ModuleFinder.of(explodedTestModule)
-                    .findAll()
-                    .iterator()
-                    .next()
-                    .descriptor()
-                    .name()
-            )
-            .orElseThrow();
+    private LauncherDiscoveryRequest launcherDiscoveryRequest(Path explodedTestJar) {
+        return LauncherDiscoveryRequestBuilder.request()
+            .selectors(DiscoverySelectors.selectClasspathRoots(Set.of(explodedTestJar)))
+            .build();
     }
 
     private Optional<Path> product(Set<Product> products, ProductType explodedModule) {
@@ -95,22 +81,21 @@ final class RunJunitJupiterTestsTask implements ConveyorTask {
             .findAny();
     }
 
-    private ModuleLayer moduleLayer(Set<Path> paths) {
-        var parent = getClass().getModule().getLayer();
-        var moduleFinder = ModuleFinder.of(paths.toArray(Path[]::new));
-        return parent.defineModulesWithOneLoader(
-            parent.configuration()
-                .resolveAndBind(
-                    ModuleFinder.of(),
-                    moduleFinder,
-                    moduleFinder.findAll()
-                        .stream()
-                        .map(ModuleReference::descriptor)
-                        .map(ModuleDescriptor::name)
-                        .collect(Collectors.toSet())
-                ),
+    private ClassLoader classLoader(Set<Path> paths) {
+        return URLClassLoader.newInstance(
+            paths.stream()
+                .map(this::url)
+                .toArray(URL[]::new),
             getClass().getClassLoader()
         );
+    }
+
+    private URL url(Path path) {
+        try {
+            return path.toUri().toURL();
+        } catch (MalformedURLException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     private void runWithContextClassLoader(ClassLoader classLoader, Runnable runnable) {

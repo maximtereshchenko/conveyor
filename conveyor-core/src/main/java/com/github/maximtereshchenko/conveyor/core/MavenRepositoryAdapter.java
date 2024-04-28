@@ -40,7 +40,7 @@ final class MavenRepositoryAdapter implements Repository<InputStream> {
                 .map(this::pomDefinition)
                 .map(this::schematicDefinition)
                 .map(this::inputStream);
-            case MODULE, POM -> original.artifact(id, semanticVersion, classifier)
+            case JAR, POM -> original.artifact(id, semanticVersion, classifier)
                 .map(this::inputStream);
         };
     }

@@ -7,9 +7,8 @@ import com.github.maximtereshchenko.conveyor.plugin.resources.ResourcesPlugin;
 import com.github.maximtereshchenko.conveyor.plugin.test.ConveyorTasks;
 import com.github.maximtereshchenko.conveyor.plugin.test.FakeConveyorSchematicBuilder;
 import com.github.maximtereshchenko.test.common.Directories;
-import com.github.maximtereshchenko.test.common.JimfsExtension;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.*;
 
@@ -25,7 +24,6 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.groups.Tuple.tuple;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
-@ExtendWith(JimfsExtension.class)
 final class CopyResourcesTests {
 
     private final ConveyorPlugin plugin = new ResourcesPlugin();
@@ -34,11 +32,11 @@ final class CopyResourcesTests {
         return Directories.differentDirectoryEntries()
             .flatMap(resources ->
                 Stream.of(
-                    arguments("main", resources, ProductType.EXPLODED_MODULE, ProductType.RESOURCE),
+                    arguments("main", resources, ProductType.EXPLODED_JAR, ProductType.RESOURCE),
                     arguments(
                         "test",
                         resources,
-                        ProductType.EXPLODED_TEST_MODULE,
+                        ProductType.EXPLODED_TEST_JAR,
                         ProductType.TEST_RESOURCE
                     )
                 )
@@ -46,7 +44,7 @@ final class CopyResourcesTests {
     }
 
     @Test
-    void givenPlugin_whenBindings_thenCopyResourcesBindingReturned(Path path) {
+    void givenPlugin_whenBindings_thenCopyResourcesBindingReturned(@TempDir Path path) {
         assertThat(
             plugin.bindings(
                 FakeConveyorSchematicBuilder.discoveryDirectory(path).build(),
@@ -58,31 +56,31 @@ final class CopyResourcesTests {
     }
 
     @ParameterizedTest
-    @EnumSource(value = ProductType.class, names = {"EXPLODED_MODULE", "EXPLODED_TEST_MODULE"})
-    void givenNoResources_whenExecuteTasks_thenExplodedModuleIsNotModified(
+    @EnumSource(value = ProductType.class, names = {"EXPLODED_JAR", "EXPLODED_TEST_JAR"})
+    void givenNoResources_whenExecuteTasks_thenExplodedJarIsNotModified(
         ProductType productType,
-        Path path
+        @TempDir Path path
     ) throws IOException {
-        var explodedModule = Files.createDirectory(path.resolve("exploded-module"));
+        var explodedJar = Files.createDirectory(path.resolve("exploded-jar"));
         var schematic = FakeConveyorSchematicBuilder.discoveryDirectory(path).build();
-        var product = new Product(schematic.coordinates(), explodedModule, productType);
+        var product = new Product(schematic.coordinates(), explodedJar, productType);
 
         var products = ConveyorTasks.executeTasks(schematic, plugin, product);
 
-        assertThat(explodedModule).isEmptyDirectory();
+        assertThat(explodedJar).isEmptyDirectory();
         assertThat(products).containsExactly(product);
     }
 
     @ParameterizedTest
     @MethodSource("resources")
-    void givenResources_whenExecuteTasks_thenExplodedModuleContainsResources(
+    void givenResources_whenExecuteTasks_thenExplodedJarContainsResources(
         String sourceSet,
         Set<String> resources,
         ProductType productType,
         ProductType resourceType,
-        Path path
+        @TempDir Path path
     ) throws IOException {
-        var explodedModule = path.resolve("exploded-module");
+        var explodedJar = path.resolve("exploded-jar");
         var resourcesDirectory = Directories.writeFiles(
             resourcesDirectory(path, sourceSet),
             resources
@@ -92,10 +90,10 @@ final class CopyResourcesTests {
         var products = ConveyorTasks.executeTasks(
             schematic,
             plugin,
-            new Product(schematic.coordinates(), explodedModule, productType)
+            new Product(schematic.coordinates(), explodedJar, productType)
         );
 
-        Directories.assertThatDirectoryContentsEqual(explodedModule, resourcesDirectory);
+        Directories.assertThatDirectoryContentsEqual(explodedJar, resourcesDirectory);
         assertThat(products)
             .filteredOn(product -> product.type() == resourceType)
             .map(Product::path)
@@ -104,8 +102,10 @@ final class CopyResourcesTests {
 
     @ParameterizedTest
     @ValueSource(strings = {"main", "test"})
-    void givenNoExplodedModule_whenExecuteTasks_thenNoFilesCopied(String sourceSet, Path path)
-        throws IOException {
+    void givenNoExplodedJar_whenExecuteTasks_thenNoFilesCopied(
+        String sourceSet,
+        @TempDir Path path
+    ) throws IOException {
         Files.createDirectories(resourcesDirectory(path, sourceSet));
         var schematic = FakeConveyorSchematicBuilder.discoveryDirectory(path)
             .build();
@@ -117,17 +117,17 @@ final class CopyResourcesTests {
     @ParameterizedTest
     @CsvSource(
         textBlock = """
-                    main, EXPLODED_MODULE
-                    test, EXPLODED_TEST_MODULE
+                    main, EXPLODED_JAR
+                    test, EXPLODED_TEST_JAR
                     """
     )
     void givenProductsFromOtherSchematics_whenExecuteTasks_thenFilesCopiedToCurrentSchematic(
         String sourceSet,
         ProductType productType,
-        Path path
+        @TempDir Path path
     ) throws IOException {
-        var explodedModule = path.resolve("exploded-module");
-        var otherExplodedModule = Files.createDirectories(path.resolve("other-exploded-module"));
+        var explodedJar = path.resolve("exploded-jar");
+        var otherExplodedJar = Files.createDirectories(path.resolve("other-exploded-jar"));
         var resourcesDirectory = Directories.writeFiles(
             resourcesDirectory(path, sourceSet),
             Set.of("file")
@@ -143,14 +143,14 @@ final class CopyResourcesTests {
                     "other-schematic",
                     "1.0.0"
                 ),
-                otherExplodedModule,
+                otherExplodedJar,
                 productType
             ),
-            new Product(schematic.coordinates(), explodedModule, productType)
+            new Product(schematic.coordinates(), explodedJar, productType)
         );
 
-        assertThat(otherExplodedModule).isEmptyDirectory();
-        Directories.assertThatDirectoryContentsEqual(explodedModule, resourcesDirectory);
+        assertThat(otherExplodedJar).isEmptyDirectory();
+        Directories.assertThatDirectoryContentsEqual(explodedJar, resourcesDirectory);
     }
 
     private Path resourcesDirectory(Path path, String sourceSet) {

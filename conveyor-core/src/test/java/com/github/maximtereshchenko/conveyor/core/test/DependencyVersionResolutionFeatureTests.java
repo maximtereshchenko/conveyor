@@ -4,6 +4,7 @@ import com.github.maximtereshchenko.conveyor.api.ConveyorModule;
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
@@ -17,14 +18,14 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
 
     @Test
     void givenTestDependencyRequireHigherVersion_whenConstructToStage_thenDependencyIsUsedWithLowerVersion(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
-                    .name("module-path")
+                    .name("class-path")
                     .dependency("dependency")
                     .dependency(
                         "group",
@@ -34,14 +35,14 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                     )
             )
             .jar(
-                factory.jarBuilder("module-path")
+                factory.jarBuilder("class-path", path)
             )
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("dependency")
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
             )
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -63,30 +64,30 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
         module.construct(
             factory.schematicDefinitionBuilder()
                 .repository(path)
-                .plugin("module-path")
+                .plugin("class-path")
                 .conveyorJson(path),
             Stage.COMPILE
         );
 
-        assertThat(defaultConstructionDirectory(path).resolve("module-path"))
+        assertThat(defaultConstructionDirectory(path).resolve("class-path"))
             .content(StandardCharsets.UTF_8)
-            .isEqualTo("dependency-1.0.0");
+            .isEqualTo("group-dependency-1.0.0");
     }
 
     @Test
     void givenPluginsRequireCommonDependency_whenConstructToStage_thenDependencyIsUsedWithHighestVersion(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("first")
                     .dependency("dependency")
             )
             .jar(
-                factory.jarBuilder("module-path")
+                factory.jarBuilder("class-path", path)
                     .name("first")
             )
             .schematicDefinition(
@@ -100,7 +101,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                     )
             )
             .jar(
-                factory.jarBuilder("module-path")
+                factory.jarBuilder("class-path", path)
                     .name("second")
             )
             .schematicDefinition(
@@ -113,7 +114,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                     .version("2.0.0")
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
                     .version("2.0.0")
             )
             .install(path);
@@ -127,25 +128,25 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
             Stage.COMPILE
         );
 
-        assertThat(defaultConstructionDirectory(path).resolve("module-path"))
+        assertThat(defaultConstructionDirectory(path).resolve("class-path"))
             .content(StandardCharsets.UTF_8)
-            .isEqualTo("dependency-2.0.0");
+            .isEqualTo("group-dependency-2.0.0");
     }
 
     @Test
     void givenHighestDependencyVersionRequiredByExcludedDependency_whenConstructToStage_thenPluginUsesLowerVersionDependency(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder().name("first")
                     .dependency("should-not-be-affected")
                     .dependency("exclude-affecting")
             )
             .jar(
-                factory.jarBuilder("module-path")
+                factory.jarBuilder("class-path", path)
                     .name("first")
             )
             .schematicDefinition(
@@ -154,7 +155,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                     .dependency("will-affect")
             )
             .jar(
-                factory.jarBuilder("module-path")
+                factory.jarBuilder("class-path", path)
                     .name("second")
             )
             .schematicDefinition(
@@ -162,7 +163,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                     .name("should-not-be-affected")
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
                     .name("should-not-be-affected")
             )
             .schematicDefinition(
@@ -176,7 +177,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                     )
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
                     .name("exclude-affecting")
 
             )
@@ -201,7 +202,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                     .version("2.0.0")
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
                     .name("will-affect")
                     .version("2.0.0")
             )
@@ -216,7 +217,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
             Stage.COMPILE
         );
 
-        assertThat(defaultConstructionDirectory(path).resolve("module-path"))
+        assertThat(defaultConstructionDirectory(path).resolve("class-path"))
             .content(StandardCharsets.UTF_8)
             .hasLineCount(3)
             .contains(
@@ -228,24 +229,24 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
 
     @Test
     void givenTestDependencyRequireOtherDependencyHigherVersion_whenConstructToStage_thenOtherDependencyIsUsedWithLowerVersion(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("dependencies")
             )
             .jar(
-                factory.jarBuilder("dependencies")
+                factory.jarBuilder("dependencies", path)
             )
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("dependency")
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
             )
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -281,22 +282,22 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
 
         assertThat(defaultConstructionDirectory(path).resolve("dependencies"))
             .content()
-            .isEqualTo("dependency-1.0.0");
+            .isEqualTo("group-dependency-1.0.0");
     }
 
     @Test
     void givenSchematicRequiresCommonDependency_whenConstructToStage_thenDependencyIsUsedWithHighestVersion(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("dependencies")
             )
             .jar(
-                factory.jarBuilder("dependencies")
+                factory.jarBuilder("dependencies", path)
             )
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -304,7 +305,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                     .dependency("dependency")
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
                     .name("first")
             )
             .schematicDefinition(
@@ -318,7 +319,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                     )
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
                     .name("second")
             )
             .schematicDefinition(
@@ -331,7 +332,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                     .version("2.0.0")
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
                     .name("dependency")
                     .version("2.0.0")
             )
@@ -350,22 +351,22 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
         assertThat(defaultConstructionDirectory(path).resolve("dependencies"))
             .content(StandardCharsets.UTF_8)
             .hasLineCount(3)
-            .contains("first-1.0.0", "second-1.0.0", "dependency-2.0.0");
+            .contains("group-first-1.0.0", "second-1.0.0", "group-dependency-2.0.0");
     }
 
     @Test
     void givenHighestDependencyVersionRequiredByExcludedDependency_whenConstructToStage_thenDependencyIsUsedWithLowerVersion(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("dependencies")
             )
             .jar(
-                factory.jarBuilder("dependencies")
+                factory.jarBuilder("dependencies", path)
             )
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -374,7 +375,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                     .dependency("exclude-affecting")
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
                     .name("first")
             )
             .schematicDefinition(
@@ -383,7 +384,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                     .dependency("will-affect")
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
                     .name("second")
             )
             .schematicDefinition(
@@ -391,7 +392,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                     .name("should-not-be-affected")
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
                     .name("should-not-be-affected")
             )
             .schematicDefinition(
@@ -405,7 +406,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                     )
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
                     .name("exclude-affecting")
             )
             .schematicDefinition(
@@ -429,7 +430,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                     .version("2.0.0")
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
                     .name("will-affect")
                     .version("2.0.0")
             )
@@ -450,7 +451,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
             .content()
             .hasLineCount(5)
             .contains(
-                "first-1.0.0",
+                "group-first-1.0.0",
                 "second-1.0.0",
                 "should-not-be-affected-1.0.0",
                 "exclude-affecting-1.0.0",
@@ -460,17 +461,17 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
 
     @Test
     void givenPreferencesContainTransitiveDependency_whenConstructToStage_thenTransitiveDependencyVersionIsFromPreferences(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("dependencies")
             )
             .jar(
-                factory.jarBuilder("dependencies")
+                factory.jarBuilder("dependencies", path)
             )
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -478,7 +479,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                     .dependency("transitive")
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
             )
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -486,7 +487,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                     .version("2.0.0")
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
                     .name("transitive")
                     .version("2.0.0")
             )
@@ -506,22 +507,22 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
         assertThat(defaultConstructionDirectory(path).resolve("dependencies"))
             .content()
             .hasLineCount(2)
-            .contains("dependency-1.0.0", "transitive-2.0.0");
+            .contains("group-dependency-1.0.0", "transitive-2.0.0");
     }
 
     @Test
     void givenPluginWithoutVersion_whenConstructToStage_thenVersionIsFromPreferences(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("instant")
             )
             .jar(
-                factory.jarBuilder("instant")
+                factory.jarBuilder("instant", path)
             )
             .install(path);
 
@@ -544,24 +545,24 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
 
     @Test
     void givenDirectDependencyWithoutVersion_whenConstructToStage_thenVersionIsFromPreferences(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("dependencies")
             )
             .jar(
-                factory.jarBuilder("dependencies")
+                factory.jarBuilder("dependencies", path)
             )
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("dependency")
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
             )
             .install(path);
 
@@ -582,22 +583,22 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
 
         assertThat(defaultConstructionDirectory(path).resolve("dependencies"))
             .content()
-            .isEqualTo("dependency-1.0.0");
+            .isEqualTo("group-dependency-1.0.0");
     }
 
     @Test
     void givenPreferenceInclusion_whenConstructToStage_thenPreferencesAreIncludedFromReferencedSchematic(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("instant")
             )
             .jar(
-                factory.jarBuilder("instant")
+                factory.jarBuilder("instant", path)
             )
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -625,17 +626,17 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
 
     @Test
     void givenTransitivePreferenceInclusion_whenConstructToStage_thenPreferencesAreIncludedFromTransitiveInclusion(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("instant")
             )
             .jar(
-                factory.jarBuilder("instant")
+                factory.jarBuilder("instant", path)
             )
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -689,17 +690,17 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
     void givenTransitiveDependency_whenConstructToStage_thenDependencyWithHigherSemanticVersionIsUsed(
         String lower,
         String higher,
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("dependencies")
             )
             .jar(
-                factory.jarBuilder("dependencies")
+                factory.jarBuilder("dependencies", path)
             )
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -712,7 +713,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                     )
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
             )
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -720,7 +721,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                     .version(higher)
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
                     .name("common")
                     .version(higher)
             )
@@ -749,23 +750,23 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
         assertThat(defaultConstructionDirectory(path).resolve("dependencies"))
             .content(StandardCharsets.UTF_8)
             .hasLineCount(2)
-            .contains("dependency-1.0.0", "common-" + higher);
+            .contains("group-dependency-1.0.0", "common-" + higher);
     }
 
     @Test
     void givenPreferenceIncludedWithMultipleVersions_whenConstructToStage_thenPreferenceWithHighestVersionIsUsed(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("instant")
                     .version("2.0.0")
             )
             .jar(
-                factory.jarBuilder("instant")
+                factory.jarBuilder("instant", path)
                     .version("2.0.0")
             )
             .schematicDefinition(
@@ -800,18 +801,18 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
 
     @Test
     void givenPreferenceFromInclusionDefined_whenConstructToStage_thenPreferenceWithDefinedVersionIsUsed(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("instant")
                     .version("1.0.0")
             )
             .jar(
-                factory.jarBuilder("instant")
+                factory.jarBuilder("instant", path)
                     .version("1.0.0")
             )
             .schematicDefinition(
@@ -841,11 +842,11 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
 
     @Test
     void givenNoTransitiveDependencyVersion_whenConstructToStage_thenVersionFromDependencySchematicPreferencesIsUsed(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("dependency")
@@ -858,7 +859,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                     )
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
                     .name("dependency")
             )
             .schematicDefinition(
@@ -866,7 +867,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                     .name("transitive")
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
                     .name("transitive")
             )
             .schematicDefinition(
@@ -874,7 +875,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                     .name("dependencies")
             )
             .jar(
-                factory.jarBuilder("dependencies")
+                factory.jarBuilder("dependencies", path)
             )
             .install(path);
 
@@ -890,6 +891,6 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
         assertThat(defaultConstructionDirectory(path).resolve("dependencies"))
             .content()
             .hasLineCount(2)
-            .contains("dependency-1.0.0", "transitive-1.0.0");
+            .contains("group-dependency-1.0.0", "transitive-1.0.0");
     }
 }

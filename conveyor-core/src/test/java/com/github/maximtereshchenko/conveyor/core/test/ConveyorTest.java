@@ -15,7 +15,7 @@ abstract class ConveyorTest {
     }
 
     Path defaultCacheDirectory(Path path) {
-        return path.resolve(".conveyor-modules");
+        return path.resolve(".conveyor-cache");
     }
 
     Path conveyorJson(Path path) {

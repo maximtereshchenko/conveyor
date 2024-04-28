@@ -8,20 +8,22 @@ import com.github.maximtereshchenko.conveyor.plugin.junit.jupiter.JunitJupiterPl
 import com.github.maximtereshchenko.conveyor.plugin.test.ConveyorTasks;
 import com.github.maximtereshchenko.conveyor.plugin.test.FakeConveyorSchematicBuilder;
 import com.github.maximtereshchenko.test.common.Directories;
-import com.github.maximtereshchenko.test.common.JimfsExtension;
+import org.apiguardian.api.API;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.lang.module.ModuleReference;
-import java.lang.module.ResolvedModule;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.CodeSource;
+import java.security.ProtectionDomain;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -29,14 +31,13 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.groups.Tuple.tuple;
 
-@ExtendWith(JimfsExtension.class)
 final class JunitJupiterPluginTests {
 
     private final ConveyorPlugin plugin = new JunitJupiterPlugin();
     private final Compiler compiler = new Compiler();
 
     @Test
-    void givenPlugin_whenBindings_thenRunJunitJupiterTestsBindingReturned(Path path) {
+    void givenPlugin_whenBindings_thenRunJunitJupiterTestsBindingReturned(@TempDir Path path) {
         assertThat(
             plugin.bindings(
                 FakeConveyorSchematicBuilder.discoveryDirectory(path).build(),
@@ -48,21 +49,12 @@ final class JunitJupiterPluginTests {
     }
 
     @Test
-    void givenTests_whenExecuteTasks_thenTestsExecuted(Path path) throws IOException {
+    void givenTests_whenExecuteTasks_thenTestsExecuted(@TempDir Path path) throws IOException {
         var testSources = path.resolve("test-sources");
         var testClasses = path.resolve("test-classes");
-        var modulePath = modulePath();
+        var classPath = classPath();
         compiler.compile(
             Set.of(
-                Files.writeString(
-                    Directories.createDirectoriesForFile(testSources.resolve("module-info.java")),
-                    """
-                    module test {
-                        requires org.junit.jupiter.api;
-                        opens test to org.junit.platform.commons;
-                    }
-                    """
-                ),
                 Files.writeString(
                     Directories.createDirectoriesForFile(
                         testSources.resolve("test").resolve("MyTest.java")
@@ -80,10 +72,10 @@ final class JunitJupiterPluginTests {
                     """
                 )
             ),
-            modulePath,
+            classPath,
             testClasses
         );
-        var schematic = modulePath.stream()
+        var schematic = classPath.stream()
             .reduce(
                 FakeConveyorSchematicBuilder.discoveryDirectory(path),
                 FakeConveyorSchematicBuilder::dependency,
@@ -97,8 +89,8 @@ final class JunitJupiterPluginTests {
         ConveyorTasks.executeTasks(
             schematic,
             plugin,
-            new Product(schematic.coordinates(), path, ProductType.EXPLODED_MODULE),
-            new Product(schematic.coordinates(), testClasses, ProductType.EXPLODED_TEST_MODULE)
+            new Product(schematic.coordinates(), path, ProductType.EXPLODED_JAR),
+            new Product(schematic.coordinates(), testClasses, ProductType.EXPLODED_TEST_JAR)
         );
 
         System.setOut(standardOut);
@@ -106,21 +98,13 @@ final class JunitJupiterPluginTests {
     }
 
     @Test
-    void givenFailingTest_whenExecuteTasks_thenExceptionReported(Path path) throws IOException {
+    void givenFailingTest_whenExecuteTasks_thenExceptionReported(@TempDir Path path)
+        throws IOException {
         var testSources = path.resolve("test-sources");
         var testClasses = path.resolve("test-classes");
-        var modulePath = modulePath();
+        var classPath = classPath();
         compiler.compile(
             Set.of(
-                Files.writeString(
-                    Directories.createDirectoriesForFile(testSources.resolve("module-info.java")),
-                    """
-                    module test {
-                        requires org.junit.jupiter.api;
-                        opens test to org.junit.platform.commons;
-                    }
-                    """
-                ),
                 Files.writeString(
                     Directories.createDirectoriesForFile(
                         testSources.resolve("test").resolve("MyTest.java")
@@ -138,32 +122,32 @@ final class JunitJupiterPluginTests {
                     """
                 )
             ),
-            modulePath,
+            classPath,
             testClasses
         );
-        var schematic = modulePath.stream()
+        var schematic = classPath.stream()
             .reduce(
                 FakeConveyorSchematicBuilder.discoveryDirectory(path),
                 FakeConveyorSchematicBuilder::dependency,
                 (a, b) -> a
             )
             .build();
-        var explodedModule = new Product(
+        var explodedJar = new Product(
             schematic.coordinates(),
             path,
-            ProductType.EXPLODED_MODULE
+            ProductType.EXPLODED_JAR
         );
-        var explodedTestModule = new Product(
+        var explodedTestJar = new Product(
             schematic.coordinates(),
             testClasses,
-            ProductType.EXPLODED_TEST_MODULE
+            ProductType.EXPLODED_TEST_JAR
         );
         var outputStream = new ByteArrayOutputStream();
         var standardOut = System.out;
         System.setOut(new PrintStream(outputStream));
 
         assertThatThrownBy(() ->
-            ConveyorTasks.executeTasks(schematic, plugin, explodedModule, explodedTestModule)
+            ConveyorTasks.executeTasks(schematic, plugin, explodedJar, explodedTestJar)
         )
             .isInstanceOf(IllegalArgumentException.class);
 
@@ -172,40 +156,31 @@ final class JunitJupiterPluginTests {
             .hasToString("""
                          test() - FAILED
                          org.opentest4j.AssertionFailedError: expected: <true> but was: <false>
-                           at test/test.MyTest.test(MyTest.java:7)
+                           at test.MyTest.test(MyTest.java:7)
                          """);
     }
 
     @Test
-    void givenNoExplodedTestModule_whenExecuteTasks_thenNoTestsAreExecuted(Path path) {
+    void givenNoExplodedTestJar_whenExecuteTasks_thenNoTestsAreExecuted(@TempDir Path path) {
         var schematic = FakeConveyorSchematicBuilder.discoveryDirectory(path).build();
-        var explodedModule = new Product(
+        var explodedJar = new Product(
             schematic.coordinates(),
             path,
-            ProductType.EXPLODED_MODULE
+            ProductType.EXPLODED_JAR
         );
 
-        assertThatCode(() -> ConveyorTasks.executeTasks(schematic, plugin, explodedModule))
+        assertThatCode(() -> ConveyorTasks.executeTasks(schematic, plugin, explodedJar))
             .doesNotThrowAnyException();
     }
 
     @Test
-    void givenNoExplodedModule_whenExecuteTasks_thenNoTestsAreExecuted(Path path)
+    void givenNoExplodedJar_whenExecuteTasks_thenNoTestsAreExecuted(@TempDir Path path)
         throws IOException {
         var testSources = path.resolve("test-sources");
         var testClasses = path.resolve("test-classes");
-        var modulePath = modulePath();
+        var classPath = classPath();
         compiler.compile(
             Set.of(
-                Files.writeString(
-                    Directories.createDirectoriesForFile(testSources.resolve("module-info.java")),
-                    """
-                    module test {
-                        requires org.junit.jupiter.api;
-                        opens test to org.junit.platform.commons;
-                    }
-                    """
-                ),
                 Files.writeString(
                     Directories.createDirectoriesForFile(
                         testSources.resolve("test").resolve("MyTest.java")
@@ -223,44 +198,35 @@ final class JunitJupiterPluginTests {
                     """
                 )
             ),
-            modulePath,
+            classPath,
             testClasses
         );
-        var schematic = modulePath.stream()
+        var schematic = classPath.stream()
             .reduce(
                 FakeConveyorSchematicBuilder.discoveryDirectory(path),
                 FakeConveyorSchematicBuilder::dependency,
                 (a, b) -> a
             )
             .build();
-        var explodedTestModule = new Product(
+        var explodedTestJar = new Product(
             schematic.coordinates(),
             testClasses,
-            ProductType.EXPLODED_TEST_MODULE
+            ProductType.EXPLODED_TEST_JAR
         );
 
-        assertThatCode(() -> ConveyorTasks.executeTasks(schematic, plugin, explodedTestModule))
+        assertThatCode(() -> ConveyorTasks.executeTasks(schematic, plugin, explodedTestJar))
             .doesNotThrowAnyException();
     }
 
     @Test
     void givenProductsFromOtherSchematics_whenExecuteTasks_thenTestsAreExecutedForCurrentSchematic(
-        Path path
+        @TempDir Path path
     ) throws IOException {
         var testSources = path.resolve("test-sources");
         var testClasses = path.resolve("test-classes");
-        var modulePath = modulePath();
+        var classPath = classPath();
         compiler.compile(
             Set.of(
-                Files.writeString(
-                    Directories.createDirectoriesForFile(testSources.resolve("module-info.java")),
-                    """
-                    module test {
-                        requires org.junit.jupiter.api;
-                        opens test to org.junit.platform.commons;
-                    }
-                    """
-                ),
                 Files.writeString(
                     Directories.createDirectoriesForFile(
                         testSources.resolve("test").resolve("MyTest.java")
@@ -278,59 +244,57 @@ final class JunitJupiterPluginTests {
                     """
                 )
             ),
-            modulePath,
+            classPath,
             testClasses
         );
-        var schematic = modulePath.stream()
+        var schematic = classPath.stream()
             .reduce(
                 FakeConveyorSchematicBuilder.discoveryDirectory(path),
                 FakeConveyorSchematicBuilder::dependency,
                 (a, b) -> a
             )
             .build();
-        var explodedTestModule = new Product(
+        var explodedTestJar = new Product(
             schematic.coordinates(),
             testClasses,
-            ProductType.EXPLODED_TEST_MODULE
+            ProductType.EXPLODED_TEST_JAR
         );
-        var otherExplodedTestModule = new Product(
+        var otherExplodedTestJar = new Product(
             new SchematicCoordinates(
                 "group",
                 "other-schematic",
                 "1.0.0"
             ),
-            path.resolve("other-exploded-test-module"),
-            ProductType.EXPLODED_TEST_MODULE
+            path.resolve("other-exploded-test-jar"),
+            ProductType.EXPLODED_TEST_JAR
         );
 
         assertThatCode(() ->
             ConveyorTasks.executeTasks(
                 schematic,
                 plugin,
-                otherExplodedTestModule,
-                explodedTestModule
+                otherExplodedTestJar,
+                explodedTestJar
             )
         )
             .doesNotThrowAnyException();
     }
 
-    private Set<Path> modulePath() {
-        var configuration = getClass()
-            .getModule()
-            .getLayer()
-            .configuration();
-        return Stream.of(
-                "org.junit.jupiter.api",
-                "org.opentest4j",
-                "org.junit.platform.commons",
-                "org.apiguardian.api"
-            )
-            .map(configuration::findModule)
-            .flatMap(Optional::stream)
-            .map(ResolvedModule::reference)
-            .map(ModuleReference::location)
-            .flatMap(Optional::stream)
+    private Set<Path> classPath() {
+        return Stream.of(Test.class, API.class)
+            .map(Class::getProtectionDomain)
+            .map(ProtectionDomain::getCodeSource)
+            .map(CodeSource::getLocation)
+            .map(this::uri)
             .map(Paths::get)
             .collect(Collectors.toSet());
+    }
+
+    private URI uri(URL url) {
+        try {
+            return url.toURI();
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException(e);
+        }
     }
 }

@@ -17,5 +17,5 @@ public interface ConveyorSchematic {
 
     Optional<String> propertyValue(String key);
 
-    Set<Path> modulePath(Set<DependencyScope> scopes);
+    Set<Path> classPath(Set<DependencyScope> scopes);
 }

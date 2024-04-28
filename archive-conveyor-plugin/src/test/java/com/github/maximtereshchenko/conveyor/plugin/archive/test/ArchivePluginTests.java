@@ -7,10 +7,9 @@ import com.github.maximtereshchenko.conveyor.plugin.archive.ArchivePlugin;
 import com.github.maximtereshchenko.conveyor.plugin.test.ConveyorTasks;
 import com.github.maximtereshchenko.conveyor.plugin.test.FakeConveyorSchematicBuilder;
 import com.github.maximtereshchenko.test.common.Directories;
-import com.github.maximtereshchenko.test.common.JimfsExtension;
 import com.github.maximtereshchenko.zip.ZipArchive;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -24,7 +23,6 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@ExtendWith(JimfsExtension.class)
 final class ArchivePluginTests {
 
     private final ConveyorPlugin plugin = new ArchivePlugin();
@@ -35,7 +33,7 @@ final class ArchivePluginTests {
     }
 
     @Test
-    void givenPlugin_whenBindings_thenTaskBindToArchiveRun(Path path) {
+    void givenPlugin_whenBindings_thenTaskBindToArchiveRun(@TempDir Path path) {
         assertThat(
             plugin.bindings(
                 FakeConveyorSchematicBuilder.discoveryDirectory(path).build(),
@@ -49,7 +47,7 @@ final class ArchivePluginTests {
     }
 
     @Test
-    void givenNoExplodedModule_whenExecuteTask_thenNoModuleProduct(Path path) {
+    void givenNoExplodedModule_whenExecuteTask_thenNoModuleProduct(@TempDir Path path) {
         var products = ConveyorTasks.executeTasks(
             FakeConveyorSchematicBuilder.discoveryDirectory(path)
                 .build(),
@@ -63,7 +61,7 @@ final class ArchivePluginTests {
     @MethodSource("entries")
     void givenExplodedModule_whenExecuteTask_thenModuleContainsFiles(
         Set<String> entries,
-        Path path
+        @TempDir Path path
     ) throws IOException {
         var explodedModule = path.resolve("exploded-module");
         Directories.writeFiles(explodedModule, entries);
@@ -72,11 +70,11 @@ final class ArchivePluginTests {
         var products = ConveyorTasks.executeTasks(
             schematic,
             plugin,
-            new Product(schematic.coordinates(), explodedModule, ProductType.EXPLODED_MODULE)
+            new Product(schematic.coordinates(), explodedModule, ProductType.EXPLODED_JAR)
         );
 
         assertThat(products)
-            .filteredOn(product -> product.type() == ProductType.MODULE)
+            .filteredOn(product -> product.type() == ProductType.JAR)
             .map(Product::path)
             .first()
             .satisfies(module -> {
@@ -88,7 +86,7 @@ final class ArchivePluginTests {
 
     @Test
     void givenProductsFromDifferentSchematic_whenExecuteTask_thenArchiveCreatedForCurrentSchematic(
-        Path path
+        @TempDir Path path
     ) throws IOException {
         var explodedModule = path.resolve("exploded-module");
         Files.createFile(Directories.createDirectoriesForFile(explodedModule.resolve("file")));
@@ -104,13 +102,13 @@ final class ArchivePluginTests {
                     "1.0.0"
                 ),
                 path.resolve("incorrect"),
-                ProductType.EXPLODED_MODULE
+                ProductType.EXPLODED_JAR
             ),
-            new Product(schematic.coordinates(), explodedModule, ProductType.EXPLODED_MODULE)
+            new Product(schematic.coordinates(), explodedModule, ProductType.EXPLODED_JAR)
         );
 
         assertThat(products)
-            .filteredOn(product -> product.type() == ProductType.MODULE)
+            .filteredOn(product -> product.type() == ProductType.JAR)
             .map(Product::path)
             .first()
             .satisfies(module -> {

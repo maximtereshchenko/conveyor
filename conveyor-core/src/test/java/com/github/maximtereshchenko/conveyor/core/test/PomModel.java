@@ -1,9 +1,9 @@
 package com.github.maximtereshchenko.conveyor.core.test;
 
-import com.fasterxml.jackson.annotation.shadowed.JsonInclude;
-import com.fasterxml.jackson.dataformat.xml.shadowed.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.shadowed.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.shadowed.annotation.JacksonXmlRootElement;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 import java.util.*;
 

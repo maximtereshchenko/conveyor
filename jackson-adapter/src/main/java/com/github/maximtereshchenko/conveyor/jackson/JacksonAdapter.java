@@ -13,7 +13,6 @@ import com.github.maximtereshchenko.conveyor.api.schematic.TemplateDefinition;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -25,7 +24,7 @@ public final class JacksonAdapter implements SchematicDefinitionConverter {
         this.objectMapper = objectMapper;
     }
 
-    public static JacksonAdapter configured(FileSystem fileSystem) {
+    public static JacksonAdapter configured() {
         var module = new SimpleModule();
         module.addSerializer(Path.class, new ToStringSerializer());
         module.addSerializer(NoTemplateDefinition.class, new NoTemplateDefinitionSerializer());
@@ -34,7 +33,6 @@ public final class JacksonAdapter implements SchematicDefinitionConverter {
             RepositoryDefinition.class,
             new RepositoryDefinitionDeserializer()
         );
-        module.addDeserializer(Path.class, new PathDeserializer(fileSystem));
         return new JacksonAdapter(
             new ObjectMapper()
                 .registerModule(module)

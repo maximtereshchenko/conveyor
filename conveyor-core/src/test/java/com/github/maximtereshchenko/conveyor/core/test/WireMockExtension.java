@@ -1,7 +1,7 @@
 package com.github.maximtereshchenko.conveyor.core.test;
 
-import com.github.tomakehurst.wiremock.shadowed.WireMockServer;
-import com.github.tomakehurst.wiremock.shadowed.core.WireMockConfiguration;
+import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import org.junit.jupiter.api.extension.*;
 
 final class WireMockExtension implements BeforeEachCallback, AfterEachCallback, ParameterResolver {

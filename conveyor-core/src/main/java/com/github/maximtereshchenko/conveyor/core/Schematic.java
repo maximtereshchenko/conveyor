@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 final class Schematic {
 
     private final ExtendableLocalInheritanceHierarchyModel localModel;
-    private final ModulePathFactory modulePathFactory;
+    private final ClassPathFactory classPathFactory;
     private final PomDefinitionFactory pomDefinitionFactory;
     private final SchematicDefinitionConverter schematicDefinitionConverter;
     private final SchematicModelFactory schematicModelFactory;
@@ -24,14 +24,14 @@ final class Schematic {
 
     Schematic(
         ExtendableLocalInheritanceHierarchyModel localModel,
-        ModulePathFactory modulePathFactory,
+        ClassPathFactory classPathFactory,
         PomDefinitionFactory pomDefinitionFactory,
         SchematicDefinitionConverter schematicDefinitionConverter,
         SchematicModelFactory schematicModelFactory,
         PreferencesFactory preferencesFactory
     ) {
         this.localModel = localModel;
-        this.modulePathFactory = modulePathFactory;
+        this.classPathFactory = classPathFactory;
         this.pomDefinitionFactory = pomDefinitionFactory;
         this.schematicDefinitionConverter = schematicDefinitionConverter;
         this.schematicModelFactory = schematicModelFactory;
@@ -139,7 +139,7 @@ final class Schematic {
                     )
                 )
                 .collect(Collectors.toSet()),
-            modulePathFactory
+            classPathFactory
         );
     }
 
@@ -227,7 +227,7 @@ final class Schematic {
                     )
                 )
                 .collect(Collectors.toCollection(LinkedHashSet::new)),
-            modulePathFactory
+            classPathFactory
         );
     }
 
@@ -249,7 +249,7 @@ final class Schematic {
                 .withResolvedPath(
                     SchematicPropertyKey.REMOTE_REPOSITORY_CACHE_DIRECTORY,
                     localInheritanceHierarchyModel.rootPath().getParent(),
-                    ".conveyor-modules"
+                    ".conveyor-cache"
                 )
         );
     }

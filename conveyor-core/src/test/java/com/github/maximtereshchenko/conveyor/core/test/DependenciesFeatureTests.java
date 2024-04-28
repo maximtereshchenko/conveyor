@@ -5,6 +5,7 @@ import com.github.maximtereshchenko.conveyor.api.schematic.ExclusionDefinition;
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Path;
 import java.util.Map;
@@ -15,11 +16,11 @@ final class DependenciesFeatureTests extends ConveyorTest {
 
     @Test
     void givenTemplateHasDifferentDependency_whenConstructToStage_thenSchematicHasBothDependencies(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("template")
@@ -30,7 +31,7 @@ final class DependenciesFeatureTests extends ConveyorTest {
                     .name("template-dependency")
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
                     .name("template-dependency")
             )
             .schematicDefinition(
@@ -38,7 +39,7 @@ final class DependenciesFeatureTests extends ConveyorTest {
                     .name("schematic-dependency")
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
                     .name("schematic-dependency")
             )
             .schematicDefinition(
@@ -46,7 +47,7 @@ final class DependenciesFeatureTests extends ConveyorTest {
                     .name("dependencies")
             )
             .jar(
-                factory.jarBuilder("dependencies")
+                factory.jarBuilder("dependencies", path)
             )
             .install(path);
 
@@ -63,16 +64,16 @@ final class DependenciesFeatureTests extends ConveyorTest {
         assertThat(defaultConstructionDirectory(path).resolve("dependencies"))
             .content()
             .hasLineCount(2)
-            .contains("template-dependency-1.0.0", "schematic-dependency-1.0.0");
+            .contains("group-template-dependency-1.0.0", "group-schematic-dependency-1.0.0");
     }
 
     @Test
     void givenSchematicOverridesDependency_whenConstructToStage_thenVersionIsOverridden(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("template")
@@ -89,7 +90,7 @@ final class DependenciesFeatureTests extends ConveyorTest {
                     .version("2.0.0")
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
                     .version("2.0.0")
             )
             .schematicDefinition(
@@ -97,7 +98,7 @@ final class DependenciesFeatureTests extends ConveyorTest {
                     .name("dependencies")
             )
             .jar(
-                factory.jarBuilder("dependencies")
+                factory.jarBuilder("dependencies", path)
             )
             .install(path);
 
@@ -119,16 +120,16 @@ final class DependenciesFeatureTests extends ConveyorTest {
         assertThat(defaultConstructionDirectory(path).resolve("dependencies"))
             .content()
             .hasLineCount(1)
-            .contains("dependency-2.0.0");
+            .contains("group-dependency-2.0.0");
     }
 
     @Test
     void givenSchematicOverridesDependency_whenConstructToStage_thenScopeIsOverridden(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("template")
@@ -139,14 +140,14 @@ final class DependenciesFeatureTests extends ConveyorTest {
                     .name("dependency")
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
             )
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("dependencies")
             )
             .jar(
-                factory.jarBuilder("dependencies")
+                factory.jarBuilder("dependencies", path)
             )
             .install(path);
 
@@ -162,26 +163,25 @@ final class DependenciesFeatureTests extends ConveyorTest {
 
         assertThat(defaultConstructionDirectory(path).resolve("dependencies"))
             .content()
-            .hasLineCount(1)
-            .contains("dependency-1.0.0");
+            .isEqualTo("group-dependency-1.0.0");
     }
 
     @Test
-    void givenDependencyOnOtherSchematic_whenConstructToStage_thenModuleProductIsUsed(
-        Path path,
+    void givenDependencyOnOtherSchematic_whenConstructToStage_thenJarProductIsUsed(
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("product")
             )
             .jar(
-                factory.jarBuilder("product")
+                factory.jarBuilder("product", path)
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
                     .name("first")
             )
             .schematicDefinition(
@@ -189,7 +189,7 @@ final class DependenciesFeatureTests extends ConveyorTest {
                     .name("dependencies")
             )
             .jar(
-                factory.jarBuilder("dependencies")
+                factory.jarBuilder("dependencies", path)
             )
             .install(path);
         var second = path.resolve("second");
@@ -230,30 +230,30 @@ final class DependenciesFeatureTests extends ConveyorTest {
 
         assertThat(defaultConstructionDirectory(second).resolve("dependencies"))
             .content()
-            .isEqualTo("first-1.0.0");
+            .isEqualTo("group-first-1.0.0");
     }
 
     @Test
-    void givenExcludedDependency_whenConstructToStage_thenDependencyIsNotInModulePath(
-        Path path,
+    void givenExcludedDependency_whenConstructToStage_thenDependencyIsNotInClassPath(
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("dependency")
                     .dependency("excluded")
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
             )
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("excluded")
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
                     .name("excluded")
             )
             .schematicDefinition(
@@ -261,7 +261,7 @@ final class DependenciesFeatureTests extends ConveyorTest {
                     .name("dependencies")
             )
             .jar(
-                factory.jarBuilder("dependencies")
+                factory.jarBuilder("dependencies", path)
             )
             .install(path);
 
@@ -282,23 +282,23 @@ final class DependenciesFeatureTests extends ConveyorTest {
 
         assertThat(defaultConstructionDirectory(path).resolve("dependencies"))
             .content()
-            .isEqualTo("dependency-1.0.0");
+            .isEqualTo("group-dependency-1.0.0");
     }
 
     @Test
-    void givenExcludedTransitiveDependency_whenConstructToStage_thenDependencyIsNotInModulePath(
-        Path path,
+    void givenExcludedTransitiveDependency_whenConstructToStage_thenDependencyIsNotInClassPath(
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("dependency")
                     .dependency("transitive")
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
             )
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -306,7 +306,7 @@ final class DependenciesFeatureTests extends ConveyorTest {
                     .dependency("excluded")
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
                     .name("transitive")
             )
             .schematicDefinition(
@@ -314,7 +314,7 @@ final class DependenciesFeatureTests extends ConveyorTest {
                     .name("excluded")
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
                     .name("excluded")
             )
             .schematicDefinition(
@@ -322,7 +322,7 @@ final class DependenciesFeatureTests extends ConveyorTest {
                     .name("dependencies")
             )
             .jar(
-                factory.jarBuilder("dependencies")
+                factory.jarBuilder("dependencies", path)
             )
             .install(path);
 
@@ -344,16 +344,16 @@ final class DependenciesFeatureTests extends ConveyorTest {
         assertThat(defaultConstructionDirectory(path).resolve("dependencies"))
             .content()
             .hasLineCount(2)
-            .contains("dependency-1.0.0", "transitive-1.0.0");
+            .contains("group-dependency-1.0.0", "transitive-1.0.0");
     }
 
     @Test
-    void givenTransitivelyExcludedDependency_whenConstructToStage_thenDependencyIsNotInModulePath(
-        Path path,
+    void givenTransitivelyExcludedDependency_whenConstructToStage_thenDependencyIsNotInClassPath(
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("dependency")
@@ -366,7 +366,7 @@ final class DependenciesFeatureTests extends ConveyorTest {
                     )
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
             )
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -374,7 +374,7 @@ final class DependenciesFeatureTests extends ConveyorTest {
                     .dependency("excluded")
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
                     .name("transitive")
             )
             .schematicDefinition(
@@ -382,7 +382,7 @@ final class DependenciesFeatureTests extends ConveyorTest {
                     .name("excluded")
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
                     .name("excluded")
             )
             .schematicDefinition(
@@ -390,7 +390,7 @@ final class DependenciesFeatureTests extends ConveyorTest {
                     .name("dependencies")
             )
             .jar(
-                factory.jarBuilder("dependencies")
+                factory.jarBuilder("dependencies", path)
             )
             .install(path);
 
@@ -406,6 +406,6 @@ final class DependenciesFeatureTests extends ConveyorTest {
         assertThat(defaultConstructionDirectory(path).resolve("dependencies"))
             .content()
             .hasLineCount(2)
-            .contains("dependency-1.0.0", "transitive-1.0.0");
+            .contains("group-dependency-1.0.0", "transitive-1.0.0");
     }
 }

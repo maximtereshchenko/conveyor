@@ -1,7 +1,7 @@
 package com.github.maximtereshchenko.conveyor.core.test;
 
 import com.github.maximtereshchenko.test.common.Directories;
-import com.github.tomakehurst.wiremock.shadowed.WireMockServer;
+import com.github.tomakehurst.wiremock.WireMockServer;
 
 import java.io.IOException;
 import java.net.URI;
@@ -11,8 +11,8 @@ import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Set;
 
-import static com.github.tomakehurst.wiremock.shadowed.client.WireMock.get;
-import static com.github.tomakehurst.wiremock.shadowed.client.WireMock.ok;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.ok;
 
 final class RepositoryBuilder {
 

@@ -45,7 +45,7 @@ final class FakeConveyorSchematic implements ConveyorSchematic {
     }
 
     @Override
-    public Set<Path> modulePath(Set<DependencyScope> scopes) {
+    public Set<Path> classPath(Set<DependencyScope> scopes) {
         return dependencies;
     }
 }

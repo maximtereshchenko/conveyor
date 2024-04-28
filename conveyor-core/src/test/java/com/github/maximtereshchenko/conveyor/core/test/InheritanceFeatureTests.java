@@ -4,6 +4,7 @@ import com.github.maximtereshchenko.conveyor.api.ConveyorModule;
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -18,11 +19,11 @@ final class InheritanceFeatureTests extends ConveyorTest {
 
     @Test
     void givenRemoteTemplate_whenConstructToStage_thenSchematicInheritsProperties(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("template")
@@ -33,7 +34,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
                     .name("properties")
             )
             .jar(
-                factory.jarBuilder("properties")
+                factory.jarBuilder("properties", path)
             )
             .install(path);
 
@@ -58,11 +59,11 @@ final class InheritanceFeatureTests extends ConveyorTest {
 
     @Test
     void givenRemoteTemplate_whenConstructToStage_thenSchematicInheritsPlugins(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("template")
@@ -78,7 +79,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
                     .name("instant")
             )
             .jar(
-                factory.jarBuilder("instant")
+                factory.jarBuilder("instant", path)
             )
             .install(path);
 
@@ -95,11 +96,11 @@ final class InheritanceFeatureTests extends ConveyorTest {
 
     @Test
     void givenRemoteTemplate_whenConstructToStage_thenSchematicInheritsDependencies(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("template")
@@ -110,14 +111,14 @@ final class InheritanceFeatureTests extends ConveyorTest {
                     .name("dependency")
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
             )
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("dependencies")
             )
             .jar(
-                factory.jarBuilder("dependencies")
+                factory.jarBuilder("dependencies", path)
             )
             .install(path);
 
@@ -132,16 +133,16 @@ final class InheritanceFeatureTests extends ConveyorTest {
 
         assertThat(defaultConstructionDirectory(path).resolve("dependencies"))
             .content()
-            .isEqualTo("dependency-1.0.0");
+            .isEqualTo("group-dependency-1.0.0");
     }
 
     @Test
     void givenRemoteTemplate_whenConstructToStage_thenSchematicInheritsTestDependencies(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("template")
@@ -157,14 +158,14 @@ final class InheritanceFeatureTests extends ConveyorTest {
                     .name("dependency")
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
             )
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("dependencies")
             )
             .jar(
-                factory.jarBuilder("dependencies")
+                factory.jarBuilder("dependencies", path)
             )
             .install(path);
 
@@ -184,22 +185,22 @@ final class InheritanceFeatureTests extends ConveyorTest {
 
         assertThat(defaultConstructionDirectory(path).resolve("dependencies"))
             .content()
-            .isEqualTo("dependency-1.0.0");
+            .isEqualTo("group-dependency-1.0.0");
     }
 
     @Test
     void givenSchematicTemplate_whenConstructToStage_thenSchematicInheritsProperties(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("properties")
             )
             .jar(
-                factory.jarBuilder("properties")
+                factory.jarBuilder("properties", path)
             )
             .install(path);
         var project = path.resolve("project");
@@ -230,17 +231,17 @@ final class InheritanceFeatureTests extends ConveyorTest {
 
     @Test
     void givenSchematicTemplate_whenConstructToStage_thenSchematicInheritsPlugins(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("instant")
             )
             .jar(
-                factory.jarBuilder("instant")
+                factory.jarBuilder("instant", path)
             )
             .install(path);
         var project = path.resolve("project");
@@ -268,24 +269,24 @@ final class InheritanceFeatureTests extends ConveyorTest {
 
     @Test
     void givenSchematicTemplate_whenConstructToStage_thenSchematicInheritsDependencies(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("dependency")
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
             )
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("dependencies")
             )
             .jar(
-                factory.jarBuilder("dependencies")
+                factory.jarBuilder("dependencies", path)
             )
             .install(path);
         var project = path.resolve("project");
@@ -306,29 +307,29 @@ final class InheritanceFeatureTests extends ConveyorTest {
 
         assertThat(defaultConstructionDirectory(project).resolve("dependencies"))
             .content()
-            .isEqualTo("dependency-1.0.0");
+            .isEqualTo("group-dependency-1.0.0");
     }
 
     @Test
     void givenSchematicTemplate_whenConstructToStage_thenSchematicInheritsTestDependencies(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("dependency")
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
             )
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("dependencies")
             )
             .jar(
-                factory.jarBuilder("dependencies")
+                factory.jarBuilder("dependencies", path)
             )
             .install(path);
         var project = path.resolve("project");
@@ -359,23 +360,23 @@ final class InheritanceFeatureTests extends ConveyorTest {
 
         assertThat(defaultConstructionDirectory(project).resolve("dependencies"))
             .content()
-            .isEqualTo("dependency-1.0.0");
+            .isEqualTo("group-dependency-1.0.0");
     }
 
     @Test
     void givenSchematicTemplate_whenConstructToStage_thenSchematicInheritsRepository(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
         var repository = path.resolve("repository");
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("instant")
             )
             .jar(
-                factory.jarBuilder("instant")
+                factory.jarBuilder("instant", path)
             )
             .install(repository);
         var project = path.resolve("project");
@@ -403,17 +404,17 @@ final class InheritanceFeatureTests extends ConveyorTest {
 
     @Test
     void givenIncludedSchematic_whenConstructToStage_thenSchematicInheritsProperties(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("properties")
             )
             .jar(
-                factory.jarBuilder("properties")
+                factory.jarBuilder("properties", path)
             )
             .install(path);
         var included = path.resolve("included");
@@ -446,17 +447,17 @@ final class InheritanceFeatureTests extends ConveyorTest {
 
     @Test
     void givenIncludedSchematic_whenConstructToStage_thenSchematicInheritsPlugins(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("instant")
             )
             .jar(
-                factory.jarBuilder("instant")
+                factory.jarBuilder("instant", path)
             )
             .install(path);
         var included = path.resolve("included");
@@ -486,24 +487,24 @@ final class InheritanceFeatureTests extends ConveyorTest {
 
     @Test
     void givenIncludedSchematic_whenConstructToStage_thenSchematicInheritsDependencies(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("dependency")
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
             )
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("dependencies")
             )
             .jar(
-                factory.jarBuilder("dependencies")
+                factory.jarBuilder("dependencies", path)
             )
             .install(path);
         var included = path.resolve("included");
@@ -526,29 +527,29 @@ final class InheritanceFeatureTests extends ConveyorTest {
 
         assertThat(defaultConstructionDirectory(included).resolve("dependencies"))
             .content()
-            .isEqualTo("dependency-1.0.0");
+            .isEqualTo("group-dependency-1.0.0");
     }
 
     @Test
     void givenIncludedSchematic_whenConstructToStage_thenSchematicInheritsTestDependencies(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("dependency")
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
             )
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("dependencies")
             )
             .jar(
-                factory.jarBuilder("dependencies")
+                factory.jarBuilder("dependencies", path)
             )
             .install(path);
         var included = path.resolve("included");
@@ -581,23 +582,23 @@ final class InheritanceFeatureTests extends ConveyorTest {
 
         assertThat(defaultConstructionDirectory(included).resolve("dependencies"))
             .content()
-            .isEqualTo("dependency-1.0.0");
+            .isEqualTo("group-dependency-1.0.0");
     }
 
     @Test
     void givenIncludedSchematic_whenConstructToStage_thenSchematicInheritsRepository(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
         var repository = path.resolve("repository");
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("instant")
             )
             .jar(
-                factory.jarBuilder("instant")
+                factory.jarBuilder("instant", path)
             )
             .install(repository);
         var included = path.resolve("included");
@@ -627,17 +628,17 @@ final class InheritanceFeatureTests extends ConveyorTest {
 
     @Test
     void givenSchematicWithInclusions_whenConstructToStage_thenSchematicIsConstructedBeforeItsInclusion(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("instant")
             )
             .jar(
-                factory.jarBuilder("instant")
+                factory.jarBuilder("instant", path)
             )
             .install(path);
         var included = path.resolve("included");
@@ -667,31 +668,31 @@ final class InheritanceFeatureTests extends ConveyorTest {
 
     @Test
     void givenSchematicDependsOnOtherSchematic_whenConstructToStage_thenOtherSchematicIsConstructedBeforeThisSchematic(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("instant")
             )
             .jar(
-                factory.jarBuilder("instant")
+                factory.jarBuilder("instant", path)
             )
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("product")
             )
             .jar(
-                factory.jarBuilder("product")
+                factory.jarBuilder("product", path)
             )
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("dependency")
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
             )
             .install(path);
         var depends = path.resolve("depends");
@@ -716,7 +717,14 @@ final class InheritanceFeatureTests extends ConveyorTest {
                             "group",
                             "product",
                             "1.0.0",
-                            Map.of("path", path.resolve("dependency-1.0.0").toString())
+                            Map.of(
+                                "path",
+                                path.resolve("group")
+                                    .resolve("dependency")
+                                    .resolve("1.0.0")
+                                    .resolve("dependency-1.0.0.jar")
+                                    .toString()
+                            )
                         )
                         .conveyorJson(dependency)
                 )
@@ -735,17 +743,17 @@ final class InheritanceFeatureTests extends ConveyorTest {
 
     @Test
     void givenSchematicTemplate_whenConstructToStage_thenSchematicIsConstructedAfterItsTemplate(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("instant")
             )
             .jar(
-                factory.jarBuilder("instant")
+                factory.jarBuilder("instant", path)
             )
             .install(path);
         var included = path.resolve("included");
@@ -774,17 +782,17 @@ final class InheritanceFeatureTests extends ConveyorTest {
 
     @Test
     void givenSchematicTree_whenConstructToStage_thenSchematicsAreConstructedInDepthFirstOrder(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("instant")
             )
             .jar(
-                factory.jarBuilder("instant")
+                factory.jarBuilder("instant", path)
             )
             .install(path);
         var project = path.resolve("project");
@@ -843,31 +851,31 @@ final class InheritanceFeatureTests extends ConveyorTest {
 
     @Test
     void givenSchematicRequireOtherSchematic_whenConstructToStage_thenSchematicsConstructedTogether(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("dependency")
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
             )
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("product")
             )
             .jar(
-                factory.jarBuilder("product")
+                factory.jarBuilder("product", path)
             )
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("dependencies")
             )
             .jar(
-                factory.jarBuilder("dependencies")
+                factory.jarBuilder("dependencies", path)
             )
             .install(path);
         var depends = path.resolve("depends");
@@ -906,22 +914,22 @@ final class InheritanceFeatureTests extends ConveyorTest {
 
         assertThat(defaultConstructionDirectory(depends).resolve("dependencies"))
             .content()
-            .isEqualTo("dependency-1.0.0");
+            .isEqualTo("group-dependency-1.0.0");
     }
 
     @Test
     void givenSchematicDoesNotRequireOtherSchematic_whenConstructToStage_thenOtherSchematicIsNotConstructed(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("instant")
             )
             .jar(
-                factory.jarBuilder("instant")
+                factory.jarBuilder("instant", path)
             )
             .install(path);
         var unrelated = path.resolve("unrelated");
@@ -951,17 +959,17 @@ final class InheritanceFeatureTests extends ConveyorTest {
 
     @Test
     void givenSchematicRequiresOtherSchematicTransitively_whenConstructToStage_thenOtherSchematicIsConstructed(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("instant")
             )
             .jar(
-                factory.jarBuilder("instant")
+                factory.jarBuilder("instant", path)
             )
             .install(path);
         var transitive = path.resolve("transitive");
@@ -1002,17 +1010,17 @@ final class InheritanceFeatureTests extends ConveyorTest {
 
     @Test
     void givenStageIsLessThanArchive_whenConstructToStage_thenSchematicDependencyConstructedToArchive(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("instant")
             )
             .jar(
-                factory.jarBuilder("instant")
+                factory.jarBuilder("instant", path)
             )
             .install(path);
         var depends = path.resolve("depends");
@@ -1052,17 +1060,17 @@ final class InheritanceFeatureTests extends ConveyorTest {
 
     @Test
     void givenStageIsGreaterThanArchive_whenConstructToStage_thenAllSchematicsAreConstructedToStage(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("instant")
             )
             .jar(
-                factory.jarBuilder("instant")
+                factory.jarBuilder("instant", path)
             )
             .install(path);
         var depends = path.resolve("depends");
@@ -1102,17 +1110,17 @@ final class InheritanceFeatureTests extends ConveyorTest {
 
     @Test
     void givenRelativeInclusion_whenConstructToStage_thenInclusionResolvedRelativeToSchematicDefinitionDirectory(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("instant")
             )
             .jar(
-                factory.jarBuilder("instant")
+                factory.jarBuilder("instant", path)
             )
             .install(path);
         var inclusion = path.resolve("inclusion");
@@ -1148,17 +1156,17 @@ final class InheritanceFeatureTests extends ConveyorTest {
 
     @Test
     void givenCommonTransitiveSchematicDependency_whenConstructToStage_thenSchematicsAreBuiltInCorrectOrder(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("instant")
             )
             .jar(
-                factory.jarBuilder("instant")
+                factory.jarBuilder("instant", path)
             )
             .install(path);
         var dependsTransitively = path.resolve("depends-transitively");

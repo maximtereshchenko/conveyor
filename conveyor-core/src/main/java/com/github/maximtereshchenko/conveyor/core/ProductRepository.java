@@ -37,7 +37,7 @@ final class ProductRepository implements Repository<Path> {
     private Optional<ProductType> productType(Classifier classifier) {
         return switch (classifier) {
             case SCHEMATIC_DEFINITION -> Optional.of(ProductType.SCHEMATIC_DEFINITION);
-            case MODULE -> Optional.of(ProductType.MODULE);
+            case JAR -> Optional.of(ProductType.JAR);
             case POM -> Optional.empty();
         };
     }

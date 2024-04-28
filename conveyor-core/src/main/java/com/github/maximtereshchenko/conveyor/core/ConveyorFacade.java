@@ -11,14 +11,14 @@ import java.util.stream.Collectors;
 public final class ConveyorFacade implements ConveyorModule {
 
     private final SchematicModelFactory schematicModelFactory;
-    private final ModulePathFactory modulePathFactory;
+    private final ClassPathFactory classPathFactory;
     private final PomDefinitionFactory pomDefinitionFactory;
     private final SchematicDefinitionConverter schematicDefinitionConverter;
     private final PreferencesFactory preferencesFactory;
 
     public ConveyorFacade(SchematicDefinitionConverter schematicDefinitionConverter) {
         this.schematicModelFactory = new SchematicModelFactory(schematicDefinitionConverter);
-        this.modulePathFactory = new ModulePathFactory();
+        this.classPathFactory = new ClassPathFactory();
         this.pomDefinitionFactory = PomDefinitionFactory.configured();
         this.schematicDefinitionConverter = schematicDefinitionConverter;
         this.preferencesFactory = new PreferencesFactory(this.schematicModelFactory);
@@ -35,7 +35,7 @@ public final class ConveyorFacade implements ConveyorModule {
             .map(extendableLocalInheritanceHierarchyModel ->
                 new Schematic(
                     extendableLocalInheritanceHierarchyModel,
-                    modulePathFactory,
+                    classPathFactory,
                     pomDefinitionFactory,
                     schematicDefinitionConverter,
                     schematicModelFactory,

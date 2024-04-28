@@ -47,7 +47,7 @@ abstract class StoredArtifact implements Artifact {
 
     @Override
     public Path path() {
-        return repositories.module(id(), semanticVersion());
+        return repositories.jar(id(), semanticVersion());
     }
 
     @Override

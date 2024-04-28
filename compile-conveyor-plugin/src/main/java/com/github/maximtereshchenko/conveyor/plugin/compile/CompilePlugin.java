@@ -40,7 +40,7 @@ public final class CompilePlugin implements ConveyorPlugin {
                 Step.RUN,
                 new CompileSourcesTask(
                     schematic,
-                    schematic.constructionDirectory().resolve("exploded-module"),
+                    schematic.constructionDirectory().resolve("exploded-jar"),
                     compiler
                 )
             ),
@@ -58,7 +58,7 @@ public final class CompilePlugin implements ConveyorPlugin {
                 Step.PREPARE,
                 new CompileTestSourcesTask(
                     schematic,
-                    schematic.constructionDirectory().resolve("exploded-test-module"),
+                    schematic.constructionDirectory().resolve("exploded-test-jar"),
                     compiler
                 )
             )

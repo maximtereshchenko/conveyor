@@ -39,7 +39,7 @@ public final class ResourcesPlugin implements ConveyorPlugin {
                 Stage.COMPILE,
                 Step.FINALIZE,
                 new CopyResourcesTask(
-                    ProductType.EXPLODED_MODULE,
+                    ProductType.EXPLODED_JAR,
                     ProductType.RESOURCE,
                     schematic.coordinates(),
                     mainResources
@@ -58,7 +58,7 @@ public final class ResourcesPlugin implements ConveyorPlugin {
                 Stage.TEST,
                 Step.PREPARE,
                 new CopyResourcesTask(
-                    ProductType.EXPLODED_TEST_MODULE,
+                    ProductType.EXPLODED_TEST_JAR,
                     ProductType.TEST_RESOURCE,
                     schematic.coordinates(),
                     testResources

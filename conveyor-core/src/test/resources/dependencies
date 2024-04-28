@@ -1,0 +1,79 @@
+package ${normalizedName};
+
+import com.github.maximtereshchenko.conveyor.common.api.*;
+import com.github.maximtereshchenko.conveyor.plugin.api.*;
+
+import java.io.*;
+import java.net.*;
+import java.nio.file.*;
+import java.util.*;
+import java.util.function.*;
+import java.util.stream.*;
+
+public final class ${normalizedName} implements ConveyorPlugin {
+
+    @Override
+    public String name() {
+        return "${name}";
+    }
+
+    @Override
+    public List<ConveyorTaskBinding> bindings(ConveyorSchematic schematic, Map<String, String> configuration) {
+        return List.of(
+            new ConveyorTaskBinding(
+                Stage.COMPILE,
+                Step.RUN,
+                (products) -> execute(
+                    schematic.classPath(
+                        Set.of(
+                            DependencyScope.valueOf(
+                                configuration.getOrDefault("scope", "IMPLEMENTATION")
+                            )
+                        )
+                    ),
+                    schematic.constructionDirectory().resolve("dependencies")
+                )
+            )
+        );
+    }
+
+    private Set<Product> execute(Set<Path> paths, Path path) {
+        write(path, dependencies(paths));
+        return Set.of();
+    }
+
+    private String dependencies(Set<Path> paths) {
+        return ServiceLoader.load(Supplier.class, classLoader(paths))
+            .stream()
+            .map(ServiceLoader.Provider::get)
+            .map(Supplier::get)
+            .map(Object::toString)
+            .collect(Collectors.joining(System.lineSeparator()));
+    }
+
+    private ClassLoader classLoader(Set<Path> paths) {
+        return URLClassLoader.newInstance(
+            paths.stream()
+                .map(this::url)
+                .toArray(URL[]::new),
+            getClass().getClassLoader()
+        );
+    }
+
+    private URL url(Path path) {
+        try {
+            return path.toUri().toURL();
+        } catch (MalformedURLException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    private void write(Path path, String content) {
+        try {
+            Files.createDirectories(path.getParent());
+            Files.writeString(path, content);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+}

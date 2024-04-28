@@ -26,8 +26,8 @@ final class Repositories {
         );
     }
 
-    Path module(Id id, SemanticVersion semanticVersion) {
-        return path(id, semanticVersion, Repository.Classifier.MODULE);
+    Path jar(Id id, SemanticVersion semanticVersion) {
+        return path(id, semanticVersion, Repository.Classifier.JAR);
     }
 
     private Path path(Id id, SemanticVersion semanticVersion, Repository.Classifier classifier) {

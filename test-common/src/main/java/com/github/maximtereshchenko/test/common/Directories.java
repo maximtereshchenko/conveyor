@@ -13,9 +13,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public final class Directories {
 
-    private Directories() {
-    }
-
     public static Stream<Set<String>> differentDirectoryEntries() {
         return Stream.of(
             Set.of(),

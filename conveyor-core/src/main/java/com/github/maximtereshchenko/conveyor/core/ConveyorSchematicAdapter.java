@@ -45,7 +45,7 @@ final class ConveyorSchematicAdapter implements ConveyorSchematic {
     }
 
     @Override
-    public Set<Path> modulePath(Set<DependencyScope> scopes) {
-        return dependencies.modulePath(scopes);
+    public Set<Path> classPath(Set<DependencyScope> scopes) {
+        return dependencies.classPath(scopes);
     }
 }

@@ -27,17 +27,17 @@ final class ArchiveTask implements ConveyorTask {
     public Set<Product> execute(Set<Product> products) {
         return products.stream()
             .filter(product -> product.schematicCoordinates().equals(coordinates))
-            .filter(product -> product.type() == ProductType.EXPLODED_MODULE)
+            .filter(product -> product.type() == ProductType.EXPLODED_JAR)
             .map(Product::path)
-            .map(this::module)
+            .map(this::jar)
             .collect(Collectors.toSet());
     }
 
-    private Product module(Path explodedModule) {
+    private Product jar(Path explodedModule) {
         try {
             Files.createDirectories(target.getParent());
             new ArchiveContainer(explodedModule).archive(target);
-            return new Product(coordinates, target, ProductType.MODULE);
+            return new Product(coordinates, target, ProductType.JAR);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

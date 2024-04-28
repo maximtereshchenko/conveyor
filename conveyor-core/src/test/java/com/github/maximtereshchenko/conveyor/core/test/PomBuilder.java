@@ -1,6 +1,6 @@
 package com.github.maximtereshchenko.conveyor.core.test;
 
-import com.fasterxml.jackson.dataformat.xml.shadowed.XmlMapper;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

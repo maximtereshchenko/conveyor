@@ -5,6 +5,7 @@ import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskBinding;
 import com.github.maximtereshchenko.conveyor.plugin.test.ConveyorTasks;
 import com.github.maximtereshchenko.conveyor.plugin.test.FakeConveyorSchematicBuilder;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -16,7 +17,9 @@ import static org.assertj.core.groups.Tuple.tuple;
 final class CompileTestSourcesTests extends CompilePluginTest {
 
     @Test
-    void givenPlugin_whenBindings_thenDiscoverTestsAndCompileTestsBindingsReturned(Path path) {
+    void givenPlugin_whenBindings_thenDiscoverTestsAndCompileTestsBindingsReturned(
+        @TempDir Path path
+    ) {
         assertThat(
             plugin.bindings(
                 FakeConveyorSchematicBuilder.discoveryDirectory(path).build(),
@@ -28,9 +31,8 @@ final class CompileTestSourcesTests extends CompilePluginTest {
     }
 
     @Test
-    void givenNoTestSources_whenExecuteTasks_thenNoTestClassProducts(Path path) throws IOException {
-        var moduleInfoJava = srcMainJava(path).resolve("module-info.java");
-        write(moduleInfoJava, "module Main {}");
+    void givenNoTestSources_whenExecuteTasks_thenNoTestClassProducts(@TempDir Path path)
+        throws IOException {
         var mainJava = srcMainJava(path).resolve("main").resolve("Main.java");
         write(
             mainJava,
@@ -49,13 +51,12 @@ final class CompileTestSourcesTests extends CompilePluginTest {
         assertThat(products)
             .isNotEmpty()
             .extracting(Product::type)
-            .doesNotContain(ProductType.TEST_SOURCE, ProductType.EXPLODED_TEST_MODULE);
+            .doesNotContain(ProductType.TEST_SOURCE, ProductType.EXPLODED_TEST_JAR);
     }
 
     @Test
-    void givenTestSources_whenExecuteTasks_thenTestSourcesAreCompiled(Path path)
+    void givenTestSources_whenExecuteTasks_thenTestSourcesAreCompiled(@TempDir Path path)
         throws IOException {
-        write(moduleInfoJava(srcMainJava(path)), "module main {}");
         var mainJava = srcMainJava(path).resolve("main").resolve("Main.java");
         write(
             mainJava,
@@ -64,7 +65,6 @@ final class CompileTestSourcesTests extends CompilePluginTest {
             class Main {}
             """
         );
-        write(moduleInfoJava(srcTestJava(path)), "module main.test {}");
         var testJava = srcTestJava(path).resolve("test").resolve("Test.java");
         write(
             testJava,
@@ -77,59 +77,41 @@ final class CompileTestSourcesTests extends CompilePluginTest {
 
         var products = ConveyorTasks.executeTasks(schematic, plugin);
 
-        var mainClass = explodedModule(schematic.constructionDirectory())
+        var mainClass = explodedJar(schematic.constructionDirectory())
             .resolve("main")
             .resolve("Main.class");
-        var testClass = explodedTestModule(schematic.constructionDirectory())
+        var testClass = explodedTestJar(schematic.constructionDirectory())
             .resolve("test")
             .resolve("Test.class");
-        assertThat(moduleInfoClass(explodedModule(schematic.constructionDirectory()))).exists();
         assertThat(mainClass).exists();
-        assertThat(moduleInfoClass(explodedTestModule(schematic.constructionDirectory()))).exists();
         assertThat(testClass).exists();
         assertThat(products)
             .extracting(Product::path, Product::type)
             .containsOnly(
-                tuple(moduleInfoJava(srcMainJava(path)), ProductType.SOURCE),
                 tuple(mainJava, ProductType.SOURCE),
                 tuple(
-                    explodedModule(schematic.constructionDirectory()),
-                    ProductType.EXPLODED_MODULE
+                    explodedJar(schematic.constructionDirectory()),
+                    ProductType.EXPLODED_JAR
                 ),
-                tuple(moduleInfoJava(srcTestJava(path)), ProductType.TEST_SOURCE),
                 tuple(testJava, ProductType.TEST_SOURCE),
                 tuple(
-                    explodedTestModule(schematic.constructionDirectory()),
-                    ProductType.EXPLODED_TEST_MODULE
+                    explodedTestJar(schematic.constructionDirectory()),
+                    ProductType.EXPLODED_TEST_JAR
                 )
             );
     }
 
     @Test
-    void givenTestSourcesDependOnMainModule_whenExecuteTasks_thenTestSourcesAreCompiled(Path path)
+    void givenTestSourcesDependOnMainModule_whenExecuteTasks_thenTestSourcesAreCompiled(
+        @TempDir Path path
+    )
         throws IOException {
-        write(
-            moduleInfoJava(srcMainJava(path)),
-            """
-            module main {
-                exports main;
-            }
-            """
-        );
         var mainJava = srcMainJava(path).resolve("main").resolve("Main.java");
         write(
             mainJava,
             """
             package main;
             public class Main {}
-            """
-        );
-        write(
-            moduleInfoJava(srcTestJava(path)),
-            """
-            module main.test {
-                requires main;
-            }
             """
         );
         var testJava = srcTestJava(path).resolve("test").resolve("Test.java");
@@ -149,37 +131,33 @@ final class CompileTestSourcesTests extends CompilePluginTest {
 
         var products = ConveyorTasks.executeTasks(schematic, plugin);
 
-        var mainClass = explodedModule(schematic.constructionDirectory())
+        var mainClass = explodedJar(schematic.constructionDirectory())
             .resolve("main")
             .resolve("Main.class");
-        var testClass = explodedTestModule(schematic.constructionDirectory())
+        var testClass = explodedTestJar(schematic.constructionDirectory())
             .resolve("test")
             .resolve("Test.class");
-        assertThat(moduleInfoClass(explodedModule(schematic.constructionDirectory()))).exists();
         assertThat(mainClass).exists();
-        assertThat(moduleInfoClass(explodedTestModule(schematic.constructionDirectory()))).exists();
         assertThat(testClass).exists();
         assertThat(products)
             .extracting(Product::path, Product::type)
             .containsOnly(
-                tuple(moduleInfoJava(srcMainJava(path)), ProductType.SOURCE),
                 tuple(mainJava, ProductType.SOURCE),
                 tuple(
-                    explodedModule(schematic.constructionDirectory()),
-                    ProductType.EXPLODED_MODULE
+                    explodedJar(schematic.constructionDirectory()),
+                    ProductType.EXPLODED_JAR
                 ),
-                tuple(moduleInfoJava(srcTestJava(path)), ProductType.TEST_SOURCE),
                 tuple(testJava, ProductType.TEST_SOURCE),
                 tuple(
-                    explodedTestModule(schematic.constructionDirectory()),
-                    ProductType.EXPLODED_TEST_MODULE
+                    explodedTestJar(schematic.constructionDirectory()),
+                    ProductType.EXPLODED_TEST_JAR
                 )
             );
     }
 
     @Test
     void givenSourcesFromDifferentSchematics_whenExecuteTasks_thenTestSourcesAreCompiledForCurrentSchematic(
-        Path path
+        @TempDir Path path
     ) throws IOException {
         write(
             srcTestJava(path).resolve("test").resolve("Test.java"),
@@ -204,18 +182,18 @@ final class CompileTestSourcesTests extends CompilePluginTest {
         );
 
         assertThat(
-            explodedTestModule(schematic.constructionDirectory())
+            explodedTestJar(schematic.constructionDirectory())
                 .resolve("test")
                 .resolve("Test.class")
         )
             .exists();
     }
 
-    private Path srcTestJava(Path path) {
+    private Path srcTestJava(@TempDir Path path) {
         return path.resolve("src").resolve("test").resolve("java");
     }
 
-    private Path explodedTestModule(Path path) {
-        return path.resolve("exploded-test-module");
+    private Path explodedTestJar(@TempDir Path path) {
+        return path.resolve("exploded-test-jar");
     }
 }

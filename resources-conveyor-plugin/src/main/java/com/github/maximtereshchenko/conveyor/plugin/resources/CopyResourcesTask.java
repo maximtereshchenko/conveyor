@@ -34,16 +34,16 @@ final class CopyResourcesTask implements ConveyorTask {
     @Override
     public Set<Product> execute(Set<Product> products) {
         paths(products, destinationType)
-            .forEach(module ->
+            .forEach(explodedJar ->
                 paths(products, resourceType)
-                    .forEach(resource -> copy(resource, module))
+                    .forEach(resource -> copy(resource, explodedJar))
             );
         return Set.of();
     }
 
-    private void copy(Path resource, Path module) {
+    private void copy(Path resource, Path explodedJar) {
         try {
-            var destination = module.resolve(base.relativize(resource));
+            var destination = explodedJar.resolve(base.relativize(resource));
             Files.createDirectories(destination.getParent());
             Files.copy(resource, destination);
         } catch (IOException e) {

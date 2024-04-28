@@ -38,11 +38,11 @@ abstract class CompileJavaFilesTask implements ConveyorTask {
         if (sources.isEmpty()) {
             return Set.of();
         }
-        compiler.compile(sources, modulePath(schematic, products), outputDirectory);
+        compiler.compile(sources, classPath(schematic, products), outputDirectory);
         return Set.of(new Product(schematic.coordinates(), outputDirectory, outputType));
     }
 
-    abstract Set<Path> modulePath(ConveyorSchematic schematic, Set<Product> products);
+    abstract Set<Path> classPath(ConveyorSchematic schematic, Set<Product> products);
 
     private Set<Path> sources(Set<Product> products) {
         return products.stream()

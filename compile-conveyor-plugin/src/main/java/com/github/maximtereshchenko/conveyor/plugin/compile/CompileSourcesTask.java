@@ -16,13 +16,13 @@ final class CompileSourcesTask extends CompileJavaFilesTask {
             schematic,
             ProductType.SOURCE,
             outputDirectory,
-            ProductType.EXPLODED_MODULE,
+            ProductType.EXPLODED_JAR,
             compiler
         );
     }
 
     @Override
-    Set<Path> modulePath(ConveyorSchematic schematic, Set<Product> products) {
-        return schematic.modulePath(Set.of(DependencyScope.IMPLEMENTATION));
+    Set<Path> classPath(ConveyorSchematic schematic, Set<Product> products) {
+        return schematic.classPath(Set.of(DependencyScope.IMPLEMENTATION));
     }
 }

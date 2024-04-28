@@ -4,6 +4,7 @@ import com.github.maximtereshchenko.conveyor.api.ConveyorModule;
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -17,17 +18,17 @@ final class TasksFeatureTests extends ConveyorTest {
 
     @Test
     void givenTaskBoundToLowerThanTargetStage_whenConstructToStage_thenTaskWasExecuted(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("instant")
             )
             .jar(
-                factory.jarBuilder("instant")
+                factory.jarBuilder("instant", path)
             )
             .install(path);
 
@@ -49,17 +50,17 @@ final class TasksFeatureTests extends ConveyorTest {
 
     @Test
     void givenTaskBoundToTargetStage_whenConstructToStage_thenTaskWasExecuted(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("instant")
             )
             .jar(
-                factory.jarBuilder("instant")
+                factory.jarBuilder("instant", path)
             )
             .install(path);
 
@@ -81,17 +82,17 @@ final class TasksFeatureTests extends ConveyorTest {
 
     @Test
     void givenTaskBoundToGreaterThanTargetStage_whenConstructToStage_thenTaskWasNotExecuted(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("instant")
             )
             .jar(
-                factory.jarBuilder("instant")
+                factory.jarBuilder("instant", path)
             )
             .install(path);
 
@@ -108,17 +109,17 @@ final class TasksFeatureTests extends ConveyorTest {
 
     @Test
     void givenTasksBoundToDifferentStages_whenConstructToStage_thenTasksWereExecutedInStageAscendingOrder(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("instant")
             )
             .jar(
-                factory.jarBuilder("instant")
+                factory.jarBuilder("instant", path)
             )
             .install(path);
 
@@ -155,17 +156,17 @@ final class TasksFeatureTests extends ConveyorTest {
 
     @Test
     void givenTasksBoundToSameStage_whenConstructToStage_thenTasksWereExecutedInStepAscendingOrder(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("instant")
             )
             .jar(
-                factory.jarBuilder("instant")
+                factory.jarBuilder("instant", path)
             )
             .install(path);
 
@@ -198,17 +199,17 @@ final class TasksFeatureTests extends ConveyorTest {
 
     @Test
     void givenTasksBoundToSameStageAndStep_whenConstructToStage_thenTasksWereExecutedInPluginsOrder(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("first")
             )
             .jar(
-                factory.jarBuilder("instant")
+                factory.jarBuilder("instant", path)
                     .name("first")
             )
             .schematicDefinition(
@@ -216,7 +217,7 @@ final class TasksFeatureTests extends ConveyorTest {
                     .name("second")
             )
             .jar(
-                factory.jarBuilder("instant")
+                factory.jarBuilder("instant", path)
                     .name("second")
             )
             .install(path);
@@ -246,24 +247,24 @@ final class TasksFeatureTests extends ConveyorTest {
 
     @Test
     void givenSchematicRequiresDependency_whenConstructToStage_thenDependencyIsUsedInTask(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("dependencies")
             )
             .jar(
-                factory.jarBuilder("dependencies")
+                factory.jarBuilder("dependencies", path)
             )
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("dependency")
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
             )
             .install(path);
 
@@ -278,22 +279,22 @@ final class TasksFeatureTests extends ConveyorTest {
 
         assertThat(defaultConstructionDirectory(path).resolve("dependencies"))
             .content()
-            .isEqualTo("dependency-1.0.0");
+            .isEqualTo("group-dependency-1.0.0");
     }
 
     @Test
     void givenSchematicRequireTransitiveDependency_whenConstructToStage_thenTransitiveDependencyIsUsedInTask(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("dependencies")
             )
             .jar(
-                factory.jarBuilder("dependencies")
+                factory.jarBuilder("dependencies", path)
             )
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -301,14 +302,14 @@ final class TasksFeatureTests extends ConveyorTest {
                     .dependency("transitive")
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
             )
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("transitive")
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
                     .name("transitive")
             )
             .install(path);
@@ -325,29 +326,29 @@ final class TasksFeatureTests extends ConveyorTest {
         assertThat(defaultConstructionDirectory(path).resolve("dependencies"))
             .content()
             .hasLineCount(2)
-            .contains("dependency-1.0.0", "transitive-1.0.0");
+            .contains("group-dependency-1.0.0", "transitive-1.0.0");
     }
 
     @Test
     void givenSchematicRequireTestDependency_whenConstructToStage_thenTestDependencyIsUsed(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("dependencies")
             )
             .jar(
-                factory.jarBuilder("dependencies")
+                factory.jarBuilder("dependencies", path)
             )
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("test")
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
                     .name("test")
             )
             .install(path);
@@ -373,29 +374,29 @@ final class TasksFeatureTests extends ConveyorTest {
 
         assertThat(defaultConstructionDirectory(path).resolve("dependencies"))
             .content()
-            .isEqualTo("test-1.0.0");
+            .isEqualTo("group-test-1.0.0");
     }
 
     @Test
     void givenPreviousTaskProducedProduct_whenConstructToStage_thenProductsAreUsed(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("products")
             )
             .jar(
-                factory.jarBuilder("products")
+                factory.jarBuilder("products", path)
             )
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("product")
             )
             .jar(
-                factory.jarBuilder("product")
+                factory.jarBuilder("product", path)
             )
             .install(path);
         var product = path.resolve("product");
@@ -415,7 +416,7 @@ final class TasksFeatureTests extends ConveyorTest {
         assertThat(defaultConstructionDirectory(path).resolve("products"))
             .content()
             .hasLineCount(2)
-            .contains("SCHEMATIC_DEFINITION=" + schematicDefinition, "MODULE=" + product);
+            .contains("SCHEMATIC_DEFINITION=" + schematicDefinition, "JAR=" + product);
     }
 
     private Instant instant(Path path, String fileName) throws IOException {

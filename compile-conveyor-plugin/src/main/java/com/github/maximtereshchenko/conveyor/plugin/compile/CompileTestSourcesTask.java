@@ -18,21 +18,21 @@ final class CompileTestSourcesTask extends CompileJavaFilesTask {
             schematic,
             ProductType.TEST_SOURCE,
             outputDirectory,
-            ProductType.EXPLODED_TEST_MODULE,
+            ProductType.EXPLODED_TEST_JAR,
             compiler
         );
     }
 
     @Override
-    Set<Path> modulePath(ConveyorSchematic schematic, Set<Product> products) {
+    Set<Path> classPath(ConveyorSchematic schematic, Set<Product> products) {
         return Stream.concat(
-                schematic.modulePath(Set.of(DependencyScope.IMPLEMENTATION, DependencyScope.TEST))
+                schematic.classPath(Set.of(DependencyScope.IMPLEMENTATION, DependencyScope.TEST))
                     .stream(),
                 products.stream()
                     .filter(product ->
                         product.schematicCoordinates().equals(schematic.coordinates())
                     )
-                    .filter(product -> product.type() == ProductType.EXPLODED_MODULE)
+                    .filter(product -> product.type() == ProductType.EXPLODED_JAR)
                     .map(Product::path)
             )
             .collect(Collectors.toSet());

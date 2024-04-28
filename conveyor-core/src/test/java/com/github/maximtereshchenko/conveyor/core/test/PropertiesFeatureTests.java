@@ -4,6 +4,7 @@ import com.github.maximtereshchenko.conveyor.api.ConveyorModule;
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -15,11 +16,11 @@ final class PropertiesFeatureTests extends ConveyorTest {
 
     @Test
     void givenTemplateHasDifferentProperty_whenConstructToStage_thenSchematicHasBothProperties(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("template")
@@ -30,7 +31,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
                     .name("properties")
             )
             .jar(
-                factory.jarBuilder("properties")
+                factory.jarBuilder("properties", path)
             )
             .install(path);
 
@@ -57,11 +58,11 @@ final class PropertiesFeatureTests extends ConveyorTest {
 
     @Test
     void givenSchematicHasPropertyWithSameKey_whenConstructToStage_thenSchematicPropertyValueIsUsed(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("template")
@@ -72,7 +73,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
                     .name("properties")
             )
             .jar(
-                factory.jarBuilder("properties")
+                factory.jarBuilder("properties", path)
             )
             .install(path);
 
@@ -98,11 +99,11 @@ final class PropertiesFeatureTests extends ConveyorTest {
 
     @Test
     void givenSchematicAssignedEmptyValueToInheritedProperty_whenConstructToStage_thenPropertyWasRemoved(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("template")
@@ -113,7 +114,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
                     .name("properties")
             )
             .jar(
-                factory.jarBuilder("properties")
+                factory.jarBuilder("properties", path)
             )
             .install(path);
 
@@ -139,17 +140,17 @@ final class PropertiesFeatureTests extends ConveyorTest {
 
     @Test
     void givenSchematicNamePropertyIsOverridden_whenConstructToStage_thenPropertyWasNotChanged(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("properties")
             )
             .jar(
-                factory.jarBuilder("properties")
+                factory.jarBuilder("properties", path)
             )
             .install(path);
 
@@ -174,17 +175,17 @@ final class PropertiesFeatureTests extends ConveyorTest {
 
     @Test
     void givenDiscoveryDirectoryProperty_whenConstructToStage_thenPluginsWorkInThisDirectory(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("properties")
             )
             .jar(
-                factory.jarBuilder("properties")
+                factory.jarBuilder("properties", path)
             )
             .install(path);
         var project = path.resolve("project");
@@ -210,17 +211,17 @@ final class PropertiesFeatureTests extends ConveyorTest {
 
     @Test
     void givenRelativeDiscoveryDirectoryProperty_whenConstructToStage_thenDiscoveryDirectoryResolvedRelativeToSchematicDefinitionDirectory(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("properties")
             )
             .jar(
-                factory.jarBuilder("properties")
+                factory.jarBuilder("properties", path)
             )
             .install(path);
 
@@ -245,17 +246,17 @@ final class PropertiesFeatureTests extends ConveyorTest {
 
     @Test
     void givenConstructionDirectoryProperty_whenConstructToStage_thenPluginsPlacedProductsInThisDirectory(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("properties")
             )
             .jar(
-                factory.jarBuilder("properties")
+                factory.jarBuilder("properties", path)
             )
             .install(path);
         var construction = path.resolve("construction");
@@ -281,17 +282,17 @@ final class PropertiesFeatureTests extends ConveyorTest {
 
     @Test
     void givenRelativeConstructionDirectoryProperty_whenConstructToStage_thenConstructionDirectoryResolvedRelativeToSchematicDefinitionDirectory(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("properties")
             )
             .jar(
-                factory.jarBuilder("properties")
+                factory.jarBuilder("properties", path)
             )
             .install(path);
 
@@ -317,17 +318,17 @@ final class PropertiesFeatureTests extends ConveyorTest {
 
     @Test
     void givenPropertyIsTemplatedWithOtherProperty_whenConstructToStage_thenPropertyIsInterpolated(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("properties")
             )
             .jar(
-                factory.jarBuilder("properties")
+                factory.jarBuilder("properties", path)
             )
             .install(path);
 
@@ -354,17 +355,17 @@ final class PropertiesFeatureTests extends ConveyorTest {
 
     @Test
     void givenConfigurationTemplatedWithOtherTemplatedProperty_whenConstructToStage_thenConfigurationInterpolatedWithInterpolatedProperty(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("configuration")
             )
             .jar(
-                factory.jarBuilder("configuration")
+                factory.jarBuilder("configuration", path)
             )
             .install(path);
 
@@ -394,24 +395,24 @@ final class PropertiesFeatureTests extends ConveyorTest {
 
     @Test
     void givenInterpolatedArtifactDependencyVersion_whenConstructToStage_thenDependencyWithVersionFromPropertyIsUsed(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("dependencies")
             )
             .jar(
-                factory.jarBuilder("dependencies")
+                factory.jarBuilder("dependencies", path)
             )
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("dependency")
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
             )
             .install(path);
 
@@ -432,40 +433,40 @@ final class PropertiesFeatureTests extends ConveyorTest {
 
         assertThat(defaultConstructionDirectory(path).resolve("dependencies"))
             .content(StandardCharsets.UTF_8)
-            .isEqualTo("dependency-1.0.0");
+            .isEqualTo("group-dependency-1.0.0");
     }
 
     @Test
     void givenInterpolatedArtifactDependencyVersionInSchematicDependency_whenConstructToStage_thenDependencyWithVersionFromOtherSchematicPropertyIsUsed(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("dependencies")
             )
             .jar(
-                factory.jarBuilder("dependencies")
+                factory.jarBuilder("dependencies", path)
             )
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("product")
             )
             .jar(
-                factory.jarBuilder("product")
+                factory.jarBuilder("product", path)
             )
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("library")
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
                     .name("library")
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
             )
             .install(path);
         var depends = path.resolve("depends");
@@ -519,22 +520,22 @@ final class PropertiesFeatureTests extends ConveyorTest {
         assertThat(defaultConstructionDirectory(depends).resolve("dependencies"))
             .content(StandardCharsets.UTF_8)
             .hasLineCount(2)
-            .contains("dependency-1.0.0", "library-1.0.0");
+            .contains("group-dependency-1.0.0", "library-1.0.0");
     }
 
     @Test
     void givenInterpolatedPluginVersion_whenConstructToStage_thenPluginWithVersionFromPropertyIsUsed(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("instant")
             )
             .jar(
-                factory.jarBuilder("instant")
+                factory.jarBuilder("instant", path)
             )
             .install(path);
 
@@ -557,17 +558,17 @@ final class PropertiesFeatureTests extends ConveyorTest {
 
     @Test
     void givenInterpolatedArtifactPreferenceVersion_whenConstructToStage_thenPluginWithVersionFromPropertyIsUsed(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("instant")
             )
             .jar(
-                factory.jarBuilder("instant")
+                factory.jarBuilder("instant", path)
             )
             .install(path);
 
@@ -591,17 +592,17 @@ final class PropertiesFeatureTests extends ConveyorTest {
 
     @Test
     void givenInterpolatedPreferenceInclusionVersion_whenConstructToStage_thenPluginWithVersionFromPropertyIsUsed(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("instant")
             )
             .jar(
-                factory.jarBuilder("instant")
+                factory.jarBuilder("instant", path)
             )
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -630,18 +631,18 @@ final class PropertiesFeatureTests extends ConveyorTest {
 
     @Test
     void givenInterpolatedPluginGroup_whenConstructToStage_thenPluginWithGroupFromPropertyIsUsed(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .group("property.group")
                     .name("instant")
             )
             .jar(
-                factory.jarBuilder("instant")
+                factory.jarBuilder("instant", path)
                     .group("property.group")
             )
             .install(path);
@@ -665,17 +666,17 @@ final class PropertiesFeatureTests extends ConveyorTest {
 
     @Test
     void givenInterpolatedDependencyGroup_whenConstructToStage_thenDependencyWithGroupFromPropertyIsUsed(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("dependencies")
             )
             .jar(
-                factory.jarBuilder("dependencies")
+                factory.jarBuilder("dependencies", path)
             )
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -683,7 +684,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
                     .name("dependency")
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
                     .group("property.group")
             )
             .install(path);
@@ -705,22 +706,22 @@ final class PropertiesFeatureTests extends ConveyorTest {
 
         assertThat(defaultConstructionDirectory(path).resolve("dependencies"))
             .content()
-            .isEqualTo("dependency-1.0.0");
+            .isEqualTo("property.group-dependency-1.0.0");
     }
 
     @Test
     void givenInterpolatedPreferenceGroup_whenConstructToStage_thenPreferenceWithGroupFromPropertyIsUsed(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("dependencies")
             )
             .jar(
-                factory.jarBuilder("dependencies")
+                factory.jarBuilder("dependencies", path)
             )
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -728,7 +729,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
                     .name("dependency")
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
                     .group("property.group")
             )
             .install(path);
@@ -751,29 +752,29 @@ final class PropertiesFeatureTests extends ConveyorTest {
 
         assertThat(defaultConstructionDirectory(path).resolve("dependencies"))
             .content()
-            .isEqualTo("dependency-1.0.0");
+            .isEqualTo("property.group-dependency-1.0.0");
     }
 
     @Test
     void givenInterpolatedPreferenceInclusionGroup_whenConstructToStage_thenPreferenceInclusionWithGroupFromPropertyIsUsed(
-        Path path,
+        @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
     ) throws Exception {
-        factory.repositoryBuilder()
+        factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("dependencies")
             )
             .jar(
-                factory.jarBuilder("dependencies")
+                factory.jarBuilder("dependencies", path)
             )
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
                     .name("dependency")
             )
             .jar(
-                factory.jarBuilder("dependency")
+                factory.jarBuilder("dependency", path)
             )
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
@@ -801,6 +802,6 @@ final class PropertiesFeatureTests extends ConveyorTest {
 
         assertThat(defaultConstructionDirectory(path).resolve("dependencies"))
             .content()
-            .isEqualTo("dependency-1.0.0");
+            .isEqualTo("group-dependency-1.0.0");
     }
 }
