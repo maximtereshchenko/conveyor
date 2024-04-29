@@ -12,7 +12,7 @@ tasks.register<Copy>("installConveyorComponent") {
     from(jarTask.archiveFile)
     val directory = project.group.toString()
         .split(".")
-        .fold(project.rootDir.toPath().resolve(".conveyor-repository"), Path::resolve)
+        .fold(project.rootDir.toPath().resolve(".gradle-repository"), Path::resolve)
         .resolve(project.name)
         .resolve(project.version.toString())
     into(directory)

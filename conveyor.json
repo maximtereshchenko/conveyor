@@ -14,6 +14,7 @@
     "./conveyor-plugin-test/conveyor.json",
     "./jackson-adapter/conveyor.json",
     "./junit-jupiter-conveyor-plugin/conveyor.json",
+    "./publish-conveyor-plugin/conveyor.json",
     "./resources-conveyor-plugin/conveyor.json",
     "./test-common/conveyor.json",
     "./zip-archive/conveyor.json"
@@ -24,7 +25,11 @@
       "uri": "https://repo1.maven.org/maven2"
     },
     {
-      "name": "local-repository",
+      "name": "gradle-repository",
+      "path": "./.gradle-repository"
+    },
+    {
+      "name": "conveyor-repository",
       "path": "./.conveyor-repository"
     }
   ],
@@ -53,6 +58,14 @@
       "group": "com.github.maximtereshchenko",
       "name": "archive-conveyor-plugin",
       "version": "1.0.0"
+    },
+    {
+      "group": "com.github.maximtereshchenko",
+      "name": "publish-conveyor-plugin",
+      "version": "1.0.0",
+      "configuration": {
+        "repository": "conveyor-repository"
+      }
     }
   ]
 }

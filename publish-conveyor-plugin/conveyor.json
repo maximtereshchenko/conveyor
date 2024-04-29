@@ -40,6 +40,11 @@
       "scope": "TEST"
     },
     {
+      "group": "org.junit.jupiter",
+      "name": "junit-jupiter-params",
+      "scope": "TEST"
+    },
+    {
       "group": "org.assertj",
       "name": "assertj-core",
       "version": "3.25.1",
