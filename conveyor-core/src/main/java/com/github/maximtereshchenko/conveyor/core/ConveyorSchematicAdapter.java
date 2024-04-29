@@ -2,6 +2,7 @@ package com.github.maximtereshchenko.conveyor.core;
 
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 import com.github.maximtereshchenko.conveyor.common.api.SchematicCoordinates;
+import com.github.maximtereshchenko.conveyor.plugin.api.ArtifactClassifier;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
 
 import java.nio.file.Path;
@@ -10,23 +11,29 @@ import java.util.Set;
 
 final class ConveyorSchematicAdapter implements ConveyorSchematic {
 
-    private final SchematicCoordinates schematicCoordinates;
+    private final Id id;
+    private final SemanticVersion semanticVersion;
     private final Properties properties;
     private final Dependencies dependencies;
+    private final Repositories repositories;
 
     ConveyorSchematicAdapter(
-        SchematicCoordinates schematicCoordinates,
+        Id id,
+        SemanticVersion semanticVersion,
         Properties properties,
-        Dependencies dependencies
+        Dependencies dependencies,
+        Repositories repositories
     ) {
-        this.schematicCoordinates = schematicCoordinates;
+        this.id = id;
+        this.semanticVersion = semanticVersion;
         this.properties = properties;
         this.dependencies = dependencies;
+        this.repositories = repositories;
     }
 
     @Override
     public SchematicCoordinates coordinates() {
-        return schematicCoordinates;
+        return id.coordinates(semanticVersion);
     }
 
     @Override
@@ -47,5 +54,19 @@ final class ConveyorSchematicAdapter implements ConveyorSchematic {
     @Override
     public Set<Path> classPath(Set<DependencyScope> scopes) {
         return dependencies.classPath(scopes);
+    }
+
+    @Override
+    public void publish(String repository, Path path, ArtifactClassifier artifactClassifier) {
+        repositories.publish(
+            repository,
+            id,
+            semanticVersion,
+            switch (artifactClassifier) {
+                case SCHEMATIC_DEFINITION -> Repository.Classifier.SCHEMATIC_DEFINITION;
+                case JAR -> Repository.Classifier.JAR;
+            },
+            path
+        );
     }
 }

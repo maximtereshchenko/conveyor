@@ -9,6 +9,7 @@ import org.junit.jupiter.api.io.TempDir;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -1143,10 +1144,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
             factory.schematicDefinitionBuilder()
                 .name("template")
                 .repository(path)
-                .inclusion(
-                    path.getFileSystem()
-                        .getPath("..", "inclusion", "conveyor.json")
-                )
+                .inclusion(Paths.get("..", "inclusion", "conveyor.json"))
                 .conveyorJson(path.resolve("template")),
             Stage.COMPILE
         );

@@ -71,12 +71,18 @@ final class Schematic {
             properties,
             repositories
         );
-        var schematicCoordinates = completeModel.id().coordinates(completeModel.version());
         var dependencies = dependencies(completeModel, properties, preferences, repositories);
+        var conveyorSchematic = new ConveyorSchematicAdapter(
+            completeModel.id(),
+            completeModel.version(),
+            properties,
+            dependencies,
+            repositories
+        );
         return plugins(completeModel, properties, preferences, repositories)
             .executeTasks(
-                new ConveyorSchematicAdapter(schematicCoordinates, properties, dependencies),
-                withSchematicDefinition(products, schematicCoordinates, completeModel),
+                conveyorSchematic,
+                withSchematicDefinition(products, conveyorSchematic.coordinates(), completeModel),
                 stage
             );
     }
@@ -171,8 +177,11 @@ final class Schematic {
             return new DisabledRepository();
         }
         return switch (repositoryModel) {
-            case LocalDirectoryRepositoryModel model -> new LocalDirectoryRepository(
-                absolutePath(path.getParent(), model.path())
+            case LocalDirectoryRepositoryModel model -> new NamedLocalDirectoryRepository(
+                new LocalDirectoryRepository(
+                    absolutePath(path.getParent(), model.path())
+                ),
+                model.name()
             );
             case RemoteRepositoryModel model -> remoteRepository(path, properties, model);
         };
@@ -189,7 +198,10 @@ final class Schematic {
         return new CachingRepository(
             new MavenRepositoryAdapter(
                 new CachingRepository(
-                    new RemoteMavenRepository(remoteRepositoryModel.uri()),
+                    new RemoteMavenRepository(
+                        remoteRepositoryModel.name(),
+                        remoteRepositoryModel.uri()
+                    ),
                     cache
                 ),
                 pomDefinitionFactory,

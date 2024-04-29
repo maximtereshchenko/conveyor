@@ -17,6 +17,11 @@ final class ProductRepository implements Repository<Path> {
     }
 
     @Override
+    public boolean hasName(String name) {
+        return false;
+    }
+
+    @Override
     public Optional<Path> artifact(
         Id id,
         SemanticVersion semanticVersion,
@@ -32,6 +37,16 @@ final class ProductRepository implements Repository<Path> {
                     .map(Product::path)
                     .findAny()
             );
+    }
+
+    @Override
+    public void publish(
+        Id id,
+        SemanticVersion semanticVersion,
+        Classifier classifier,
+        Resource resource
+    ) {
+        throw new IllegalArgumentException();
     }
 
     private Optional<ProductType> productType(Classifier classifier) {

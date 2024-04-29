@@ -16,6 +16,16 @@ abstract class UriRepository<T> implements Repository<T> {
         return artifact(uri(id, semanticVersion, classifier));
     }
 
+    @Override
+    public void publish(
+        Id id,
+        SemanticVersion semanticVersion,
+        Classifier classifier,
+        Resource resource
+    ) {
+        publish(uri(id, semanticVersion, classifier), resource);
+    }
+
     URI uri(Id id, SemanticVersion semanticVersion, Classifier classifier) {
         return URI.create(
             "%s/%s/%s/%s/%s-%s.%s".formatted(
@@ -35,4 +45,6 @@ abstract class UriRepository<T> implements Repository<T> {
     }
 
     abstract Optional<T> artifact(URI uri);
+
+    abstract void publish(URI uri, Resource resource);
 }

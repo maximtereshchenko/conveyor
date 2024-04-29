@@ -12,6 +12,7 @@ import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
@@ -1110,5 +1111,52 @@ final class RepositoriesFeatureTests extends ConveyorTest {
 
         assertThatCode(() -> module.construct(conveyorJson, Stage.COMPILE))
             .doesNotThrowAnyException();
+    }
+
+    @Test
+    void givenLocalDirectoryRepository_whenConstructToStage_thenProductIsPublished(
+        @TempDir Path path,
+        ConveyorModule module,
+        BuilderFactory factory
+    ) throws Exception {
+        factory.repositoryBuilder(path)
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("publisher")
+            )
+            .jar(
+                factory.jarBuilder("publisher", path)
+            )
+            .install(path);
+        var published = path.resolve("published");
+
+        module.construct(
+            factory.schematicDefinitionBuilder()
+                .group("schematic.group")
+                .name("schematic-name")
+                .version("1.2.3")
+                .repository(path)
+                .repository("published", published, true)
+                .plugin(
+                    "group",
+                    "publisher",
+                    "1.0.0",
+                    Map.of(
+                        "path", Files.createFile(path.resolve("file")).toString(),
+                        "repository", "published"
+                    )
+                )
+                .conveyorJson(path),
+            Stage.PUBLISH
+        );
+
+        assertThat(
+            published.resolve("schematic")
+                .resolve("group")
+                .resolve("schematic-name")
+                .resolve("1.2.3")
+                .resolve("schematic-name-1.2.3.jar")
+        )
+            .exists();
     }
 }

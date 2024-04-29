@@ -18,4 +18,6 @@ public interface ConveyorSchematic {
     Optional<String> propertyValue(String key);
 
     Set<Path> classPath(Set<DependencyScope> scopes);
+
+    void publish(String repository, Path path, ArtifactClassifier artifactClassifier);
 }

@@ -98,7 +98,7 @@ final class JarBuilder {
                 )
             ),
             Stream.of(System.getProperty("java.class.path").split(":"))
-                .map(temporaryDirectory.getFileSystem()::getPath)
+                .map(Paths::get)
                 .collect(Collectors.toSet()),
             classes
         );

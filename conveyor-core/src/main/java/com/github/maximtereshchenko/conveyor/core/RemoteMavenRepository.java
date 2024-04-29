@@ -11,10 +11,12 @@ import java.util.Optional;
 
 final class RemoteMavenRepository extends UriRepository<InputStream> {
 
+    private final String name;
     private final HttpClient httpClient = HttpClient.newHttpClient();
 
-    RemoteMavenRepository(URI baseUri) {
+    RemoteMavenRepository(String name, URI baseUri) {
         super(baseUri);
+        this.name = name;
     }
 
     @Override
@@ -24,6 +26,16 @@ final class RemoteMavenRepository extends UriRepository<InputStream> {
             return Optional.empty();
         }
         return Optional.of(response.body());
+    }
+
+    @Override
+    void publish(URI uri, Resource resource) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean hasName(String name) {
+        return this.name.equals(name);
     }
 
     private HttpResponse<InputStream> getResponse(URI uri) {

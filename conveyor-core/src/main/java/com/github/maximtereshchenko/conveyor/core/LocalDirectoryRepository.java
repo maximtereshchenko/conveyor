@@ -1,7 +1,6 @@
 package com.github.maximtereshchenko.conveyor.core;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.net.URI;
 import java.nio.file.Files;
@@ -16,7 +15,12 @@ final class LocalDirectoryRepository extends UriRepository<Path> {
     }
 
     @Override
-    public Optional<Path> artifact(URI uri) {
+    public boolean hasName(String name) {
+        return false;
+    }
+
+    @Override
+    Optional<Path> artifact(URI uri) {
         var requested = Paths.get(uri);
         if (Files.exists(requested)) {
             return Optional.of(requested);
@@ -24,19 +28,14 @@ final class LocalDirectoryRepository extends UriRepository<Path> {
         return Optional.empty();
     }
 
-    Path publish(
-        Id id,
-        SemanticVersion semanticVersion,
-        Classifier classifier,
-        InputStream inputStream
-    ) {
-        var destination = Paths.get(uri(id, semanticVersion, classifier));
-        try {
+    @Override
+    void publish(URI uri, Resource resource) {
+        try (var inputStream = resource.inputStream()) {
+            var destination = Paths.get(uri);
             Files.deleteIfExists(destination);
             Files.createDirectories(destination.getParent());
             try (var outputStream = Files.newOutputStream(destination)) {
                 inputStream.transferTo(outputStream);
-                return destination;
             }
         } catch (IOException e) {
             throw new UncheckedIOException(e);

@@ -30,6 +30,11 @@ final class MavenRepositoryAdapter implements Repository<InputStream> {
     }
 
     @Override
+    public boolean hasName(String name) {
+        return original.hasName(name);
+    }
+
+    @Override
     public Optional<InputStream> artifact(
         Id id,
         SemanticVersion semanticVersion,
@@ -43,6 +48,16 @@ final class MavenRepositoryAdapter implements Repository<InputStream> {
             case JAR, POM -> original.artifact(id, semanticVersion, classifier)
                 .map(this::inputStream);
         };
+    }
+
+    @Override
+    public void publish(
+        Id id,
+        SemanticVersion semanticVersion,
+        Classifier classifier,
+        Resource resource
+    ) {
+        original.publish(id, semanticVersion, classifier, resource);
     }
 
     private InputStream inputStream(Path path) {

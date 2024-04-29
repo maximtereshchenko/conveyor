@@ -2,6 +2,7 @@ package com.github.maximtereshchenko.conveyor.plugin.test;
 
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 import com.github.maximtereshchenko.conveyor.common.api.SchematicCoordinates;
+import com.github.maximtereshchenko.conveyor.plugin.api.ArtifactClassifier;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
 
 import java.nio.file.Path;
@@ -47,5 +48,10 @@ final class FakeConveyorSchematic implements ConveyorSchematic {
     @Override
     public Set<Path> classPath(Set<DependencyScope> scopes) {
         return dependencies;
+    }
+
+    @Override
+    public void publish(String repository, Path path, ArtifactClassifier artifactClassifier) {
+        throw new UnsupportedOperationException();
     }
 }
