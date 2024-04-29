@@ -87,8 +87,7 @@ final class JunitJupiterPluginTests {
         System.setOut(new PrintStream(outputStream));
 
         ConveyorTasks.executeTasks(
-            schematic,
-            plugin,
+            plugin.bindings(schematic, Map.of()),
             new Product(schematic.coordinates(), path, ProductType.EXPLODED_JAR),
             new Product(schematic.coordinates(), testClasses, ProductType.EXPLODED_TEST_JAR)
         );
@@ -142,13 +141,12 @@ final class JunitJupiterPluginTests {
             testClasses,
             ProductType.EXPLODED_TEST_JAR
         );
+        var bindings = plugin.bindings(schematic, Map.of());
         var outputStream = new ByteArrayOutputStream();
         var standardOut = System.out;
         System.setOut(new PrintStream(outputStream));
 
-        assertThatThrownBy(() ->
-            ConveyorTasks.executeTasks(schematic, plugin, explodedJar, explodedTestJar)
-        )
+        assertThatThrownBy(() -> ConveyorTasks.executeTasks(bindings, explodedJar, explodedTestJar))
             .isInstanceOf(IllegalArgumentException.class);
 
         System.setOut(standardOut);
@@ -169,7 +167,9 @@ final class JunitJupiterPluginTests {
             ProductType.EXPLODED_JAR
         );
 
-        assertThatCode(() -> ConveyorTasks.executeTasks(schematic, plugin, explodedJar))
+        assertThatCode(() ->
+            ConveyorTasks.executeTasks(plugin.bindings(schematic, Map.of()), explodedJar)
+        )
             .doesNotThrowAnyException();
     }
 
@@ -214,7 +214,9 @@ final class JunitJupiterPluginTests {
             ProductType.EXPLODED_TEST_JAR
         );
 
-        assertThatCode(() -> ConveyorTasks.executeTasks(schematic, plugin, explodedTestJar))
+        assertThatCode(() ->
+            ConveyorTasks.executeTasks(plugin.bindings(schematic, Map.of()), explodedTestJar)
+        )
             .doesNotThrowAnyException();
     }
 
@@ -271,8 +273,7 @@ final class JunitJupiterPluginTests {
 
         assertThatCode(() ->
             ConveyorTasks.executeTasks(
-                schematic,
-                plugin,
+                plugin.bindings(schematic, Map.of()),
                 otherExplodedTestJar,
                 explodedTestJar
             )

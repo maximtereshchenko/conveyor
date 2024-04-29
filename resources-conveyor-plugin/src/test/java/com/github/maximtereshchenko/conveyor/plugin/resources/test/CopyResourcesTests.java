@@ -65,7 +65,7 @@ final class CopyResourcesTests {
         var schematic = FakeConveyorSchematicBuilder.discoveryDirectory(path).build();
         var product = new Product(schematic.coordinates(), explodedJar, productType);
 
-        var products = ConveyorTasks.executeTasks(schematic, plugin, product);
+        var products = ConveyorTasks.executeTasks(plugin.bindings(schematic, Map.of()), product);
 
         assertThat(explodedJar).isEmptyDirectory();
         assertThat(products).containsExactly(product);
@@ -88,8 +88,7 @@ final class CopyResourcesTests {
         var schematic = FakeConveyorSchematicBuilder.discoveryDirectory(path).build();
 
         var products = ConveyorTasks.executeTasks(
-            schematic,
-            plugin,
+            plugin.bindings(schematic, Map.of()),
             new Product(schematic.coordinates(), explodedJar, productType)
         );
 
@@ -110,7 +109,7 @@ final class CopyResourcesTests {
         var schematic = FakeConveyorSchematicBuilder.discoveryDirectory(path)
             .build();
 
-        assertThatCode(() -> ConveyorTasks.executeTasks(schematic, plugin))
+        assertThatCode(() -> ConveyorTasks.executeTasks(plugin.bindings(schematic, Map.of())))
             .doesNotThrowAnyException();
     }
 
@@ -135,8 +134,7 @@ final class CopyResourcesTests {
         var schematic = FakeConveyorSchematicBuilder.discoveryDirectory(path).build();
 
         ConveyorTasks.executeTasks(
-            schematic,
-            plugin,
+            plugin.bindings(schematic, Map.of()),
             new Product(
                 new SchematicCoordinates(
                     "group",

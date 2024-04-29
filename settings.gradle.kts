@@ -14,6 +14,7 @@ include("zip-archive")
 include("compiler")
 include("junit-jupiter-conveyor-plugin")
 include("conveyor-cli")
+include("publish-conveyor-plugin")
 dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {

@@ -49,9 +49,11 @@ final class ArchivePluginTests {
     @Test
     void givenNoExplodedModule_whenExecuteTask_thenNoModuleProduct(@TempDir Path path) {
         var products = ConveyorTasks.executeTasks(
-            FakeConveyorSchematicBuilder.discoveryDirectory(path)
-                .build(),
-            plugin
+            plugin.bindings(
+                FakeConveyorSchematicBuilder.discoveryDirectory(path)
+                    .build(),
+                Map.of()
+            )
         );
 
         assertThat(products).isEmpty();
@@ -68,8 +70,7 @@ final class ArchivePluginTests {
         var schematic = FakeConveyorSchematicBuilder.discoveryDirectory(path).build();
 
         var products = ConveyorTasks.executeTasks(
-            schematic,
-            plugin,
+            plugin.bindings(schematic, Map.of()),
             new Product(schematic.coordinates(), explodedModule, ProductType.EXPLODED_JAR)
         );
 
@@ -93,8 +94,7 @@ final class ArchivePluginTests {
         var schematic = FakeConveyorSchematicBuilder.discoveryDirectory(path).build();
 
         var products = ConveyorTasks.executeTasks(
-            schematic,
-            plugin,
+            plugin.bindings(schematic, Map.of()),
             new Product(
                 new SchematicCoordinates(
                     "group",

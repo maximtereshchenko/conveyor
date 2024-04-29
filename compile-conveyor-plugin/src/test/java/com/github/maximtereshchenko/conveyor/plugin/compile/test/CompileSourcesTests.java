@@ -33,9 +33,11 @@ final class CompileSourcesTests extends CompilePluginTest {
     @Test
     void givenNoSources_whenExecuteTasks_thenNoProducts(@TempDir Path path) {
         var products = ConveyorTasks.executeTasks(
-            FakeConveyorSchematicBuilder.discoveryDirectory(path)
-                .build(),
-            plugin
+            plugin.bindings(
+                FakeConveyorSchematicBuilder.discoveryDirectory(path)
+                    .build(),
+                Map.of()
+            )
         );
 
         assertThat(products).isEmpty();
@@ -54,7 +56,7 @@ final class CompileSourcesTests extends CompilePluginTest {
         );
         var schematic = FakeConveyorSchematicBuilder.discoveryDirectory(path).build();
 
-        var products = ConveyorTasks.executeTasks(schematic, plugin);
+        var products = ConveyorTasks.executeTasks(plugin.bindings(schematic, Map.of()));
 
         var mainClass = explodedJar(schematic.constructionDirectory())
             .resolve("main")
@@ -84,7 +86,7 @@ final class CompileSourcesTests extends CompilePluginTest {
         );
         var dependencySchematic = FakeConveyorSchematicBuilder.discoveryDirectory(dependency)
             .build();
-        ConveyorTasks.executeTasks(dependencySchematic, plugin);
+        ConveyorTasks.executeTasks(plugin.bindings(dependencySchematic, Map.of()));
         var dependent = path.resolve("dependent");
         var mainJava = srcMainJava(dependent).resolve("main").resolve("Main.java");
         write(
@@ -103,7 +105,7 @@ final class CompileSourcesTests extends CompilePluginTest {
             .dependency(explodedJar(dependencySchematic.constructionDirectory()))
             .build();
 
-        var products = ConveyorTasks.executeTasks(schematic, plugin);
+        var products = ConveyorTasks.executeTasks(plugin.bindings(schematic, Map.of()));
 
         var mainClass = explodedJar(schematic.constructionDirectory())
             .resolve("main")
@@ -150,8 +152,8 @@ final class CompileSourcesTests extends CompilePluginTest {
                 secondDependency
             )
             .build();
-        ConveyorTasks.executeTasks(firstDependencySchematic, plugin);
-        ConveyorTasks.executeTasks(secondDependencySchematic, plugin);
+        ConveyorTasks.executeTasks(plugin.bindings(firstDependencySchematic, Map.of()));
+        ConveyorTasks.executeTasks(plugin.bindings(secondDependencySchematic, Map.of()));
         var dependent = path.resolve("dependent");
         var mainJava = srcMainJava(dependent).resolve("main").resolve("Main.java");
         write(
@@ -173,7 +175,7 @@ final class CompileSourcesTests extends CompilePluginTest {
             .dependency(explodedJar(secondDependencySchematic.constructionDirectory()))
             .build();
 
-        var products = ConveyorTasks.executeTasks(schematic, plugin);
+        var products = ConveyorTasks.executeTasks(plugin.bindings(schematic, Map.of()));
 
         var mainClass = explodedJar(schematic.constructionDirectory())
             .resolve("main")
@@ -204,8 +206,7 @@ final class CompileSourcesTests extends CompilePluginTest {
         var schematic = FakeConveyorSchematicBuilder.discoveryDirectory(path).build();
 
         ConveyorTasks.executeTasks(
-            schematic,
-            plugin,
+            plugin.bindings(schematic, Map.of()),
             new Product(
                 new SchematicCoordinates(
                     "group",

@@ -1,7 +1,5 @@
 package com.github.maximtereshchenko.conveyor.plugin.test;
 
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
-
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Set;
@@ -31,7 +29,7 @@ public final class FakeConveyorSchematicBuilder {
         return this;
     }
 
-    public ConveyorSchematic build() {
+    public FakeConveyorSchematic build() {
         return new FakeConveyorSchematic(discoveryDirectory, constructionDirectory, dependencies);
     }
 }

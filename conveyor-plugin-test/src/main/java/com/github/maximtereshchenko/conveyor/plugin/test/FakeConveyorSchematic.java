@@ -6,14 +6,17 @@ import com.github.maximtereshchenko.conveyor.plugin.api.ArtifactClassifier;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-final class FakeConveyorSchematic implements ConveyorSchematic {
+public final class FakeConveyorSchematic implements ConveyorSchematic {
 
     private final Path discoveryDirectory;
     private final Path constructionDirectory;
     private final Set<Path> dependencies;
+    private final List<PublishedArtifact> published = new ArrayList<>();
 
     FakeConveyorSchematic(
         Path discoveryDirectory,
@@ -52,6 +55,10 @@ final class FakeConveyorSchematic implements ConveyorSchematic {
 
     @Override
     public void publish(String repository, Path path, ArtifactClassifier artifactClassifier) {
-        throw new UnsupportedOperationException();
+        published.add(new PublishedArtifact(repository, path, artifactClassifier));
+    }
+
+    public List<PublishedArtifact> published() {
+        return published;
     }
 }

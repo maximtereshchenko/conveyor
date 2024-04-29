@@ -43,9 +43,11 @@ final class CompileTestSourcesTests extends CompilePluginTest {
         );
 
         var products = ConveyorTasks.executeTasks(
-            FakeConveyorSchematicBuilder.discoveryDirectory(path)
-                .build(),
-            plugin
+            plugin.bindings(
+                FakeConveyorSchematicBuilder.discoveryDirectory(path)
+                    .build(),
+                Map.of()
+            )
         );
 
         assertThat(products)
@@ -75,7 +77,7 @@ final class CompileTestSourcesTests extends CompilePluginTest {
         );
         var schematic = FakeConveyorSchematicBuilder.discoveryDirectory(path).build();
 
-        var products = ConveyorTasks.executeTasks(schematic, plugin);
+        var products = ConveyorTasks.executeTasks(plugin.bindings(schematic, Map.of()));
 
         var mainClass = explodedJar(schematic.constructionDirectory())
             .resolve("main")
@@ -129,7 +131,7 @@ final class CompileTestSourcesTests extends CompilePluginTest {
         );
         var schematic = FakeConveyorSchematicBuilder.discoveryDirectory(path).build();
 
-        var products = ConveyorTasks.executeTasks(schematic, plugin);
+        var products = ConveyorTasks.executeTasks(plugin.bindings(schematic, Map.of()));
 
         var mainClass = explodedJar(schematic.constructionDirectory())
             .resolve("main")
@@ -168,8 +170,7 @@ final class CompileTestSourcesTests extends CompilePluginTest {
         );
         var schematic = FakeConveyorSchematicBuilder.discoveryDirectory(path).build();
         ConveyorTasks.executeTasks(
-            schematic,
-            plugin,
+            plugin.bindings(schematic, Map.of()),
             new Product(
                 new SchematicCoordinates(
                     "group",

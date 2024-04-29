@@ -50,7 +50,7 @@ final class CleanPluginTest {
     void givenNoDirectory_whenExecuteTasks_thenTaskDidNotFail(@TempDir Path path) {
         var schematic = FakeConveyorSchematicBuilder.discoveryDirectory(path).build();
 
-        assertThatCode(() -> ConveyorTasks.executeTasks(schematic, plugin))
+        assertThatCode(() -> ConveyorTasks.executeTasks(plugin.bindings(schematic, Map.of())))
             .doesNotThrowAnyException();
     }
 
@@ -62,10 +62,12 @@ final class CleanPluginTest {
     )
         throws IOException {
         ConveyorTasks.executeTasks(
-            FakeConveyorSchematicBuilder.discoveryDirectory(path)
-                .constructionDirectory(Directories.writeFiles(path, entries))
-                .build(),
-            plugin
+            plugin.bindings(
+                FakeConveyorSchematicBuilder.discoveryDirectory(path)
+                    .constructionDirectory(Directories.writeFiles(path, entries))
+                    .build(),
+                Map.of()
+            )
         );
 
         assertThat(path).doesNotExist();
