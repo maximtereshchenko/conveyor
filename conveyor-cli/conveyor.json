@@ -1,0 +1,32 @@
+{
+  "group": "com.github.maximtereshchenko",
+  "name": "conveyor-cli",
+  "version": "1.0.0",
+  "template": {
+    "group": "com.github.maximtereshchenko",
+    "name": "conveyor-template",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "group": "com.github.maximtereshchenko",
+      "name": "executable-conveyor-plugin",
+      "version": "1.0.0",
+      "configuration": {
+        "main-class": "com.github.maximtereshchenko.conveyor.cli.Main"
+      }
+    }
+  ],
+  "dependencies": [
+    {
+      "group": "com.github.maximtereshchenko",
+      "name": "conveyor-core",
+      "version": "1.0.0"
+    },
+    {
+      "group": "com.github.maximtereshchenko",
+      "name": "jackson-adapter",
+      "version": "1.0.0"
+    }
+  ]
+}

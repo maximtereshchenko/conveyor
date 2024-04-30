@@ -21,10 +21,12 @@ public final class ZipArchive {
                 entry != null;
                 entry = zipInputStream.getNextEntry()
             ) {
-                var file = target.resolve(entry.getName());
-                Files.createDirectories(file.getParent());
-                try (var outputStream = Files.newOutputStream(file)) {
-                    zipInputStream.transferTo(outputStream);
+                if (!entry.isDirectory()) {
+                    var file = target.resolve(entry.getName());
+                    Files.createDirectories(file.getParent());
+                    try (var outputStream = Files.newOutputStream(file)) {
+                        zipInputStream.transferTo(outputStream);
+                    }
                 }
             }
         } catch (IOException e) {
