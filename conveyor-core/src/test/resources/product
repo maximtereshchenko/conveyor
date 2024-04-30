@@ -44,7 +44,7 @@ public final class ${normalizedName} implements ConveyorPlugin {
                     new Product(
                         schematic.coordinates(),
                         schematic.discoveryDirectory().resolve(configuration.get("path")),
-                        ProductType.JAR
+                        ProductType.valueOf(configuration.getOrDefault("type", "JAR"))
                     )
                 );
         }

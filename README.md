@@ -74,7 +74,8 @@ A build tool for Java projects
     * Dependencies are inherited from a schematic used as a template
     * Version and scope of the inherited dependency can be overridden
     * Schematic can define a dependency on other schematic with a group, a name and an optional
-      scope. In such case the product from this schematic of type `JAR` will be used in class path
+      scope. In such case the product from this schematic of type `JAR` or `EXPLODED_JAR` (if `JAR`
+      is absent) will be used in class path
     * A transitive dependency can be excluded from a dependency by defining the dependency as the
       exclusion
 * Inheritance
@@ -89,8 +90,7 @@ A build tool for Java projects
     * A schematic is constructed before its inclusions
     * A schematic is constructed after its schematic template
     * A schematic is constructed before other schematics, which require it as a dependency
-    * A schematic is constructed up to the specified stage or ARCHIVE, whichever is higher, if it is
-      required as a dependency for other schematic
+    * A schematic is constructed up to the specified stage
     * Schematics are constructed in depth-first order
     * Schematics to be constructed depend on the initial targeted schematic. The targeted schematic
       will be constructed together with its schematic templates, inclusions and also with other

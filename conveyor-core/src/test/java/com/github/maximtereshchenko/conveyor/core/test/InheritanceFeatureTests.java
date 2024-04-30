@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 
 final class InheritanceFeatureTests extends ConveyorTest {
 
@@ -1010,7 +1011,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
     }
 
     @Test
-    void givenStageIsLessThanArchive_whenConstructToStage_thenSchematicDependencyConstructedToArchive(
+    void givenNoDependencyJarProduct_whenConstructToStage_thenDependencyExplodedJarProductIsUsed(
         @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
@@ -1018,45 +1019,46 @@ final class InheritanceFeatureTests extends ConveyorTest {
         factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
-                    .name("instant")
+                    .name("product")
             )
             .jar(
-                factory.jarBuilder("instant", path)
+                factory.jarBuilder("product", path)
             )
             .install(path);
-        var depends = path.resolve("depends");
         var dependency = path.resolve("dependency");
+        var conveyorJson = factory.schematicDefinitionBuilder()
+            .name("template")
+            .repository(path)
+            .inclusion(
+                factory.schematicDefinitionBuilder()
+                    .name("depends")
+                    .template("template")
+                    .dependency("dependency")
+                    .conveyorJson(path.resolve("depends"))
+            )
+            .inclusion(
+                factory.schematicDefinitionBuilder()
+                    .name("dependency")
+                    .template("template")
+                    .plugin(
+                        "group",
+                        "product",
+                        "1.0.0",
+                        Map.of(
+                            "path",
+                            defaultConstructionDirectory(dependency)
+                                .resolve("exploded-jar")
+                                .toString(),
+                            "type",
+                            "EXPLODED_JAR"
+                        )
+                    )
+                    .conveyorJson(dependency)
+            )
+            .conveyorJson(path);
 
-        module.construct(
-            factory.schematicDefinitionBuilder()
-                .name("template")
-                .repository(path)
-                .inclusion(
-                    factory.schematicDefinitionBuilder()
-                        .name("depends")
-                        .template("template")
-                        .dependency("dependency")
-                        .conveyorJson(depends)
-                )
-                .inclusion(
-                    factory.schematicDefinitionBuilder()
-                        .name("dependency")
-                        .template("template")
-                        .conveyorJson(dependency)
-                )
-                .plugin(
-                    "group",
-                    "instant",
-                    "1.0.0",
-                    Map.of("instant", "ARCHIVE-RUN")
-                )
-                .conveyorJson(path),
-            Stage.COMPILE
-        );
-
-        assertThat(instantPath(path)).doesNotExist();
-        assertThat(instantPath(depends)).doesNotExist();
-        assertThat(instantPath(dependency)).exists();
+        assertThatCode(() -> module.construct(conveyorJson, Stage.ARCHIVE))
+            .doesNotThrowAnyException();
     }
 
     @Test

@@ -27,16 +27,13 @@ final class ProductRepository implements Repository<Path> {
         SemanticVersion semanticVersion,
         Classifier classifier
     ) {
-        return productType(classifier)
-            .flatMap(productType ->
-                products.stream()
-                    .filter(product ->
-                        hasCoordinates(product.schematicCoordinates(), id, semanticVersion)
-                    )
-                    .filter(product -> product.type() == productType)
-                    .map(Product::path)
-                    .findAny()
-            );
+        return switch (classifier) {
+            case SCHEMATIC_DEFINITION ->
+                path(id, semanticVersion, ProductType.SCHEMATIC_DEFINITION);
+            case JAR -> path(id, semanticVersion, ProductType.JAR)
+                .or(() -> path(id, semanticVersion, ProductType.EXPLODED_JAR));
+            case POM -> Optional.empty();
+        };
     }
 
     @Override
@@ -49,12 +46,14 @@ final class ProductRepository implements Repository<Path> {
         throw new IllegalArgumentException();
     }
 
-    private Optional<ProductType> productType(Classifier classifier) {
-        return switch (classifier) {
-            case SCHEMATIC_DEFINITION -> Optional.of(ProductType.SCHEMATIC_DEFINITION);
-            case JAR -> Optional.of(ProductType.JAR);
-            case POM -> Optional.empty();
-        };
+    private Optional<Path> path(Id id, SemanticVersion semanticVersion, ProductType productType) {
+        return products.stream()
+            .filter(product ->
+                hasCoordinates(product.schematicCoordinates(), id, semanticVersion)
+            )
+            .filter(product -> product.type() == productType)
+            .map(Product::path)
+            .findAny();
     }
 
     private boolean hasCoordinates(

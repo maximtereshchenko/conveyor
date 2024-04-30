@@ -22,7 +22,7 @@ final class Schematics {
         var schematicsInConstructionOrder = schematicsInConstructionOrder();
         log(schematicsInConstructionOrder);
         for (var schematic : schematicsInConstructionOrder) {
-            products = schematic.construct(products, stage(stage, schematic));
+            products = schematic.construct(products, stage);
         }
     }
 
@@ -62,21 +62,6 @@ final class Schematics {
             }
         }
         return schematics.size();
-    }
-
-    private Stage stage(Stage stage, Schematic schematic) {
-        if (stage.compareTo(Stage.ARCHIVE) >= 0) {
-            return stage;
-        }
-        if (isDependency(schematic)) {
-            return Stage.ARCHIVE;
-        }
-        return stage;
-    }
-
-    private boolean isDependency(Schematic schematic) {
-        return all.stream()
-            .anyMatch(other -> other.dependsOn(schematic, this));
     }
 
     private boolean toBeConstructed(Schematic schematic) {
