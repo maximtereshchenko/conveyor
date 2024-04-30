@@ -8,7 +8,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -56,8 +55,6 @@ final class ZipArchiveTests {
             zipOutputStream.putNextEntry(new ZipEntry("directory/file"));
             zipOutputStream.write("content".getBytes(StandardCharsets.UTF_8));
             zipOutputStream.closeEntry();
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
         }
         var destination = Files.createDirectory(path.resolve("destination"));
         var zipArchive = new ZipArchive(archive);

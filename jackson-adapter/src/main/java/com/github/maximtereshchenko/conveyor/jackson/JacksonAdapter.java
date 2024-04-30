@@ -46,8 +46,9 @@ public final class JacksonAdapter implements SchematicDefinitionConverter {
     @Override
     public SchematicDefinition schematicDefinition(Path path) {
         try (var reader = Files.newBufferedReader(path)) {
-            LOGGER.log(System.Logger.Level.DEBUG, "Reading schematic definition {0}", path);
-            return objectMapper.readValue(reader, SchematicDefinition.class);
+            var schematicDefinition = objectMapper.readValue(reader, SchematicDefinition.class);
+            LOGGER.log(System.Logger.Level.DEBUG, "Read schematic definition {0}", path);
+            return schematicDefinition;
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

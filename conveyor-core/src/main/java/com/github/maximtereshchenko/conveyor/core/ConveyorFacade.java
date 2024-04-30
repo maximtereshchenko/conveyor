@@ -21,10 +21,10 @@ public final class ConveyorFacade implements ConveyorModule {
     private final PreferencesFactory preferencesFactory;
 
     public ConveyorFacade(SchematicDefinitionConverter schematicDefinitionConverter) {
-        this.schematicModelFactory = new SchematicModelFactory(schematicDefinitionConverter);
+        this.schematicDefinitionConverter = schematicDefinitionConverter;
+        this.schematicModelFactory = new SchematicModelFactory(this.schematicDefinitionConverter);
         this.classPathFactory = new ClassPathFactory();
         this.pomDefinitionFactory = PomDefinitionFactory.configured();
-        this.schematicDefinitionConverter = schematicDefinitionConverter;
         this.preferencesFactory = new PreferencesFactory(this.schematicModelFactory);
     }
 
