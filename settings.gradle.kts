@@ -15,6 +15,7 @@ include("compiler")
 include("junit-jupiter-conveyor-plugin")
 include("conveyor-cli")
 include("publish-conveyor-plugin")
+include("executable-conveyor-plugin")
 dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {

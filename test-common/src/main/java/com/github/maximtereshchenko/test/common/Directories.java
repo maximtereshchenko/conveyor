@@ -36,8 +36,16 @@ public final class Directories {
         return Files.createDirectories(directory);
     }
 
-    public static void assertThatDirectoryContentsEqual(Path actual, Path expected) {
-        assertThat(files(actual))
+    public static void assertThatDirectoryContentsEqual(
+        Path actual,
+        Path expected,
+        Path... exclusions
+    ) {
+        assertThat(
+            files(actual)
+                .stream()
+                .filter(path -> !List.of(exclusions).contains(path))
+        )
             .zipSatisfy(
                 files(expected),
                 (actualFile, expectedFile) -> {

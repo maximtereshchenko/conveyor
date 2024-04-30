@@ -6,11 +6,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.zip.ZipOutputStream;
 
-public final class ArchiveContainer {
+public final class ZipArchiveContainer {
 
     private final Path path;
 
-    public ArchiveContainer(Path path) {
+    public ZipArchiveContainer(Path path) {
         this.path = path;
     }
 

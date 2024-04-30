@@ -4,7 +4,7 @@ import com.github.maximtereshchenko.conveyor.common.api.Product;
 import com.github.maximtereshchenko.conveyor.common.api.ProductType;
 import com.github.maximtereshchenko.conveyor.common.api.SchematicCoordinates;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
-import com.github.maximtereshchenko.zip.ArchiveContainer;
+import com.github.maximtereshchenko.zip.ZipArchiveContainer;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -39,19 +39,19 @@ final class ArchiveTask implements ConveyorTask {
             .map(this::jar)
             .collect(Collectors.toSet());
         if (jars.isEmpty()) {
-            LOGGER.log(System.Logger.Level.WARNING, "No exploded JARs to archive");
+            LOGGER.log(System.Logger.Level.WARNING, "Nothing to archive");
         }
         return jars;
     }
 
-    private Product jar(Path explodedModule) {
+    private Product jar(Path explodedJar) {
         try {
             Files.createDirectories(target.getParent());
-            new ArchiveContainer(explodedModule).archive(target);
+            new ZipArchiveContainer(explodedJar).archive(target);
             LOGGER.log(
                 System.Logger.Level.INFO,
                 "Archived {0} to {1}",
-                explodedModule,
+                explodedJar,
                 target
             );
             return new Product(coordinates, target, ProductType.JAR);

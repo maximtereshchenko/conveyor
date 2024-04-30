@@ -27,8 +27,7 @@ public final class ZipArchive {
                     zipInputStream.transferTo(outputStream);
                 }
             }
-        } catch (
-            IOException e) {
+        } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
     }

@@ -33,7 +33,7 @@ final class ZipArchiveTests {
         var archive = temporaryDirectory(path).resolve("archive");
         var extracted = temporaryDirectory(path);
 
-        new ArchiveContainer(archiveContainer).archive(archive);
+        new ZipArchiveContainer(archiveContainer).archive(archive);
         new ZipArchive(archive).extract(extracted);
 
         Directories.assertThatDirectoryContentsEqual(archiveContainer, extracted);

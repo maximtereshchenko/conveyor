@@ -3,7 +3,7 @@ package com.github.maximtereshchenko.conveyor.core.test;
 import com.github.maximtereshchenko.compiler.Compiler;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
 import com.github.maximtereshchenko.test.common.Directories;
-import com.github.maximtereshchenko.zip.ArchiveContainer;
+import com.github.maximtereshchenko.zip.ZipArchiveContainer;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -110,7 +110,7 @@ final class JarBuilder {
             ),
             normalizedName() + '.' + normalizedName()
         );
-        new ArchiveContainer(classes).archive(path);
+        new ZipArchiveContainer(classes).archive(path);
     }
 
     private String service() throws IOException {
