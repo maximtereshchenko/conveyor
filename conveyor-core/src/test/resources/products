@@ -21,28 +21,43 @@ public final class ${normalizedName} implements ConveyorPlugin {
             new ConveyorTaskBinding(
                 Stage.PUBLISH,
                 Step.RUN,
-                (products) -> execute(products, schematic.constructionDirectory().resolve("products"))
+                new Task(schematic.constructionDirectory().resolve("products"))
             )
         );
     }
 
-    private Set<Product> execute(Set<Product> products, Path path) {
-        write(path, products(products));
-        return Set.of();
-    }
+    private static final class Task implements ConveyorTask {
 
-    private String products(Set<Product> products) {
-        return products.stream()
-            .map(product -> product.type() + "=" + product.path())
-            .collect(Collectors.joining(System.lineSeparator()));
-    }
+        private final Path path;
 
-    private void write(Path path, String content) {
-        try {
-            Files.createDirectories(path.getParent());
-            Files.writeString(path, content);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
+        Task(Path path) {
+            this.path = path;
+        }
+
+        @Override
+        public String name() {
+            return "";
+        }
+
+        @Override
+        public Set<Product> execute(Set<Product> products) {
+            write(path, products(products));
+            return Set.of();
+        }
+
+        private String products(Set<Product> products) {
+            return products.stream()
+                .map(product -> product.type() + "=" + product.path())
+                .collect(Collectors.joining(System.lineSeparator()));
+        }
+
+        private void write(Path path, String content) {
+            try {
+                Files.createDirectories(path.getParent());
+                Files.writeString(path, content);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
         }
     }
 }

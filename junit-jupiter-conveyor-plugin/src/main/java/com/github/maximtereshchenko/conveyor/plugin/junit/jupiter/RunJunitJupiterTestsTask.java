@@ -30,6 +30,11 @@ final class RunJunitJupiterTestsTask implements ConveyorTask {
     }
 
     @Override
+    public String name() {
+        return "execute-junit-jupiter-tests";
+    }
+
+    @Override
     public Set<Product> execute(Set<Product> products) {
         product(products, ProductType.EXPLODED_TEST_JAR)
             .ifPresent(explodedTestJar -> executeTests(explodedTestJar, products));

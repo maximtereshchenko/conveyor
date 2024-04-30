@@ -4,70 +4,124 @@ import org.junit.platform.engine.TestExecutionResult;
 import org.junit.platform.engine.support.descriptor.MethodSource;
 import org.junit.platform.launcher.TestExecutionListener;
 import org.junit.platform.launcher.TestIdentifier;
+import org.junit.platform.launcher.TestPlan;
 
-import java.util.stream.Stream;
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
 final class ReportingTestExecutionListener implements TestExecutionListener {
+
+    private static final System.Logger LOGGER =
+        System.getLogger(ReportingTestExecutionListener.class.getName());
+
+    private final AtomicInteger passed = new AtomicInteger();
+    private final AtomicInteger failed = new AtomicInteger();
+    private final AtomicInteger skipped = new AtomicInteger();
+
+    @Override
+    public void testPlanExecutionFinished(TestPlan testPlan) {
+        LOGGER.log(
+            System.Logger.Level.INFO,
+            "Tests run: total {0}, passed {1}, failed {2}, skipped {3}",
+            passed.get() + failed.get() + skipped.get(),
+            passed.get(),
+            failed.get(),
+            skipped.get()
+        );
+    }
+
+    @Override
+    public void executionSkipped(TestIdentifier testIdentifier, String reason) {
+        methodSource(testIdentifier)
+            .ifPresent(methodSource -> onSkipped(testIdentifier, methodSource, reason));
+    }
 
     @Override
     public void executionFinished(
         TestIdentifier testIdentifier,
         TestExecutionResult testExecutionResult
     ) {
-        if (!testIdentifier.isTest()) {
-            return;
-        }
-        reportTestResult(testIdentifier, testExecutionResult);
-        reportThrowable(testIdentifier, testExecutionResult);
-    }
-
-    private void reportThrowable(
-        TestIdentifier testIdentifier,
-        TestExecutionResult testExecutionResult
-    ) {
-        testExecutionResult.getThrowable()
-            .ifPresent(throwable ->
-                System.out.printf(
-                    "%s: %s%n  at %s%n",
-                    throwable.getClass().getName(),
-                    throwable.getLocalizedMessage(),
-                    testStackTraceElement(
-                        throwable,
-                        testIdentifier.getSource()
-                            .map(MethodSource.class::cast)
-                            .orElseThrow()
-                    )
-                )
+        methodSource(testIdentifier)
+            .ifPresent(methodSource ->
+                onFinished(testIdentifier, methodSource, testExecutionResult)
             );
     }
 
-    private StackTraceElement testStackTraceElement(
-        Throwable throwable,
-        MethodSource methodSource
+    private void onSkipped(
+        TestIdentifier testIdentifier,
+        MethodSource methodSource,
+        String reason
     ) {
-        return Stream.of(throwable.getStackTrace())
-            .filter(stackTraceElement ->
-                stackTraceElement.getClassName()
-                    .equals(methodSource.getClassName())
-            )
-            .filter(stackTraceElement ->
-                stackTraceElement.getMethodName()
-                    .equals(methodSource.getMethodName())
-            )
-            .findAny()
-            .orElseThrow();
+        LOGGER.log(
+            System.Logger.Level.INFO,
+            () -> message(testIdentifier, methodSource, "SKIPPED (%s)".formatted(reason))
+        );
     }
 
-    private void reportTestResult(
+    private void onFinished(
         TestIdentifier testIdentifier,
+        MethodSource methodSource,
         TestExecutionResult testExecutionResult
     ) {
-        System.out.printf(
-            "%s - %s%n",
+        switch (testExecutionResult.getStatus()) {
+            case SUCCESSFUL -> {
+                LOGGER.log(
+                    System.Logger.Level.INFO,
+                    () -> message(testIdentifier, methodSource, "OK")
+                );
+                passed.incrementAndGet();
+            }
+            case ABORTED -> {
+                //empty
+            }
+            case FAILED -> {
+                LOGGER.log(
+                    System.Logger.Level.INFO,
+                    () -> message(testIdentifier, methodSource, "FAILED"),
+                    testExecutionResult.getThrowable()
+                        .map(throwable -> withTrimmedStackTrace(throwable, methodSource))
+                        .orElse(null)
+                );
+                failed.incrementAndGet();
+            }
+        }
+    }
+
+    private String message(
+        TestIdentifier testIdentifier,
+        MethodSource methodSource,
+        String status
+    ) {
+        return "%s - %s - %s".formatted(
+            methodSource.getClassName(),
             testIdentifier.getDisplayName(),
-            testExecutionResult.getStatus() == TestExecutionResult.Status.SUCCESSFUL ?
-                "OK" :
-                "FAILED"
+            status
         );
+    }
+
+    private Optional<MethodSource> methodSource(TestIdentifier testIdentifier) {
+        return testIdentifier.getSource()
+            .filter(MethodSource.class::isInstance)
+            .map(MethodSource.class::cast);
+    }
+
+    private Throwable withTrimmedStackTrace(Throwable throwable, MethodSource methodSource) {
+        var stackTrace = throwable.getStackTrace();
+        throwable.setStackTrace(Arrays.copyOf(stackTrace, length(stackTrace, methodSource)));
+        return throwable;
+    }
+
+    private int length(StackTraceElement[] stackTrace, MethodSource methodSource) {
+        for (int i = 0; i < stackTrace.length; i++) {
+            var element = stackTrace[i];
+            if (
+                element.getClassName().equals(methodSource.getClassName()) &&
+                element.getMethodName().equals(methodSource.getMethodName())
+            ) {
+                return i + 1;
+            }
+        }
+        return stackTrace.length;
     }
 }

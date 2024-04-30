@@ -15,14 +15,26 @@ import java.util.stream.Collectors;
 
 final class DiscoverJavaFilesTask implements ConveyorTask {
 
+    private final String name;
     private final Path path;
     private final ProductType productType;
     private final SchematicCoordinates coordinates;
 
-    DiscoverJavaFilesTask(Path path, ProductType productType, SchematicCoordinates coordinates) {
+    DiscoverJavaFilesTask(
+        String name,
+        Path path,
+        ProductType productType,
+        SchematicCoordinates coordinates
+    ) {
+        this.name = name;
         this.path = path;
         this.productType = productType;
         this.coordinates = coordinates;
+    }
+
+    @Override
+    public String name() {
+        return name;
     }
 
     @Override

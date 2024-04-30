@@ -17,6 +17,8 @@ import java.util.stream.Stream;
 
 final class Plugins {
 
+    private static final System.Logger LOGGER = System.getLogger(Plugins.class.getName());
+
     private final LinkedHashSet<Plugin> all;
     private final ClassPathFactory classPathFactory;
 
@@ -32,6 +34,7 @@ final class Plugins {
     ) {
         var copy = new HashSet<>(products);
         for (var task : tasks(conveyorSchematic, stage)) {
+            LOGGER.log(System.Logger.Level.INFO, "Executing task {0}", task.name());
             copy.addAll(task.execute(copy));
         }
         return copy;

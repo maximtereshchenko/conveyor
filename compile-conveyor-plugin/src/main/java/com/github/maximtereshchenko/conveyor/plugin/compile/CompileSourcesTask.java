@@ -22,6 +22,11 @@ final class CompileSourcesTask extends CompileJavaFilesTask {
     }
 
     @Override
+    public String name() {
+        return "compile-sources";
+    }
+
+    @Override
     Set<Path> classPath(ConveyorSchematic schematic, Set<Product> products) {
         return schematic.classPath(Set.of(DependencyScope.IMPLEMENTATION));
     }

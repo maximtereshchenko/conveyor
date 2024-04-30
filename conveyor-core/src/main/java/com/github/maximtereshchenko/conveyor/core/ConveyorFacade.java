@@ -5,10 +5,14 @@ import com.github.maximtereshchenko.conveyor.api.port.SchematicDefinitionConvert
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 
 import java.nio.file.Path;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
 
 public final class ConveyorFacade implements ConveyorModule {
+
+    private static final System.Logger LOGGER = System.getLogger(ConveyorFacade.class.getName());
 
     private final SchematicModelFactory schematicModelFactory;
     private final ClassPathFactory classPathFactory;
@@ -26,7 +30,14 @@ public final class ConveyorFacade implements ConveyorModule {
 
     @Override
     public void construct(Path path, Stage stage) {
+        var start = Instant.now();
         schematics(path).construct(stage);
+        LOGGER.log(
+            System.Logger.Level.INFO,
+            () -> "Construction took %ds".formatted(
+                Duration.between(start, Instant.now()).getSeconds()
+            )
+        );
     }
 
     private Schematics schematics(Path path) {

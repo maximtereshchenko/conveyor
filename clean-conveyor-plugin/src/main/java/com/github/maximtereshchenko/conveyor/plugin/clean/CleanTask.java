@@ -11,6 +11,8 @@ import java.util.Set;
 
 final class CleanTask implements ConveyorTask {
 
+    private static final System.Logger LOGGER = System.getLogger(CleanTask.class.getName());
+
     private final Path path;
 
     CleanTask(Path path) {
@@ -18,9 +20,17 @@ final class CleanTask implements ConveyorTask {
     }
 
     @Override
+    public String name() {
+        return "clean";
+    }
+
+    @Override
     public Set<Product> execute(Set<Product> products) {
         if (Files.exists(path)) {
             deleteRecursively(path);
+            LOGGER.log(System.Logger.Level.INFO, "Removed {0}", path);
+        } else {
+            LOGGER.log(System.Logger.Level.WARNING, "{0} does not exist", path);
         }
         return Set.of();
     }

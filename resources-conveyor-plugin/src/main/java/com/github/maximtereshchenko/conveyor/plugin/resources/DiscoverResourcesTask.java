@@ -15,18 +15,26 @@ import java.util.stream.Collectors;
 
 final class DiscoverResourcesTask implements ConveyorTask {
 
+    private final String name;
     private final Path directory;
     private final ProductType resourceType;
     private final SchematicCoordinates schematicCoordinates;
 
     DiscoverResourcesTask(
+        String name,
         Path directory,
         ProductType resourceType,
         SchematicCoordinates schematicCoordinates
     ) {
+        this.name = name;
         this.directory = directory;
         this.resourceType = resourceType;
         this.schematicCoordinates = schematicCoordinates;
+    }
+
+    @Override
+    public String name() {
+        return name;
     }
 
     @Override

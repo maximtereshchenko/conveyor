@@ -15,6 +15,8 @@ import java.util.stream.Stream;
 
 final class Schematic {
 
+    private static final System.Logger LOGGER = System.getLogger(Schematic.class.getName());
+
     private final ExtendableLocalInheritanceHierarchyModel localModel;
     private final ClassPathFactory classPathFactory;
     private final PomDefinitionFactory pomDefinitionFactory;
@@ -42,6 +44,10 @@ final class Schematic {
         return localModel.id();
     }
 
+    SemanticVersion version() {
+        return localModel.version();
+    }
+
     boolean locatedAt(Path path) {
         return localModel.path().equals(path);
     }
@@ -60,6 +66,14 @@ final class Schematic {
     }
 
     Set<Product> construct(Set<Product> products, Stage stage) {
+        LOGGER.log(
+            System.Logger.Level.INFO,
+            () -> "Constructing %s:%s:%s".formatted(
+                localModel.id().group(),
+                localModel.id().name(),
+                localModel.version()
+            )
+        );
         var repositories = repositories(products, properties(localModel));
         var completeModel = schematicModelFactory.completeInheritanceHierarchyModel(
             localModel,

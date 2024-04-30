@@ -24,6 +24,11 @@ final class CompileTestSourcesTask extends CompileJavaFilesTask {
     }
 
     @Override
+    public String name() {
+        return "compile-test-sources";
+    }
+
+    @Override
     Set<Path> classPath(ConveyorSchematic schematic, Set<Product> products) {
         return Stream.concat(
                 schematic.classPath(Set.of(DependencyScope.IMPLEMENTATION, DependencyScope.TEST))

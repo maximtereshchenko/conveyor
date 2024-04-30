@@ -7,6 +7,8 @@ import java.util.*;
 
 final class Schematics {
 
+    private static final System.Logger LOGGER = System.getLogger(Schematics.class.getName());
+
     private final LinkedHashSet<Schematic> all;
     private final Schematic initial;
 
@@ -17,7 +19,9 @@ final class Schematics {
 
     void construct(Stage stage) {
         var products = Set.<Product>of();
-        for (var schematic : schematicsInConstructionOrder()) {
+        var schematicsInConstructionOrder = schematicsInConstructionOrder();
+        log(schematicsInConstructionOrder);
+        for (var schematic : schematicsInConstructionOrder) {
             products = schematic.construct(products, stage(stage, schematic));
         }
     }
@@ -26,6 +30,19 @@ final class Schematics {
         return all.stream()
             .filter(schematic -> schematic.id().equals(id))
             .findAny();
+    }
+
+    private void log(List<Schematic> schematicsInConstructionOrder) {
+        LOGGER.log(System.Logger.Level.INFO, "Construction order:");
+        schematicsInConstructionOrder.forEach(schematic ->
+            LOGGER.log(
+                System.Logger.Level.INFO,
+                "{0}:{1}:{2}",
+                schematic.id().group(),
+                schematic.id().name(),
+                schematic.version()
+            )
+        );
     }
 
     private List<Schematic> schematicsInConstructionOrder() {

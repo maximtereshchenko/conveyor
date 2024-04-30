@@ -12,6 +12,9 @@ import java.util.stream.Collectors;
 
 abstract class CompileJavaFilesTask implements ConveyorTask {
 
+    private static final System.Logger LOGGER =
+        System.getLogger(CompileJavaFilesTask.class.getName());
+
     private final ConveyorSchematic schematic;
     private final ProductType sourceType;
     private final Path outputDirectory;
@@ -36,9 +39,11 @@ abstract class CompileJavaFilesTask implements ConveyorTask {
     public Set<Product> execute(Set<Product> products) {
         var sources = sources(products);
         if (sources.isEmpty()) {
+            LOGGER.log(System.Logger.Level.WARNING, "No sources to compile");
             return Set.of();
         }
         compiler.compile(sources, classPath(schematic, products), outputDirectory);
+        LOGGER.log(System.Logger.Level.INFO, "Compiled classes to {0}", outputDirectory);
         return Set.of(new Product(schematic.coordinates(), outputDirectory, outputType));
     }
 

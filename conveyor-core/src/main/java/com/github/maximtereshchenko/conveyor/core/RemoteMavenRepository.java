@@ -11,6 +11,9 @@ import java.util.Optional;
 
 final class RemoteMavenRepository extends UriRepository<InputStream> {
 
+    private static final System.Logger LOGGER =
+        System.getLogger(RemoteMavenRepository.class.getName());
+
     private final String name;
     private final HttpClient httpClient = HttpClient.newHttpClient();
 
@@ -25,6 +28,7 @@ final class RemoteMavenRepository extends UriRepository<InputStream> {
         if (response.statusCode() != 200) {
             return Optional.empty();
         }
+        LOGGER.log(System.Logger.Level.INFO, "Downloaded from {0}: {1}", name, uri);
         return Optional.of(response.body());
     }
 

@@ -23,6 +23,7 @@ dependencyResolutionManagement {
             library("jackson-bom", "com.fasterxml.jackson", "jackson-bom").version("2.17.0")
             library("wiremock", "org.wiremock", "wiremock").version("3.4.2")
             library("apiguardian-api", "org.apiguardian", "apiguardian-api").version("1.1.2")
+            library("slf4j-jdk14", "org.slf4j", "slf4j-jdk14").version("2.0.13")
             library("junit-jupiter-api", "org.junit.jupiter", "junit-jupiter-api").withoutVersion()
             library("junit-jupiter-engine", "org.junit.jupiter", "junit-jupiter-engine")
                 .withoutVersion()

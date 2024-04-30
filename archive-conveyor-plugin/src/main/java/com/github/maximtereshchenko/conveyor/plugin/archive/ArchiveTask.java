@@ -15,6 +15,8 @@ import java.util.stream.Collectors;
 
 final class ArchiveTask implements ConveyorTask {
 
+    private static final System.Logger LOGGER = System.getLogger(ArchiveTask.class.getName());
+
     private final Path target;
     private final SchematicCoordinates coordinates;
 
@@ -24,19 +26,34 @@ final class ArchiveTask implements ConveyorTask {
     }
 
     @Override
+    public String name() {
+        return "archive";
+    }
+
+    @Override
     public Set<Product> execute(Set<Product> products) {
-        return products.stream()
+        var jars = products.stream()
             .filter(product -> product.schematicCoordinates().equals(coordinates))
             .filter(product -> product.type() == ProductType.EXPLODED_JAR)
             .map(Product::path)
             .map(this::jar)
             .collect(Collectors.toSet());
+        if (jars.isEmpty()) {
+            LOGGER.log(System.Logger.Level.WARNING, "No exploded JARs to archive");
+        }
+        return jars;
     }
 
     private Product jar(Path explodedModule) {
         try {
             Files.createDirectories(target.getParent());
             new ArchiveContainer(explodedModule).archive(target);
+            LOGGER.log(
+                System.Logger.Level.INFO,
+                "Archived {0} to {1}",
+                explodedModule,
+                target
+            );
             return new Product(coordinates, target, ProductType.JAR);
         } catch (IOException e) {
             throw new UncheckedIOException(e);

@@ -18,14 +18,35 @@ public final class ${normalizedName} implements ConveyorPlugin {
             new ConveyorTaskBinding(
                 Stage.ARCHIVE,
                 Step.RUN,
-                (products) -> Set.of(
+                new Task(schematic, configuration)
+            )
+        );
+    }
+
+    private static final class Task implements ConveyorTask {
+
+        private final ConveyorSchematic schematic;
+        private final Map<String, String> configuration;
+
+        Task(ConveyorSchematic schematic, Map<String, String> configuration) {
+            this.schematic = schematic;
+            this.configuration = configuration;
+        }
+
+        @Override
+        public String name() {
+            return "";
+        }
+
+        @Override
+        public Set<Product> execute(Set<Product> products) {
+            return Set.of(
                     new Product(
                         schematic.coordinates(),
                         schematic.discoveryDirectory().resolve(configuration.get("path")),
                         ProductType.JAR
                     )
-                )
-            )
-        );
+                );
+        }
     }
 }

@@ -30,6 +30,7 @@ public final class CompilePlugin implements ConveyorPlugin {
                 Stage.COMPILE,
                 Step.PREPARE,
                 new DiscoverJavaFilesTask(
+                    "discover-sources",
                     javaFilesDirectory(schematic.discoveryDirectory(), "main"),
                     ProductType.SOURCE,
                     schematic.coordinates()
@@ -48,6 +49,7 @@ public final class CompilePlugin implements ConveyorPlugin {
                 Stage.TEST,
                 Step.PREPARE,
                 new DiscoverJavaFilesTask(
+                    "discover-test-sources",
                     javaFilesDirectory(schematic.discoveryDirectory(), "test"),
                     ProductType.TEST_SOURCE,
                     schematic.coordinates()

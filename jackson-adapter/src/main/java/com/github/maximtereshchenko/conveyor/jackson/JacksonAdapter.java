@@ -18,6 +18,8 @@ import java.nio.file.Path;
 
 public final class JacksonAdapter implements SchematicDefinitionConverter {
 
+    private static final System.Logger LOGGER = System.getLogger(JacksonAdapter.class.getName());
+
     private final ObjectMapper objectMapper;
 
     private JacksonAdapter(ObjectMapper objectMapper) {
@@ -44,6 +46,7 @@ public final class JacksonAdapter implements SchematicDefinitionConverter {
     @Override
     public SchematicDefinition schematicDefinition(Path path) {
         try (var reader = Files.newBufferedReader(path)) {
+            LOGGER.log(System.Logger.Level.DEBUG, "Reading schematic definition {0}", path);
             return objectMapper.readValue(reader, SchematicDefinition.class);
         } catch (IOException e) {
             throw new UncheckedIOException(e);

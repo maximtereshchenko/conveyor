@@ -13,10 +13,7 @@ final class FailureTestExecutionListener implements TestExecutionListener {
         TestIdentifier testIdentifier,
         TestExecutionResult testExecutionResult
     ) {
-        if (
-            testIdentifier.isTest() &&
-            testExecutionResult.getStatus() == TestExecutionResult.Status.FAILED
-        ) {
+        if (testExecutionResult.getStatus() == TestExecutionResult.Status.FAILED) {
             success = false;
         }
     }

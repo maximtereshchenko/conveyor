@@ -6,5 +6,7 @@ import java.util.Set;
 
 public interface ConveyorTask {
 
+    String name();
+
     Set<Product> execute(Set<Product> products);
 }

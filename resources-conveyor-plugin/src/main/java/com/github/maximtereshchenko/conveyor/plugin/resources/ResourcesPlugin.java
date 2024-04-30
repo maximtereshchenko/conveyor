@@ -30,6 +30,7 @@ public final class ResourcesPlugin implements ConveyorPlugin {
                 Stage.COMPILE,
                 Step.PREPARE,
                 new DiscoverResourcesTask(
+                    "discover-resources",
                     mainResources,
                     ProductType.RESOURCE,
                     schematic.coordinates()
@@ -39,6 +40,7 @@ public final class ResourcesPlugin implements ConveyorPlugin {
                 Stage.COMPILE,
                 Step.FINALIZE,
                 new CopyResourcesTask(
+                    "copy-resources",
                     ProductType.EXPLODED_JAR,
                     ProductType.RESOURCE,
                     schematic.coordinates(),
@@ -49,6 +51,7 @@ public final class ResourcesPlugin implements ConveyorPlugin {
                 Stage.TEST,
                 Step.PREPARE,
                 new DiscoverResourcesTask(
+                    "discover-test-resources",
                     testResources,
                     ProductType.TEST_RESOURCE,
                     schematic.coordinates()
@@ -58,6 +61,7 @@ public final class ResourcesPlugin implements ConveyorPlugin {
                 Stage.TEST,
                 Step.PREPARE,
                 new CopyResourcesTask(
+                    "copy-test-resources",
                     ProductType.EXPLODED_TEST_JAR,
                     ProductType.TEST_RESOURCE,
                     schematic.coordinates(),

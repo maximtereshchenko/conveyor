@@ -21,27 +21,44 @@ public final class ${normalizedName} implements ConveyorPlugin {
             new ConveyorTaskBinding(
                 Stage.COMPILE,
                 Step.RUN,
-                (products) -> execute(schematic, configuration)
+                new Task(schematic, configuration)
             )
         );
     }
 
-    private Set<Product> execute(ConveyorSchematic schematic, Map<String, String> configuration) {
-        writeConfiguration(schematic, configuration);
-        return Set.of();
-    }
+    private static final class Task implements ConveyorTask {
 
-    private void writeConfiguration(ConveyorSchematic schematic, Map<String, String> configuration) {
-        try {
-            Files.writeString(
-                Files.createDirectories(schematic.constructionDirectory()).resolve("configuration"),
-                configuration.entrySet()
-                    .stream()
-                    .map(Map.Entry::toString)
-                    .collect(Collectors.joining(System.lineSeparator()))
-            );
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
+        private final ConveyorSchematic schematic;
+        private final Map<String, String> configuration;
+
+        Task(ConveyorSchematic schematic, Map<String, String> configuration) {
+            this.schematic = schematic;
+            this.configuration = configuration;
+        }
+
+        @Override
+        public String name() {
+            return "";
+        }
+
+        @Override
+        public Set<Product> execute(Set<Product> products) {
+            writeConfiguration(schematic, configuration);
+            return Set.of();
+        }
+
+        private void writeConfiguration(ConveyorSchematic schematic, Map<String, String> configuration) {
+            try {
+                Files.writeString(
+                    Files.createDirectories(schematic.constructionDirectory()).resolve("configuration"),
+                    configuration.entrySet()
+                        .stream()
+                        .map(Map.Entry::toString)
+                        .collect(Collectors.joining(System.lineSeparator()))
+                );
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
         }
     }
 }

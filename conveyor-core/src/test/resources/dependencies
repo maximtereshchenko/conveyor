@@ -23,7 +23,7 @@ public final class ${normalizedName} implements ConveyorPlugin {
             new ConveyorTaskBinding(
                 Stage.COMPILE,
                 Step.RUN,
-                (products) -> execute(
+                new Task(
                     schematic.classPath(
                         Set.of(
                             DependencyScope.valueOf(
@@ -37,43 +37,60 @@ public final class ${normalizedName} implements ConveyorPlugin {
         );
     }
 
-    private Set<Product> execute(Set<Path> paths, Path path) {
-        write(path, dependencies(paths));
-        return Set.of();
-    }
+    private static final class Task implements ConveyorTask {
 
-    private String dependencies(Set<Path> paths) {
-        return ServiceLoader.load(Supplier.class, classLoader(paths))
-            .stream()
-            .map(ServiceLoader.Provider::get)
-            .map(Supplier::get)
-            .map(Object::toString)
-            .collect(Collectors.joining(System.lineSeparator()));
-    }
+        private final Set<Path> paths;
+        private final Path path;
 
-    private ClassLoader classLoader(Set<Path> paths) {
-        return URLClassLoader.newInstance(
-            paths.stream()
-                .map(this::url)
-                .toArray(URL[]::new),
-            getClass().getClassLoader()
-        );
-    }
-
-    private URL url(Path path) {
-        try {
-            return path.toUri().toURL();
-        } catch (MalformedURLException e) {
-            throw new UncheckedIOException(e);
+        Task(Set<Path> paths, Path path) {
+            this.paths = paths;
+            this.path = path;
         }
-    }
 
-    private void write(Path path, String content) {
-        try {
-            Files.createDirectories(path.getParent());
-            Files.writeString(path, content);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
+        @Override
+        public String name() {
+            return "";
+        }
+
+        @Override
+        public Set<Product> execute(Set<Product> products) {
+            write(path, dependencies(paths));
+            return Set.of();
+        }
+
+        private String dependencies(Set<Path> paths) {
+            return ServiceLoader.load(Supplier.class, classLoader(paths))
+                .stream()
+                .map(ServiceLoader.Provider::get)
+                .map(Supplier::get)
+                .map(Object::toString)
+                .collect(Collectors.joining(System.lineSeparator()));
+        }
+
+        private ClassLoader classLoader(Set<Path> paths) {
+            return URLClassLoader.newInstance(
+                paths.stream()
+                    .map(this::url)
+                    .toArray(URL[]::new),
+                getClass().getClassLoader()
+            );
+        }
+
+        private URL url(Path path) {
+            try {
+                return path.toUri().toURL();
+            } catch (MalformedURLException e) {
+                throw new UncheckedIOException(e);
+            }
+        }
+
+        private void write(Path path, String content) {
+            try {
+                Files.createDirectories(path.getParent());
+                Files.writeString(path, content);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
         }
     }
 }
