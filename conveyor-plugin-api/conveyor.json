@@ -10,8 +10,7 @@
   "dependencies": [
     {
       "group": "com.github.maximtereshchenko",
-      "name": "conveyor-common-api",
-      "version": "1.0.0"
+      "name": "conveyor-common-api"
     }
   ]
 }

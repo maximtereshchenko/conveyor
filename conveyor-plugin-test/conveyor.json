@@ -10,13 +10,11 @@
   "dependencies": [
     {
       "group": "com.github.maximtereshchenko",
-      "name": "conveyor-plugin-api",
-      "version": "1.0.0"
+      "name": "conveyor-plugin-api"
     },
     {
       "group": "org.assertj",
-      "name": "assertj-core",
-      "version": "3.25.1"
+      "name": "assertj-core"
     }
   ]
 }

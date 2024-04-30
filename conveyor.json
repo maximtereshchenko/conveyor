@@ -35,36 +35,154 @@
       "path": "./.conveyor-repository"
     }
   ],
+  "properties": {
+    "junit-bom.version": "5.10.2",
+    "jackson-bom.version": "2.17.0",
+    "assertj.version": "3.25.1",
+    "wiremock.version": "3.4.2",
+    "slf4j-jdk14.version": "2.0.13",
+    "apiguardian-api.version": "1.1.2"
+  },
+  "preferences": {
+    "inclusions": [
+      {
+        "group": "org.junit",
+        "name": "junit-bom",
+        "version": "${junit-bom.version}"
+      },
+      {
+        "group": "com.fasterxml.jackson",
+        "name": "jackson-bom",
+        "version": "${jackson-bom.version}"
+      }
+    ],
+    "artifacts": [
+      {
+        "group": "com.github.maximtereshchenko",
+        "name": "clean-conveyor-plugin",
+        "version": "${conveyor.schematic.version}"
+      },
+      {
+        "group": "com.github.maximtereshchenko",
+        "name": "compile-conveyor-plugin",
+        "version": "${conveyor.schematic.version}"
+      },
+      {
+        "group": "com.github.maximtereshchenko",
+        "name": "resources-conveyor-plugin",
+        "version": "${conveyor.schematic.version}"
+      },
+      {
+        "group": "com.github.maximtereshchenko",
+        "name": "junit-jupiter-conveyor-plugin",
+        "version": "${conveyor.schematic.version}"
+      },
+      {
+        "group": "com.github.maximtereshchenko",
+        "name": "archive-conveyor-plugin",
+        "version": "${conveyor.schematic.version}"
+      },
+      {
+        "group": "com.github.maximtereshchenko",
+        "name": "executable-conveyor-plugin",
+        "version": "${conveyor.schematic.version}"
+      },
+      {
+        "group": "com.github.maximtereshchenko",
+        "name": "publish-conveyor-plugin",
+        "version": "${conveyor.schematic.version}"
+      },
+      {
+        "group": "com.github.maximtereshchenko",
+        "name": "conveyor-plugin-api",
+        "version": "${conveyor.schematic.version}"
+      },
+      {
+        "group": "com.github.maximtereshchenko",
+        "name": "zip-archive",
+        "version": "${conveyor.schematic.version}"
+      },
+      {
+        "group": "com.github.maximtereshchenko",
+        "name": "test-common",
+        "version": "${conveyor.schematic.version}"
+      },
+      {
+        "group": "com.github.maximtereshchenko",
+        "name": "conveyor-plugin-test",
+        "version": "${conveyor.schematic.version}"
+      },
+      {
+        "group": "com.github.maximtereshchenko",
+        "name": "compiler",
+        "version": "${conveyor.schematic.version}"
+      },
+      {
+        "group": "com.github.maximtereshchenko",
+        "name": "conveyor-common-api",
+        "version": "${conveyor.schematic.version}"
+      },
+      {
+        "group": "com.github.maximtereshchenko",
+        "name": "conveyor-core",
+        "version": "${conveyor.schematic.version}"
+      },
+      {
+        "group": "com.github.maximtereshchenko",
+        "name": "jackson-adapter",
+        "version": "${conveyor.schematic.version}"
+      },
+      {
+        "group": "com.github.maximtereshchenko",
+        "name": "conveyor-api",
+        "version": "${conveyor.schematic.version}"
+      },
+      {
+        "group": "org.assertj",
+        "name": "assertj-core",
+        "version": "${assertj.version}"
+      },
+      {
+        "group": "org.wiremock",
+        "name": "wiremock",
+        "version": "${wiremock.version}"
+      },
+      {
+        "group": "org.slf4j",
+        "name": "slf4j-jdk14",
+        "version": "${slf4j-jdk14.version}"
+      },
+      {
+        "group": "org.apiguardian",
+        "name": "apiguardian-api",
+        "version": "${apiguardian-api.version}"
+      }
+    ]
+  },
   "plugins": [
     {
       "group": "com.github.maximtereshchenko",
-      "name": "clean-conveyor-plugin",
-      "version": "1.0.0"
+      "name": "clean-conveyor-plugin"
     },
     {
       "group": "com.github.maximtereshchenko",
-      "name": "compile-conveyor-plugin",
-      "version": "1.0.0"
+      "name": "compile-conveyor-plugin"
     },
     {
       "group": "com.github.maximtereshchenko",
-      "name": "resources-conveyor-plugin",
-      "version": "1.0.0"
+      "name": "resources-conveyor-plugin"
     },
     {
       "group": "com.github.maximtereshchenko",
-      "name": "junit-jupiter-conveyor-plugin",
-      "version": "1.0.0"
+      "name": "junit-jupiter-conveyor-plugin"
     },
     {
       "group": "com.github.maximtereshchenko",
-      "name": "archive-conveyor-plugin",
-      "version": "1.0.0"
+      "name": "archive-conveyor-plugin"
     },
     {
       "group": "com.github.maximtereshchenko",
       "name": "publish-conveyor-plugin",
-      "version": "1.0.0",
       "configuration": {
         "repository": "conveyor-repository"
       }

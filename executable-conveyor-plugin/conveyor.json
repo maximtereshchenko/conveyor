@@ -7,36 +7,23 @@
     "name": "conveyor-template",
     "version": "1.0.0"
   },
-  "preferences": {
-    "inclusions": [
-      {
-        "group": "org.junit",
-        "name": "junit-bom",
-        "version": "5.10.2"
-      }
-    ]
-  },
   "dependencies": [
     {
       "group": "com.github.maximtereshchenko",
-      "name": "conveyor-plugin-api",
-      "version": "1.0.0"
+      "name": "conveyor-plugin-api"
     },
     {
       "group": "com.github.maximtereshchenko",
-      "name": "zip-archive",
-      "version": "1.0.0"
+      "name": "zip-archive"
     },
     {
       "group": "com.github.maximtereshchenko",
       "name": "test-common",
-      "version": "1.0.0",
       "scope": "TEST"
     },
     {
       "group": "com.github.maximtereshchenko",
       "name": "conveyor-plugin-test",
-      "version": "1.0.0",
       "scope": "TEST"
     },
     {
@@ -47,7 +34,6 @@
     {
       "group": "org.assertj",
       "name": "assertj-core",
-      "version": "3.25.1",
       "scope": "TEST"
     }
   ]

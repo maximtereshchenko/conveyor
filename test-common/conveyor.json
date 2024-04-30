@@ -7,15 +7,6 @@
     "name": "conveyor-template",
     "version": "1.0.0"
   },
-  "preferences": {
-    "inclusions": [
-      {
-        "group": "org.junit",
-        "name": "junit-bom",
-        "version": "5.10.2"
-      }
-    ]
-  },
   "dependencies": [
     {
       "group": "org.junit.jupiter",
@@ -23,8 +14,7 @@
     },
     {
       "group": "org.assertj",
-      "name": "assertj-core",
-      "version": "3.25.1"
+      "name": "assertj-core"
     }
   ]
 }

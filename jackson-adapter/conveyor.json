@@ -7,20 +7,10 @@
     "name": "conveyor-template",
     "version": "1.0.0"
   },
-  "preferences": {
-    "inclusions": [
-      {
-        "group": "com.fasterxml.jackson",
-        "name": "jackson-bom",
-        "version": "2.17.0"
-      }
-    ]
-  },
   "dependencies": [
     {
       "group": "com.github.maximtereshchenko",
-      "name": "conveyor-api",
-      "version": "1.0.0"
+      "name": "conveyor-api"
     },
     {
       "group": "com.fasterxml.jackson.datatype",
