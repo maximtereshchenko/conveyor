@@ -6,19 +6,29 @@ import com.github.maximtereshchenko.conveyor.api.schematic.SchematicDefinition;
 import com.github.maximtereshchenko.conveyor.api.schematic.SchematicTemplateDefinition;
 
 import java.util.LinkedHashSet;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 record StandaloneSchematicModel(SchematicDefinition schematicDefinition) implements SchematicModel {
 
     @Override
     public Id id() {
-        return new Id(schematicDefinition.group(), schematicDefinition().name());
+        return new Id(
+            schematicDefinition.group()
+                .or(() -> fromSchematicTemplateDefinition(SchematicTemplateDefinition::group))
+                .orElseThrow(),
+            schematicDefinition().name()
+        );
     }
 
     @Override
     public SemanticVersion version() {
-        return new SemanticVersion(schematicDefinition.version());
+        return schematicDefinition.version()
+            .or(() -> fromSchematicTemplateDefinition(SchematicTemplateDefinition::version))
+            .map(SemanticVersion::new)
+            .orElseThrow();
     }
 
     @Override
@@ -35,9 +45,9 @@ record StandaloneSchematicModel(SchematicDefinition schematicDefinition) impleme
     @Override
     public PropertiesModel properties() {
         return PropertiesModel.from(schematicDefinition.properties())
-            .with(SchematicPropertyKey.SCHEMATIC_GROUP, schematicDefinition.group())
+            .with(SchematicPropertyKey.SCHEMATIC_GROUP, id().group())
             .with(SchematicPropertyKey.SCHEMATIC_NAME, schematicDefinition.name())
-            .with(SchematicPropertyKey.SCHEMATIC_VERSION, schematicDefinition.version());
+            .with(SchematicPropertyKey.SCHEMATIC_VERSION, version().toString());
     }
 
     @Override
@@ -93,6 +103,15 @@ record StandaloneSchematicModel(SchematicDefinition schematicDefinition) impleme
                 )
             )
             .collect(Collectors.toSet());
+    }
+
+    private Optional<String> fromSchematicTemplateDefinition(
+        Function<SchematicTemplateDefinition, String> mapper
+    ) {
+        return switch (schematicDefinition.template()) {
+            case SchematicTemplateDefinition definition -> Optional.of(mapper.apply(definition));
+            case NoTemplateDefinition ignored -> Optional.empty();
+        };
     }
 
     private Set<Id> exclusions(DependencyDefinition dependencyDefinition) {

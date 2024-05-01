@@ -4,11 +4,12 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 public record SchematicDefinition(
-    String group,
+    Optional<String> group,
     String name,
-    String version,
+    Optional<String> version,
     TemplateDefinition template,
     List<Path> inclusions,
     List<RepositoryDefinition> repositories,
@@ -19,9 +20,9 @@ public record SchematicDefinition(
 ) {
 
     public SchematicDefinition {
-        Objects.requireNonNull(group);
+        group = Objects.requireNonNullElse(group, Optional.empty());
         Objects.requireNonNull(name);
-        Objects.requireNonNull(version);
+        version = Objects.requireNonNullElse(version, Optional.empty());
         template = Objects.requireNonNullElse(template, new NoTemplateDefinition());
         inclusions = List.copyOf(Objects.requireNonNullElse(inclusions, List.of()));
         repositories = List.copyOf(Objects.requireNonNullElse(repositories, List.of()));

@@ -1,7 +1,5 @@
 {
-  "group": "com.github.maximtereshchenko.conveyor",
   "name": "clean-conveyor-plugin",
-  "version": "1.0.0",
   "template": {
     "group": "com.github.maximtereshchenko.conveyor",
     "name": "conveyor-template",

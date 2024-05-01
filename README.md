@@ -6,6 +6,8 @@ A build tool for Java projects
 
 * Schematic
     * This is a definition of a project
+    * Schematic is defined by an optional group, name and an optional version. If group or version
+      is absent, then the schematic is defined by its template's group or version
     * A schematic can be constructed up to the specified stage: CLEAN, COMPILE, TEST, ARCHIVE or
       PUBLISH
 * Dependency version resolution

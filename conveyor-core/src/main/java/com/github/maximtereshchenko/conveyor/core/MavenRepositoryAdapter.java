@@ -81,16 +81,18 @@ final class MavenRepositoryAdapter implements Repository<InputStream> {
     }
 
     private SchematicDefinition schematicDefinition(PomDefinition pomDefinition) {
-        var groupId = either(pomDefinition, PomDefinition::groupId, PomDefinition.Parent::groupId);
-        var version = either(pomDefinition, PomDefinition::version, PomDefinition.Parent::version);
         return new SchematicDefinition(
-            groupId,
+            pomDefinition.groupId(),
             pomDefinition.artifactId(),
-            version,
+            pomDefinition.version(),
             template(pomDefinition),
             List.of(),
             List.of(),
-            properties(pomDefinition.properties(), groupId, version),
+            properties(
+                pomDefinition.properties(),
+                either(pomDefinition, PomDefinition::groupId, PomDefinition.Parent::groupId),
+                either(pomDefinition, PomDefinition::version, PomDefinition.Parent::version)
+            ),
             preferences(pomDefinition),
             List.of(),
             dependencies(pomDefinition, scopes(pomDefinition))

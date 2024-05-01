@@ -36,9 +36,9 @@ final class SchematicDefinitionBuilder {
             outputStream.write(
                 jacksonAdapter.bytes(
                     new SchematicDefinition(
-                        group,
+                        Optional.ofNullable(group),
                         name,
-                        version,
+                        Optional.ofNullable(version),
                         template,
                         inclusions,
                         repositories,

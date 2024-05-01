@@ -174,6 +174,88 @@ final class PropertiesFeatureTests extends ConveyorTest {
     }
 
     @Test
+    void givenSchematicDoesNotHaveGroup_whenConstructToStage_thenGroupIsEqualToTemplateGroup(
+        @TempDir Path path,
+        ConveyorModule module,
+        BuilderFactory factory
+    ) throws Exception {
+        factory.repositoryBuilder(path)
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("properties")
+            )
+            .jar(
+                factory.jarBuilder("properties", path)
+            )
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .group("template.group")
+                    .name("template")
+            )
+            .install(path);
+
+        module.construct(
+            factory.schematicDefinitionBuilder()
+                .repository("main", path, true)
+                .group(null)
+                .template("template.group", "template", "1.0.0")
+                .plugin(
+                    "group",
+                    "properties",
+                    "1.0.0",
+                    Map.of("keys", "conveyor.schematic.group")
+                )
+                .conveyorJson(path),
+            Stage.COMPILE
+        );
+
+        assertThat(defaultConstructionDirectory(path).resolve("properties"))
+            .content()
+            .isEqualTo("conveyor.schematic.group=template.group");
+    }
+
+    @Test
+    void givenSchematicDoesNotHaveVersion_whenConstructToStage_thenVersionIsEqualToTemplateVersion(
+        @TempDir Path path,
+        ConveyorModule module,
+        BuilderFactory factory
+    ) throws Exception {
+        factory.repositoryBuilder(path)
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("properties")
+            )
+            .jar(
+                factory.jarBuilder("properties", path)
+            )
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("template")
+                    .version("2.0.0")
+            )
+            .install(path);
+
+        module.construct(
+            factory.schematicDefinitionBuilder()
+                .repository("main", path, true)
+                .version(null)
+                .template("group", "template", "2.0.0")
+                .plugin(
+                    "group",
+                    "properties",
+                    "1.0.0",
+                    Map.of("keys", "conveyor.schematic.version")
+                )
+                .conveyorJson(path),
+            Stage.COMPILE
+        );
+
+        assertThat(defaultConstructionDirectory(path).resolve("properties"))
+            .content()
+            .isEqualTo("conveyor.schematic.version=2.0.0");
+    }
+
+    @Test
     void givenSchematicGroupPropertyIsOverridden_whenConstructToStage_thenPropertyWasNotChanged(
         @TempDir Path path,
         ConveyorModule module,
