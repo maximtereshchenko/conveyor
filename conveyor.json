@@ -1,5 +1,5 @@
 {
-  "group": "com.github.maximtereshchenko",
+  "group": "com.github.maximtereshchenko.conveyor",
   "name": "conveyor-template",
   "version": "1.0.0",
   "inclusions": [
@@ -58,82 +58,82 @@
     ],
     "artifacts": [
       {
-        "group": "com.github.maximtereshchenko",
+        "group": "${conveyor.schematic.group}",
         "name": "clean-conveyor-plugin",
         "version": "${conveyor.schematic.version}"
       },
       {
-        "group": "com.github.maximtereshchenko",
+        "group": "${conveyor.schematic.group}",
         "name": "compile-conveyor-plugin",
         "version": "${conveyor.schematic.version}"
       },
       {
-        "group": "com.github.maximtereshchenko",
+        "group": "${conveyor.schematic.group}",
         "name": "resources-conveyor-plugin",
         "version": "${conveyor.schematic.version}"
       },
       {
-        "group": "com.github.maximtereshchenko",
+        "group": "${conveyor.schematic.group}",
         "name": "junit-jupiter-conveyor-plugin",
         "version": "${conveyor.schematic.version}"
       },
       {
-        "group": "com.github.maximtereshchenko",
+        "group": "${conveyor.schematic.group}",
         "name": "archive-conveyor-plugin",
         "version": "${conveyor.schematic.version}"
       },
       {
-        "group": "com.github.maximtereshchenko",
+        "group": "${conveyor.schematic.group}",
         "name": "executable-conveyor-plugin",
         "version": "${conveyor.schematic.version}"
       },
       {
-        "group": "com.github.maximtereshchenko",
+        "group": "${conveyor.schematic.group}",
         "name": "publish-conveyor-plugin",
         "version": "${conveyor.schematic.version}"
       },
       {
-        "group": "com.github.maximtereshchenko",
+        "group": "${conveyor.schematic.group}",
         "name": "conveyor-plugin-api",
         "version": "${conveyor.schematic.version}"
       },
       {
-        "group": "com.github.maximtereshchenko",
+        "group": "${conveyor.schematic.group}",
         "name": "zip-archive",
         "version": "${conveyor.schematic.version}"
       },
       {
-        "group": "com.github.maximtereshchenko",
+        "group": "${conveyor.schematic.group}",
         "name": "test-common",
         "version": "${conveyor.schematic.version}"
       },
       {
-        "group": "com.github.maximtereshchenko",
+        "group": "${conveyor.schematic.group}",
         "name": "conveyor-plugin-test",
         "version": "${conveyor.schematic.version}"
       },
       {
-        "group": "com.github.maximtereshchenko",
+        "group": "${conveyor.schematic.group}",
         "name": "compiler",
         "version": "${conveyor.schematic.version}"
       },
       {
-        "group": "com.github.maximtereshchenko",
+        "group": "${conveyor.schematic.group}",
         "name": "conveyor-common-api",
         "version": "${conveyor.schematic.version}"
       },
       {
-        "group": "com.github.maximtereshchenko",
+        "group": "${conveyor.schematic.group}",
         "name": "conveyor-core",
         "version": "${conveyor.schematic.version}"
       },
       {
-        "group": "com.github.maximtereshchenko",
+        "group": "${conveyor.schematic.group}",
         "name": "jackson-adapter",
         "version": "${conveyor.schematic.version}"
       },
       {
-        "group": "com.github.maximtereshchenko",
+        "group": "${conveyor.schematic.group}",
         "name": "conveyor-api",
         "version": "${conveyor.schematic.version}"
       },
@@ -161,27 +161,27 @@
   },
   "plugins": [
     {
-      "group": "com.github.maximtereshchenko",
+      "group": "${conveyor.schematic.group}",
       "name": "clean-conveyor-plugin"
     },
     {
-      "group": "com.github.maximtereshchenko",
+      "group": "${conveyor.schematic.group}",
       "name": "compile-conveyor-plugin"
     },
     {
-      "group": "com.github.maximtereshchenko",
+      "group": "${conveyor.schematic.group}",
       "name": "resources-conveyor-plugin"
     },
     {
-      "group": "com.github.maximtereshchenko",
+      "group": "${conveyor.schematic.group}",
       "name": "junit-jupiter-conveyor-plugin"
     },
     {
-      "group": "com.github.maximtereshchenko",
+      "group": "${conveyor.schematic.group}",
       "name": "archive-conveyor-plugin"
     },
     {
-      "group": "com.github.maximtereshchenko",
+      "group": "${conveyor.schematic.group}",
       "name": "publish-conveyor-plugin",
       "configuration": {
         "repository": "conveyor-repository"

@@ -1,5 +1,5 @@
 allprojects {
-    group = "com.github.maximtereshchenko"
+    group = "com.github.maximtereshchenko.conveyor"
     version = "1.0.0"
 }
 

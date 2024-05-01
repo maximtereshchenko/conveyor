@@ -174,6 +174,41 @@ final class PropertiesFeatureTests extends ConveyorTest {
     }
 
     @Test
+    void givenSchematicGroupPropertyIsOverridden_whenConstructToStage_thenPropertyWasNotChanged(
+        @TempDir Path path,
+        ConveyorModule module,
+        BuilderFactory factory
+    ) throws Exception {
+        factory.repositoryBuilder(path)
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("properties")
+            )
+            .jar(
+                factory.jarBuilder("properties", path)
+            )
+            .install(path);
+
+        module.construct(
+            factory.schematicDefinitionBuilder()
+                .repository("main", path, true)
+                .property("conveyor.schematic.group", "custom")
+                .plugin(
+                    "group",
+                    "properties",
+                    "1.0.0",
+                    Map.of("keys", "conveyor.schematic.group")
+                )
+                .conveyorJson(path),
+            Stage.COMPILE
+        );
+
+        assertThat(defaultConstructionDirectory(path).resolve("properties"))
+            .content()
+            .isEqualTo("conveyor.schematic.group=group");
+    }
+
+    @Test
     void givenDiscoveryDirectoryProperty_whenConstructToStage_thenPluginsWorkInThisDirectory(
         @TempDir Path path,
         ConveyorModule module,

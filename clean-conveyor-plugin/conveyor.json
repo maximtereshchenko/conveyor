@@ -1,24 +1,24 @@
 {
-  "group": "com.github.maximtereshchenko",
+  "group": "com.github.maximtereshchenko.conveyor",
   "name": "clean-conveyor-plugin",
   "version": "1.0.0",
   "template": {
-    "group": "com.github.maximtereshchenko",
+    "group": "com.github.maximtereshchenko.conveyor",
     "name": "conveyor-template",
     "version": "1.0.0"
   },
   "dependencies": [
     {
-      "group": "com.github.maximtereshchenko",
+      "group": "${conveyor.schematic.group}",
       "name": "conveyor-plugin-api"
     },
     {
-      "group": "com.github.maximtereshchenko",
+      "group": "${conveyor.schematic.group}",
       "name": "test-common",
       "scope": "test"
     },
     {
-      "group": "com.github.maximtereshchenko",
+      "group": "${conveyor.schematic.group}",
       "name": "conveyor-plugin-test",
       "scope": "test"
     },

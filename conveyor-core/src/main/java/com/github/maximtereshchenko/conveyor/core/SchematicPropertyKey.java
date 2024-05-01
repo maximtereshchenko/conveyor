@@ -3,6 +3,7 @@ package com.github.maximtereshchenko.conveyor.core;
 enum SchematicPropertyKey {
 
     TEMPLATE_LOCATION("conveyor.schematic.template.location"),
+    SCHEMATIC_GROUP("conveyor.schematic.group"),
     SCHEMATIC_NAME("conveyor.schematic.name"),
     SCHEMATIC_VERSION("conveyor.schematic.version"),
     DISCOVERY_DIRECTORY("conveyor.discovery.directory"),

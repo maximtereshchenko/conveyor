@@ -35,6 +35,7 @@ record StandaloneSchematicModel(SchematicDefinition schematicDefinition) impleme
     @Override
     public PropertiesModel properties() {
         return PropertiesModel.from(schematicDefinition.properties())
+            .with(SchematicPropertyKey.SCHEMATIC_GROUP, schematicDefinition.group())
             .with(SchematicPropertyKey.SCHEMATIC_NAME, schematicDefinition.name())
             .with(SchematicPropertyKey.SCHEMATIC_VERSION, schematicDefinition.version());
     }

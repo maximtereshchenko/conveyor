@@ -55,6 +55,8 @@ A build tool for Java projects
     * Properties are inherited from a schematic used as a template
     * Inherited property can be overridden in a schematic
     * Inherited property can be removed in the schematic by assigning empty string to the key
+    * The property `conveyor.schematic.group` can be used to interpolate the schematic's group. This
+      property cannot be overridden
     * The property `conveyor.schematic.name` can be used to interpolate the schematic's name. This
       property cannot be overridden
     * The property `conveyor.schematic.version` can be used to interpolate the schematic's version.
