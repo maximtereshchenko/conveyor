@@ -16,9 +16,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.*;
 
 @ExtendWith(WireMockExtension.class)
 final class RepositoriesFeatureTests extends ConveyorTest {
@@ -1076,5 +1076,20 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                 .resolve("schematic-name-1.2.3.jar")
         )
             .exists();
+    }
+
+    @Test
+    void givenNoArtifact_whenConstructToStage_thenExceptionIsThrown(
+        @TempDir Path path,
+        ConveyorModule module,
+        BuilderFactory factory
+    ) throws Exception {
+        var conveyorJson = factory.schematicDefinitionBuilder()
+            .plugin("non-existent")
+            .conveyorJson(path);
+
+        assertThatThrownBy(() -> module.construct(conveyorJson, Stage.COMPILE))
+            .isInstanceOf(NoSuchElementException.class)
+            .hasMessage("group:non-existent:1.0.0");
     }
 }

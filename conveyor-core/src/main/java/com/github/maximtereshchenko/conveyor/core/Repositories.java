@@ -5,6 +5,7 @@ import com.github.maximtereshchenko.conveyor.api.schematic.SchematicDefinition;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 
@@ -55,6 +56,8 @@ final class Repositories {
             .map(repository -> repository.artifact(id, version, classifier))
             .flatMap(Optional::stream)
             .findAny()
-            .orElseThrow();
+            .orElseThrow(() ->
+                new NoSuchElementException("%s:%s:%s".formatted(id.group(), id.name(), version))
+            );
     }
 }
