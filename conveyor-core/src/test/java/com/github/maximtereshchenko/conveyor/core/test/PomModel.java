@@ -59,6 +59,7 @@ record PomModel(
         String artifactId,
         String version,
         String scope,
+        boolean optional,
         @JacksonXmlProperty(localName = "exclusion")
         @JacksonXmlElementWrapper(localName = "exclusions")
         Collection<Exclusion> exclusions

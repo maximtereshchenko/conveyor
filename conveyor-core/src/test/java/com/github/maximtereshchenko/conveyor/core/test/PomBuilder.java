@@ -90,7 +90,7 @@ final class PomBuilder {
     }
 
     PomBuilder dependency(String artifactId) {
-        return dependency(groupId, artifactId, version, null);
+        return dependency(groupId, artifactId, version, null, false, List.of());
     }
 
     PomBuilder dependency(
@@ -98,7 +98,8 @@ final class PomBuilder {
         String artifactId,
         String version,
         String scope,
-        PomModel.Exclusion... exclusions
+        boolean optional,
+        List<PomModel.Exclusion> exclusions
     ) {
         dependencies.add(
             new PomModel.Dependency(
@@ -106,7 +107,8 @@ final class PomBuilder {
                 artifactId,
                 version,
                 scope,
-                List.of(exclusions)
+                optional,
+                exclusions
             )
         );
         return this;
@@ -118,7 +120,7 @@ final class PomBuilder {
 
     PomBuilder managedDependency(String artifactId, String version, String scope) {
         dependencyManagement.add(
-            new PomModel.Dependency(groupId, artifactId, version, scope, null)
+            new PomModel.Dependency(groupId, artifactId, version, scope, false, List.of())
         );
         return this;
     }

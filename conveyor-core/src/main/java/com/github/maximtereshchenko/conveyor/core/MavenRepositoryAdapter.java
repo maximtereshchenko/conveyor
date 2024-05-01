@@ -137,6 +137,7 @@ final class MavenRepositoryAdapter implements Repository<InputStream> {
     ) {
         return pomModel.dependencies()
             .stream()
+            .filter(definition -> !definition.optional())
             .map(definition ->
                 new DependencyDefinition(
                     definition.groupId(),

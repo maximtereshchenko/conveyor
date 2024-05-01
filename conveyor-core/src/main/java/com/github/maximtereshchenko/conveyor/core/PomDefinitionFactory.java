@@ -123,6 +123,9 @@ final class PomDefinitionFactory {
             singleValue(node, "scope")
                 .map(String::toUpperCase)
                 .map(PomDefinition.DependencyScope::valueOf),
+            singleValue(node, "optional")
+                .map(Boolean::parseBoolean)
+                .orElse(Boolean.FALSE),
             exclusions(node)
         );
     }

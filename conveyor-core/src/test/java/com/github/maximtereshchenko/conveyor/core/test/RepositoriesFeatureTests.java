@@ -15,6 +15,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
@@ -483,7 +484,14 @@ final class RepositoriesFeatureTests extends ConveyorTest {
             .pom(
                 factory.pomBuilder()
                     .artifactId("template")
-                    .dependency("group", "dependency", "1.0.0", originalScope)
+                    .dependency(
+                        "group",
+                        "dependency",
+                        "1.0.0",
+                        originalScope,
+                        false,
+                        List.of()
+                    )
             )
             .pom(
                 factory.pomBuilder()
@@ -669,7 +677,14 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                 factory.pomBuilder()
                     .artifactId("template")
                     .managedDependency("dependency", "1.0.0")
-                    .dependency("group", "dependency", null, null)
+                    .dependency(
+                        "group",
+                        "dependency",
+                        null,
+                        null,
+                        false,
+                        List.of()
+                    )
             )
             .pom(
                 factory.pomBuilder()
@@ -713,7 +728,14 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                 factory.pomBuilder()
                     .artifactId("template")
                     .managedDependency("dependency", "1.0.0", "test")
-                    .dependency("group", "dependency", null, null)
+                    .dependency(
+                        "group",
+                        "dependency",
+                        null,
+                        null,
+                        false,
+                        List.of()
+                    )
             )
             .pom(
                 factory.pomBuilder()
@@ -767,7 +789,14 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                 factory.pomBuilder()
                     .parent("parent")
                     .artifactId("template")
-                    .dependency("group", "dependency", null, null)
+                    .dependency(
+                        "group",
+                        "dependency",
+                        null,
+                        null,
+                        false,
+                        List.of()
+                    )
             )
             .pom(
                 factory.pomBuilder()
@@ -819,7 +848,9 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                         "${project.groupId}",
                         "dependency",
                         "1.0.0",
-                        null
+                        null,
+                        false,
+                        List.of()
                     )
             )
             .pom(
@@ -867,7 +898,9 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                         "group",
                         "dependency",
                         "${project.version}",
-                        null
+                        null,
+                        false,
+                        List.of()
                     )
             )
             .pom(
@@ -916,7 +949,8 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                         "transitive",
                         "1.0.0",
                         null,
-                        new PomModel.Exclusion("group", "excluded")
+                        false,
+                        List.of(new PomModel.Exclusion("group", "excluded"))
                     )
             )
             .jar(
@@ -1091,5 +1125,46 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         assertThatThrownBy(() -> module.construct(conveyorJson, Stage.COMPILE))
             .isInstanceOf(NoSuchElementException.class)
             .hasMessage("group:non-existent:1.0.0");
+    }
+
+    @Test
+    void givenOptionalPomDependency_whenConstructToStage_thenSchematicDefinitionDoesNotContainIt(
+        @TempDir Path path,
+        ConveyorModule module,
+        BuilderFactory factory,
+        WireMockServer wireMockServer
+    ) throws Exception {
+        factory.repositoryBuilder(path)
+            .pom(
+                factory.pomBuilder()
+                    .artifactId("instant")
+                    .dependency(
+                        "group",
+                        "optional",
+                        "1.0.0",
+                        null,
+                        true,
+                        List.of()
+                    )
+            )
+            .jar(
+                factory.jarBuilder("instant", path)
+            )
+            .install(wireMockServer);
+
+        module.construct(
+            factory.schematicDefinitionBuilder()
+                .repository(wireMockServer.baseUrl())
+                .plugin(
+                    "group",
+                    "instant",
+                    "1.0.0",
+                    Map.of("instant", "COMPILE-RUN")
+                )
+                .conveyorJson(path),
+            Stage.COMPILE
+        );
+
+        assertThat(defaultConstructionDirectory(path).resolve("instant")).exists();
     }
 }

@@ -32,6 +32,7 @@ record PomDefinition(
         String artifactId,
         Optional<String> version,
         Optional<DependencyScope> scope,
+        boolean optional,
         List<Exclusion> exclusions
     ) {}
 
