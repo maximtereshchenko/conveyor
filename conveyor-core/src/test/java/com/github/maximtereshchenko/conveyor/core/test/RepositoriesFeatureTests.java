@@ -47,12 +47,12 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         module.construct(
             factory.schematicDefinitionBuilder()
                 .name("template")
-                .repository("first", first, true)
+                .repository("first", first)
                 .inclusion(
                     factory.schematicDefinitionBuilder()
                         .name("project")
                         .template("template")
-                        .repository("second", second, true)
+                        .repository("second", second)
                         .plugin(
                             "group",
                             "instant",
@@ -92,12 +92,12 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         module.construct(
             factory.schematicDefinitionBuilder()
                 .name("template")
-                .repository("main", templateRepository, true)
+                .repository("main", templateRepository)
                 .inclusion(
                     factory.schematicDefinitionBuilder()
                         .name("project")
                         .template("template")
-                        .repository("main", projectRepository, true)
+                        .repository("main", projectRepository)
                         .plugin(
                             "group",
                             "instant",
@@ -111,64 +111,6 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         );
 
         assertThat(defaultConstructionDirectory(project).resolve("instant")).exists();
-    }
-
-    @Test
-    void givenSchematicTemplateHasSameRepository_whenConstructToStage_thenRepositoryEnabledFlagIsOverridden(
-        @TempDir Path path,
-        ConveyorModule module,
-        BuilderFactory factory
-    ) throws Exception {
-        var templateRepository = path.resolve("template-repository");
-        factory.repositoryBuilder(path)
-            .schematicDefinition(
-                factory.schematicDefinitionBuilder()
-                    .name("class-path")
-            )
-            .jar(
-                factory.jarBuilder("class-path", path)
-            )
-            .install(templateRepository);
-        var projectRepository = path.resolve("project-repository");
-        factory.repositoryBuilder(path)
-            .schematicDefinition(
-                factory.schematicDefinitionBuilder()
-                    .name("class-path")
-                    .dependency("dependency")
-            )
-            .jar(
-                factory.jarBuilder("class-path", path)
-            )
-            .schematicDefinition(
-                factory.schematicDefinitionBuilder()
-                    .name("dependency")
-            )
-            .jar(
-                factory.jarBuilder("dependency", path)
-            )
-            .install(projectRepository);
-        var project = path.resolve("project");
-
-        module.construct(
-            factory.schematicDefinitionBuilder()
-                .name("template")
-                .repository("template-repository", templateRepository, true)
-                .inclusion(
-                    factory.schematicDefinitionBuilder()
-                        .name("project")
-                        .template("template")
-                        .repository("project-repository", projectRepository, true)
-                        .repository("template-repository", templateRepository, false)
-                        .plugin("class-path")
-                        .conveyorJson(project)
-                )
-                .conveyorJson(path),
-            Stage.COMPILE
-        );
-
-        assertThat(defaultConstructionDirectory(project).resolve("class-path"))
-            .content()
-            .isEqualTo("group-dependency-1.0.0");
     }
 
     @Test
@@ -258,13 +200,10 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                     .artifactId("instant")
             )
             .install(wireMockServer);
-        factory.repositoryBuilder(path)
-            .install(path);
 
         module.construct(
             factory.schematicDefinitionBuilder()
-                .repository("local", path, true)
-                .repository("remote", wireMockServer.baseUrl(), true)
+                .repository("remote", wireMockServer.baseUrl())
                 .plugin(
                     "group",
                     "instant",
@@ -294,11 +233,8 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                     .artifactId("instant")
             )
             .install(wireMockServer);
-        factory.repositoryBuilder(path)
-            .install(path);
         var schematic = factory.schematicDefinitionBuilder()
-            .repository("local", path, true)
-            .repository("remote", wireMockServer.baseUrl(), true)
+            .repository(wireMockServer.baseUrl())
             .plugin(
                 "group",
                 "instant",
@@ -335,14 +271,11 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                     .artifactId("instant")
             )
             .install(wireMockServer);
-        factory.repositoryBuilder(path)
-            .install(path);
         var cache = path.resolve("cache");
 
         module.construct(
             factory.schematicDefinitionBuilder()
-                .repository("local", path, true)
-                .repository("remote", wireMockServer.baseUrl(), true)
+                .repository(wireMockServer.baseUrl())
                 .property("conveyor.repository.remote.cache.directory", cache.toString())
                 .plugin(
                     "group",
@@ -376,13 +309,10 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                     .artifactId("instant")
             )
             .install(wireMockServer);
-        factory.repositoryBuilder(path)
-            .install(path);
 
         module.construct(
             factory.schematicDefinitionBuilder()
-                .repository("local", path, true)
-                .repository("remote", wireMockServer.baseUrl(), true)
+                .repository(wireMockServer.baseUrl())
                 .property("conveyor.repository.remote.cache.directory", "./temp/../cache")
                 .plugin(
                     "group",
@@ -429,13 +359,10 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                     .artifactId("dependency")
             )
             .install(wireMockServer);
-        factory.repositoryBuilder(path)
-            .install(path);
 
         module.construct(
             factory.schematicDefinitionBuilder()
-                .repository("local", path, true)
-                .repository("remote", wireMockServer.baseUrl(), true)
+                .repository(wireMockServer.baseUrl())
                 .plugin("class-path")
                 .conveyorJson(path),
             Stage.COMPILE
@@ -466,21 +393,18 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                 factory.pomBuilder()
                     .artifactId("dependency")
             )
-            .install(wireMockServer);
-        factory.repositoryBuilder(path)
-            .schematicDefinition(
-                factory.schematicDefinitionBuilder()
-                    .name("dependencies")
+            .pom(
+                factory.pomBuilder()
+                    .artifactId("dependencies")
             )
             .jar(
                 factory.jarBuilder("dependencies", path)
             )
-            .install(path);
+            .install(wireMockServer);
 
         module.construct(
             factory.schematicDefinitionBuilder()
-                .repository("local", path, true)
-                .repository("remote", wireMockServer.baseUrl(), true)
+                .repository(wireMockServer.baseUrl())
                 .preferenceInclusion("bom")
                 .plugin("dependencies")
                 .dependency("dependency")
@@ -506,22 +430,19 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                     .artifactId("template")
                     .property("pom.key", "value")
             )
-            .install(wireMockServer);
-        factory.repositoryBuilder(path)
-            .schematicDefinition(
-                factory.schematicDefinitionBuilder()
-                    .name("properties")
+            .pom(
+                factory.pomBuilder()
+                    .artifactId("properties")
             )
             .jar(
                 factory.jarBuilder("properties", path)
             )
-            .install(path);
+            .install(wireMockServer);
 
         module.construct(
             factory.schematicDefinitionBuilder()
                 .template("template")
-                .repository("local", path, true)
-                .repository("remote", wireMockServer.baseUrl(), true)
+                .repository(wireMockServer.baseUrl())
                 .plugin(
                     "group",
                     "properties",
@@ -571,22 +492,19 @@ final class RepositoriesFeatureTests extends ConveyorTest {
             .jar(
                 factory.jarBuilder("dependency", path)
             )
-            .install(wireMockServer);
-        factory.repositoryBuilder(path)
-            .schematicDefinition(
-                factory.schematicDefinitionBuilder()
-                    .name("dependencies")
+            .pom(
+                factory.pomBuilder()
+                    .artifactId("dependencies")
             )
             .jar(
                 factory.jarBuilder("dependencies", path)
             )
-            .install(path);
+            .install(wireMockServer);
 
         module.construct(
             factory.schematicDefinitionBuilder()
                 .template("template")
-                .repository("local", path, true)
-                .repository("remote", wireMockServer.baseUrl(), true)
+                .repository(wireMockServer.baseUrl())
                 .plugin(
                     "group",
                     "dependencies",
@@ -634,7 +552,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         module.construct(
             factory.schematicDefinitionBuilder()
                 .template("group", "template", "1.0.0")
-                .repository("remote", wireMockServer.baseUrl(), true)
+                .repository(wireMockServer.baseUrl())
                 .plugin(
                     "group",
                     "instant",
@@ -681,7 +599,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         module.construct(
             factory.schematicDefinitionBuilder()
                 .template("group", "template", "2.0.0")
-                .repository("remote", wireMockServer.baseUrl(), true)
+                .repository(wireMockServer.baseUrl())
                 .plugin(
                     "group",
                     "instant",
@@ -725,7 +643,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         module.construct(
             factory.schematicDefinitionBuilder()
                 .template("template")
-                .repository("remote", wireMockServer.baseUrl(), true)
+                .repository(wireMockServer.baseUrl())
                 .plugin(
                     "group",
                     "instant",
@@ -772,7 +690,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         module.construct(
             factory.schematicDefinitionBuilder()
                 .template("template")
-                .repository("remote", wireMockServer.baseUrl(), true)
+                .repository(wireMockServer.baseUrl())
                 .plugin("dependencies")
                 .conveyorJson(path),
             Stage.COMPILE
@@ -816,7 +734,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         module.construct(
             factory.schematicDefinitionBuilder()
                 .template("template")
-                .repository("remote", wireMockServer.baseUrl(), true)
+                .repository(wireMockServer.baseUrl())
                 .plugin(
                     "group",
                     "dependencies",
@@ -870,7 +788,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         module.construct(
             factory.schematicDefinitionBuilder()
                 .template("template")
-                .repository("remote", wireMockServer.baseUrl(), true)
+                .repository(wireMockServer.baseUrl())
                 .plugin(
                     "group",
                     "dependencies",
@@ -923,7 +841,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         module.construct(
             factory.schematicDefinitionBuilder()
                 .template("template")
-                .repository("remote", wireMockServer.baseUrl(), true)
+                .repository(wireMockServer.baseUrl())
                 .plugin("dependencies")
                 .conveyorJson(path),
             Stage.COMPILE
@@ -971,7 +889,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         module.construct(
             factory.schematicDefinitionBuilder()
                 .template("template")
-                .repository("remote", wireMockServer.baseUrl(), true)
+                .repository(wireMockServer.baseUrl())
                 .plugin("dependencies")
                 .conveyorJson(path),
             Stage.COMPILE
@@ -1136,7 +1054,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                 .name("schematic-name")
                 .version("1.2.3")
                 .repository(path)
-                .repository("published", published, true)
+                .repository("published", published)
                 .plugin(
                     "group",
                     "publisher",

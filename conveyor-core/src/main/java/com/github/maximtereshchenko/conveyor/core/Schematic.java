@@ -187,9 +187,6 @@ final class Schematic {
         Path path,
         Properties properties
     ) {
-        if (!repositoryModel.enabled().orElse(Boolean.TRUE)) {
-            return new DisabledRepository();
-        }
         return switch (repositoryModel) {
             case LocalDirectoryRepositoryModel model -> new NamedLocalDirectoryRepository(
                 new LocalDirectoryRepository(

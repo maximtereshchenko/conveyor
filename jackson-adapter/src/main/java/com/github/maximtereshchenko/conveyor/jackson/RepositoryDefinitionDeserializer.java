@@ -11,7 +11,6 @@ import com.github.maximtereshchenko.conveyor.api.schematic.RepositoryDefinition;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Path;
-import java.util.Optional;
 
 final class RepositoryDefinitionDeserializer extends StdDeserializer<RepositoryDefinition> {
 
@@ -24,27 +23,13 @@ final class RepositoryDefinitionDeserializer extends StdDeserializer<RepositoryD
         throws IOException {
         JsonNode jsonNode = jsonParser.readValueAsTree();
         var name = jsonNode.get("name").asText();
-        var enabled = enabled(jsonNode);
         var path = jsonNode.get("path");
         if (path == null) {
-            return new RemoteRepositoryDefinition(
-                name,
-                URI.create(jsonNode.get("uri").asText()),
-                enabled
-            );
+            return new RemoteRepositoryDefinition(name, URI.create(jsonNode.get("uri").asText()));
         }
         return new LocalDirectoryRepositoryDefinition(
             name,
-            context.readTreeAsValue(path, Path.class),
-            enabled
+            context.readTreeAsValue(path, Path.class)
         );
-    }
-
-    private Optional<Boolean> enabled(JsonNode jsonNode) {
-        var node = jsonNode.get("enabled");
-        if (node == null || node.isNull()) {
-            return Optional.empty();
-        }
-        return Optional.of(node.asBoolean());
     }
 }

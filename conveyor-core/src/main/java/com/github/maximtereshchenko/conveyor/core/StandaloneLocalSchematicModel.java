@@ -93,13 +93,11 @@ final class StandaloneLocalSchematicModel implements LocalSchematicModel {
                     case LocalDirectoryRepositoryDefinition definition ->
                         new LocalDirectoryRepositoryModel(
                             definition.name(),
-                            path.getParent().resolve(definition.path()).normalize(),
-                            definition.enabled()
+                            path.getParent().resolve(definition.path()).normalize()
                         );
                     case RemoteRepositoryDefinition definition -> new RemoteRepositoryModel(
                         definition.name(),
-                        definition.uri(),
-                        definition.enabled()
+                        definition.uri()
                     );
                 }
             )

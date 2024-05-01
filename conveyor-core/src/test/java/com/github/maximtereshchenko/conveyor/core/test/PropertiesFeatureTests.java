@@ -37,7 +37,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
 
         module.construct(
             factory.schematicDefinitionBuilder()
-                .repository("main", path, true)
+                .repository(path)
                 .template("template")
                 .property("key", "value")
                 .plugin(
@@ -79,7 +79,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
 
         module.construct(
             factory.schematicDefinitionBuilder()
-                .repository("main", path, true)
+                .repository(path)
                 .template("template")
                 .property("key", "value")
                 .plugin(
@@ -120,7 +120,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
 
         module.construct(
             factory.schematicDefinitionBuilder()
-                .repository("main", path, true)
+                .repository(path)
                 .template("template")
                 .property("to.be.removed", "")
                 .plugin(
@@ -156,7 +156,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
 
         module.construct(
             factory.schematicDefinitionBuilder()
-                .repository("main", path, true)
+                .repository(path)
                 .property("conveyor.schematic.name", "custom")
                 .plugin(
                     "group",
@@ -196,7 +196,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
 
         module.construct(
             factory.schematicDefinitionBuilder()
-                .repository("main", path, true)
+                .repository(path)
                 .group(null)
                 .template("template.group", "template", "1.0.0")
                 .plugin(
@@ -237,7 +237,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
 
         module.construct(
             factory.schematicDefinitionBuilder()
-                .repository("main", path, true)
+                .repository(path)
                 .version(null)
                 .template("group", "template", "2.0.0")
                 .plugin(
@@ -273,7 +273,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
 
         module.construct(
             factory.schematicDefinitionBuilder()
-                .repository("main", path, true)
+                .repository(path)
                 .property("conveyor.schematic.group", "custom")
                 .plugin(
                     "group",
@@ -309,7 +309,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
 
         module.construct(
             factory.schematicDefinitionBuilder()
-                .repository("main", path, true)
+                .repository(path)
                 .property("conveyor.discovery.directory", project.toString())
                 .plugin(
                     "group",
@@ -344,7 +344,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
 
         module.construct(
             factory.schematicDefinitionBuilder()
-                .repository("main", path, true)
+                .repository(path)
                 .property("conveyor.discovery.directory", "./temp/../project")
                 .plugin(
                     "group",
@@ -380,7 +380,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
 
         module.construct(
             factory.schematicDefinitionBuilder()
-                .repository("main", path, true)
+                .repository(path)
                 .property("conveyor.construction.directory", construction.toString())
                 .plugin(
                     "group",
@@ -415,7 +415,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
 
         module.construct(
             factory.schematicDefinitionBuilder()
-                .repository("main", path, true)
+                .repository(path)
                 .property("conveyor.construction.directory", "./temp/../construction")
                 .plugin(
                     "group",
@@ -451,7 +451,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
 
         module.construct(
             factory.schematicDefinitionBuilder()
-                .repository("main", path, true)
+                .repository(path)
                 .property("key", "interpolated")
                 .property("templated", "${key}-suffix")
                 .plugin(
@@ -488,7 +488,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
 
         module.construct(
             factory.schematicDefinitionBuilder()
-                .repository("main", path, true)
+                .repository(path)
                 .property("key", "interpolated")
                 .property("templated", "${key}-suffix")
                 .plugin(

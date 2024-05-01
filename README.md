@@ -103,8 +103,7 @@ A build tool for Java projects
       or transitively
 * Repositories
     * Repositories are defined in a schematic
-    * Every repository has a name and an optional `enabled` flag
-    * A repository can be disabled with the `enabled` flag equal to `false`
+    * Every repository has a name
     * Repositories are inherited from a schematic used as a template
     * Local directory can be used as a source of artifacts and schematics. It is defined by a path
       relative to the directory, where the schematic definition is located. The path can be

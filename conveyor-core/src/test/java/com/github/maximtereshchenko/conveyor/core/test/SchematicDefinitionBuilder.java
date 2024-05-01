@@ -68,23 +68,23 @@ final class SchematicDefinitionBuilder {
     }
 
     SchematicDefinitionBuilder repository(Path path) {
-        return repository(path.toString(), path, true);
+        return repository(path.toString(), path);
     }
 
-    SchematicDefinitionBuilder repository(String name, Path path, boolean enabled) {
+    SchematicDefinitionBuilder repository(String name, Path path) {
         repositories.add(
-            new LocalDirectoryRepositoryDefinition(name, path, Optional.of(enabled))
+            new LocalDirectoryRepositoryDefinition(name, path)
         );
         return this;
     }
 
     SchematicDefinitionBuilder repository(String uri) {
-        return repository(uri, uri, true);
+        return repository(uri, uri);
     }
 
-    SchematicDefinitionBuilder repository(String name, String uri, boolean enabled) {
+    SchematicDefinitionBuilder repository(String name, String uri) {
         repositories.add(
-            new RemoteRepositoryDefinition(name, URI.create(uri), Optional.of(enabled))
+            new RemoteRepositoryDefinition(name, URI.create(uri))
         );
         return this;
     }
