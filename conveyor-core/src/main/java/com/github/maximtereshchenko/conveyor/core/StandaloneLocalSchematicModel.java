@@ -3,6 +3,7 @@ package com.github.maximtereshchenko.conveyor.core;
 import com.github.maximtereshchenko.conveyor.api.schematic.LocalDirectoryRepositoryDefinition;
 import com.github.maximtereshchenko.conveyor.api.schematic.RemoteRepositoryDefinition;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashSet;
 import java.util.Objects;
@@ -10,6 +11,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 final class StandaloneLocalSchematicModel implements LocalSchematicModel {
+
+    private static final String DEFAULT_SCHEMATIC_DEFINITION_NAME = "conveyor.json";
 
     private final Path path;
     private final StandaloneSchematicModel standaloneSchematicModel;
@@ -40,7 +43,7 @@ final class StandaloneLocalSchematicModel implements LocalSchematicModel {
             .withResolvedPath(
                 SchematicPropertyKey.TEMPLATE_LOCATION,
                 path.getParent(),
-                "../conveyor.json"
+                "../" + DEFAULT_SCHEMATIC_DEFINITION_NAME
             );
     }
 
@@ -76,6 +79,7 @@ final class StandaloneLocalSchematicModel implements LocalSchematicModel {
             .stream()
             .map(path.getParent()::resolve)
             .map(Path::normalize)
+            .map(this::schematicDefinitionPath)
             .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
@@ -118,5 +122,12 @@ final class StandaloneLocalSchematicModel implements LocalSchematicModel {
         var that = (StandaloneLocalSchematicModel) object;
         return Objects.equals(standaloneSchematicModel, that.standaloneSchematicModel) &&
                Objects.equals(path, that.path);
+    }
+
+    private Path schematicDefinitionPath(Path potentialDirectory) {
+        if (Files.isDirectory(potentialDirectory)) {
+            return potentialDirectory.resolve(DEFAULT_SCHEMATIC_DEFINITION_NAME);
+        }
+        return potentialDirectory;
     }
 }

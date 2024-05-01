@@ -1155,6 +1155,49 @@ final class InheritanceFeatureTests extends ConveyorTest {
     }
 
     @Test
+    void givenDirectoryInclusion_whenConstructToStage_thenConveyorJsonFileInThisDirectoryIsIncluded(
+        @TempDir Path path,
+        ConveyorModule module,
+        BuilderFactory factory
+    ) throws Exception {
+        factory.repositoryBuilder(path)
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("instant")
+            )
+            .jar(
+                factory.jarBuilder("instant", path)
+            )
+            .install(path);
+        var inclusion = path.resolve("inclusion");
+        factory.schematicDefinitionBuilder()
+            .name("inclusion")
+            .template("template")
+            .property(
+                "conveyor.schematic.template.location",
+                "../template/conveyor.json"
+            )
+            .plugin(
+                "group",
+                "instant",
+                "1.0.0",
+                Map.of("instant", "COMPILE-RUN")
+            )
+            .conveyorJson(inclusion);
+
+        module.construct(
+            factory.schematicDefinitionBuilder()
+                .name("template")
+                .repository(path)
+                .inclusion(inclusion)
+                .conveyorJson(path.resolve("template")),
+            Stage.COMPILE
+        );
+
+        assertThat(instantPath(inclusion)).exists();
+    }
+
+    @Test
     void givenCommonTransitiveSchematicDependency_whenConstructToStage_thenSchematicsAreBuiltInCorrectOrder(
         @TempDir Path path,
         ConveyorModule module,
