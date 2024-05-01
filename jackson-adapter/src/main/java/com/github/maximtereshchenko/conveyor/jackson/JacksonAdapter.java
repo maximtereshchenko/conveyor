@@ -1,8 +1,9 @@
 package com.github.maximtereshchenko.conveyor.jackson;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.github.maximtereshchenko.conveyor.api.port.SchematicDefinitionConverter;
@@ -36,10 +37,11 @@ public final class JacksonAdapter implements SchematicDefinitionConverter {
             new RepositoryDefinitionDeserializer()
         );
         return new JacksonAdapter(
-            new ObjectMapper()
-                .registerModule(module)
-                .findAndRegisterModules()
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            JsonMapper.builder()
+                .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS)
+                .addModule(module)
+                .findAndAddModules()
+                .build()
         );
     }
 

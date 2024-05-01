@@ -23,32 +23,32 @@
     {
       "group": "com.github.maximtereshchenko",
       "name": "test-common",
-      "scope": "TEST"
+      "scope": "test"
     },
     {
       "group": "com.github.maximtereshchenko",
       "name": "conveyor-plugin-test",
-      "scope": "TEST"
+      "scope": "test"
     },
     {
       "group": "com.github.maximtereshchenko",
       "name": "compiler",
-      "scope": "TEST"
+      "scope": "test"
     },
     {
       "group": "org.junit.jupiter",
       "name": "junit-jupiter-api",
-      "scope": "TEST"
+      "scope": "test"
     },
     {
       "group": "org.assertj",
       "name": "assertj-core",
-      "scope": "TEST"
+      "scope": "test"
     },
     {
       "group": "org.apiguardian",
       "name": "apiguardian-api",
-      "scope": "TEST"
+      "scope": "test"
     }
   ]
 }

@@ -19,52 +19,52 @@
     {
       "group": "com.github.maximtereshchenko",
       "name": "compiler",
-      "scope": "TEST"
+      "scope": "test"
     },
     {
       "group": "com.github.maximtereshchenko",
       "name": "zip-archive",
-      "scope": "TEST"
+      "scope": "test"
     },
     {
       "group": "com.github.maximtereshchenko",
       "name": "jackson-adapter",
-      "scope": "TEST"
+      "scope": "test"
     },
     {
       "group": "com.github.maximtereshchenko",
       "name": "test-common",
-      "scope": "TEST"
+      "scope": "test"
     },
     {
       "group": "org.junit.jupiter",
       "name": "junit-jupiter-api",
-      "scope": "TEST"
+      "scope": "test"
     },
     {
       "group": "org.junit.jupiter",
       "name": "junit-jupiter-params",
-      "scope": "TEST"
+      "scope": "test"
     },
     {
       "group": "org.assertj",
       "name": "assertj-core",
-      "scope": "TEST"
+      "scope": "test"
     },
     {
       "group": "org.wiremock",
       "name": "wiremock",
-      "scope": "TEST"
+      "scope": "test"
     },
     {
       "group": "org.slf4j",
       "name": "slf4j-jdk14",
-      "scope": "TEST"
+      "scope": "test"
     },
     {
       "group": "com.fasterxml.jackson.dataformat",
       "name": "jackson-dataformat-xml",
-      "scope": "TEST"
+      "scope": "test"
     }
   ]
 }
