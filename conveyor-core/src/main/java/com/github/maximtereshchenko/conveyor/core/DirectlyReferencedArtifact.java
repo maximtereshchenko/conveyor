@@ -24,14 +24,14 @@ final class DirectlyReferencedArtifact extends StoredArtifact {
     }
 
     @Override
-    SemanticVersion semanticVersion(
+    Version version(
         ArtifactModel artifactModel,
         Properties properties,
         Preferences preferences
     ) {
         return artifactModel.version()
             .map(properties::interpolated)
-            .map(SemanticVersion::new)
+            .map(Version::new)
             .or(() -> preferences.version(artifactModel.idModel().id(properties)))
             .orElseThrow();
     }

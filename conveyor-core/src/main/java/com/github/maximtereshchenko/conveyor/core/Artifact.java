@@ -7,7 +7,7 @@ interface Artifact {
 
     Id id();
 
-    SemanticVersion semanticVersion();
+    Version version();
 
     Path path();
 

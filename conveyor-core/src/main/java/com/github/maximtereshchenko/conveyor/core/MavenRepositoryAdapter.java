@@ -37,15 +37,15 @@ final class MavenRepositoryAdapter implements Repository<InputStream> {
     @Override
     public Optional<InputStream> artifact(
         Id id,
-        SemanticVersion semanticVersion,
+        Version version,
         Classifier classifier
     ) {
         return switch (classifier) {
-            case SCHEMATIC_DEFINITION -> original.artifact(id, semanticVersion, Classifier.POM)
+            case SCHEMATIC_DEFINITION -> original.artifact(id, version, Classifier.POM)
                 .map(this::pomDefinition)
                 .map(this::schematicDefinition)
                 .map(this::inputStream);
-            case JAR, POM -> original.artifact(id, semanticVersion, classifier)
+            case JAR, POM -> original.artifact(id, version, classifier)
                 .map(this::inputStream);
         };
     }
@@ -53,11 +53,11 @@ final class MavenRepositoryAdapter implements Repository<InputStream> {
     @Override
     public void publish(
         Id id,
-        SemanticVersion semanticVersion,
+        Version version,
         Classifier classifier,
         Resource resource
     ) {
-        original.publish(id, semanticVersion, classifier, resource);
+        original.publish(id, version, classifier, resource);
     }
 
     private InputStream inputStream(Path path) {
@@ -115,7 +115,7 @@ final class MavenRepositoryAdapter implements Repository<InputStream> {
             .flatMap(parent ->
                 original.artifact(
                     new Id(parent.groupId(), parent.artifactId()),
-                    new SemanticVersion(parent.version()),
+                    new Version(parent.version()),
                     Classifier.POM
                 )
             )

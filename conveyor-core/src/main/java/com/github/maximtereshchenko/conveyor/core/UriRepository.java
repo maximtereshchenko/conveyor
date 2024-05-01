@@ -12,29 +12,29 @@ abstract class UriRepository<T> implements Repository<T> {
     }
 
     @Override
-    public Optional<T> artifact(Id id, SemanticVersion semanticVersion, Classifier classifier) {
-        return artifact(uri(id, semanticVersion, classifier));
+    public Optional<T> artifact(Id id, Version version, Classifier classifier) {
+        return artifact(uri(id, version, classifier));
     }
 
     @Override
     public void publish(
         Id id,
-        SemanticVersion semanticVersion,
+        Version version,
         Classifier classifier,
         Resource resource
     ) {
-        publish(uri(id, semanticVersion, classifier), resource);
+        publish(uri(id, version, classifier), resource);
     }
 
-    URI uri(Id id, SemanticVersion semanticVersion, Classifier classifier) {
+    URI uri(Id id, Version version, Classifier classifier) {
         return URI.create(
             "%s/%s/%s/%s/%s-%s.%s".formatted(
                 base,
                 id.group().replace('.', '/'),
                 id.name(),
-                semanticVersion,
+                version,
                 id.name(),
-                semanticVersion,
+                version,
                 switch (classifier) {
                     case SCHEMATIC_DEFINITION -> "json";
                     case JAR -> "jar";

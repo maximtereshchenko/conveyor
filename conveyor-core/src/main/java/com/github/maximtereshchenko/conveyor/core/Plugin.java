@@ -29,8 +29,8 @@ final class Plugin implements Artifact {
     }
 
     @Override
-    public SemanticVersion semanticVersion() {
-        return directlyReferencedArtifact.semanticVersion();
+    public Version version() {
+        return directlyReferencedArtifact.version();
     }
 
     @Override

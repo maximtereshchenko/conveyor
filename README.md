@@ -14,6 +14,19 @@ A build tool for Java projects
     * Given the same dependency is required but with different versions, the highest version wins
       taken into account the presence of the dependency requiring that version in the result class
       path
+    * Version precedence is determined by the following rules:
+        * Part of the version before the first dash is considered version components, after -
+          qualifiers
+        * Dot, dash and transition between characters and digits constitute a separator
+        * When version components are equal, a version with qualifiers has lower precedence than a
+          version without
+        * Precedence for two versions is determined by comparing version components and then
+          qualifiers from left to right until a difference is found as follows:
+            * Identifiers consisting of digits are compared numerically
+            * Identifiers with letters are compared lexically
+            * Numeric identifiers always have lower precedence than non-numeric identifiers
+            * A larger set of identifiers has a higher precedence than a smaller set, if all the
+              preceding identifiers are equal
     * Preferences are defined in a schematic with a group, a name and a version
     * Preferences can be imported from a schematic by defining that schematic with a group, a name
       and a version as the inclusion in preferences. Given the same artifact preference is imported

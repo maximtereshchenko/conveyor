@@ -21,8 +21,8 @@ final class Dependency implements Artifact {
     }
 
     @Override
-    public SemanticVersion semanticVersion() {
-        return artifact.semanticVersion();
+    public Version version() {
+        return artifact.version();
     }
 
     @Override

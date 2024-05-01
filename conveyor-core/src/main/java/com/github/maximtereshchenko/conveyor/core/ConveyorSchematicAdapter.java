@@ -12,20 +12,20 @@ import java.util.Set;
 final class ConveyorSchematicAdapter implements ConveyorSchematic {
 
     private final Id id;
-    private final SemanticVersion semanticVersion;
+    private final Version version;
     private final Properties properties;
     private final Dependencies dependencies;
     private final Repositories repositories;
 
     ConveyorSchematicAdapter(
         Id id,
-        SemanticVersion semanticVersion,
+        Version version,
         Properties properties,
         Dependencies dependencies,
         Repositories repositories
     ) {
         this.id = id;
-        this.semanticVersion = semanticVersion;
+        this.version = version;
         this.properties = properties;
         this.dependencies = dependencies;
         this.repositories = repositories;
@@ -33,7 +33,7 @@ final class ConveyorSchematicAdapter implements ConveyorSchematic {
 
     @Override
     public SchematicCoordinates coordinates() {
-        return id.coordinates(semanticVersion);
+        return id.coordinates(version);
     }
 
     @Override
@@ -61,7 +61,7 @@ final class ConveyorSchematicAdapter implements ConveyorSchematic {
         repositories.publish(
             repository,
             id,
-            semanticVersion,
+            version,
             switch (artifactClassifier) {
                 case SCHEMATIC_DEFINITION -> Repository.Classifier.SCHEMATIC_DEFINITION;
                 case JAR -> Repository.Classifier.JAR;

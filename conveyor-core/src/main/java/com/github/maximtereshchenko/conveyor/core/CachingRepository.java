@@ -20,31 +20,31 @@ final class CachingRepository implements Repository<Path> {
     }
 
     @Override
-    public Optional<Path> artifact(Id id, SemanticVersion semanticVersion, Classifier classifier) {
-        return cache.artifact(id, semanticVersion, classifier)
+    public Optional<Path> artifact(Id id, Version version, Classifier classifier) {
+        return cache.artifact(id, version, classifier)
             .or(() ->
-                original.artifact(id, semanticVersion, classifier)
-                    .flatMap(inputStream -> published(id, semanticVersion, classifier, inputStream))
+                original.artifact(id, version, classifier)
+                    .flatMap(inputStream -> published(id, version, classifier, inputStream))
             );
     }
 
     @Override
     public void publish(
         Id id,
-        SemanticVersion semanticVersion,
+        Version version,
         Classifier classifier,
         Resource resource
     ) {
-        original.publish(id, semanticVersion, classifier, resource);
+        original.publish(id, version, classifier, resource);
     }
 
     private Optional<Path> published(
         Id id,
-        SemanticVersion semanticVersion,
+        Version version,
         Classifier classifier,
         InputStream inputStream
     ) {
-        cache.publish(id, semanticVersion, classifier, () -> inputStream);
-        return cache.artifact(id, semanticVersion, classifier);
+        cache.publish(id, version, classifier, () -> inputStream);
+        return cache.artifact(id, version, classifier);
     }
 }

@@ -21,20 +21,20 @@ final class Repositories {
         this.schematicDefinitionConverter = schematicDefinitionConverter;
     }
 
-    SchematicDefinition schematicDefinition(Id id, SemanticVersion semanticVersion) {
+    SchematicDefinition schematicDefinition(Id id, Version version) {
         return schematicDefinitionConverter.schematicDefinition(
-            path(id, semanticVersion, Repository.Classifier.SCHEMATIC_DEFINITION)
+            path(id, version, Repository.Classifier.SCHEMATIC_DEFINITION)
         );
     }
 
-    Path jar(Id id, SemanticVersion semanticVersion) {
-        return path(id, semanticVersion, Repository.Classifier.JAR);
+    Path jar(Id id, Version version) {
+        return path(id, version, Repository.Classifier.JAR);
     }
 
     void publish(
         String repositoryName,
         Id id,
-        SemanticVersion semanticVersion,
+        Version version,
         Repository.Classifier classifier,
         Path path
     ) {
@@ -43,16 +43,16 @@ final class Repositories {
             .forEach(repository ->
                 repository.publish(
                     id,
-                    semanticVersion,
+                    version,
                     classifier,
                     () -> Files.newInputStream(path)
                 )
             );
     }
 
-    private Path path(Id id, SemanticVersion semanticVersion, Repository.Classifier classifier) {
+    private Path path(Id id, Version version, Repository.Classifier classifier) {
         return all.stream()
-            .map(repository -> repository.artifact(id, semanticVersion, classifier))
+            .map(repository -> repository.artifact(id, version, classifier))
             .flatMap(Optional::stream)
             .findAny()
             .orElseThrow();

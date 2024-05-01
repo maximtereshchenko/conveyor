@@ -13,27 +13,6 @@ final class TransitivelyReferencedArtifact extends StoredArtifact {
         Properties properties,
         Repositories repositories,
         SchematicModelFactory schematicModelFactory,
-        PreferencesFactory preferencesFactory
-    ) {
-        this(
-            artifactModel,
-            original,
-            schematicPreferences,
-            properties,
-            repositories,
-            schematicModelFactory,
-            preferencesFactory,
-            Set.of()
-        );
-    }
-
-    TransitivelyReferencedArtifact(
-        ArtifactModel artifactModel,
-        Preferences original,
-        Preferences schematicPreferences,
-        Properties properties,
-        Repositories repositories,
-        SchematicModelFactory schematicModelFactory,
         PreferencesFactory preferencesFactory,
         Set<Id> propagatedExclusions
     ) {
@@ -50,7 +29,7 @@ final class TransitivelyReferencedArtifact extends StoredArtifact {
     }
 
     @Override
-    SemanticVersion semanticVersion(
+    Version version(
         ArtifactModel artifactModel,
         Properties properties,
         Preferences preferences
@@ -60,7 +39,7 @@ final class TransitivelyReferencedArtifact extends StoredArtifact {
             .or(() ->
                 artifactModel.version()
                     .map(properties::interpolated)
-                    .map(SemanticVersion::new)
+                    .map(Version::new)
                     .or(() -> schematicPreferences.version(id))
             )
             .orElseThrow();

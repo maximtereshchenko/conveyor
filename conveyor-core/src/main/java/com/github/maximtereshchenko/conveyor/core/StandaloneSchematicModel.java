@@ -24,10 +24,10 @@ record StandaloneSchematicModel(SchematicDefinition schematicDefinition) impleme
     }
 
     @Override
-    public SemanticVersion version() {
+    public Version version() {
         return schematicDefinition.version()
             .or(() -> fromSchematicTemplateDefinition(SchematicTemplateDefinition::version))
-            .map(SemanticVersion::new)
+            .map(Version::new)
             .orElseThrow();
     }
 
@@ -36,7 +36,7 @@ record StandaloneSchematicModel(SchematicDefinition schematicDefinition) impleme
         return switch (schematicDefinition.template()) {
             case SchematicTemplateDefinition definition -> new SchematicTemplateModel(
                 new Id(definition.group(), definition.name()),
-                new SemanticVersion(definition.version())
+                new Version(definition.version())
             );
             case NoTemplateDefinition ignored -> new NoTemplateModel();
         };

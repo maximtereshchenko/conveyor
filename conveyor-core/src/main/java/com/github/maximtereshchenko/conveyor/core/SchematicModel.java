@@ -7,7 +7,7 @@ interface SchematicModel {
 
     Id id();
 
-    SemanticVersion version();
+    Version version();
 
     TemplateModel template();
 

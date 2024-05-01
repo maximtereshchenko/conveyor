@@ -8,11 +8,11 @@ interface Repository<T> {
 
     boolean hasName(String name);
 
-    Optional<T> artifact(Id id, SemanticVersion semanticVersion, Classifier classifier);
+    Optional<T> artifact(Id id, Version version, Classifier classifier);
 
     void publish(
         Id id,
-        SemanticVersion semanticVersion,
+        Version version,
         Classifier classifier,
         Resource resource
     );

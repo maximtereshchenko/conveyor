@@ -41,20 +41,20 @@ abstract class StoredArtifact implements Artifact {
     }
 
     @Override
-    public SemanticVersion semanticVersion() {
-        return semanticVersion(artifactModel, properties, preferences);
+    public Version version() {
+        return version(artifactModel, properties, preferences);
     }
 
     @Override
     public Path path() {
-        return repositories.jar(id(), semanticVersion());
+        return repositories.jar(id(), version());
     }
 
     @Override
     public Set<Artifact> dependencies() {
         var inheritanceHierarchyModel = schematicModelFactory.inheritanceHierarchyModel(
             id(),
-            semanticVersion(),
+            version(),
             repositories
         );
         var schematicProperties = new Properties(inheritanceHierarchyModel.properties());
@@ -87,7 +87,7 @@ abstract class StoredArtifact implements Artifact {
             .collect(Collectors.toSet());
     }
 
-    abstract SemanticVersion semanticVersion(
+    abstract Version version(
         ArtifactModel artifactModel,
         Properties properties,
         Preferences preferences

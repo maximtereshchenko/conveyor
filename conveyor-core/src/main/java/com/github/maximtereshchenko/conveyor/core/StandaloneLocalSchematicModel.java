@@ -28,7 +28,7 @@ final class StandaloneLocalSchematicModel implements LocalSchematicModel {
     }
 
     @Override
-    public SemanticVersion version() {
+    public Version version() {
         return standaloneSchematicModel.version();
     }
 

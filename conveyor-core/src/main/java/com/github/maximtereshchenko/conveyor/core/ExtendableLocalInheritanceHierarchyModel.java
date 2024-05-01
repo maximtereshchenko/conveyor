@@ -24,7 +24,7 @@ final class ExtendableLocalInheritanceHierarchyModel
     }
 
     @Override
-    public SemanticVersion version() {
+    public Version version() {
         return original.version();
     }
 

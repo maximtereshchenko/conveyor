@@ -22,7 +22,7 @@ final class PreferencesFactory {
         return new Preferences(versions(preferencesModel, properties, repositories));
     }
 
-    private Map<Id, SemanticVersion> versions(
+    private Map<Id, Version> versions(
         PreferencesModel preferencesModel,
         Properties properties,
         Repositories repositories
@@ -38,7 +38,7 @@ final class PreferencesFactory {
             );
     }
 
-    private Map<Id, SemanticVersion> includedPreferences(
+    private Map<Id, Version> includedPreferences(
         Set<PreferencesInclusionModel> inclusions,
         Properties properties,
         Repositories repositories
@@ -47,7 +47,7 @@ final class PreferencesFactory {
             .map(preferencesInclusionModel ->
                 schematicModelFactory.inheritanceHierarchyModel(
                     preferencesInclusionModel.idModel().id(properties),
-                    new SemanticVersion(
+                    new Version(
                         properties.interpolated(preferencesInclusionModel.version())
                     ),
                     repositories
@@ -71,9 +71,9 @@ final class PreferencesFactory {
             );
     }
 
-    private SemanticVersion highestVersion(
-        SemanticVersion first,
-        SemanticVersion second
+    private Version highestVersion(
+        Version first,
+        Version second
     ) {
         if (first.compareTo(second) > 0) {
             return first;
@@ -81,7 +81,7 @@ final class PreferencesFactory {
         return second;
     }
 
-    private Map<Id, SemanticVersion> artifactPreferences(
+    private Map<Id, Version> artifactPreferences(
         Set<ArtifactPreferenceModel> artifacts,
         Properties properties
     ) {
@@ -89,7 +89,7 @@ final class PreferencesFactory {
             .collect(
                 Collectors.toMap(
                     artifactPreferenceModel -> artifactPreferenceModel.idModel().id(properties),
-                    artifactPreferenceModel -> new SemanticVersion(
+                    artifactPreferenceModel -> new Version(
                         properties.interpolated(artifactPreferenceModel.version())
                     )
                 )

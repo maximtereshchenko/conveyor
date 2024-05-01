@@ -19,17 +19,17 @@ final class NamedLocalDirectoryRepository implements Repository<Path> {
     }
 
     @Override
-    public Optional<Path> artifact(Id id, SemanticVersion semanticVersion, Classifier classifier) {
-        return original.artifact(id, semanticVersion, classifier);
+    public Optional<Path> artifact(Id id, Version version, Classifier classifier) {
+        return original.artifact(id, version, classifier);
     }
 
     @Override
     public void publish(
         Id id,
-        SemanticVersion semanticVersion,
+        Version version,
         Classifier classifier,
         Resource resource
     ) {
-        original.publish(id, semanticVersion, classifier, resource);
+        original.publish(id, version, classifier, resource);
     }
 }

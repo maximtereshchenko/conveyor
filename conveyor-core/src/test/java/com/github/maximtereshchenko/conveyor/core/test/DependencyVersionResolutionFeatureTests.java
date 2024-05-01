@@ -671,6 +671,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
     @ParameterizedTest
     @CsvSource(
         //https://semver.org
+        //https://github.com/apache/maven/blob/804cfea8f69ab217e6b06055cb4b9bcbfcd4619a/maven-artifact/src/test/java/org/apache/maven/artifact/versioning/ComparableVersionTest.java
         textBlock = """
                     1.0.0, 2.0.0
                     2.0.0, 2.1.0
@@ -685,6 +686,39 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                     1.0, 1.0.1
                     1.0-alpha, 1.0
                     1, 1.1
+                    1-alpha2, 1-alpha-123
+                    1-alpha-123, 1-beta-2
+                    1-beta-2, 1-beta123
+                    1-beta123, 1-m2
+                    1-m2, 1-m11
+                    1-m11, 1-rc
+                    1-cr2, 1-rc123
+                    1-rc123, 1-SNAPSHOT
+                    1-SNAPSHOT, 1
+                    1-sp, 1-sp2
+                    1-sp2, 1-sp123
+                    1-abc, 1-def
+                    1-def, 1-pom-1
+                    1-1, 1-2
+                    1-2, 1-123
+                    2.0, 2.0.a
+                    2-1, 2.0.2
+                    2.0.2, 2.0.123
+                    2.0.123, 2.1.0
+                    2.1-a, 2.1b
+                    2.1-1, 2.1.0.1
+                    2.1.0.1, 2.2
+                    2.2, 2.123
+                    2.123, 11.a2
+                    11.a2, 11.a11
+                    11.a11, 11.b2
+                    11.b2, 11.b11
+                    11.b11, 11.m2
+                    11.m2, 11.m11
+                    11, 11.a
+                    11.a, 11b
+                    11b, 11c
+                    11c, 11m
                     """
     )
     void givenTransitiveDependency_whenConstructToStage_thenDependencyWithHigherSemanticVersionIsUsed(

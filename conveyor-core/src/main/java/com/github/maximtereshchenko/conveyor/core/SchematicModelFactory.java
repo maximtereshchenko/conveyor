@@ -40,12 +40,12 @@ final class SchematicModelFactory {
 
     InheritanceHierarchyModel<SchematicModel> inheritanceHierarchyModel(
         Id id,
-        SemanticVersion semanticVersion,
+        Version version,
         Repositories repositories
     ) {
         return inheritanceHierarchyModel(
             id,
-            semanticVersion,
+            version,
             repositories,
             InheritanceHierarchyModel<SchematicModel>::new
         );
@@ -53,12 +53,12 @@ final class SchematicModelFactory {
 
     private InheritanceHierarchyModel<SchematicModel> inheritanceHierarchyModel(
         Id id,
-        SemanticVersion semanticVersion,
+        Version version,
         Repositories repositories,
         Function<StandaloneSchematicModel, InheritanceHierarchyModel<SchematicModel>> combiner
     ) {
         var inheritanceHierarchyModel = combiner.apply(
-            new StandaloneSchematicModel(repositories.schematicDefinition(id, semanticVersion))
+            new StandaloneSchematicModel(repositories.schematicDefinition(id, version))
         );
         return switch (inheritanceHierarchyModel.template()) {
             case NoTemplateModel ignored -> inheritanceHierarchyModel;

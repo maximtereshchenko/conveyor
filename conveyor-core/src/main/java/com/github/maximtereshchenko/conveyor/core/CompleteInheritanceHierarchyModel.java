@@ -31,7 +31,7 @@ final class CompleteInheritanceHierarchyModel
     }
 
     @Override
-    public SemanticVersion version() {
+    public Version version() {
         return hierarchyModel.version();
     }
 

@@ -24,14 +24,13 @@ final class ProductRepository implements Repository<Path> {
     @Override
     public Optional<Path> artifact(
         Id id,
-        SemanticVersion semanticVersion,
+        Version version,
         Classifier classifier
     ) {
         return switch (classifier) {
-            case SCHEMATIC_DEFINITION ->
-                path(id, semanticVersion, ProductType.SCHEMATIC_DEFINITION);
-            case JAR -> path(id, semanticVersion, ProductType.JAR)
-                .or(() -> path(id, semanticVersion, ProductType.EXPLODED_JAR));
+            case SCHEMATIC_DEFINITION -> path(id, version, ProductType.SCHEMATIC_DEFINITION);
+            case JAR -> path(id, version, ProductType.JAR)
+                .or(() -> path(id, version, ProductType.EXPLODED_JAR));
             case POM -> Optional.empty();
         };
     }
@@ -39,17 +38,17 @@ final class ProductRepository implements Repository<Path> {
     @Override
     public void publish(
         Id id,
-        SemanticVersion semanticVersion,
+        Version version,
         Classifier classifier,
         Resource resource
     ) {
         throw new IllegalArgumentException();
     }
 
-    private Optional<Path> path(Id id, SemanticVersion semanticVersion, ProductType productType) {
+    private Optional<Path> path(Id id, Version version, ProductType productType) {
         return products.stream()
             .filter(product ->
-                hasCoordinates(product.schematicCoordinates(), id, semanticVersion)
+                hasCoordinates(product.schematicCoordinates(), id, version)
             )
             .filter(product -> product.type() == productType)
             .map(Product::path)
@@ -59,10 +58,10 @@ final class ProductRepository implements Repository<Path> {
     private boolean hasCoordinates(
         SchematicCoordinates schematicCoordinates,
         Id id,
-        SemanticVersion semanticVersion
+        Version version
     ) {
         return schematicCoordinates.group().equals(id.group()) &&
                schematicCoordinates.name().equals(id.name()) &&
-               new SemanticVersion(schematicCoordinates.version()).equals(semanticVersion);
+               new Version(schematicCoordinates.version()).equals(version);
     }
 }

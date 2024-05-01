@@ -22,7 +22,7 @@ record InheritanceHierarchyModel<T extends SchematicModel>(LinkedHashSet<T> mode
     }
 
     @Override
-    public SemanticVersion version() {
+    public Version version() {
         return models.getLast().version();
     }
 

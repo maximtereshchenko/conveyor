@@ -44,7 +44,7 @@ final class Schematic {
         return localModel.id();
     }
 
-    SemanticVersion version() {
+    Version version() {
         return localModel.version();
     }
 
