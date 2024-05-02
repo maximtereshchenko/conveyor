@@ -22,6 +22,7 @@ final class Main {
                 Paths.get(args[0]).toAbsolutePath().normalize(),
                 Stage.valueOf(args[1].toUpperCase(Locale.ROOT))
             );
+        System.exit(0);
     }
 
     private static void mergeLoggingConfiguration() throws IOException {
