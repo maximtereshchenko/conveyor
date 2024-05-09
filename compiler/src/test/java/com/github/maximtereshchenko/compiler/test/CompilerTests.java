@@ -28,7 +28,13 @@ final class CompilerTests {
                     sources.resolve("main").resolve("Main.java"),
                     """
                     package main;
-                    class Main {}
+                    import java.util.*;
+                    class Main {
+                    public static void main(String[] args){
+                    List list=new ArrayList();
+                    System.out.println(list);
+                    }
+                    }
                     """
                 )
             ),

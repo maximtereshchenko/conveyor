@@ -2,7 +2,6 @@ package com.github.maximtereshchenko.conveyor.compiler;
 
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
-import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.List;
@@ -25,15 +24,16 @@ public final class Compiler {
         Set<Path> classPath,
         Path outputDirectory
     ) {
+        var diagnosticListener = new LoggingDiagnosticListener();
         var fileManager = javaCompiler.getStandardFileManager(
-            System.err::println,
+            diagnosticListener,
             Locale.ROOT,
             StandardCharsets.UTF_8
         );
         return javaCompiler.getTask(
-            new PrintWriter(System.err),
+            null,
             fileManager,
-            System.err::println,
+            diagnosticListener,
             List.of(
                 "--class-path", classPathString(classPath),
                 "-d", outputDirectory.toString()
