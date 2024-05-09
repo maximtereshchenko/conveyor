@@ -1,13 +1,11 @@
 package com.github.maximtereshchenko.conveyor.plugin.executable;
 
-import com.github.maximtereshchenko.conveyor.common.api.Product;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Set;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
@@ -28,12 +26,7 @@ final class WriteManifestTask extends BaseTask {
     }
 
     @Override
-    public Set<Product> execute(Set<Product> products) {
-        explodedJar(products).ifPresent(this::writeManifest);
-        return Set.of();
-    }
-
-    private void writeManifest(Path explodedJar) {
+    void onExplodedJar(ConveyorSchematic schematic, Path explodedJar) {
         try {
             var destination = Files.createDirectories(explodedJar.resolve("META-INF"))
                 .resolve("MANIFEST.MF");

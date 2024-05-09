@@ -17,11 +17,15 @@ abstract class BaseTask implements ConveyorTask {
         this.schematic = schematic;
     }
 
-    ConveyorSchematic schematic() {
-        return schematic;
+    @Override
+    public Set<Product> execute(Set<Product> products) {
+        explodedJar(products).ifPresent(explodedJar -> onExplodedJar(schematic, explodedJar));
+        return Set.of();
     }
 
-    Optional<Path> explodedJar(Set<Product> products) {
+    abstract void onExplodedJar(ConveyorSchematic schematic, Path explodedJar);
+
+    private Optional<Path> explodedJar(Set<Product> products) {
         return products.stream()
             .filter(product -> product.schematicCoordinates().equals(schematic.coordinates()))
             .filter(product -> product.type() == ProductType.EXPLODED_JAR)

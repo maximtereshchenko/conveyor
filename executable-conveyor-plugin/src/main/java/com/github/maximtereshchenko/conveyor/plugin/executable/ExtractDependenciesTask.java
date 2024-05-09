@@ -1,7 +1,6 @@
 package com.github.maximtereshchenko.conveyor.plugin.executable;
 
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
-import com.github.maximtereshchenko.conveyor.common.api.Product;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
 import com.github.maximtereshchenko.zip.ZipArchive;
 
@@ -23,19 +22,15 @@ final class ExtractDependenciesTask extends BaseTask {
     }
 
     @Override
-    public Set<Product> execute(Set<Product> products) {
-        explodedJar(products).ifPresentOrElse(
-            this::extractDependencies,
-            () -> LOGGER.log(
-                System.Logger.Level.WARNING,
-                "No destination to extract dependencies to"
-            )
-        );
-        return Set.of();
-    }
-
-    private void extractDependencies(Path destination) {
-        schematic().classPath(Set.of(DependencyScope.IMPLEMENTATION))
-            .forEach(dependency -> new ZipArchive(dependency).extract(destination));
+    void onExplodedJar(ConveyorSchematic schematic, Path explodedJar) {
+        for (var dependency : schematic.classPath(Set.of(DependencyScope.IMPLEMENTATION))) {
+            new ZipArchive(dependency).extract(explodedJar);
+            LOGGER.log(
+                System.Logger.Level.INFO,
+                "Extracted {0} to {1}",
+                dependency,
+                explodedJar
+            );
+        }
     }
 }
