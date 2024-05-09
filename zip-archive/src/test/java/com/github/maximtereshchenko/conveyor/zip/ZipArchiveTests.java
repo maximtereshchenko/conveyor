@@ -1,6 +1,6 @@
-package com.github.maximtereshchenko.zip;
+package com.github.maximtereshchenko.conveyor.zip;
 
-import com.github.maximtereshchenko.test.common.Directories;
+import com.github.maximtereshchenko.conveyor.common.test.Directories;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import static com.github.maximtereshchenko.test.common.Directories.temporaryDirectory;
+import static com.github.maximtereshchenko.conveyor.common.test.Directories.temporaryDirectory;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
 final class ZipArchiveTests {

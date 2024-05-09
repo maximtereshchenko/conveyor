@@ -2,7 +2,7 @@ package com.github.maximtereshchenko.conveyor.plugin.executable;
 
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
-import com.github.maximtereshchenko.zip.ZipArchive;
+import com.github.maximtereshchenko.conveyor.zip.ZipArchive;
 
 import java.nio.file.Path;
 import java.util.Set;

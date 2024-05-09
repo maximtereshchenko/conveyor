@@ -1,7 +1,7 @@
 package com.github.maximtereshchenko.conveyor.plugin.executable;
 
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
-import com.github.maximtereshchenko.zip.ZipArchiveContainer;
+import com.github.maximtereshchenko.conveyor.zip.ZipArchiveContainer;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;

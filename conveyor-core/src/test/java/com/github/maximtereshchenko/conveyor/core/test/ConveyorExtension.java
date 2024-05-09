@@ -1,8 +1,8 @@
 package com.github.maximtereshchenko.conveyor.core.test;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import com.github.maximtereshchenko.compiler.Compiler;
 import com.github.maximtereshchenko.conveyor.api.ConveyorModule;
+import com.github.maximtereshchenko.conveyor.compiler.Compiler;
 import com.github.maximtereshchenko.conveyor.core.ConveyorFacade;
 import com.github.maximtereshchenko.conveyor.jackson.JacksonAdapter;
 import org.junit.jupiter.api.extension.ExtensionContext;

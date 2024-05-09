@@ -2,7 +2,7 @@ package com.github.maximtereshchenko.conveyor.plugin.springboot;
 
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
 import com.github.maximtereshchenko.conveyor.springboot.Configuration;
-import com.github.maximtereshchenko.zip.ZipArchive;
+import com.github.maximtereshchenko.conveyor.zip.ZipArchive;
 
 import java.net.URISyntaxException;
 import java.nio.file.Path;

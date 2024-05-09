@@ -1,7 +1,7 @@
 package com.github.maximtereshchenko.compiler.test;
 
-import com.github.maximtereshchenko.compiler.Compiler;
-import com.github.maximtereshchenko.test.common.Directories;
+import com.github.maximtereshchenko.conveyor.common.test.Directories;
+import com.github.maximtereshchenko.conveyor.compiler.Compiler;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 

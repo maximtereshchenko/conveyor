@@ -1,14 +1,14 @@
 package com.github.maximtereshchenko.conveyor.plugin.executable.test;
 
 import com.github.maximtereshchenko.conveyor.common.api.*;
+import com.github.maximtereshchenko.conveyor.common.test.Directories;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskBinding;
 import com.github.maximtereshchenko.conveyor.plugin.executable.ExecutablePlugin;
 import com.github.maximtereshchenko.conveyor.plugin.test.ConveyorTasks;
 import com.github.maximtereshchenko.conveyor.plugin.test.FakeConveyorSchematicBuilder;
-import com.github.maximtereshchenko.test.common.Directories;
-import com.github.maximtereshchenko.zip.ZipArchive;
-import com.github.maximtereshchenko.zip.ZipArchiveContainer;
+import com.github.maximtereshchenko.conveyor.zip.ZipArchive;
+import com.github.maximtereshchenko.conveyor.zip.ZipArchiveContainer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 

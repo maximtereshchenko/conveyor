@@ -1,9 +1,9 @@
 package com.github.maximtereshchenko.conveyor.plugin.compile;
 
-import com.github.maximtereshchenko.compiler.Compiler;
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 import com.github.maximtereshchenko.conveyor.common.api.Product;
 import com.github.maximtereshchenko.conveyor.common.api.ProductType;
+import com.github.maximtereshchenko.conveyor.compiler.Compiler;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
 
 import java.nio.file.Path;

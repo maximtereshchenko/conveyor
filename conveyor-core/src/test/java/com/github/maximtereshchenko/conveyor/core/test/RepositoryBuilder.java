@@ -1,6 +1,6 @@
 package com.github.maximtereshchenko.conveyor.core.test;
 
-import com.github.maximtereshchenko.test.common.Directories;
+import com.github.maximtereshchenko.conveyor.common.test.Directories;
 import com.github.tomakehurst.wiremock.WireMockServer;
 
 import java.io.IOException;

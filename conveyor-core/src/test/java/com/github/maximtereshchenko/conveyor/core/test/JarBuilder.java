@@ -1,9 +1,9 @@
 package com.github.maximtereshchenko.conveyor.core.test;
 
-import com.github.maximtereshchenko.compiler.Compiler;
+import com.github.maximtereshchenko.conveyor.common.test.Directories;
+import com.github.maximtereshchenko.conveyor.compiler.Compiler;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
-import com.github.maximtereshchenko.test.common.Directories;
-import com.github.maximtereshchenko.zip.ZipArchiveContainer;
+import com.github.maximtereshchenko.conveyor.zip.ZipArchiveContainer;
 
 import java.io.IOException;
 import java.net.URISyntaxException;

@@ -1,9 +1,9 @@
 package com.github.maximtereshchenko.conveyor.core.test;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import com.github.maximtereshchenko.compiler.Compiler;
+import com.github.maximtereshchenko.conveyor.common.test.Directories;
+import com.github.maximtereshchenko.conveyor.compiler.Compiler;
 import com.github.maximtereshchenko.conveyor.jackson.JacksonAdapter;
-import com.github.maximtereshchenko.test.common.Directories;
 
 import java.io.IOException;
 import java.net.URISyntaxException;

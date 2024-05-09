@@ -6,7 +6,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.stream.IntStream;
 
 final class CopyRecursively extends SimpleFileVisitor<Path> {
 
@@ -32,10 +31,6 @@ final class CopyRecursively extends SimpleFileVisitor<Path> {
     }
 
     private Path resolved(Path original) {
-        var relative = source.relativize(original);
-        return IntStream.range(0, relative.getNameCount())
-            .mapToObj(relative::getName)
-            .map(Path::toString)
-            .reduce(destination, Path::resolve, (a, b) -> a);
+        return destination.resolve(source.relativize(original));
     }
 }

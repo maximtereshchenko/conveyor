@@ -1,4 +1,4 @@
-package com.github.maximtereshchenko.test.common;
+package com.github.maximtereshchenko.conveyor.common.test;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;

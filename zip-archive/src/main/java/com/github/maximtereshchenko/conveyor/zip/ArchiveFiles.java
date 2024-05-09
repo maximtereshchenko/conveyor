@@ -1,4 +1,4 @@
-package com.github.maximtereshchenko.zip;
+package com.github.maximtereshchenko.conveyor.zip;
 
 import java.io.IOException;
 import java.nio.file.FileVisitResult;

@@ -4,7 +4,7 @@ import com.github.maximtereshchenko.conveyor.common.api.Product;
 import com.github.maximtereshchenko.conveyor.common.api.ProductType;
 import com.github.maximtereshchenko.conveyor.common.api.SchematicCoordinates;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
-import com.github.maximtereshchenko.zip.ZipArchiveContainer;
+import com.github.maximtereshchenko.conveyor.zip.ZipArchiveContainer;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;

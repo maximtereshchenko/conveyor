@@ -1,4 +1,4 @@
-package com.github.maximtereshchenko.compiler;
+package com.github.maximtereshchenko.conveyor.compiler;
 
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
