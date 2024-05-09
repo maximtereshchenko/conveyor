@@ -16,6 +16,8 @@ include("junit-jupiter-conveyor-plugin")
 include("conveyor-cli")
 include("publish-conveyor-plugin")
 include("executable-conveyor-plugin")
+include("spring-boot-conveyor-plugin")
+include("spring-boot-launcher")
 dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {

@@ -1,0 +1,42 @@
+{
+  "name": "spring-boot-conveyor-plugin",
+  "template": {
+    "group": "com.github.maximtereshchenko.conveyor",
+    "name": "conveyor-template",
+    "version": "1.0.0"
+  },
+  "dependencies": [
+    {
+      "group": "${conveyor.schematic.group}",
+      "name": "conveyor-plugin-api"
+    },
+    {
+      "group": "${conveyor.schematic.group}",
+      "name": "zip-archive"
+    },
+    {
+      "group": "${conveyor.schematic.group}",
+      "name": "spring-boot-launcher"
+    },
+    {
+      "group": "${conveyor.schematic.group}",
+      "name": "test-common",
+      "scope": "test"
+    },
+    {
+      "group": "${conveyor.schematic.group}",
+      "name": "conveyor-plugin-test",
+      "scope": "test"
+    },
+    {
+      "group": "org.junit.jupiter",
+      "name": "junit-jupiter-api",
+      "scope": "test"
+    },
+    {
+      "group": "org.assertj",
+      "name": "assertj-core",
+      "scope": "test"
+    }
+  ]
+}

@@ -25,7 +25,7 @@ final class ExecutablePluginTests {
     private final ConveyorPlugin plugin = new ExecutablePlugin();
 
     @Test
-    void givenPlugin_whenBindings_thenTaskBindToArchiveRun(@TempDir Path path) {
+    void givenPlugin_whenBindings_thenTaskBindToArchiveFinalize(@TempDir Path path) {
         assertThat(
             plugin.bindings(
                 FakeConveyorSchematicBuilder.discoveryDirectory(path).build(),

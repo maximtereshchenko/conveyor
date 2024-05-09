@@ -18,6 +18,8 @@
     "./junit-jupiter-conveyor-plugin",
     "./publish-conveyor-plugin",
     "./resources-conveyor-plugin",
+    "./spring-boot-conveyor-plugin",
+    "./spring-boot-launcher",
     "./test-common",
     "./zip-archive"
   ],
@@ -115,6 +117,11 @@
       {
         "group": "${conveyor.schematic.group}",
         "name": "compiler",
+        "version": "${conveyor.schematic.version}"
+      },
+      {
+        "group": "${conveyor.schematic.group}",
+        "name": "spring-boot-launcher",
         "version": "${conveyor.schematic.version}"
       },
       {

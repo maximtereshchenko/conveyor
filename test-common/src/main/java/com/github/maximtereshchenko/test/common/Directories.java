@@ -51,7 +51,7 @@ public final class Directories {
                 (actualFile, expectedFile) -> {
                     assertThat(actual.relativize(actualFile))
                         .isEqualTo(expected.relativize(expectedFile));
-                    assertThat(actualFile).hasSameTextualContentAs(expectedFile);
+                    assertThat(actualFile).hasSameBinaryContentAs(expectedFile);
                 }
             );
     }
