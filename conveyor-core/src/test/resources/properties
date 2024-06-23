@@ -42,15 +42,15 @@ public final class ${normalizedName} implements ConveyorPlugin {
         }
 
         @Override
-        public Set<Product> execute(Set<Product> products) {
+        public Optional<Path> execute() {
             writeProperties(schematic, Set.of(configuration.get("keys").split(",")));
-            return Set.of();
+            return Optional.empty();
         }
 
         private void writeProperties(ConveyorSchematic schematic, Set<String> keys) {
             try {
                 Files.writeString(
-                    Files.createDirectories(schematic.constructionDirectory()).resolve("properties"),
+                    schematic.path().getParent().resolve("properties"),
                     keys.stream()
                         .map(key ->
                             schematic.propertyValue(key)

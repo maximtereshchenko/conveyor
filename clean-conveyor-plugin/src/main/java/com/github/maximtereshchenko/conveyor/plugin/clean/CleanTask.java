@@ -1,13 +1,12 @@
 package com.github.maximtereshchenko.conveyor.plugin.clean;
 
-import com.github.maximtereshchenko.conveyor.common.api.Product;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Set;
+import java.util.Optional;
 
 final class CleanTask implements ConveyorTask {
 
@@ -25,14 +24,14 @@ final class CleanTask implements ConveyorTask {
     }
 
     @Override
-    public Set<Product> execute(Set<Product> products) {
+    public Optional<Path> execute() {
         if (Files.exists(path)) {
             deleteRecursively(path);
             LOGGER.log(System.Logger.Level.INFO, "Removed {0}", path);
         } else {
             LOGGER.log(System.Logger.Level.WARNING, "{0} does not exist", path);
         }
-        return Set.of();
+        return Optional.empty();
     }
 
     private void deleteRecursively(Path path) {

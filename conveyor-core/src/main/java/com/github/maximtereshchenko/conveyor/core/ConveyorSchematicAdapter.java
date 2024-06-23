@@ -1,7 +1,6 @@
 package com.github.maximtereshchenko.conveyor.core;
 
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
-import com.github.maximtereshchenko.conveyor.common.api.SchematicCoordinates;
 import com.github.maximtereshchenko.conveyor.plugin.api.ArtifactClassifier;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
 
@@ -11,6 +10,7 @@ import java.util.Set;
 
 final class ConveyorSchematicAdapter implements ConveyorSchematic {
 
+    private final Path path;
     private final Id id;
     private final Version version;
     private final Properties properties;
@@ -18,12 +18,13 @@ final class ConveyorSchematicAdapter implements ConveyorSchematic {
     private final Repositories repositories;
 
     ConveyorSchematicAdapter(
-        Id id,
+        Path path, Id id,
         Version version,
         Properties properties,
         Dependencies dependencies,
         Repositories repositories
     ) {
+        this.path = path;
         this.id = id;
         this.version = version;
         this.properties = properties;
@@ -32,18 +33,8 @@ final class ConveyorSchematicAdapter implements ConveyorSchematic {
     }
 
     @Override
-    public SchematicCoordinates coordinates() {
-        return id.coordinates(version);
-    }
-
-    @Override
-    public Path discoveryDirectory() {
-        return properties.discoveryDirectory();
-    }
-
-    @Override
-    public Path constructionDirectory() {
-        return properties.constructionDirectory();
+    public Path path() {
+        return path;
     }
 
     @Override
@@ -52,8 +43,8 @@ final class ConveyorSchematicAdapter implements ConveyorSchematic {
     }
 
     @Override
-    public Set<Path> classPath(Set<DependencyScope> scopes) {
-        return dependencies.classPath(scopes);
+    public Set<Path> classpath(Set<DependencyScope> scopes) {
+        return dependencies.classpath(scopes);
     }
 
     @Override

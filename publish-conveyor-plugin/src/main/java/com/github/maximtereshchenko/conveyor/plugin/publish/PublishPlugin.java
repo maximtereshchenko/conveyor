@@ -6,6 +6,7 @@ import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskBinding;
 
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
@@ -25,7 +26,11 @@ public final class PublishPlugin implements ConveyorPlugin {
             new ConveyorTaskBinding(
                 Stage.PUBLISH,
                 Step.RUN,
-                new PublishProductsTask(schematic, configuration.get("repository"))
+                new PublishArtifactTask(
+                    Paths.get(configuration.get("artifact.location")),
+                    configuration.get("repository"),
+                    schematic
+                )
             )
         );
     }

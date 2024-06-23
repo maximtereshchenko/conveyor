@@ -1,0 +1,47 @@
+package ${normalizedName};
+
+import com.github.maximtereshchenko.conveyor.common.api.*;
+import com.github.maximtereshchenko.conveyor.plugin.api.*;
+
+import java.nio.file.*;
+import java.util.*;
+
+public final class ${normalizedName} implements ConveyorPlugin {
+
+    @Override
+    public String name() {
+        return "${name}";
+    }
+
+    @Override
+    public List<ConveyorTaskBinding> bindings(ConveyorSchematic schematic, Map<String, String> configuration) {
+        return List.of(
+            new ConveyorTaskBinding(
+                Stage.ARCHIVE,
+                Step.RUN,
+                new Task(schematic, configuration)
+            )
+        );
+    }
+
+    private static final class Task implements ConveyorTask {
+
+        private final ConveyorSchematic schematic;
+        private final Map<String, String> configuration;
+
+        Task(ConveyorSchematic schematic, Map<String, String> configuration) {
+            this.schematic = schematic;
+            this.configuration = configuration;
+        }
+
+        @Override
+        public String name() {
+            return "";
+        }
+
+        @Override
+        public Optional<Path> execute() {
+            return Optional.of(Paths.get(configuration.get("path")));
+        }
+    }
+}

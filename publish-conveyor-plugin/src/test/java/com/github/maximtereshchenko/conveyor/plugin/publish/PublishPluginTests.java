@@ -1,19 +1,21 @@
 package com.github.maximtereshchenko.conveyor.plugin.publish;
 
-import com.github.maximtereshchenko.conveyor.common.api.*;
+import com.github.maximtereshchenko.conveyor.common.api.Stage;
+import com.github.maximtereshchenko.conveyor.common.api.Step;
 import com.github.maximtereshchenko.conveyor.plugin.api.ArtifactClassifier;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskBinding;
 import com.github.maximtereshchenko.conveyor.plugin.test.ConveyorTasks;
-import com.github.maximtereshchenko.conveyor.plugin.test.FakeConveyorSchematicBuilder;
+import com.github.maximtereshchenko.conveyor.plugin.test.FakeConveyorSchematic;
 import com.github.maximtereshchenko.conveyor.plugin.test.PublishedArtifact;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.groups.Tuple.tuple;
@@ -23,59 +25,89 @@ final class PublishPluginTests {
     private final ConveyorPlugin plugin = new PublishPlugin();
 
     @Test
-    void givenPlugin_whenBindings_thenCopyResourcesBindingReturned(@TempDir Path path) {
+    void givenPlugin_whenBindings_thenPublishArtifactBindingReturned() {
         assertThat(
             plugin.bindings(
-                FakeConveyorSchematicBuilder.discoveryDirectory(path).build(),
-                Map.of()
+                new FakeConveyorSchematic(),
+                Map.of("artifact.location", "")
             )
         )
             .extracting(ConveyorTaskBinding::stage, ConveyorTaskBinding::step)
             .containsExactly(tuple(Stage.PUBLISH, Step.RUN));
     }
 
-    @ParameterizedTest
-    @CsvSource(
-        textBlock = """
-                    JAR, JAR
-                    SCHEMATIC_DEFINITION, SCHEMATIC_DEFINITION
-                    """
-    )
-    void givenProduct_whenExecuteTasks_thenProductIsPublished(
-        ProductType productType,
-        ArtifactClassifier artifactClassifier,
-        @TempDir Path path
-    ) {
-        var schematic = FakeConveyorSchematicBuilder.discoveryDirectory(path).build();
-        var product = path.resolve("product");
+    @Test
+    void givenArtifactExists_whenExecuteTask_thenArtifactPublished(@TempDir Path path)
+        throws IOException {
+        var artifact = Files.createFile(path.resolve("artifact"));
+        var schematic = new FakeConveyorSchematic(
+            Files.createFile(path.resolve("conveyor.json")),
+            Set.of()
+        );
 
         ConveyorTasks.executeTasks(
-            plugin.bindings(schematic, Map.of("repository", "repository")),
-            new Product(schematic.coordinates(), product, productType)
+            plugin.bindings(
+                schematic,
+                Map.of(
+                    "artifact.location", artifact.toString(),
+                    "repository", "target"
+                )
+            )
         );
 
         assertThat(schematic.published())
-            .containsExactly(new PublishedArtifact("repository", product, artifactClassifier));
+            .contains(new PublishedArtifact("target", artifact, ArtifactClassifier.JAR));
     }
 
     @Test
-    void givenProductsFromOtherSchematics_whenExecuteTasks_thenProductsPublishedToCurrentSchematic(
-        @TempDir Path path
-    ) {
-        var schematic = FakeConveyorSchematicBuilder.discoveryDirectory(path).build();
-        var product = path.resolve("product");
+    void givenNoArtifact_whenExecuteTask_thenNoArtifactPublished(@TempDir Path path)
+        throws IOException {
+        var artifact = path.resolve("artifact");
+        var schematic = new FakeConveyorSchematic(
+            Files.createFile(path.resolve("conveyor.json")),
+            Set.of()
+        );
 
         ConveyorTasks.executeTasks(
-            plugin.bindings(schematic, Map.of("repository", "repository")),
-            new Product(
-                new SchematicCoordinates("group", "other-schematic", "1.0.0"),
-                path.resolve("other-product"),
-                ProductType.JAR
-            ),
-            new Product(schematic.coordinates(), product, ProductType.JAR)
+            plugin.bindings(
+                schematic,
+                Map.of(
+                    "artifact.location", artifact.toString(),
+                    "repository", "target"
+                )
+            )
         );
 
         assertThat(schematic.published())
-            .containsExactly(new PublishedArtifact("repository", product, ArtifactClassifier.JAR));
+            .doesNotContain(new PublishedArtifact("target", artifact, ArtifactClassifier.JAR));
+    }
+
+    @Test
+    void givenConveyorSchematic_whenExecuteTask_thenSchematicDefinitionPublished(
+        @TempDir Path path
+    ) throws IOException {
+        var schematic = new FakeConveyorSchematic(
+            Files.createFile(path.resolve("conveyor.json")),
+            Set.of()
+        );
+
+        ConveyorTasks.executeTasks(
+            plugin.bindings(
+                schematic,
+                Map.of(
+                    "artifact.location", path.resolve("artifact").toString(),
+                    "repository", "target"
+                )
+            )
+        );
+
+        assertThat(schematic.published())
+            .contains(
+                new PublishedArtifact(
+                    "target",
+                    schematic.path(),
+                    ArtifactClassifier.SCHEMATIC_DEFINITION
+                )
+            );
     }
 }

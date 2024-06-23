@@ -6,6 +6,8 @@ import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskBinding;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
@@ -21,31 +23,30 @@ public final class ExecutablePlugin implements ConveyorPlugin {
         ConveyorSchematic schematic,
         Map<String, String> configuration
     ) {
+        var classesDirectory = configuredPath(configuration, "classes.directory");
         return List.of(
             new ConveyorTaskBinding(
                 Stage.ARCHIVE,
                 Step.FINALIZE,
-                new ExtractDependenciesTask(schematic)
+                new ExtractDependenciesTask(schematic, classesDirectory)
             ),
             new ConveyorTaskBinding(
                 Stage.ARCHIVE,
                 Step.FINALIZE,
-                new WriteManifestTask(schematic, configuration.get("main-class"))
+                new WriteManifestTask(classesDirectory, configuration.get("main.class"))
             ),
             new ConveyorTaskBinding(
                 Stage.ARCHIVE,
                 Step.FINALIZE,
                 new ArchiveExecutableTask(
-                    schematic,
-                    schematic.constructionDirectory()
-                        .resolve(
-                            "%s-%s-executable.jar".formatted(
-                                schematic.coordinates().name(),
-                                schematic.coordinates().version()
-                            )
-                        )
+                    classesDirectory,
+                    configuredPath(configuration, "destination")
                 )
             )
         );
+    }
+
+    private Path configuredPath(Map<String, String> configuration, String property) {
+        return Paths.get(configuration.get(property));
     }
 }

@@ -1,8 +1,6 @@
 package com.github.maximtereshchenko.conveyor.plugin.compile;
 
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
-import com.github.maximtereshchenko.conveyor.common.api.Product;
-import com.github.maximtereshchenko.conveyor.common.api.ProductType;
 import com.github.maximtereshchenko.conveyor.compiler.Compiler;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
 
@@ -13,14 +11,17 @@ import java.util.stream.Stream;
 
 final class CompileTestSourcesTask extends CompileJavaFilesTask {
 
-    CompileTestSourcesTask(ConveyorSchematic schematic, Path outputDirectory, Compiler compiler) {
-        super(
-            schematic,
-            ProductType.TEST_SOURCE,
-            outputDirectory,
-            ProductType.EXPLODED_TEST_JAR,
-            compiler
-        );
+    private final Path classesDirectory;
+
+    CompileTestSourcesTask(
+        Path sourcesDirectory,
+        Path outputDirectory,
+        Compiler compiler,
+        ConveyorSchematic schematic,
+        Path classesDirectory
+    ) {
+        super(sourcesDirectory, outputDirectory, compiler, schematic);
+        this.classesDirectory = classesDirectory;
     }
 
     @Override
@@ -29,16 +30,11 @@ final class CompileTestSourcesTask extends CompileJavaFilesTask {
     }
 
     @Override
-    Set<Path> classPath(ConveyorSchematic schematic, Set<Product> products) {
+    Set<Path> classpath(ConveyorSchematic schematic) {
         return Stream.concat(
-                schematic.classPath(Set.of(DependencyScope.IMPLEMENTATION, DependencyScope.TEST))
+                schematic.classpath(Set.of(DependencyScope.IMPLEMENTATION, DependencyScope.TEST))
                     .stream(),
-                products.stream()
-                    .filter(product ->
-                        product.schematicCoordinates().equals(schematic.coordinates())
-                    )
-                    .filter(product -> product.type() == ProductType.EXPLODED_JAR)
-                    .map(Product::path)
+                Stream.of(classesDirectory)
             )
             .collect(Collectors.toSet());
     }

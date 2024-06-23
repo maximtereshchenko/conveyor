@@ -6,6 +6,8 @@ import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskBinding;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
@@ -21,17 +23,19 @@ public final class ArchivePlugin implements ConveyorPlugin {
         ConveyorSchematic schematic,
         Map<String, String> configuration
     ) {
-        var coordinates = schematic.coordinates();
         return List.of(
             new ConveyorTaskBinding(
                 Stage.ARCHIVE,
                 Step.RUN,
                 new ArchiveTask(
-                    schematic.constructionDirectory()
-                        .resolve("%s-%s.jar".formatted(coordinates.name(), coordinates.version())),
-                    schematic.coordinates()
+                    configuredPath(configuration, "classes.directory"),
+                    configuredPath(configuration, "destination")
                 )
             )
         );
+    }
+
+    private Path configuredPath(Map<String, String> configuration, String property) {
+        return Paths.get(configuration.get(property));
     }
 }

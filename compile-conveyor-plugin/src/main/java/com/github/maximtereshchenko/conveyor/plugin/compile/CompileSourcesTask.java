@@ -1,8 +1,6 @@
 package com.github.maximtereshchenko.conveyor.plugin.compile;
 
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
-import com.github.maximtereshchenko.conveyor.common.api.Product;
-import com.github.maximtereshchenko.conveyor.common.api.ProductType;
 import com.github.maximtereshchenko.conveyor.compiler.Compiler;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
 
@@ -11,14 +9,13 @@ import java.util.Set;
 
 final class CompileSourcesTask extends CompileJavaFilesTask {
 
-    CompileSourcesTask(ConveyorSchematic schematic, Path outputDirectory, Compiler compiler) {
-        super(
-            schematic,
-            ProductType.SOURCE,
-            outputDirectory,
-            ProductType.EXPLODED_JAR,
-            compiler
-        );
+    CompileSourcesTask(
+        Path sourcesDirectory,
+        Path outputDirectory,
+        Compiler compiler,
+        ConveyorSchematic schematic
+    ) {
+        super(sourcesDirectory, outputDirectory, compiler, schematic);
     }
 
     @Override
@@ -27,7 +24,7 @@ final class CompileSourcesTask extends CompileJavaFilesTask {
     }
 
     @Override
-    Set<Path> classPath(ConveyorSchematic schematic, Set<Product> products) {
-        return schematic.classPath(Set.of(DependencyScope.IMPLEMENTATION));
+    Set<Path> classpath(ConveyorSchematic schematic) {
+        return schematic.classpath(Set.of(DependencyScope.IMPLEMENTATION));
     }
 }

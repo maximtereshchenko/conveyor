@@ -15,7 +15,7 @@ public final class ConveyorFacade implements ConveyorModule {
     private static final System.Logger LOGGER = System.getLogger(ConveyorFacade.class.getName());
 
     private final SchematicModelFactory schematicModelFactory;
-    private final ClassPathFactory classPathFactory;
+    private final ClasspathFactory classpathFactory;
     private final PomDefinitionFactory pomDefinitionFactory;
     private final SchematicDefinitionConverter schematicDefinitionConverter;
     private final PreferencesFactory preferencesFactory;
@@ -24,7 +24,7 @@ public final class ConveyorFacade implements ConveyorModule {
         this.schematicDefinitionConverter =
             new CachingSchematicDefinitionConverter(schematicDefinitionConverter);
         this.schematicModelFactory = new SchematicModelFactory(this.schematicDefinitionConverter);
-        this.classPathFactory = new ClassPathFactory();
+        this.classpathFactory = new ClasspathFactory();
         this.pomDefinitionFactory = PomDefinitionFactory.configured();
         this.preferencesFactory = new PreferencesFactory(this.schematicModelFactory);
     }
@@ -47,7 +47,7 @@ public final class ConveyorFacade implements ConveyorModule {
             .map(extendableLocalInheritanceHierarchyModel ->
                 new Schematic(
                     extendableLocalInheritanceHierarchyModel,
-                    classPathFactory,
+                    classpathFactory,
                     pomDefinitionFactory,
                     schematicDefinitionConverter,
                     schematicModelFactory,

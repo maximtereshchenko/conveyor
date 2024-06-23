@@ -1,22 +1,23 @@
 package com.github.maximtereshchenko.conveyor.plugin.springboot;
 
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
+import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
 import com.github.maximtereshchenko.conveyor.springboot.Configuration;
 import com.github.maximtereshchenko.conveyor.zip.ZipArchive;
 
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 
-final class ExtractSpringBootLauncherTask extends BaseTask {
+final class ExtractSpringBootLauncherTask implements ConveyorTask {
 
     private static final System.Logger LOGGER =
         System.getLogger(ExtractSpringBootLauncherTask.class.getName());
 
     private final Path destination;
 
-    ExtractSpringBootLauncherTask(ConveyorSchematic schematic, Path destination) {
-        super(schematic);
+    ExtractSpringBootLauncherTask(Path destination) {
         this.destination = destination;
     }
 
@@ -26,10 +27,13 @@ final class ExtractSpringBootLauncherTask extends BaseTask {
     }
 
     @Override
-    void onExplodedJar(ConveyorSchematic schematic, Path explodedJar) {
-        var path = path();
-        new ZipArchive(path).extract(destination);
-        LOGGER.log(System.Logger.Level.INFO, "Extracted {0} to {1}", path, destination);
+    public Optional<Path> execute() {
+        if (Files.exists(destination)) {
+            var path = path();
+            new ZipArchive(path).extract(destination);
+            LOGGER.log(System.Logger.Level.INFO, "Extracted {0} to {1}", path, destination);
+        }
+        return Optional.empty();
     }
 
     private Path path() {

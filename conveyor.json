@@ -43,7 +43,11 @@
     "assertj.version": "3.25.1",
     "wiremock.version": "3.4.2",
     "slf4j-jdk14.version": "2.0.13",
-    "apiguardian-api.version": "1.1.2"
+    "apiguardian-api.version": "1.1.2",
+    "construction.directory": "${conveyor.schematic.directory}/.conveyor",
+    "classes.directory": "${construction.directory}/classes",
+    "test.classes.directory": "${construction.directory}/test-classes",
+    "artifact.location": "${construction.directory}/${conveyor.schematic.name}-${conveyor.schematic.version}.jar"
   },
   "preferences": {
     "inclusions": [
@@ -169,28 +173,52 @@
   "plugins": [
     {
       "group": "${conveyor.schematic.group}",
-      "name": "clean-conveyor-plugin"
+      "name": "clean-conveyor-plugin",
+      "configuration": {
+        "directory": "${construction.directory}"
+      }
     },
     {
       "group": "${conveyor.schematic.group}",
-      "name": "compile-conveyor-plugin"
+      "name": "compile-conveyor-plugin",
+      "configuration": {
+        "sources.directory": "${conveyor.schematic.directory}/src/main/java",
+        "classes.directory": "${classes.directory}",
+        "test.sources.directory": "${conveyor.schematic.directory}/src/test/java",
+        "test.classes.directory": "${test.classes.directory}"
+      }
     },
     {
       "group": "${conveyor.schematic.group}",
-      "name": "resources-conveyor-plugin"
+      "name": "resources-conveyor-plugin",
+      "configuration": {
+        "resources.directory": "${conveyor.schematic.directory}/src/main/resources",
+        "classes.directory": "${classes.directory}",
+        "test.resources.directory": "${conveyor.schematic.directory}/src/test/resources",
+        "test.classes.directory": "${test.classes.directory}"
+      }
     },
     {
       "group": "${conveyor.schematic.group}",
-      "name": "junit-jupiter-conveyor-plugin"
+      "name": "junit-jupiter-conveyor-plugin",
+      "configuration": {
+        "test.classes.directory": "${test.classes.directory}",
+        "classes.directory": "${classes.directory}"
+      }
     },
     {
       "group": "${conveyor.schematic.group}",
-      "name": "archive-conveyor-plugin"
+      "name": "archive-conveyor-plugin",
+      "configuration": {
+        "classes.directory": "${classes.directory}",
+        "destination": "${artifact.location}"
+      }
     },
     {
       "group": "${conveyor.schematic.group}",
       "name": "publish-conveyor-plugin",
       "configuration": {
+        "artifact.location": "${artifact.location}",
         "repository": "conveyor-repository"
       }
     }

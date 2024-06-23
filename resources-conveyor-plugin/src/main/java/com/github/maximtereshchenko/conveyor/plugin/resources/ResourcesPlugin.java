@@ -1,6 +1,5 @@
 package com.github.maximtereshchenko.conveyor.plugin.resources;
 
-import com.github.maximtereshchenko.conveyor.common.api.ProductType;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import com.github.maximtereshchenko.conveyor.common.api.Step;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
@@ -8,6 +7,7 @@ import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskBinding;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
@@ -23,38 +23,14 @@ public final class ResourcesPlugin implements ConveyorPlugin {
         ConveyorSchematic schematic,
         Map<String, String> configuration
     ) {
-        var mainResources = resourcesDirectory(schematic.discoveryDirectory(), "main");
-        var testResources = resourcesDirectory(schematic.discoveryDirectory(), "test");
         return List.of(
-            new ConveyorTaskBinding(
-                Stage.COMPILE,
-                Step.PREPARE,
-                new DiscoverResourcesTask(
-                    "discover-resources",
-                    mainResources,
-                    ProductType.RESOURCE,
-                    schematic.coordinates()
-                )
-            ),
             new ConveyorTaskBinding(
                 Stage.COMPILE,
                 Step.FINALIZE,
                 new CopyResourcesTask(
                     "copy-resources",
-                    ProductType.EXPLODED_JAR,
-                    ProductType.RESOURCE,
-                    schematic.coordinates(),
-                    mainResources
-                )
-            ),
-            new ConveyorTaskBinding(
-                Stage.TEST,
-                Step.PREPARE,
-                new DiscoverResourcesTask(
-                    "discover-test-resources",
-                    testResources,
-                    ProductType.TEST_RESOURCE,
-                    schematic.coordinates()
+                    configuredPath(configuration, "resources.directory"),
+                    configuredPath(configuration, "classes.directory")
                 )
             ),
             new ConveyorTaskBinding(
@@ -62,16 +38,14 @@ public final class ResourcesPlugin implements ConveyorPlugin {
                 Step.PREPARE,
                 new CopyResourcesTask(
                     "copy-test-resources",
-                    ProductType.EXPLODED_TEST_JAR,
-                    ProductType.TEST_RESOURCE,
-                    schematic.coordinates(),
-                    testResources
+                    configuredPath(configuration, "test.resources.directory"),
+                    configuredPath(configuration, "test.classes.directory")
                 )
             )
         );
     }
 
-    private Path resourcesDirectory(Path path, String sourceSet) {
-        return path.resolve("src").resolve(sourceSet).resolve("resources");
+    private Path configuredPath(Map<String, String> configuration, String property) {
+        return Paths.get(configuration.get(property));
     }
 }

@@ -1,15 +1,10 @@
 package com.github.maximtereshchenko.conveyor.core;
 
 import com.github.maximtereshchenko.conveyor.api.port.SchematicDefinitionConverter;
-import com.github.maximtereshchenko.conveyor.common.api.Product;
-import com.github.maximtereshchenko.conveyor.common.api.ProductType;
-import com.github.maximtereshchenko.conveyor.common.api.SchematicCoordinates;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 
 import java.nio.file.Path;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -18,7 +13,7 @@ final class Schematic {
     private static final System.Logger LOGGER = System.getLogger(Schematic.class.getName());
 
     private final ExtendableLocalInheritanceHierarchyModel localModel;
-    private final ClassPathFactory classPathFactory;
+    private final ClasspathFactory classpathFactory;
     private final PomDefinitionFactory pomDefinitionFactory;
     private final SchematicDefinitionConverter schematicDefinitionConverter;
     private final SchematicModelFactory schematicModelFactory;
@@ -26,14 +21,14 @@ final class Schematic {
 
     Schematic(
         ExtendableLocalInheritanceHierarchyModel localModel,
-        ClassPathFactory classPathFactory,
+        ClasspathFactory classpathFactory,
         PomDefinitionFactory pomDefinitionFactory,
         SchematicDefinitionConverter schematicDefinitionConverter,
         SchematicModelFactory schematicModelFactory,
         PreferencesFactory preferencesFactory
     ) {
         this.localModel = localModel;
-        this.classPathFactory = classPathFactory;
+        this.classpathFactory = classpathFactory;
         this.pomDefinitionFactory = pomDefinitionFactory;
         this.schematicDefinitionConverter = schematicDefinitionConverter;
         this.schematicModelFactory = schematicModelFactory;
@@ -65,7 +60,7 @@ final class Schematic {
             );
     }
 
-    Set<Product> construct(Set<Product> products, Stage stage) {
+    ConstructionRepository construct(ConstructionRepository constructionRepository, Stage stage) {
         LOGGER.log(
             System.Logger.Level.INFO,
             () -> "Constructing %s:%s:%s".formatted(
@@ -74,7 +69,12 @@ final class Schematic {
                 localModel.version()
             )
         );
-        var repositories = repositories(products, properties(localModel));
+        var updatedConstructionRepository = constructionRepository.withSchematicDefinition(
+            localModel.id(),
+            localModel.version(),
+            localModel.path()
+        );
+        var repositories = repositories(updatedConstructionRepository, properties(localModel));
         var completeModel = schematicModelFactory.completeInheritanceHierarchyModel(
             localModel,
             repositories
@@ -87,6 +87,7 @@ final class Schematic {
         );
         var dependencies = dependencies(completeModel, properties, preferences, repositories);
         var conveyorSchematic = new ConveyorSchematicAdapter(
+            completeModel.path(),
             completeModel.id(),
             completeModel.version(),
             properties,
@@ -96,9 +97,16 @@ final class Schematic {
         return plugins(completeModel, properties, preferences, repositories)
             .executeTasks(
                 conveyorSchematic,
-                withSchematicDefinition(products, conveyorSchematic.coordinates(), completeModel),
                 stage
-            );
+            )
+            .map(path ->
+                updatedConstructionRepository.withArtifact(
+                    completeModel.id(),
+                    completeModel.version(),
+                    path
+                )
+            )
+            .orElse(updatedConstructionRepository);
     }
 
     private boolean dependencyExists(
@@ -108,22 +116,6 @@ final class Schematic {
     ) {
         return schematic.id().equals(id) ||
                dependencyExistsBetweenSchematics(id, schematic, schematics);
-    }
-
-    private Set<Product> withSchematicDefinition(
-        Set<Product> original,
-        SchematicCoordinates schematicCoordinates,
-        CompleteInheritanceHierarchyModel completeModel
-    ) {
-        var copy = new HashSet<>(original);
-        copy.add(
-            new Product(
-                schematicCoordinates,
-                completeModel.path(),
-                ProductType.SCHEMATIC_DEFINITION
-            )
-        );
-        return copy;
     }
 
     private boolean dependencyExistsBetweenSchematics(
@@ -159,14 +151,17 @@ final class Schematic {
                     )
                 )
                 .collect(Collectors.toSet()),
-            classPathFactory
+            classpathFactory
         );
     }
 
-    private Repositories repositories(Set<Product> products, Properties properties) {
+    private Repositories repositories(
+        ConstructionRepository constructionRepository,
+        Properties properties
+    ) {
         return new Repositories(
             Stream.concat(
-                    Stream.of(new ProductRepository(products)),
+                    Stream.of(constructionRepository),
                     localModel.repositories()
                         .stream()
                         .map(repositoryModel ->
@@ -250,7 +245,7 @@ final class Schematic {
                     )
                 )
                 .collect(Collectors.toCollection(LinkedHashSet::new)),
-            classPathFactory
+            classpathFactory
         );
     }
 
@@ -259,16 +254,6 @@ final class Schematic {
     ) {
         return new Properties(
             localInheritanceHierarchyModel.properties()
-                .withResolvedPath(
-                    SchematicPropertyKey.DISCOVERY_DIRECTORY,
-                    localInheritanceHierarchyModel.path().getParent(),
-                    ""
-                )
-                .withResolvedPath(
-                    SchematicPropertyKey.CONSTRUCTION_DIRECTORY,
-                    localInheritanceHierarchyModel.path().getParent(),
-                    ".conveyor"
-                )
                 .withResolvedPath(
                     SchematicPropertyKey.REMOTE_REPOSITORY_CACHE_DIRECTORY,
                     localInheritanceHierarchyModel.rootPath().getParent(),

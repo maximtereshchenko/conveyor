@@ -1,22 +1,24 @@
 package com.github.maximtereshchenko.conveyor.plugin.executable;
 
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
+import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
-final class WriteManifestTask extends BaseTask {
+final class WriteManifestTask implements ConveyorTask {
 
     private static final System.Logger LOGGER = System.getLogger(WriteManifestTask.class.getName());
 
+    private final Path classesDirectory;
     private final String mainClass;
 
-    WriteManifestTask(ConveyorSchematic schematic, String mainClass) {
-        super(schematic);
+    WriteManifestTask(Path classesDirectory, String mainClass) {
+        this.classesDirectory = classesDirectory;
         this.mainClass = mainClass;
     }
 
@@ -26,9 +28,16 @@ final class WriteManifestTask extends BaseTask {
     }
 
     @Override
-    void onExplodedJar(ConveyorSchematic schematic, Path explodedJar) {
+    public Optional<Path> execute() {
+        if (Files.exists(classesDirectory)) {
+            write();
+        }
+        return Optional.empty();
+    }
+
+    private void write() {
         try {
-            var destination = Files.createDirectories(explodedJar.resolve("META-INF"))
+            var destination = Files.createDirectories(classesDirectory.resolve("META-INF"))
                 .resolve("MANIFEST.MF");
             try (var outputStream = Files.newOutputStream(destination)) {
                 var manifest = new Manifest();

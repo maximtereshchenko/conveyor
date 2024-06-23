@@ -1,9 +1,11 @@
 package com.github.maximtereshchenko.conveyor.core;
 
-import com.github.maximtereshchenko.conveyor.common.api.Product;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Optional;
 
 final class Schematics {
 
@@ -18,11 +20,11 @@ final class Schematics {
     }
 
     void construct(Stage stage) {
-        var products = Set.<Product>of();
         var schematicsInConstructionOrder = schematicsInConstructionOrder();
         log(schematicsInConstructionOrder);
+        var constructionRepository = new ConstructionRepository();
         for (var schematic : schematicsInConstructionOrder) {
-            products = schematic.construct(products, stage);
+            constructionRepository = schematic.construct(constructionRepository, stage);
         }
     }
 

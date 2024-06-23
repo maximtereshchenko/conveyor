@@ -1,59 +1,58 @@
 package com.github.maximtereshchenko.conveyor.plugin.compile;
 
-import com.github.maximtereshchenko.conveyor.common.api.Product;
-import com.github.maximtereshchenko.conveyor.common.api.ProductType;
 import com.github.maximtereshchenko.conveyor.compiler.Compiler;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 abstract class CompileJavaFilesTask implements ConveyorTask {
 
     private static final System.Logger LOGGER =
         System.getLogger(CompileJavaFilesTask.class.getName());
 
-    private final ConveyorSchematic schematic;
-    private final ProductType sourceType;
+    private final Path sourcesDirectory;
     private final Path outputDirectory;
-    private final ProductType outputType;
     private final Compiler compiler;
+    private final ConveyorSchematic schematic;
 
     CompileJavaFilesTask(
-        ConveyorSchematic schematic,
-        ProductType sourceType,
+        Path sourcesDirectory,
         Path outputDirectory,
-        ProductType outputType,
-        Compiler compiler
+        Compiler compiler,
+        ConveyorSchematic schematic
     ) {
-        this.schematic = schematic;
-        this.sourceType = sourceType;
+        this.sourcesDirectory = sourcesDirectory;
         this.outputDirectory = outputDirectory;
-        this.outputType = outputType;
         this.compiler = compiler;
+        this.schematic = schematic;
     }
 
     @Override
-    public Set<Product> execute(Set<Product> products) {
-        var sources = sources(products);
-        if (sources.isEmpty()) {
+    public Optional<Path> execute() {
+        if (Files.exists(sourcesDirectory)) {
+            compiler.compile(files(sourcesDirectory), classpath(schematic), outputDirectory);
+            LOGGER.log(System.Logger.Level.INFO, "Compiled classes to {0}", outputDirectory);
+        } else {
             LOGGER.log(System.Logger.Level.WARNING, "No sources to compile");
-            return Set.of();
         }
-        compiler.compile(sources, classPath(schematic, products), outputDirectory);
-        LOGGER.log(System.Logger.Level.INFO, "Compiled classes to {0}", outputDirectory);
-        return Set.of(new Product(schematic.coordinates(), outputDirectory, outputType));
+        return Optional.empty();
     }
 
-    abstract Set<Path> classPath(ConveyorSchematic schematic, Set<Product> products);
+    abstract Set<Path> classpath(ConveyorSchematic schematic);
 
-    private Set<Path> sources(Set<Product> products) {
-        return products.stream()
-            .filter(product -> product.schematicCoordinates().equals(schematic.coordinates()))
-            .filter(product -> product.type() == sourceType)
-            .map(Product::path)
-            .collect(Collectors.toSet());
+    private Set<Path> files(Path directory) {
+        try {
+            var visitor = new CollectingFileVisitor();
+            Files.walkFileTree(directory, visitor);
+            return visitor.collected();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 }

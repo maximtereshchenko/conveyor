@@ -30,14 +30,6 @@ final class Properties {
             );
     }
 
-    Path discoveryDirectory() {
-        return propertiesModel.path(SchematicPropertyKey.DISCOVERY_DIRECTORY);
-    }
-
-    Path constructionDirectory() {
-        return propertiesModel.path(SchematicPropertyKey.CONSTRUCTION_DIRECTORY);
-    }
-
     Path remoteRepositoryCacheDirectory() {
         return propertiesModel.path(SchematicPropertyKey.REMOTE_REPOSITORY_CACHE_DIRECTORY);
     }

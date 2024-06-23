@@ -7,6 +7,8 @@ import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskBinding;
 import com.github.maximtereshchenko.conveyor.springboot.Configuration;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
@@ -22,45 +24,49 @@ public final class SpringBootPlugin implements ConveyorPlugin {
         ConveyorSchematic schematic,
         Map<String, String> configuration
     ) {
-        var executableContainer = schematic.constructionDirectory()
-            .resolve("executable-container");
-        var classPathDirectory = "class-path";
+        var containerDirectory = configuredPath(configuration, "container.directory");
+        var classpathDirectory = "classpath";
         return List.of(
             new ConveyorTaskBinding(
                 Stage.ARCHIVE,
                 Step.FINALIZE,
                 new CopyClassPathTask(
-                    schematic,
-                    executableContainer.resolve(classPathDirectory)
+                    configuredPath(configuration, "classes.directory"),
+                    containerDirectory.resolve(classpathDirectory),
+                    schematic
                 )
             ),
             new ConveyorTaskBinding(
                 Stage.ARCHIVE,
                 Step.FINALIZE,
-                new ExtractSpringBootLauncherTask(schematic, executableContainer)
+                new ExtractSpringBootLauncherTask(containerDirectory)
             ),
             new ConveyorTaskBinding(
                 Stage.ARCHIVE,
                 Step.FINALIZE,
                 new WritePropertiesTask(
-                    schematic,
-                    executableContainer.resolve(
-                        Configuration.PROPERTIES_CLASS_PATH_LOCATION
-                    ),
-                    classPathDirectory,
-                    configuration.get("launched-class")
+                    containerDirectory.resolve(Configuration.PROPERTIES_CLASS_PATH_LOCATION),
+                    classpathDirectory,
+                    configuration.get("launched.class")
                 )
             ),
             new ConveyorTaskBinding(
                 Stage.ARCHIVE,
                 Step.FINALIZE,
-                new WriteManifestTask(schematic, executableContainer)
+                new WriteManifestTask(containerDirectory)
             ),
             new ConveyorTaskBinding(
                 Stage.ARCHIVE,
                 Step.FINALIZE,
-                new ArchiveExecutableTask(schematic, executableContainer)
+                new ArchiveExecutableTask(
+                    containerDirectory,
+                    configuredPath(configuration, "destination")
+                )
             )
         );
+    }
+
+    private Path configuredPath(Map<String, String> configuration, String property) {
+        return Paths.get(configuration.get(property));
     }
 }

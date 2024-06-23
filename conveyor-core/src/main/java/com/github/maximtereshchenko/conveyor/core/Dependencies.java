@@ -9,15 +9,15 @@ import java.util.stream.Collectors;
 final class Dependencies {
 
     private final Set<Dependency> all;
-    private final ClassPathFactory classPathFactory;
+    private final ClasspathFactory classpathFactory;
 
-    Dependencies(Set<Dependency> all, ClassPathFactory classPathFactory) {
+    Dependencies(Set<Dependency> all, ClasspathFactory classpathFactory) {
         this.all = all;
-        this.classPathFactory = classPathFactory;
+        this.classpathFactory = classpathFactory;
     }
 
-    Set<Path> classPath(Set<DependencyScope> scopes) {
-        return classPathFactory.classPath(
+    Set<Path> classpath(Set<DependencyScope> scopes) {
+        return classpathFactory.classpath(
             all.stream()
                 .filter(dependency -> scopes.contains(dependency.scope()))
                 .collect(Collectors.toSet())

@@ -6,8 +6,7 @@ enum SchematicPropertyKey {
     SCHEMATIC_GROUP("conveyor.schematic.group"),
     SCHEMATIC_NAME("conveyor.schematic.name"),
     SCHEMATIC_VERSION("conveyor.schematic.version"),
-    DISCOVERY_DIRECTORY("conveyor.discovery.directory"),
-    CONSTRUCTION_DIRECTORY("conveyor.construction.directory"),
+    SCHEMATIC_DIRECTORY("conveyor.schematic.directory"),
     REMOTE_REPOSITORY_CACHE_DIRECTORY("conveyor.repository.remote.cache.directory");
 
     private final String fullName;

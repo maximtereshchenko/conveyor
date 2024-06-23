@@ -6,6 +6,7 @@ import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskBinding;
 
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
@@ -25,7 +26,7 @@ public final class CleanPlugin implements ConveyorPlugin {
             new ConveyorTaskBinding(
                 Stage.CLEAN,
                 Step.RUN,
-                new CleanTask(schematic.constructionDirectory())
+                new CleanTask(Paths.get(configuration.get("directory")))
             )
         );
     }

@@ -1,32 +1,27 @@
 package com.github.maximtereshchenko.conveyor.plugin.springboot;
 
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
+import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
 import com.github.maximtereshchenko.conveyor.springboot.Configuration;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.Properties;
 
-final class WritePropertiesTask extends BaseTask {
+final class WritePropertiesTask implements ConveyorTask {
 
     private static final System.Logger LOGGER =
         System.getLogger(WritePropertiesTask.class.getName());
 
     private final Path destination;
-    private final String classPathDirectory;
+    private final String classpathDirectory;
     private final String launchedClassName;
 
-    WritePropertiesTask(
-        ConveyorSchematic schematic,
-        Path destination,
-        String classPathDirectory,
-        String launchedClassName
-    ) {
-        super(schematic);
+    WritePropertiesTask(Path destination, String classpathDirectory, String launchedClassName) {
         this.destination = destination;
-        this.classPathDirectory = classPathDirectory;
+        this.classpathDirectory = classpathDirectory;
         this.launchedClassName = launchedClassName;
     }
 
@@ -36,7 +31,14 @@ final class WritePropertiesTask extends BaseTask {
     }
 
     @Override
-    void onExplodedJar(ConveyorSchematic schematic, Path explodedJar) {
+    public Optional<Path> execute() {
+        if (Files.exists(destination.getParent())) {
+            write();
+        }
+        return Optional.empty();
+    }
+
+    private void write() {
         try (var outputStream = Files.newOutputStream(destination)) {
             var properties = properties();
             properties.store(outputStream, null);
@@ -48,7 +50,7 @@ final class WritePropertiesTask extends BaseTask {
 
     private Properties properties() {
         var properties = new Properties();
-        properties.put(Configuration.CLASS_PATH_DIRECTORY_KEY, classPathDirectory);
+        properties.put(Configuration.CLASS_PATH_DIRECTORY_KEY, classpathDirectory);
         properties.put(Configuration.LAUNCHED_CLASS_NAME_KEY, launchedClassName);
         return properties;
     }

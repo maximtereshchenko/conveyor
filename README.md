@@ -63,8 +63,8 @@ A build tool for Java projects
     * Tasks bound to the same stage are executed in step ascending order (PREPARE, RUN, FINALIZE)
     * Tasks bound to the same stage and step are executed in order of originating plugins in the
       schematic definition
-    * Given schematic dependencies and products, task performs operations on the project and
-      produces products to be used in subsequent tasks
+    * Given schematic dependencies, task performs operations on the project and optionally produces
+      artifact to be used by other schematics
 * Properties
     * Properties are user-defined key-value pairs
     * Properties are inherited from a schematic used as a template
@@ -76,12 +76,8 @@ A build tool for Java projects
       property cannot be overridden
     * The property `conveyor.schematic.version` can be used to interpolate the schematic's version.
       This property cannot be overridden
-    * The property `conveyor.discovery.directory` defines the directory, where plugins should find
-      files to work with. It is relative to the directory, where the schematic definition is
-      located. The default value is `./`
-    * The property `conveyor.construction.directory` defines the directory, where plugins should
-      place created products. It is relative to the directory, where the schematic definition is
-      located. The default value is `./.conveyor`
+    * The property `conveyor.schematic.directory` can be used to interpolate the directory, in which
+      the schematic is located. This property cannot be overridden
     * Properties, plugin group and version, dependency group and version and preference group and
       version can be interpolated with other properties using `${property.key}` syntax
 * Dependencies
@@ -91,8 +87,7 @@ A build tool for Java projects
     * Dependencies are inherited from a schematic used as a template
     * Version and scope of the inherited dependency can be overridden
     * Schematic can define a dependency on other schematic with a group, a name and an optional
-      scope. In such case the product from this schematic of type `JAR` or `EXPLODED_JAR` (if `JAR`
-      is absent) will be used in class path
+      scope
     * A transitive dependency can be excluded from a dependency by defining the dependency as the
       exclusion
 * Inheritance

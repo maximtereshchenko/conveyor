@@ -1,8 +1,6 @@
 package com.github.maximtereshchenko.conveyor.plugin.junit.jupiter;
 
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
-import com.github.maximtereshchenko.conveyor.common.api.Product;
-import com.github.maximtereshchenko.conveyor.common.api.ProductType;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
 import org.junit.platform.engine.discovery.DiscoverySelectors;
@@ -14,18 +12,27 @@ import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 final class RunJunitJupiterTestsTask implements ConveyorTask {
 
+    private final Path testClassesDirectory;
+    private final Path classesDirectory;
     private final ConveyorSchematic schematic;
 
-    RunJunitJupiterTestsTask(ConveyorSchematic schematic) {
+    RunJunitJupiterTestsTask(
+        Path testClassesDirectory,
+        Path classesDirectory,
+        ConveyorSchematic schematic
+    ) {
+        this.testClassesDirectory = testClassesDirectory;
+        this.classesDirectory = classesDirectory;
         this.schematic = schematic;
     }
 
@@ -35,35 +42,28 @@ final class RunJunitJupiterTestsTask implements ConveyorTask {
     }
 
     @Override
-    public Set<Product> execute(Set<Product> products) {
-        product(products, ProductType.EXPLODED_TEST_JAR)
-            .ifPresent(explodedTestJar -> executeTests(explodedTestJar, products));
-        return Set.of();
+    public Optional<Path> execute() {
+        if (Files.exists(testClassesDirectory)) {
+            runWithContextClassLoader(classLoader(classpath()), this::executeTests);
+        }
+        return Optional.empty();
     }
 
-    private void executeTests(Path explodedTestJar, Set<Product> products) {
-        runWithContextClassLoader(
-            classLoader(classPath(explodedTestJar, products)),
-            () -> executeTests(explodedTestJar)
-        );
-    }
-
-    private Set<Path> classPath(Path explodedTestJar, Set<Product> products) {
+    private Set<Path> classpath() {
         return Stream.of(
-                schematic.classPath(Set.of(DependencyScope.IMPLEMENTATION, DependencyScope.TEST))
-                    .stream(),
-                product(products, ProductType.EXPLODED_JAR).stream(),
-                Stream.of(explodedTestJar)
+                schematic.classpath(Set.of(DependencyScope.IMPLEMENTATION, DependencyScope.TEST)),
+                Set.of(classesDirectory),
+                Set.of(testClassesDirectory)
             )
-            .flatMap(Function.identity())
+            .flatMap(Collection::stream)
             .collect(Collectors.toSet());
     }
 
-    private void executeTests(Path explodedTestJar) {
+    private void executeTests() {
         var failureTestExecutionListener = new FailureTestExecutionListener();
         LauncherFactory.create()
             .execute(
-                launcherDiscoveryRequest(explodedTestJar),
+                launcherDiscoveryRequest(),
                 new ReportingTestExecutionListener(),
                 failureTestExecutionListener
             );
@@ -72,18 +72,10 @@ final class RunJunitJupiterTestsTask implements ConveyorTask {
         }
     }
 
-    private LauncherDiscoveryRequest launcherDiscoveryRequest(Path explodedTestJar) {
+    private LauncherDiscoveryRequest launcherDiscoveryRequest() {
         return LauncherDiscoveryRequestBuilder.request()
-            .selectors(DiscoverySelectors.selectClasspathRoots(Set.of(explodedTestJar)))
+            .selectors(DiscoverySelectors.selectClasspathRoots(Set.of(testClassesDirectory)))
             .build();
-    }
-
-    private Optional<Path> product(Set<Product> products, ProductType explodedModule) {
-        return products.stream()
-            .filter(product -> product.schematicCoordinates().equals(schematic.coordinates()))
-            .filter(product -> product.type() == explodedModule)
-            .map(Product::path)
-            .findAny();
     }
 
     private ClassLoader classLoader(Set<Path> paths) {

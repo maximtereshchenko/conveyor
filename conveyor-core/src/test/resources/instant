@@ -21,7 +21,7 @@ public final class ${normalizedName} implements ConveyorPlugin {
         return configuration.entrySet()
             .stream()
             .filter(entry -> !entry.getKey().equals("enabled"))
-            .map(entry -> binding(schematic.constructionDirectory().resolve(entry.getKey()), entry.getValue()))
+            .map(entry -> binding(schematic.path().getParent().resolve(entry.getKey()), entry.getValue()))
             .toList();
     }
 
@@ -48,10 +48,10 @@ public final class ${normalizedName} implements ConveyorPlugin {
         }
 
         @Override
-        public Set<Product> execute(Set<Product> products) {
+        public Optional<Path> execute() {
             sleep();
             writeInstant(path);
-            return Set.of();
+            return Optional.empty();
         }
 
         private void sleep() {
@@ -64,7 +64,6 @@ public final class ${normalizedName} implements ConveyorPlugin {
 
         private void writeInstant(Path path) {
             try {
-                Files.createDirectories(path.getParent());
                 Files.writeString(path, Instant.now().toString());
             } catch (IOException e) {
                 throw new UncheckedIOException(e);

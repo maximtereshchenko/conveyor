@@ -1,6 +1,5 @@
 package com.github.maximtereshchenko.conveyor.core;
 
-import com.github.maximtereshchenko.conveyor.common.api.Product;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
@@ -20,24 +19,20 @@ final class Plugins {
     private static final System.Logger LOGGER = System.getLogger(Plugins.class.getName());
 
     private final LinkedHashSet<Plugin> all;
-    private final ClassPathFactory classPathFactory;
+    private final ClasspathFactory classpathFactory;
 
-    Plugins(LinkedHashSet<Plugin> all, ClassPathFactory classPathFactory) {
+    Plugins(LinkedHashSet<Plugin> all, ClasspathFactory classpathFactory) {
         this.all = all;
-        this.classPathFactory = classPathFactory;
+        this.classpathFactory = classpathFactory;
     }
 
-    Set<Product> executeTasks(
-        ConveyorSchematic conveyorSchematic,
-        Set<Product> products,
-        Stage stage
-    ) {
-        var copy = new HashSet<>(products);
+    Optional<Path> executeTasks(ConveyorSchematic conveyorSchematic, Stage stage) {
+        var artifacts = new ArrayList<Path>();
         for (var task : tasks(conveyorSchematic, stage)) {
             LOGGER.log(System.Logger.Level.INFO, "Executing task {0}", task.name());
-            copy.addAll(task.execute(copy));
+            task.execute().ifPresent(artifacts::add);
         }
-        return copy;
+        return artifacts.isEmpty() ? Optional.empty() : Optional.of(artifacts.getLast());
     }
 
     private List<ConveyorTask> tasks(ConveyorSchematic conveyorSchematic, Stage stage) {
@@ -86,7 +81,7 @@ final class Plugins {
     private Stream<ConveyorPlugin> conveyorPlugins() {
         return ServiceLoader.load(
                 ConveyorPlugin.class,
-                classLoader(classPathFactory.classPath(all))
+                classLoader(classpathFactory.classpath(all))
             )
             .stream()
             .map(ServiceLoader.Provider::get);

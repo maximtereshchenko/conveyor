@@ -6,6 +6,8 @@ import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskBinding;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
@@ -25,8 +27,16 @@ public final class JunitJupiterPlugin implements ConveyorPlugin {
             new ConveyorTaskBinding(
                 Stage.TEST,
                 Step.RUN,
-                new RunJunitJupiterTestsTask(schematic)
+                new RunJunitJupiterTestsTask(
+                    configuredPath(configuration, "test.classes.directory"),
+                    configuredPath(configuration, "classes.directory"),
+                    schematic
+                )
             )
         );
+    }
+
+    private Path configuredPath(Map<String, String> configuration, String property) {
+        return Paths.get(configuration.get(property));
     }
 }

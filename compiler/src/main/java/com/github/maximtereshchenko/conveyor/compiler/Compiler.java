@@ -13,15 +13,15 @@ public final class Compiler {
 
     private final JavaCompiler javaCompiler = ToolProvider.getSystemJavaCompiler();
 
-    public void compile(Set<Path> sources, Set<Path> classPath, Path outputDirectory) {
-        if (Boolean.FALSE.equals(compilationTask(sources, classPath, outputDirectory).call())) {
+    public void compile(Set<Path> sources, Set<Path> classpath, Path outputDirectory) {
+        if (Boolean.FALSE.equals(compilationTask(sources, classpath, outputDirectory).call())) {
             throw new IllegalArgumentException("Could not compile");
         }
     }
 
     private JavaCompiler.CompilationTask compilationTask(
         Set<Path> sources,
-        Set<Path> classPath,
+        Set<Path> classpath,
         Path outputDirectory
     ) {
         var diagnosticListener = new LoggingDiagnosticListener();
@@ -35,7 +35,7 @@ public final class Compiler {
             fileManager,
             diagnosticListener,
             List.of(
-                "--class-path", classPathString(classPath),
+                "--class-path", classpathString(classpath),
                 "-d", outputDirectory.toString()
             ),
             List.of(),
@@ -43,7 +43,7 @@ public final class Compiler {
         );
     }
 
-    private String classPathString(Set<Path> dependencies) {
+    private String classpathString(Set<Path> dependencies) {
         return dependencies.stream()
             .map(Path::toString)
             .collect(Collectors.joining(":"));

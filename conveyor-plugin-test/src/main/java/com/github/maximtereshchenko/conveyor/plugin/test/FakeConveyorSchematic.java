@@ -1,11 +1,11 @@
 package com.github.maximtereshchenko.conveyor.plugin.test;
 
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
-import com.github.maximtereshchenko.conveyor.common.api.SchematicCoordinates;
 import com.github.maximtereshchenko.conveyor.plugin.api.ArtifactClassifier;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -13,34 +13,22 @@ import java.util.Set;
 
 public final class FakeConveyorSchematic implements ConveyorSchematic {
 
-    private final Path discoveryDirectory;
-    private final Path constructionDirectory;
+    private final Path path;
     private final Set<Path> dependencies;
     private final List<PublishedArtifact> published = new ArrayList<>();
 
-    FakeConveyorSchematic(
-        Path discoveryDirectory,
-        Path constructionDirectory,
-        Set<Path> dependencies
-    ) {
-        this.discoveryDirectory = discoveryDirectory;
-        this.constructionDirectory = constructionDirectory;
+    public FakeConveyorSchematic(Path path, Set<Path> dependencies) {
+        this.path = path;
         this.dependencies = dependencies;
     }
 
-    @Override
-    public SchematicCoordinates coordinates() {
-        return new SchematicCoordinates("", "", "");
+    public FakeConveyorSchematic(Path... dependencies) {
+        this(Paths.get(""), Set.of(dependencies));
     }
 
     @Override
-    public Path discoveryDirectory() {
-        return discoveryDirectory;
-    }
-
-    @Override
-    public Path constructionDirectory() {
-        return constructionDirectory;
+    public Path path() {
+        return path;
     }
 
     @Override
@@ -49,7 +37,7 @@ public final class FakeConveyorSchematic implements ConveyorSchematic {
     }
 
     @Override
-    public Set<Path> classPath(Set<DependencyScope> scopes) {
+    public Set<Path> classpath(Set<DependencyScope> scopes) {
         return dependencies;
     }
 

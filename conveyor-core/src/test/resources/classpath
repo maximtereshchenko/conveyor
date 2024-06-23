@@ -1,0 +1,66 @@
+package ${normalizedName};
+
+import com.github.maximtereshchenko.conveyor.common.api.*;
+import com.github.maximtereshchenko.conveyor.plugin.api.*;
+
+import java.io.*;
+import java.nio.file.*;
+import java.util.*;
+import java.util.function.*;
+import java.util.stream.*;
+
+public final class ${normalizedName} implements ConveyorPlugin {
+
+    @Override
+    public String name() {
+        return "${name}";
+    }
+
+    @Override
+    public List<ConveyorTaskBinding> bindings(ConveyorSchematic schematic, Map<String, String> configuration) {
+        return List.of(
+            new ConveyorTaskBinding(
+                Stage.COMPILE,
+                Step.RUN,
+                new Task(schematic.path().getParent().resolve("classpath"))
+            )
+        );
+    }
+
+    private static final class Task implements ConveyorTask {
+
+        private final Path path;
+
+        Task(Path path) {
+            this.path = path;
+        }
+
+        @Override
+        public String name() {
+            return "";
+        }
+
+        @Override
+        public Optional<Path> execute() {
+            write(path, classpath());
+            return Optional.empty();
+        }
+
+        private String classpath() {
+            return ServiceLoader.load(Supplier.class, getClass().getClassLoader())
+                .stream()
+                .map(ServiceLoader.Provider::get)
+                .map(Supplier::get)
+                .map(Object::toString)
+                .collect(Collectors.joining(System.lineSeparator()));
+        }
+
+        private void write(Path path, String content) {
+            try {
+                Files.writeString(path, content);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        }
+    }
+}

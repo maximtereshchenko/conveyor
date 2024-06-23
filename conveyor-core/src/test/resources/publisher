@@ -42,9 +42,9 @@ public final class ${normalizedName} implements ConveyorPlugin {
         }
 
         @Override
-        public Set<Product> execute(Set<Product> products) {
+        public Optional<Path> execute() {
             schematic.publish(repository, path, ArtifactClassifier.JAR);
-            return Set.of();
+            return Optional.empty();
         }
     }
 }

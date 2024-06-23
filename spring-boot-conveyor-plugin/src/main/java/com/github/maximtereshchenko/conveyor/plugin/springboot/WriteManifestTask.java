@@ -1,24 +1,24 @@
 package com.github.maximtereshchenko.conveyor.plugin.springboot;
 
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
+import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
 import com.github.maximtereshchenko.conveyor.springboot.Configuration;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
-final class WriteManifestTask extends BaseTask {
+final class WriteManifestTask implements ConveyorTask {
 
     private static final System.Logger LOGGER = System.getLogger(WriteManifestTask.class.getName());
 
-    private final Path destination;
+    private final Path containerDirectory;
 
-    WriteManifestTask(ConveyorSchematic schematic, Path destination) {
-        super(schematic);
-        this.destination = destination;
+    WriteManifestTask(Path containerDirectory) {
+        this.containerDirectory = containerDirectory;
     }
 
     @Override
@@ -27,9 +27,16 @@ final class WriteManifestTask extends BaseTask {
     }
 
     @Override
-    void onExplodedJar(ConveyorSchematic schematic, Path explodedJar) {
+    public Optional<Path> execute() {
+        if (Files.exists(containerDirectory)) {
+            write();
+        }
+        return Optional.empty();
+    }
+
+    private void write() {
         try {
-            var manifestPath = Files.createDirectories(destination.resolve("META-INF"))
+            var manifestPath = Files.createDirectories(containerDirectory.resolve("META-INF"))
                 .resolve("MANIFEST.MF");
             try (var outputStream = Files.newOutputStream(manifestPath)) {
                 var manifest = new Manifest();
