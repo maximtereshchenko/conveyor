@@ -1,15 +1,15 @@
-package com.github.maximtereshchenko.conveyor.plugin.compile;
+package com.github.maximtereshchenko.conveyor.plugin.archive;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-final class PublishExplodedJarArtifactTask implements Supplier<Optional<Path>> {
+final class PublishJarArtifactTask implements Supplier<Optional<Path>> {
 
     private final Path path;
 
-    PublishExplodedJarArtifactTask(Path path) {
+    PublishJarArtifactTask(Path path) {
         this.path = path;
     }
 

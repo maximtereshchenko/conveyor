@@ -9,11 +9,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-final class CompileTestSourcesTask extends CompileJavaFilesTask {
+final class CompileTestSourcesAction extends CompileJavaFilesAction {
 
     private final Path classesDirectory;
 
-    CompileTestSourcesTask(
+    CompileTestSourcesAction(
         Path sourcesDirectory,
         Path outputDirectory,
         Compiler compiler,
@@ -22,11 +22,6 @@ final class CompileTestSourcesTask extends CompileJavaFilesTask {
     ) {
         super(sourcesDirectory, outputDirectory, compiler, schematic);
         this.classesDirectory = classesDirectory;
-    }
-
-    @Override
-    public String name() {
-        return "compile-test-sources";
     }
 
     @Override

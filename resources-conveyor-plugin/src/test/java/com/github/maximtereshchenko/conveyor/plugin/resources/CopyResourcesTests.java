@@ -3,8 +3,9 @@ package com.github.maximtereshchenko.conveyor.plugin.resources;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import com.github.maximtereshchenko.conveyor.common.api.Step;
 import com.github.maximtereshchenko.conveyor.common.test.Directories;
+import com.github.maximtereshchenko.conveyor.plugin.api.Cache;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskBinding;
+import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
 import com.github.maximtereshchenko.conveyor.plugin.test.ConveyorTasks;
 import com.github.maximtereshchenko.conveyor.plugin.test.FakeConveyorSchematic;
 import org.junit.jupiter.api.Test;
@@ -21,7 +22,6 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.groups.Tuple.tuple;
 
 final class CopyResourcesTests {
 
@@ -33,10 +33,11 @@ final class CopyResourcesTests {
     }
 
     @Test
-    void givenPlugin_whenBindings_thenCopyResourcesBindingReturned() {
+    void givenPlugin_whenBindings_thenCopyResourcesBindingReturned(@TempDir Path path)
+        throws IOException {
         assertThat(
-            plugin.bindings(
-                new FakeConveyorSchematic(),
+            plugin.tasks(
+                FakeConveyorSchematic.from(path),
                 Map.of(
                     "resources.directory", "",
                     "classes.directory", "",
@@ -45,8 +46,27 @@ final class CopyResourcesTests {
                 )
             )
         )
-            .extracting(ConveyorTaskBinding::stage, ConveyorTaskBinding::step)
-            .contains(tuple(Stage.COMPILE, Step.FINALIZE), tuple(Stage.TEST, Step.PREPARE));
+            .usingRecursiveFieldByFieldElementComparatorIgnoringFields("action")
+            .containsExactly(
+                new ConveyorTask(
+                    "copy-resources",
+                    Stage.COMPILE,
+                    Step.FINALIZE,
+                    null,
+                    Set.of(),
+                    Set.of(),
+                    Cache.DISABLED
+                ),
+                new ConveyorTask(
+                    "copy-test-resources",
+                    Stage.TEST,
+                    Step.PREPARE,
+                    null,
+                    Set.of(),
+                    Set.of(),
+                    Cache.DISABLED
+                )
+            );
     }
 
     @Test
@@ -56,8 +76,8 @@ final class CopyResourcesTests {
         var classes = Files.createDirectory(path.resolve("classes"));
         var resources = path.resolve("resources");
         ConveyorTasks.executeTasks(
-            plugin.bindings(
-                new FakeConveyorSchematic(),
+            plugin.tasks(
+                FakeConveyorSchematic.from(path),
                 Map.of(
                     "resources.directory", resources.toString(),
                     "classes.directory", classes.toString(),
@@ -79,8 +99,8 @@ final class CopyResourcesTests {
         Files.createFile(resources.resolve("resource"));
 
         ConveyorTasks.executeTasks(
-            plugin.bindings(
-                new FakeConveyorSchematic(),
+            plugin.tasks(
+                FakeConveyorSchematic.from(path),
                 Map.of(
                     "resources.directory", resources.toString(),
                     "classes.directory", classes.toString(),
@@ -108,8 +128,8 @@ final class CopyResourcesTests {
         );
 
         ConveyorTasks.executeTasks(
-            plugin.bindings(
-                new FakeConveyorSchematic(),
+            plugin.tasks(
+                FakeConveyorSchematic.from(path),
                 Map.of(
                     "resources.directory", resources.toString(),
                     "classes.directory", classes.toString(),

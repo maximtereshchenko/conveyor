@@ -4,8 +4,9 @@ import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import com.github.maximtereshchenko.conveyor.common.api.Step;
 import com.github.maximtereshchenko.conveyor.common.test.Directories;
 import com.github.maximtereshchenko.conveyor.compiler.Compiler;
+import com.github.maximtereshchenko.conveyor.plugin.api.Cache;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskBinding;
+import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
 import com.github.maximtereshchenko.conveyor.plugin.test.ConveyorTasks;
 import com.github.maximtereshchenko.conveyor.plugin.test.FakeConveyorSchematic;
 import org.apiguardian.api.API;
@@ -28,7 +29,6 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.groups.Tuple.tuple;
 
 final class JunitJupiterPluginTests {
 
@@ -36,31 +36,46 @@ final class JunitJupiterPluginTests {
     private final Compiler compiler = new Compiler();
 
     @Test
-    void givenPlugin_whenBindings_thenRunJunitJupiterTestsBindingReturned() {
+    void givenPlugin_whenTasks_thenRunJunitJupiterTestsBindingReturned(@TempDir Path path)
+        throws IOException {
+        var testClasses = path.resolve("test-classes");
+        var classes = path.resolve("classes");
+
         assertThat(
-            plugin.bindings(
-                new FakeConveyorSchematic(),
+            plugin.tasks(
+                FakeConveyorSchematic.from(path),
                 Map.of(
-                    "test.classes.directory", "",
-                    "classes.directory", ""
+                    "test.classes.directory", testClasses.toString(),
+                    "classes.directory", classes.toString()
                 )
             )
         )
-            .extracting(ConveyorTaskBinding::stage, ConveyorTaskBinding::step)
-            .contains(tuple(Stage.TEST, Step.RUN));
+            .usingRecursiveFieldByFieldElementComparatorIgnoringFields("action")
+            .containsExactly(
+                new ConveyorTask(
+                    "execute-junit-jupiter-tests",
+                    Stage.TEST,
+                    Step.RUN,
+                    null,
+                    Set.of(testClasses, classes),
+                    Set.of(),
+                    Cache.ENABLED
+                )
+            );
     }
 
     @Test
-    void givenNoTestClasses_whenExecuteTasks_thenNoTestsAreExecuted(@TempDir Path path) {
-        var bindings = plugin.bindings(
-            new FakeConveyorSchematic(),
+    void givenNoTestClasses_whenExecuteTasks_thenNoTestsAreExecuted(@TempDir Path path)
+        throws IOException {
+        var tasks = plugin.tasks(
+            FakeConveyorSchematic.from(path),
             Map.of(
                 "test.classes.directory", path.resolve("testClasses").toString(),
                 "classes.directory", path.resolve("classes").toString()
             )
         );
 
-        assertThatCode(() -> ConveyorTasks.executeTasks(bindings)).doesNotThrowAnyException();
+        assertThatCode(() -> ConveyorTasks.executeTasks(tasks)).doesNotThrowAnyException();
     }
 
     @Test
@@ -91,15 +106,15 @@ final class JunitJupiterPluginTests {
             classPath,
             testClasses
         );
-        var bindings = plugin.bindings(
-            new FakeConveyorSchematic(path, classPath),
+        var tasks = plugin.tasks(
+            FakeConveyorSchematic.from(path, classPath),
             Map.of(
                 "test.classes.directory", testClasses.toString(),
                 "classes.directory", path.resolve("classes").toString()
             )
         );
 
-        assertThatCode(() -> ConveyorTasks.executeTasks(bindings)).doesNotThrowAnyException();
+        assertThatCode(() -> ConveyorTasks.executeTasks(tasks)).doesNotThrowAnyException();
     }
 
     private Set<Path> classpath() {

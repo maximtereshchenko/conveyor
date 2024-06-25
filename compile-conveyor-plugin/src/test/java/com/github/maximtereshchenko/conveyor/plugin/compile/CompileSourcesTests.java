@@ -1,8 +1,5 @@
 package com.github.maximtereshchenko.conveyor.plugin.compile;
 
-import com.github.maximtereshchenko.conveyor.common.api.Stage;
-import com.github.maximtereshchenko.conveyor.common.api.Step;
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskBinding;
 import com.github.maximtereshchenko.conveyor.plugin.test.ConveyorTasks;
 import com.github.maximtereshchenko.conveyor.plugin.test.FakeConveyorSchematic;
 import org.junit.jupiter.api.Test;
@@ -10,35 +7,25 @@ import org.junit.jupiter.api.io.TempDir;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.groups.Tuple.tuple;
 
-final class CompileSourcesTests extends CompilePluginTest {
-
-    @Test
-    void givenPlugin_whenBindings_thenCompileSourcesAndPublishArtifactBindingsReturned(
-        @TempDir Path path
-    ) {
-        assertThat(
-            plugin.bindings(
-                new FakeConveyorSchematic(),
-                configuration(path)
-            )
-        )
-            .extracting(ConveyorTaskBinding::stage, ConveyorTaskBinding::step)
-            .contains(
-                tuple(Stage.COMPILE, Step.RUN),
-                tuple(Stage.COMPILE, Step.FINALIZE)
-            );
-    }
+final class CompileSourcesTests extends BaseTest {
 
     @Test
-    void givenNoSources_whenExecuteTasks_thenNoArtifact(@TempDir Path path) {
+    void givenNoSources_whenExecuteTasks_thenNoArtifact(@TempDir Path path) throws IOException {
+        var nonExistent = path.resolve("non-existent");
+
         var artifacts = ConveyorTasks.executeTasks(
-            plugin.bindings(
-                new FakeConveyorSchematic(),
-                configuration(path)
+            plugin.tasks(
+                FakeConveyorSchematic.from(path),
+                Map.of(
+                    "sources.directory", path.resolve("sources").toString(),
+                    "classes.directory", path.resolve("classes").toString(),
+                    "test.sources.directory", nonExistent.toString(),
+                    "test.classes.directory", nonExistent.toString()
+                )
             )
         );
 
@@ -48,41 +35,59 @@ final class CompileSourcesTests extends CompilePluginTest {
     @Test
     void givenSources_whenExecuteTasks_thenSourcesAreCompiled(@TempDir Path path)
         throws IOException {
-        var mainJava = srcMainJava(path).resolve("main").resolve("Main.java");
+        var sources = path.resolve("sources");
         write(
-            mainJava,
+            sources.resolve("Main.java"),
             """
             package main;
             class Main {}
             """
         );
+        var classes = path.resolve("classes");
+        var nonExistent = path.resolve("non-existent");
 
-        var artifacts = ConveyorTasks.executeTasks(
-            plugin.bindings(new FakeConveyorSchematic(), configuration(path))
+        ConveyorTasks.executeTasks(
+            plugin.tasks(
+                FakeConveyorSchematic.from(path),
+                Map.of(
+                    "sources.directory", sources.toString(),
+                    "classes.directory", classes.toString(),
+                    "test.sources.directory", nonExistent.toString(),
+                    "test.classes.directory", nonExistent.toString()
+                )
+            )
         );
 
-        assertThat(classes(path).resolve("main").resolve("Main.class")).exists();
-        assertThat(artifacts).containsExactly(classes(path));
+        assertThat(classes.resolve("main").resolve("Main.class")).exists();
     }
 
     @Test
     void givenDependency_whenExecuteTasks_thenSourcesAreCompiledWithDependency(@TempDir Path path)
         throws IOException {
-        var dependency = path.resolve("dependency");
+        var dependencySources = path.resolve("dependency-sources");
         write(
-            srcMainJava(dependency).resolve("dependency").resolve("Dependency.java"),
+            dependencySources.resolve("Dependency.java"),
             """
             package dependency;
             public class Dependency {}
             """
         );
+        var dependencyClasses = path.resolve("dependency-classes");
+        var nonExistent = path.resolve("non-existent");
         ConveyorTasks.executeTasks(
-            plugin.bindings(new FakeConveyorSchematic(), configuration(dependency))
+            plugin.tasks(
+                FakeConveyorSchematic.from(path),
+                Map.of(
+                    "sources.directory", dependencySources.toString(),
+                    "classes.directory", dependencyClasses.toString(),
+                    "test.sources.directory", nonExistent.toString(),
+                    "test.classes.directory", nonExistent.toString()
+                )
+            )
         );
-        var dependent = path.resolve("dependent");
-        var mainJava = srcMainJava(dependent).resolve("main").resolve("Main.java");
+        var dependentSources = path.resolve("dependent-sources");
         write(
-            mainJava,
+            dependentSources.resolve("Main.java"),
             """
             package main;
             import dependency.Dependency;
@@ -93,50 +98,72 @@ final class CompileSourcesTests extends CompilePluginTest {
             }
             """
         );
+        var dependentClasses = path.resolve("dependent-classes");
 
-        var artifacts = ConveyorTasks.executeTasks(
-            plugin.bindings(
-                new FakeConveyorSchematic(classes(dependency)),
-                configuration(dependent)
+        ConveyorTasks.executeTasks(
+            plugin.tasks(
+                FakeConveyorSchematic.from(path, dependencyClasses),
+                Map.of(
+                    "sources.directory", dependentSources.toString(),
+                    "classes.directory", dependentClasses.toString(),
+                    "test.sources.directory", nonExistent.toString(),
+                    "test.classes.directory", nonExistent.toString()
+                )
             )
         );
 
-        assertThat(classes(dependent).resolve("main").resolve("Main.class")).exists();
-        assertThat(artifacts).containsExactly(classes(dependent));
+        assertThat(dependentClasses.resolve("main").resolve("Main.class")).exists();
     }
 
     @Test
     void givenMultipleDependencies_whenExecuteTasks_thenSourcesAreCompiledWithAllDependencies(
         @TempDir Path path
     ) throws IOException {
-        var firstDependency = path.resolve("first-dependency");
+        var firstDependencySources = path.resolve("first-dependency-sources");
         write(
-            srcMainJava(firstDependency).resolve("firstdependency").resolve("FirstDependency.java"),
+            firstDependencySources.resolve("FirstDependency.java"),
             """
             package firstdependency;
             public class FirstDependency {}
             """
         );
-        var secondDependency = path.resolve("second-dependency");
+        var firstDependencyClasses = path.resolve("first-dependency-classes");
+        var secondDependencySources = path.resolve("second-dependency-sources");
         write(
-            srcMainJava(secondDependency)
-                .resolve("seconddependency")
-                .resolve("SecondDependency.java"),
+            secondDependencySources.resolve("SecondDependency.java"),
             """
             package seconddependency;
             public class SecondDependency {}
             """
         );
+        var secondDependencyClasses = path.resolve("second-dependency-classes");
+        var schematic = FakeConveyorSchematic.from(path);
+        var nonExistent = path.resolve("non-existent");
         ConveyorTasks.executeTasks(
-            plugin.bindings(new FakeConveyorSchematic(), configuration(firstDependency))
+            plugin.tasks(
+                schematic,
+                Map.of(
+                    "sources.directory", firstDependencySources.toString(),
+                    "classes.directory", firstDependencyClasses.toString(),
+                    "test.sources.directory", nonExistent.toString(),
+                    "test.classes.directory", nonExistent.toString()
+                )
+            )
         );
         ConveyorTasks.executeTasks(
-            plugin.bindings(new FakeConveyorSchematic(), configuration(secondDependency))
+            plugin.tasks(
+                schematic,
+                Map.of(
+                    "sources.directory", secondDependencySources.toString(),
+                    "classes.directory", secondDependencyClasses.toString(),
+                    "test.sources.directory", nonExistent.toString(),
+                    "test.classes.directory", nonExistent.toString()
+                )
+            )
         );
-        var dependent = path.resolve("dependent");
-        var mainJava = srcMainJava(dependent).resolve("main").resolve("Main.java");
+        var dependentSources = path.resolve("dependent-sources");
         write(
-            mainJava,
+            dependentSources.resolve("Main.java"),
             """
             package main;
             import firstdependency.FirstDependency;
@@ -149,15 +176,20 @@ final class CompileSourcesTests extends CompilePluginTest {
             }
             """
         );
+        var dependentClasses = path.resolve("dependent-classes");
 
-        var artifacts = ConveyorTasks.executeTasks(
-            plugin.bindings(
-                new FakeConveyorSchematic(classes(firstDependency), classes(secondDependency)),
-                configuration(dependent)
+        ConveyorTasks.executeTasks(
+            plugin.tasks(
+                FakeConveyorSchematic.from(path, firstDependencyClasses, secondDependencyClasses),
+                Map.of(
+                    "sources.directory", dependentSources.toString(),
+                    "classes.directory", dependentClasses.toString(),
+                    "test.sources.directory", nonExistent.toString(),
+                    "test.classes.directory", nonExistent.toString()
+                )
             )
         );
 
-        assertThat(classes(dependent).resolve("main").resolve("Main.class")).exists();
-        assertThat(artifacts).containsExactly(classes(dependent));
+        assertThat(dependentClasses.resolve("main").resolve("Main.class")).exists();
     }
 }

@@ -1,30 +1,24 @@
 package com.github.maximtereshchenko.conveyor.plugin.clean;
 
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
-
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.function.Supplier;
 
-final class CleanTask implements ConveyorTask {
+final class CleanAction implements Supplier<Optional<Path>> {
 
-    private static final System.Logger LOGGER = System.getLogger(CleanTask.class.getName());
+    private static final System.Logger LOGGER = System.getLogger(CleanAction.class.getName());
 
     private final Path path;
 
-    CleanTask(Path path) {
+    CleanAction(Path path) {
         this.path = path;
     }
 
     @Override
-    public String name() {
-        return "clean";
-    }
-
-    @Override
-    public Optional<Path> execute() {
+    public Optional<Path> get() {
         if (Files.exists(path)) {
             deleteRecursively(path);
             LOGGER.log(System.Logger.Level.INFO, "Removed {0}", path);

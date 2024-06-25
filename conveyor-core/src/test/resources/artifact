@@ -14,34 +14,17 @@ public final class ${normalizedName} implements ConveyorPlugin {
     }
 
     @Override
-    public List<ConveyorTaskBinding> bindings(ConveyorSchematic schematic, Map<String, String> configuration) {
+    public List<ConveyorTask> tasks(ConveyorSchematic schematic, Map<String, String> configuration) {
         return List.of(
-            new ConveyorTaskBinding(
+            new ConveyorTask(
+                "",
                 Stage.ARCHIVE,
                 Step.RUN,
-                new Task(schematic, configuration)
+                () -> Optional.of(Paths.get(configuration.get("path"))),
+                Set.of(),
+                Set.of(),
+                Cache.DISABLED
             )
         );
-    }
-
-    private static final class Task implements ConveyorTask {
-
-        private final ConveyorSchematic schematic;
-        private final Map<String, String> configuration;
-
-        Task(ConveyorSchematic schematic, Map<String, String> configuration) {
-            this.schematic = schematic;
-            this.configuration = configuration;
-        }
-
-        @Override
-        public String name() {
-            return "";
-        }
-
-        @Override
-        public Optional<Path> execute() {
-            return Optional.of(Paths.get(configuration.get("path")));
-        }
     }
 }

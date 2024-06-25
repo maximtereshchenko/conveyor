@@ -3,8 +3,9 @@ package com.github.maximtereshchenko.conveyor.plugin.springboot;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import com.github.maximtereshchenko.conveyor.common.api.Step;
 import com.github.maximtereshchenko.conveyor.common.test.Directories;
+import com.github.maximtereshchenko.conveyor.plugin.api.Cache;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskBinding;
+import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
 import com.github.maximtereshchenko.conveyor.plugin.test.ConveyorTasks;
 import com.github.maximtereshchenko.conveyor.plugin.test.FakeConveyorSchematic;
 import com.github.maximtereshchenko.conveyor.springboot.Configuration;
@@ -17,44 +18,88 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
 
 final class SpringBootPluginTests {
 
     private final ConveyorPlugin plugin = new SpringBootPlugin();
 
     @Test
-    void givenPlugin_whenBindings_thenTaskBindToArchiveFinalize() {
+    void givenPlugin_whenTasks_thenTaskBindToArchiveFinalize(@TempDir Path path)
+        throws IOException {
+        var container = path.resolve("container");
+        var destination = path.resolve("destination");
+
         assertThat(
-            plugin.bindings(
-                new FakeConveyorSchematic(),
+            plugin.tasks(
+                FakeConveyorSchematic.from(path),
                 Map.of(
-                    "container.directory", "",
-                    "classes.directory", "",
-                    "destination", ""
+                    "container.directory", container.toString(),
+                    "classes.directory", path.resolve("classes").toString(),
+                    "destination", destination.toString()
                 )
             )
         )
-            .extracting(ConveyorTaskBinding::stage, ConveyorTaskBinding::step)
+            .usingRecursiveFieldByFieldElementComparatorIgnoringFields("action")
             .containsExactly(
-                tuple(Stage.ARCHIVE, Step.FINALIZE),
-                tuple(Stage.ARCHIVE, Step.FINALIZE),
-                tuple(Stage.ARCHIVE, Step.FINALIZE),
-                tuple(Stage.ARCHIVE, Step.FINALIZE),
-                tuple(Stage.ARCHIVE, Step.FINALIZE)
+                new ConveyorTask(
+                    "copy-dependencies",
+                    Stage.ARCHIVE,
+                    Step.FINALIZE,
+                    null,
+                    Set.of(),
+                    Set.of(),
+                    Cache.DISABLED
+                ),
+                new ConveyorTask(
+                    "extract-spring-boot-launcher",
+                    Stage.ARCHIVE,
+                    Step.FINALIZE,
+                    null,
+                    Set.of(),
+                    Set.of(),
+                    Cache.DISABLED
+                ),
+                new ConveyorTask(
+                    "write-properties",
+                    Stage.ARCHIVE,
+                    Step.FINALIZE,
+                    null,
+                    Set.of(),
+                    Set.of(),
+                    Cache.DISABLED
+                ),
+                new ConveyorTask(
+                    "write-manifest",
+                    Stage.ARCHIVE,
+                    Step.FINALIZE,
+                    null,
+                    Set.of(),
+                    Set.of(),
+                    Cache.DISABLED
+                ),
+                new ConveyorTask(
+                    "archive-executable",
+                    Stage.ARCHIVE,
+                    Step.FINALIZE,
+                    null,
+                    Set.of(container),
+                    Set.of(destination),
+                    Cache.ENABLED
+                )
             );
     }
 
     @Test
-    void givenNoClasses_whenExecuteTasks_thenNoExecutable(@TempDir Path path) {
+    void givenNoClasses_whenExecuteTasks_thenNoExecutable(@TempDir Path path) throws IOException {
         var container = path.resolve("container");
         var executable = path.resolve("executable");
 
         ConveyorTasks.executeTasks(
-            plugin.bindings(
-                new FakeConveyorSchematic(),
+            plugin.tasks(
+                FakeConveyorSchematic.from(path),
                 Map.of(
                     "container.directory", container.toString(),
                     "classes.directory", path.resolve("classes").toString(),
@@ -77,8 +122,8 @@ final class SpringBootPluginTests {
         var executable = path.resolve("executable");
 
         ConveyorTasks.executeTasks(
-            plugin.bindings(
-                new FakeConveyorSchematic(),
+            plugin.tasks(
+                FakeConveyorSchematic.from(path),
                 Map.of(
                     "container.directory", container.toString(),
                     "classes.directory", classes.toString(),
@@ -101,8 +146,8 @@ final class SpringBootPluginTests {
         var container = path.resolve("container");
 
         ConveyorTasks.executeTasks(
-            plugin.bindings(
-                new FakeConveyorSchematic(Files.createFile(path.resolve("dependency"))),
+            plugin.tasks(
+                FakeConveyorSchematic.from(path, Files.createFile(path.resolve("dependency"))),
                 Map.of(
                     "container.directory", container.toString(),
                     "classes.directory",
@@ -122,8 +167,8 @@ final class SpringBootPluginTests {
         var container = path.resolve("container");
 
         ConveyorTasks.executeTasks(
-            plugin.bindings(
-                new FakeConveyorSchematic(),
+            plugin.tasks(
+                FakeConveyorSchematic.from(path),
                 Map.of(
                     "container.directory", container.toString(),
                     "classes.directory",
@@ -151,8 +196,8 @@ final class SpringBootPluginTests {
         var container = path.resolve("container");
 
         ConveyorTasks.executeTasks(
-            plugin.bindings(
-                new FakeConveyorSchematic(),
+            plugin.tasks(
+                FakeConveyorSchematic.from(path),
                 Map.of(
                     "container.directory", container.toString(),
                     "classes.directory",
@@ -176,8 +221,8 @@ final class SpringBootPluginTests {
         var container = path.resolve("container");
 
         ConveyorTasks.executeTasks(
-            plugin.bindings(
-                new FakeConveyorSchematic(),
+            plugin.tasks(
+                FakeConveyorSchematic.from(path),
                 Map.of(
                     "container.directory", container.toString(),
                     "classes.directory",
@@ -199,8 +244,8 @@ final class SpringBootPluginTests {
         var executable = path.resolve("executable");
 
         ConveyorTasks.executeTasks(
-            plugin.bindings(
-                new FakeConveyorSchematic(),
+            plugin.tasks(
+                FakeConveyorSchematic.from(path),
                 Map.of(
                     "container.directory", container.toString(),
                     "classes.directory",

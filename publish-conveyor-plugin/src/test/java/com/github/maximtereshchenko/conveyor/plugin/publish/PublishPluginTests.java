@@ -3,8 +3,9 @@ package com.github.maximtereshchenko.conveyor.plugin.publish;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import com.github.maximtereshchenko.conveyor.common.api.Step;
 import com.github.maximtereshchenko.conveyor.plugin.api.ArtifactClassifier;
+import com.github.maximtereshchenko.conveyor.plugin.api.Cache;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskBinding;
+import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
 import com.github.maximtereshchenko.conveyor.plugin.test.ConveyorTasks;
 import com.github.maximtereshchenko.conveyor.plugin.test.FakeConveyorSchematic;
 import com.github.maximtereshchenko.conveyor.plugin.test.PublishedArtifact;
@@ -18,35 +19,45 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.groups.Tuple.tuple;
 
 final class PublishPluginTests {
 
     private final ConveyorPlugin plugin = new PublishPlugin();
 
     @Test
-    void givenPlugin_whenBindings_thenPublishArtifactBindingReturned() {
+    void givenPlugin_whenTasks_thenPublishArtifactBindingReturned(@TempDir Path path)
+        throws IOException {
+        var artifact = path.resolve("artifact");
+        var schematic = FakeConveyorSchematic.from(path);
+
         assertThat(
-            plugin.bindings(
-                new FakeConveyorSchematic(),
-                Map.of("artifact.location", "")
+            plugin.tasks(
+                schematic,
+                Map.of("artifact.location", artifact.toString())
             )
         )
-            .extracting(ConveyorTaskBinding::stage, ConveyorTaskBinding::step)
-            .containsExactly(tuple(Stage.PUBLISH, Step.RUN));
+            .usingRecursiveFieldByFieldElementComparatorIgnoringFields("action")
+            .containsExactly(
+                new ConveyorTask(
+                    "publish-artifact",
+                    Stage.PUBLISH,
+                    Step.RUN,
+                    null,
+                    Set.of(artifact, schematic.path()),
+                    Set.of(),
+                    Cache.DISABLED
+                )
+            );
     }
 
     @Test
     void givenArtifactExists_whenExecuteTask_thenArtifactPublished(@TempDir Path path)
         throws IOException {
         var artifact = Files.createFile(path.resolve("artifact"));
-        var schematic = new FakeConveyorSchematic(
-            Files.createFile(path.resolve("conveyor.json")),
-            Set.of()
-        );
+        var schematic = FakeConveyorSchematic.from(path);
 
         ConveyorTasks.executeTasks(
-            plugin.bindings(
+            plugin.tasks(
                 schematic,
                 Map.of(
                     "artifact.location", artifact.toString(),
@@ -63,13 +74,10 @@ final class PublishPluginTests {
     void givenNoArtifact_whenExecuteTask_thenNoArtifactPublished(@TempDir Path path)
         throws IOException {
         var artifact = path.resolve("artifact");
-        var schematic = new FakeConveyorSchematic(
-            Files.createFile(path.resolve("conveyor.json")),
-            Set.of()
-        );
+        var schematic = FakeConveyorSchematic.from(path);
 
         ConveyorTasks.executeTasks(
-            plugin.bindings(
+            plugin.tasks(
                 schematic,
                 Map.of(
                     "artifact.location", artifact.toString(),
@@ -86,13 +94,10 @@ final class PublishPluginTests {
     void givenConveyorSchematic_whenExecuteTask_thenSchematicDefinitionPublished(
         @TempDir Path path
     ) throws IOException {
-        var schematic = new FakeConveyorSchematic(
-            Files.createFile(path.resolve("conveyor.json")),
-            Set.of()
-        );
+        var schematic = FakeConveyorSchematic.from(path);
 
         ConveyorTasks.executeTasks(
-            plugin.bindings(
+            plugin.tasks(
                 schematic,
                 Map.of(
                     "artifact.location", path.resolve("artifact").toString(),

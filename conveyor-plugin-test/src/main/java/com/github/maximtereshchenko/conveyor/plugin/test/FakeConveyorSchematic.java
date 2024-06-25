@@ -4,8 +4,9 @@ import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 import com.github.maximtereshchenko.conveyor.plugin.api.ArtifactClassifier;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -17,13 +18,23 @@ public final class FakeConveyorSchematic implements ConveyorSchematic {
     private final Set<Path> dependencies;
     private final List<PublishedArtifact> published = new ArrayList<>();
 
-    public FakeConveyorSchematic(Path path, Set<Path> dependencies) {
+    private FakeConveyorSchematic(Path path, Set<Path> dependencies) {
         this.path = path;
         this.dependencies = dependencies;
     }
 
-    public FakeConveyorSchematic(Path... dependencies) {
-        this(Paths.get(""), Set.of(dependencies));
+    public static FakeConveyorSchematic from(Path directory, Path... dependencies)
+        throws IOException {
+        return from(directory, Set.of(dependencies));
+    }
+
+    public static FakeConveyorSchematic from(Path directory, Set<Path> dependencies)
+        throws IOException {
+        var conveyorJson = directory.resolve("conveyor.json");
+        if (!Files.exists(conveyorJson)) {
+            Files.createFile(conveyorJson);
+        }
+        return new FakeConveyorSchematic(conveyorJson, dependencies);
     }
 
     @Override

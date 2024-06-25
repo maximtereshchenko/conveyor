@@ -3,8 +3,9 @@ package com.github.maximtereshchenko.conveyor.plugin.archive;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import com.github.maximtereshchenko.conveyor.common.api.Step;
 import com.github.maximtereshchenko.conveyor.common.test.Directories;
+import com.github.maximtereshchenko.conveyor.plugin.api.Cache;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskBinding;
+import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
 import com.github.maximtereshchenko.conveyor.plugin.test.ConveyorTasks;
 import com.github.maximtereshchenko.conveyor.plugin.test.FakeConveyorSchematic;
 import com.github.maximtereshchenko.conveyor.zip.ZipArchive;
@@ -33,29 +34,49 @@ final class ArchivePluginTests {
     }
 
     @Test
-    void givenPlugin_whenBindings_thenTaskBindToArchiveRun() {
+    void givenPlugin_whenTasks_thenTaskBindToArchiveRun(@TempDir Path path) throws IOException {
+        var classes = path.resolve("classes");
+        var destination = path.resolve("destination");
+
         assertThat(
-            plugin.bindings(
-                new FakeConveyorSchematic(),
+            plugin.tasks(
+                FakeConveyorSchematic.from(path),
                 Map.of(
-                    "classes.directory", "",
-                    "destination", ""
+                    "classes.directory", classes.toString(),
+                    "destination", destination.toString()
                 )
             )
         )
-            .hasSize(1)
-            .first()
-            .extracting(ConveyorTaskBinding::stage, ConveyorTaskBinding::step)
-            .containsExactly(Stage.ARCHIVE, Step.RUN);
+            .usingRecursiveFieldByFieldElementComparatorIgnoringFields("action")
+            .containsExactly(
+                new ConveyorTask(
+                    "archive",
+                    Stage.ARCHIVE,
+                    Step.RUN,
+                    null,
+                    Set.of(classes),
+                    Set.of(destination),
+                    Cache.ENABLED
+                ),
+                new ConveyorTask(
+                    "publish-jar-artifact",
+                    Stage.ARCHIVE,
+                    Step.FINALIZE,
+                    null,
+                    Set.of(),
+                    Set.of(),
+                    Cache.DISABLED
+                )
+            );
     }
 
     @Test
-    void givenNoClasses_whenExecuteTask_thenNoArtifact(@TempDir Path path) {
+    void givenNoClasses_whenExecuteTask_thenNoArtifact(@TempDir Path path) throws IOException {
         var archive = path.resolve("archive");
 
         var artifacts = ConveyorTasks.executeTasks(
-            plugin.bindings(
-                new FakeConveyorSchematic(),
+            plugin.tasks(
+                FakeConveyorSchematic.from(path),
                 Map.of(
                     "classes.directory", path.resolve("classes").toString(),
                     "destination", archive.toString()
@@ -78,8 +99,8 @@ final class ArchivePluginTests {
         var archive = path.resolve("archive");
 
         var artifacts = ConveyorTasks.executeTasks(
-            plugin.bindings(
-                new FakeConveyorSchematic(),
+            plugin.tasks(
+                FakeConveyorSchematic.from(path),
                 Map.of(
                     "classes.directory", classes.toString(),
                     "destination", archive.toString()
@@ -89,7 +110,7 @@ final class ArchivePluginTests {
 
         assertThat(artifacts).hasSize(1);
         var extracted = Files.createDirectory(path.resolve("extracted"));
-        new ZipArchive(artifacts.getFirst()).extract(extracted);
+        new ZipArchive(artifacts.getLast()).extract(extracted);
         Directories.assertThatDirectoryContentsEqual(extracted, classes);
     }
 }

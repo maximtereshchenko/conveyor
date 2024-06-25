@@ -5,9 +5,9 @@ import com.github.maximtereshchenko.conveyor.plugin.api.*;
 
 import java.io.*;
 import java.nio.file.*;
+import java.time.*;
 import java.util.*;
-import java.util.function.*;
-import java.util.stream.*;
+import java.util.concurrent.*;
 
 public final class ${normalizedName} implements ConveyorPlugin {
 
@@ -18,6 +18,8 @@ public final class ${normalizedName} implements ConveyorPlugin {
 
     @Override
     public List<ConveyorTask> tasks(ConveyorSchematic schematic, Map<String, String> configuration) {
+        var directory = schematic.path().getParent();
+        var output = directory.resolve("output");
         return List.of(
             new ConveyorTask(
                 "",
@@ -25,23 +27,15 @@ public final class ${normalizedName} implements ConveyorPlugin {
                 Step.RUN,
                 () -> {
                     try {
-                        Files.writeString(
-                            schematic.path().getParent().resolve("classpath"),
-                            ServiceLoader.load(Supplier.class, getClass().getClassLoader())
-                                .stream()
-                                .map(ServiceLoader.Provider::get)
-                                .map(Supplier::get)
-                                .map(Object::toString)
-                                .collect(Collectors.joining(System.lineSeparator()))
-                        );
+                        Files.writeString(output, Instant.now().toString());
                     } catch (IOException e) {
                         throw new UncheckedIOException(e);
                     }
                     return Optional.empty();
                 },
-                Set.of(),
-                Set.of(),
-                Cache.DISABLED
+                Set.of(directory.resolve("input")),
+                Set.of(output),
+                Cache.ENABLED
             )
         );
     }

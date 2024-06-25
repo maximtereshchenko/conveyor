@@ -2,7 +2,6 @@ package com.github.maximtereshchenko.conveyor.plugin.compile;
 
 import com.github.maximtereshchenko.conveyor.compiler.Compiler;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -10,18 +9,19 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 
-abstract class CompileJavaFilesTask implements ConveyorTask {
+abstract class CompileJavaFilesAction implements Supplier<Optional<Path>> {
 
     private static final System.Logger LOGGER =
-        System.getLogger(CompileJavaFilesTask.class.getName());
+        System.getLogger(CompileJavaFilesAction.class.getName());
 
     private final Path sourcesDirectory;
     private final Path outputDirectory;
     private final Compiler compiler;
     private final ConveyorSchematic schematic;
 
-    CompileJavaFilesTask(
+    CompileJavaFilesAction(
         Path sourcesDirectory,
         Path outputDirectory,
         Compiler compiler,
@@ -34,7 +34,7 @@ abstract class CompileJavaFilesTask implements ConveyorTask {
     }
 
     @Override
-    public Optional<Path> execute() {
+    public Optional<Path> get() {
         if (Files.exists(sourcesDirectory)) {
             compiler.compile(files(sourcesDirectory), classpath(schematic), outputDirectory);
             LOGGER.log(System.Logger.Level.INFO, "Compiled classes to {0}", outputDirectory);

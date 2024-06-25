@@ -18,78 +18,55 @@ public final class ${normalizedName} implements ConveyorPlugin {
     }
 
     @Override
-    public List<ConveyorTaskBinding> bindings(ConveyorSchematic schematic, Map<String, String> configuration) {
+    public List<ConveyorTask> tasks(ConveyorSchematic schematic, Map<String, String> configuration) {
         return List.of(
-            new ConveyorTaskBinding(
+            new ConveyorTask(
+                "",
                 Stage.COMPILE,
                 Step.RUN,
-                new Task(
-                    schematic.classpath(
-                        Set.of(
-                            DependencyScope.valueOf(
-                                configuration.getOrDefault("scope", "IMPLEMENTATION")
+                () -> {
+                    try {
+                        Files.writeString(
+                            schematic.path().getParent().resolve("dependencies"),
+                            ServiceLoader.load(
+                                Supplier.class,
+                                URLClassLoader.newInstance(
+                                    schematic.classpath(
+                                        Set.of(
+                                            DependencyScope.valueOf(
+                                                configuration.getOrDefault("scope", "IMPLEMENTATION")
+                                            )
+                                        )
+                                    )
+                                        .stream()
+                                        .map(this::url)
+                                        .toArray(URL[]::new),
+                                    getClass().getClassLoader()
+                                )
                             )
-                        )
-                    ),
-                    schematic.path().getParent().resolve("dependencies")
-                )
+                                .stream()
+                                .map(ServiceLoader.Provider::get)
+                                .map(Supplier::get)
+                                .map(Object::toString)
+                                .collect(Collectors.joining(System.lineSeparator()))
+                        );
+                    } catch (IOException e) {
+                        throw new UncheckedIOException(e);
+                    }
+                    return Optional.empty();
+                },
+                Set.of(),
+                Set.of(),
+                Cache.DISABLED
             )
         );
     }
 
-    private static final class Task implements ConveyorTask {
-
-        private final Set<Path> paths;
-        private final Path path;
-
-        Task(Set<Path> paths, Path path) {
-            this.paths = paths;
-            this.path = path;
-        }
-
-        @Override
-        public String name() {
-            return "";
-        }
-
-        @Override
-        public Optional<Path> execute() {
-            write(path, dependencies(paths));
-            return Optional.empty();
-        }
-
-        private String dependencies(Set<Path> paths) {
-            return ServiceLoader.load(Supplier.class, classLoader(paths))
-                .stream()
-                .map(ServiceLoader.Provider::get)
-                .map(Supplier::get)
-                .map(Object::toString)
-                .collect(Collectors.joining(System.lineSeparator()));
-        }
-
-        private ClassLoader classLoader(Set<Path> paths) {
-            return URLClassLoader.newInstance(
-                paths.stream()
-                    .map(this::url)
-                    .toArray(URL[]::new),
-                getClass().getClassLoader()
-            );
-        }
-
-        private URL url(Path path) {
-            try {
-                return path.toUri().toURL();
-            } catch (MalformedURLException e) {
-                throw new UncheckedIOException(e);
-            }
-        }
-
-        private void write(Path path, String content) {
-            try {
-                Files.writeString(path, content);
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            }
+    private URL url(Path path) {
+        try {
+            return path.toUri().toURL();
+        } catch (MalformedURLException e) {
+            throw new UncheckedIOException(e);
         }
     }
 }

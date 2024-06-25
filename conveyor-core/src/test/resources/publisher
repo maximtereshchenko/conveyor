@@ -14,37 +14,24 @@ public final class ${normalizedName} implements ConveyorPlugin {
     }
 
     @Override
-    public List<ConveyorTaskBinding> bindings(ConveyorSchematic schematic, Map<String, String> configuration) {
+    public List<ConveyorTask> tasks(ConveyorSchematic schematic, Map<String, String> configuration) {
         return List.of(
-            new ConveyorTaskBinding(
+            new ConveyorTask(
+                "",
                 Stage.PUBLISH,
                 Step.RUN,
-                new Task(schematic, configuration.get("repository"), Paths.get(configuration.get("path")))
+                () -> {
+                    schematic.publish(
+                        configuration.get("repository"),
+                        Paths.get(configuration.get("path")),
+                        ArtifactClassifier.JAR
+                    );
+                    return Optional.empty();
+                },
+                Set.of(),
+                Set.of(),
+                Cache.DISABLED
             )
         );
-    }
-
-    private static final class Task implements ConveyorTask {
-
-        private final ConveyorSchematic schematic;
-        private final String repository;
-        private final Path path;
-
-        Task(ConveyorSchematic schematic, String repository, Path path) {
-            this.schematic = schematic;
-            this.repository = repository;
-            this.path = path;
-        }
-
-        @Override
-        public String name() {
-            return "";
-        }
-
-        @Override
-        public Optional<Path> execute() {
-            schematic.publish(repository, path, ArtifactClassifier.JAR);
-            return Optional.empty();
-        }
     }
 }

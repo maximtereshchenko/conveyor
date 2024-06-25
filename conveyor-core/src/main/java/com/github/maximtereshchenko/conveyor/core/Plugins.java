@@ -4,7 +4,6 @@ import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskBinding;
 
 import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
@@ -12,6 +11,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 final class Plugins {
@@ -30,19 +30,35 @@ final class Plugins {
         var artifacts = new ArrayList<Path>();
         for (var task : tasks(conveyorSchematic, stage)) {
             LOGGER.log(System.Logger.Level.INFO, "Executing task {0}", task.name());
-            task.execute().ifPresent(artifacts::add);
+            action(task, conveyorSchematic).get().ifPresent(artifacts::add);
         }
         return artifacts.isEmpty() ? Optional.empty() : Optional.of(artifacts.getLast());
+    }
+
+    private Supplier<Optional<Path>> action(ConveyorTask task, ConveyorSchematic schematic) {
+        var directory = schematic.path().getParent();
+        var cache = directory.resolve(".conveyor").resolve("cache").resolve(task.name());
+        return switch (task.cache()) {
+            case ENABLED -> new CacheableAction(
+                task.action(),
+                task.inputs(),
+                task.outputs(),
+                cache.resolve("input-checksum"),
+                cache.resolve("output-checksum"),
+                cache,
+                directory
+            );
+            case DISABLED -> task.action();
+        };
     }
 
     private List<ConveyorTask> tasks(ConveyorSchematic conveyorSchematic, Stage stage) {
         return conveyorPlugins()
             .filter(conveyorPlugin -> named(conveyorPlugin.name()).isEnabled())
             .sorted(this::byPosition)
-            .flatMap(conveyorPlugin -> bindings(conveyorSchematic, conveyorPlugin))
-            .filter(binding -> isBeforeOrEqual(binding, stage))
+            .flatMap(conveyorPlugin -> tasks(conveyorSchematic, conveyorPlugin))
+            .filter(task -> isBeforeOrEqual(task, stage))
             .sorted(byStageAndStep())
-            .map(ConveyorTaskBinding::task)
             .toList();
     }
 
@@ -59,19 +75,19 @@ final class Plugins {
         return 0;
     }
 
-    private Comparator<ConveyorTaskBinding> byStageAndStep() {
-        return Comparator.comparing(ConveyorTaskBinding::stage).thenComparing(ConveyorTaskBinding::step);
+    private Comparator<ConveyorTask> byStageAndStep() {
+        return Comparator.comparing(ConveyorTask::stage).thenComparing(ConveyorTask::step);
     }
 
-    private boolean isBeforeOrEqual(ConveyorTaskBinding conveyorTaskBinding, Stage stage) {
-        return conveyorTaskBinding.stage().compareTo(stage) <= 0;
+    private boolean isBeforeOrEqual(ConveyorTask task, Stage stage) {
+        return task.stage().compareTo(stage) <= 0;
     }
 
-    private Stream<ConveyorTaskBinding> bindings(
+    private Stream<ConveyorTask> tasks(
         ConveyorSchematic conveyorSchematic,
         ConveyorPlugin conveyorPlugin
     ) {
-        return conveyorPlugin.bindings(
+        return conveyorPlugin.tasks(
                 conveyorSchematic,
                 named(conveyorPlugin.name()).configuration()
             )

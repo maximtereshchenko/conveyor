@@ -17,57 +17,44 @@ public final class ${normalizedName} implements ConveyorPlugin {
     }
 
     @Override
-    public List<ConveyorTaskBinding> bindings(ConveyorSchematic schematic, Map<String, String> configuration) {
+    public List<ConveyorTask> tasks(ConveyorSchematic schematic, Map<String, String> configuration) {
         return configuration.entrySet()
             .stream()
             .filter(entry -> !entry.getKey().equals("enabled"))
-            .map(entry -> binding(schematic.path().getParent().resolve(entry.getKey()), entry.getValue()))
+            .map(entry -> task(schematic.path().getParent().resolve(entry.getKey()), entry.getValue()))
             .toList();
     }
 
-    private ConveyorTaskBinding binding(Path path, String rawStageAndStep) {
+    private ConveyorTask task(Path path, String rawStageAndStep) {
         var stageAndStep = rawStageAndStep.split("-");
-        return new ConveyorTaskBinding(
+        return new ConveyorTask(
+            "",
             Stage.valueOf(stageAndStep[0]),
             Step.valueOf(stageAndStep[1]),
-            new Task(path)
+            () -> {
+                sleep();
+                writeInstant(path);
+                return Optional.empty();
+            },
+            Set.of(),
+            Set.of(),
+            Cache.DISABLED
         );
     }
 
-    private static final class Task implements ConveyorTask {
-
-        private final Path path;
-
-        Task(Path path) {
-            this.path = path;
+    private void sleep() {
+        try {
+            TimeUnit.MILLISECONDS.sleep(10);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
+    }
 
-        @Override
-        public String name() {
-            return "";
-        }
-
-        @Override
-        public Optional<Path> execute() {
-            sleep();
-            writeInstant(path);
-            return Optional.empty();
-        }
-
-        private void sleep() {
-            try {
-                TimeUnit.MILLISECONDS.sleep(10);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        }
-
-        private void writeInstant(Path path) {
-            try {
-                Files.writeString(path, Instant.now().toString());
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            }
+    private void writeInstant(Path path) {
+        try {
+            Files.writeString(path, Instant.now().toString());
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
     }
 }

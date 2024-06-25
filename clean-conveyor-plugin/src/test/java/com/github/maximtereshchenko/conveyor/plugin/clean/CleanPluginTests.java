@@ -3,8 +3,9 @@ package com.github.maximtereshchenko.conveyor.plugin.clean;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import com.github.maximtereshchenko.conveyor.common.api.Step;
 import com.github.maximtereshchenko.conveyor.common.test.Directories;
+import com.github.maximtereshchenko.conveyor.plugin.api.Cache;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskBinding;
+import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
 import com.github.maximtereshchenko.conveyor.plugin.test.ConveyorTasks;
 import com.github.maximtereshchenko.conveyor.plugin.test.FakeConveyorSchematic;
 import org.junit.jupiter.api.Test;
@@ -22,7 +23,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
-final class CleanPluginTest {
+final class CleanPluginTests {
 
     private final ConveyorPlugin plugin = new CleanPlugin();
 
@@ -32,28 +33,36 @@ final class CleanPluginTest {
     }
 
     @Test
-    void givenPlugin_whenBindings_thenTaskBindToCleanRun() {
+    void givenPlugin_whenTasks_thenTaskBindToCleanRun(@TempDir Path path) throws IOException {
         assertThat(
-            plugin.bindings(
-                new FakeConveyorSchematic(),
-                Map.of("directory", "")
+            plugin.tasks(
+                FakeConveyorSchematic.from(path),
+                Map.of("directory", path.toString())
             )
         )
-            .hasSize(1)
-            .first()
-            .extracting(ConveyorTaskBinding::stage, ConveyorTaskBinding::step)
-            .containsExactly(Stage.CLEAN, Step.RUN);
+            .usingRecursiveFieldByFieldElementComparatorIgnoringFields("action")
+            .containsExactly(
+                new ConveyorTask(
+                    "clean",
+                    Stage.CLEAN,
+                    Step.RUN,
+                    null,
+                    Set.of(),
+                    Set.of(),
+                    Cache.DISABLED
+                )
+            );
     }
 
     @Test
-    void givenNoDirectory_whenExecuteTasks_thenTaskDidNotFail(@TempDir Path path) {
-        var bindings = plugin.bindings(
-            new FakeConveyorSchematic(),
-            Map.of("directory", path.toString())
+    void givenNoDirectory_whenExecuteTasks_thenTaskDidNotFail(@TempDir Path path)
+        throws IOException {
+        var tasks = plugin.tasks(
+            FakeConveyorSchematic.from(path),
+            Map.of("directory", path.resolve("does-not-exist").toString())
         );
 
-        assertThatCode(() -> ConveyorTasks.executeTasks(bindings))
-            .doesNotThrowAnyException();
+        assertThatCode(() -> ConveyorTasks.executeTasks(tasks)).doesNotThrowAnyException();
     }
 
     @ParameterizedTest
@@ -65,8 +74,8 @@ final class CleanPluginTest {
         Directories.writeFiles(path, entries);
 
         ConveyorTasks.executeTasks(
-            plugin.bindings(
-                new FakeConveyorSchematic(),
+            plugin.tasks(
+                FakeConveyorSchematic.from(path),
                 Map.of("directory", path.toString())
             )
         );

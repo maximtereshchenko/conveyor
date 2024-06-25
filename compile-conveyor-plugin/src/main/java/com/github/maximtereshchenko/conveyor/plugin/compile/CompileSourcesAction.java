@@ -7,20 +7,15 @@ import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
 import java.nio.file.Path;
 import java.util.Set;
 
-final class CompileSourcesTask extends CompileJavaFilesTask {
+final class CompileSourcesAction extends CompileJavaFilesAction {
 
-    CompileSourcesTask(
+    CompileSourcesAction(
         Path sourcesDirectory,
         Path outputDirectory,
         Compiler compiler,
         ConveyorSchematic schematic
     ) {
         super(sourcesDirectory, outputDirectory, compiler, schematic);
-    }
-
-    @Override
-    public String name() {
-        return "compile-sources";
     }
 
     @Override

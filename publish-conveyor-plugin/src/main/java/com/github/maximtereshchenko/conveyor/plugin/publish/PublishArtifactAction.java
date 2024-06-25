@@ -2,34 +2,29 @@ package com.github.maximtereshchenko.conveyor.plugin.publish;
 
 import com.github.maximtereshchenko.conveyor.plugin.api.ArtifactClassifier;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.function.Supplier;
 
-final class PublishArtifactTask implements ConveyorTask {
+final class PublishArtifactAction implements Supplier<Optional<Path>> {
 
     private static final System.Logger LOGGER =
-        System.getLogger(PublishArtifactTask.class.getName());
+        System.getLogger(PublishArtifactAction.class.getName());
 
     private final Path artifact;
     private final String repository;
     private final ConveyorSchematic schematic;
 
-    PublishArtifactTask(Path artifact, String repository, ConveyorSchematic schematic) {
+    PublishArtifactAction(Path artifact, String repository, ConveyorSchematic schematic) {
         this.artifact = artifact;
         this.repository = repository;
         this.schematic = schematic;
     }
 
     @Override
-    public String name() {
-        return "publish-artifact";
-    }
-
-    @Override
-    public Optional<Path> execute() {
+    public Optional<Path> get() {
         publish(artifact, ArtifactClassifier.JAR);
         publish(schematic.path(), ArtifactClassifier.SCHEMATIC_DEFINITION);
         return Optional.empty();

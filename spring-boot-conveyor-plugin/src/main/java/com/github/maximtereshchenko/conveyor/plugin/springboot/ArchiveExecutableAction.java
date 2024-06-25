@@ -1,32 +1,27 @@
 package com.github.maximtereshchenko.conveyor.plugin.springboot;
 
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
 import com.github.maximtereshchenko.conveyor.zip.ZipArchiveContainer;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.function.Supplier;
 
-final class ArchiveExecutableTask implements ConveyorTask {
+final class ArchiveExecutableAction implements Supplier<Optional<Path>> {
 
     private static final System.Logger LOGGER =
-        System.getLogger(ArchiveExecutableTask.class.getName());
+        System.getLogger(ArchiveExecutableAction.class.getName());
 
     private final Path containerDirectory;
     private final Path destination;
 
-    ArchiveExecutableTask(Path containerDirectory, Path destination) {
+    ArchiveExecutableAction(Path containerDirectory, Path destination) {
         this.containerDirectory = containerDirectory;
         this.destination = destination;
     }
 
     @Override
-    public String name() {
-        return "archive-executable";
-    }
-
-    @Override
-    public Optional<Path> execute() {
+    public Optional<Path> get() {
         if (Files.exists(containerDirectory)) {
             archive();
         }

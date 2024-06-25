@@ -2,7 +2,6 @@ package com.github.maximtereshchenko.conveyor.plugin.springboot;
 
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -10,28 +9,25 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 
-final class CopyClassPathTask implements ConveyorTask {
+final class CopyClassPathAction implements Supplier<Optional<Path>> {
 
-    private static final System.Logger LOGGER = System.getLogger(CopyClassPathTask.class.getName());
+    private static final System.Logger LOGGER =
+        System.getLogger(CopyClassPathAction.class.getName());
 
     private final Path classesDirectory;
     private final Path destination;
     private final ConveyorSchematic schematic;
 
-    CopyClassPathTask(Path classesDirectory, Path destination, ConveyorSchematic schematic) {
+    CopyClassPathAction(Path classesDirectory, Path destination, ConveyorSchematic schematic) {
         this.classesDirectory = classesDirectory;
         this.destination = destination;
         this.schematic = schematic;
     }
 
     @Override
-    public String name() {
-        return "copy-dependencies";
-    }
-
-    @Override
-    public Optional<Path> execute() {
+    public Optional<Path> get() {
         try {
             if (Files.exists(classesDirectory)) {
                 copyClasses();

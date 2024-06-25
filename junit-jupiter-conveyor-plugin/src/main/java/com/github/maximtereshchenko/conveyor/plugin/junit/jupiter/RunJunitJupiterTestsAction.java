@@ -2,7 +2,6 @@ package com.github.maximtereshchenko.conveyor.plugin.junit.jupiter;
 
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
 import org.junit.platform.engine.discovery.DiscoverySelectors;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
 import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
@@ -17,16 +16,17 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-final class RunJunitJupiterTestsTask implements ConveyorTask {
+final class RunJunitJupiterTestsAction implements Supplier<Optional<Path>> {
 
     private final Path testClassesDirectory;
     private final Path classesDirectory;
     private final ConveyorSchematic schematic;
 
-    RunJunitJupiterTestsTask(
+    RunJunitJupiterTestsAction(
         Path testClassesDirectory,
         Path classesDirectory,
         ConveyorSchematic schematic
@@ -37,12 +37,7 @@ final class RunJunitJupiterTestsTask implements ConveyorTask {
     }
 
     @Override
-    public String name() {
-        return "execute-junit-jupiter-tests";
-    }
-
-    @Override
-    public Optional<Path> execute() {
+    public Optional<Path> get() {
         if (Files.exists(testClassesDirectory)) {
             runWithContextClassLoader(classLoader(classpath()), this::executeTests);
         }

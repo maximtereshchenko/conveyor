@@ -1,6 +1,5 @@
 package com.github.maximtereshchenko.conveyor.plugin.springboot;
 
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
 import com.github.maximtereshchenko.conveyor.springboot.Configuration;
 
 import java.io.IOException;
@@ -9,29 +8,25 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.function.Supplier;
 
-final class WritePropertiesTask implements ConveyorTask {
+final class WritePropertiesAction implements Supplier<Optional<Path>> {
 
     private static final System.Logger LOGGER =
-        System.getLogger(WritePropertiesTask.class.getName());
+        System.getLogger(WritePropertiesAction.class.getName());
 
     private final Path destination;
     private final String classpathDirectory;
     private final String launchedClassName;
 
-    WritePropertiesTask(Path destination, String classpathDirectory, String launchedClassName) {
+    WritePropertiesAction(Path destination, String classpathDirectory, String launchedClassName) {
         this.destination = destination;
         this.classpathDirectory = classpathDirectory;
         this.launchedClassName = launchedClassName;
     }
 
     @Override
-    public String name() {
-        return "write-properties";
-    }
-
-    @Override
-    public Optional<Path> execute() {
+    public Optional<Path> get() {
         if (Files.exists(destination.getParent())) {
             write();
         }

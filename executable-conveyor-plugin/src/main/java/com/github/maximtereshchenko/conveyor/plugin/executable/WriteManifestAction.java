@@ -1,34 +1,29 @@
 package com.github.maximtereshchenko.conveyor.plugin.executable;
 
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
-
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
-final class WriteManifestTask implements ConveyorTask {
+final class WriteManifestAction implements Supplier<Optional<Path>> {
 
-    private static final System.Logger LOGGER = System.getLogger(WriteManifestTask.class.getName());
+    private static final System.Logger LOGGER =
+        System.getLogger(WriteManifestAction.class.getName());
 
     private final Path classesDirectory;
     private final String mainClass;
 
-    WriteManifestTask(Path classesDirectory, String mainClass) {
+    WriteManifestAction(Path classesDirectory, String mainClass) {
         this.classesDirectory = classesDirectory;
         this.mainClass = mainClass;
     }
 
     @Override
-    public String name() {
-        return "write-manifest";
-    }
-
-    @Override
-    public Optional<Path> execute() {
+    public Optional<Path> get() {
         if (Files.exists(classesDirectory)) {
             write();
         }

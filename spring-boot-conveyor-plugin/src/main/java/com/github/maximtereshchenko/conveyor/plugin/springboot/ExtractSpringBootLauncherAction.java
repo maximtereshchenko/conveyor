@@ -1,6 +1,5 @@
 package com.github.maximtereshchenko.conveyor.plugin.springboot;
 
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
 import com.github.maximtereshchenko.conveyor.springboot.Configuration;
 import com.github.maximtereshchenko.conveyor.zip.ZipArchive;
 
@@ -9,25 +8,21 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
+import java.util.function.Supplier;
 
-final class ExtractSpringBootLauncherTask implements ConveyorTask {
+final class ExtractSpringBootLauncherAction implements Supplier<Optional<Path>> {
 
     private static final System.Logger LOGGER =
-        System.getLogger(ExtractSpringBootLauncherTask.class.getName());
+        System.getLogger(ExtractSpringBootLauncherAction.class.getName());
 
     private final Path destination;
 
-    ExtractSpringBootLauncherTask(Path destination) {
+    ExtractSpringBootLauncherAction(Path destination) {
         this.destination = destination;
     }
 
     @Override
-    public String name() {
-        return "extract-spring-boot-launcher";
-    }
-
-    @Override
-    public Optional<Path> execute() {
+    public Optional<Path> get() {
         if (Files.exists(destination)) {
             var path = path();
             new ZipArchive(path).extract(destination);

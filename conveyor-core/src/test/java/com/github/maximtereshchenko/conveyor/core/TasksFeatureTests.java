@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.List;
@@ -375,6 +376,92 @@ final class TasksFeatureTests extends ConveyorTest {
         assertThat(path.resolve("dependencies"))
             .content()
             .isEqualTo("group-test-1.0.0");
+    }
+
+    @Test
+    void givenCacheableTask_whenConstructToStage_thenTaskIsNotExecutedDuringNextConstruction(
+        @TempDir Path path,
+        ConveyorModule module,
+        BuilderFactory factory
+    ) throws Exception {
+        factory.repositoryBuilder(path)
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("cache")
+            )
+            .jar(
+                factory.jarBuilder("cache", path)
+            )
+            .install(path);
+        var conveyorJson = factory.schematicDefinitionBuilder()
+            .repository(path)
+            .plugin("cache")
+            .conveyorJson(path);
+        var output = path.resolve("output");
+
+        module.construct(conveyorJson, Stage.COMPILE);
+        var instant = instant(output);
+        module.construct(conveyorJson, Stage.COMPILE);
+
+        assertThat(instant(output)).isEqualTo(instant);
+    }
+
+    @Test
+    void givenCacheableTaskInputChanged_whenConstructToStage_thenTaskExecutedDuringNextConstruction(
+        @TempDir Path path,
+        ConveyorModule module,
+        BuilderFactory factory
+    ) throws Exception {
+        factory.repositoryBuilder(path)
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("cache")
+            )
+            .jar(
+                factory.jarBuilder("cache", path)
+            )
+            .install(path);
+        var conveyorJson = factory.schematicDefinitionBuilder()
+            .repository(path)
+            .plugin("cache")
+            .conveyorJson(path);
+        var output = path.resolve("output");
+
+        module.construct(conveyorJson, Stage.COMPILE);
+        var instant = instant(output);
+        Files.writeString(path.resolve("input"), "changed");
+        module.construct(conveyorJson, Stage.COMPILE);
+
+        assertThat(instant(output)).isNotEqualTo(instant);
+    }
+
+    @Test
+    void givenTaskCachedOutputs_whenConstructToStage_thenTaskIsNotExecutedAndOutputsAreCopied(
+        @TempDir Path path,
+        ConveyorModule module,
+        BuilderFactory factory
+    ) throws Exception {
+        factory.repositoryBuilder(path)
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("cache")
+            )
+            .jar(
+                factory.jarBuilder("cache", path)
+            )
+            .install(path);
+        var conveyorJson = factory.schematicDefinitionBuilder()
+            .repository(path)
+            .plugin("cache")
+            .conveyorJson(path);
+        var output = path.resolve("output");
+
+        module.construct(conveyorJson, Stage.COMPILE);
+        var instant = instant(output);
+        Files.writeString(output, "changed");
+        module.construct(conveyorJson, Stage.COMPILE);
+
+        assertThat(instant(output)).isEqualTo(instant);
     }
 
     private Instant instant(Path path, String fileName) throws IOException {

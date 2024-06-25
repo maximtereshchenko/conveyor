@@ -65,6 +65,7 @@ A build tool for Java projects
       schematic definition
     * Given schematic dependencies, task performs operations on the project and optionally produces
       artifact to be used by other schematics
+    * Task can opt in for caching by declaring its inputs and outputs
 * Properties
     * Properties are user-defined key-value pairs
     * Properties are inherited from a schematic used as a template

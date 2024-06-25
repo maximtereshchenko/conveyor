@@ -3,8 +3,9 @@ package com.github.maximtereshchenko.conveyor.plugin.executable;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import com.github.maximtereshchenko.conveyor.common.api.Step;
 import com.github.maximtereshchenko.conveyor.common.test.Directories;
+import com.github.maximtereshchenko.conveyor.plugin.api.Cache;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskBinding;
+import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
 import com.github.maximtereshchenko.conveyor.plugin.test.ConveyorTasks;
 import com.github.maximtereshchenko.conveyor.plugin.test.FakeConveyorSchematic;
 import com.github.maximtereshchenko.conveyor.zip.ZipArchive;
@@ -16,48 +17,80 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
 
 final class ExecutablePluginTests {
 
     private final ConveyorPlugin plugin = new ExecutablePlugin();
 
     @Test
-    void givenPlugin_whenBindings_thenTaskBindToArchiveFinalize() {
+    void givenPlugin_whenTasks_thenTaskBindToArchiveFinalize(@TempDir Path path)
+        throws IOException {
+        var classes = path.resolve("classes");
+        var destination = path.resolve("destination");
+
         assertThat(
-            plugin.bindings(
-                new FakeConveyorSchematic(),
+            plugin.tasks(
+                FakeConveyorSchematic.from(path),
                 Map.of(
-                    "classes.directory", "",
+                    "classes.directory", classes.toString(),
                     "main.class", "",
-                    "destination", ""
+                    "destination", destination.toString()
                 )
             )
         )
-            .extracting(ConveyorTaskBinding::stage, ConveyorTaskBinding::step)
+            .usingRecursiveFieldByFieldElementComparatorIgnoringFields("action")
             .containsExactly(
-                tuple(Stage.ARCHIVE, Step.FINALIZE),
-                tuple(Stage.ARCHIVE, Step.FINALIZE),
-                tuple(Stage.ARCHIVE, Step.FINALIZE)
+                new ConveyorTask(
+                    "extract-dependencies",
+                    Stage.ARCHIVE,
+                    Step.FINALIZE,
+                    null,
+                    Set.of(),
+                    Set.of(),
+                    Cache.DISABLED
+                ),
+                new ConveyorTask(
+                    "write-manifest",
+                    Stage.ARCHIVE,
+                    Step.FINALIZE,
+                    null,
+                    Set.of(),
+                    Set.of(),
+                    Cache.DISABLED
+                ),
+                new ConveyorTask(
+                    "archive-executable",
+                    Stage.ARCHIVE,
+                    Step.FINALIZE,
+                    null,
+                    Set.of(classes),
+                    Set.of(destination),
+                    Cache.ENABLED
+                )
             );
     }
 
     @Test
-    void givenNoClasses_whenExecuteTasks_thenNoExecutable(@TempDir Path path) {
+    void givenNoClasses_whenExecuteTasks_thenNoExecutable(@TempDir Path path) throws IOException {
+        var classes = path.resolve("classes");
+        var executable = path.resolve("executable");
+
         ConveyorTasks.executeTasks(
-            plugin.bindings(
-                new FakeConveyorSchematic(),
+            plugin.tasks(
+                FakeConveyorSchematic.from(path),
                 Map.of(
-                    "classes.directory", path.resolve("classes").toString(),
+                    "classes.directory", classes.toString(),
                     "main.class", "",
-                    "destination", path.resolve("executable").toString()
+                    "destination", executable.toString()
                 )
             )
         );
 
-        assertThat(path).isEmptyDirectory();
+        assertThat(classes).doesNotExist();
+        assertThat(executable).doesNotExist();
     }
 
     @Test
@@ -67,8 +100,8 @@ final class ExecutablePluginTests {
         var classes = Files.createDirectory(path.resolve("classes"));
 
         ConveyorTasks.executeTasks(
-            plugin.bindings(
-                new FakeConveyorSchematic(),
+            plugin.tasks(
+                FakeConveyorSchematic.from(path),
                 Map.of(
                     "classes.directory", classes.toString(),
                     "main.class", "",
@@ -91,8 +124,8 @@ final class ExecutablePluginTests {
         var classes = Files.createDirectory(path.resolve("classes"));
 
         ConveyorTasks.executeTasks(
-            plugin.bindings(
-                new FakeConveyorSchematic(dependency),
+            plugin.tasks(
+                FakeConveyorSchematic.from(path, dependency),
                 Map.of(
                     "classes.directory", classes.toString(),
                     "main.class", "",
@@ -117,8 +150,8 @@ final class ExecutablePluginTests {
         var executable = path.resolve("executable");
 
         ConveyorTasks.executeTasks(
-            plugin.bindings(
-                new FakeConveyorSchematic(),
+            plugin.tasks(
+                FakeConveyorSchematic.from(path),
                 Map.of(
                     "classes.directory", classes.toString(),
                     "main.class", "",
@@ -144,8 +177,8 @@ final class ExecutablePluginTests {
         var executable = path.resolve("executable");
 
         ConveyorTasks.executeTasks(
-            plugin.bindings(
-                new FakeConveyorSchematic(),
+            plugin.tasks(
+                FakeConveyorSchematic.from(path),
                 Map.of(
                     "classes.directory", classes.toString(),
                     "main.class", "main.Main",

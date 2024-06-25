@@ -1,11 +1,19 @@
 package com.github.maximtereshchenko.conveyor.plugin.api;
 
+import com.github.maximtereshchenko.conveyor.common.api.Stage;
+import com.github.maximtereshchenko.conveyor.common.api.Step;
+
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.Supplier;
 
-public interface ConveyorTask {
-
-    String name();
-
-    Optional<Path> execute();
-}
+public record ConveyorTask(
+    String name,
+    Stage stage,
+    Step step,
+    Supplier<Optional<Path>> action,
+    Set<Path> inputs,
+    Set<Path> outputs,
+    Cache cache
+) {}
