@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -47,8 +48,8 @@ final class CleanPluginTests {
                     Stage.CLEAN,
                     Step.RUN,
                     null,
-                    Set.of(),
-                    Set.of(),
+                    new TreeSet<>(),
+                    new TreeSet<>(),
                     Cache.DISABLED
                 )
             );

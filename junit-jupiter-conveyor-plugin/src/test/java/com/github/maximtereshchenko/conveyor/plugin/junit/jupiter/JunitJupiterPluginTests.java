@@ -24,6 +24,7 @@ import java.security.CodeSource;
 import java.security.ProtectionDomain;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -57,8 +58,8 @@ final class JunitJupiterPluginTests {
                     Stage.TEST,
                     Step.RUN,
                     null,
-                    Set.of(testClasses, classes),
-                    Set.of(),
+                    new TreeSet<>(Set.of(testClasses, classes)),
+                    new TreeSet<>(),
                     Cache.ENABLED
                 )
             );

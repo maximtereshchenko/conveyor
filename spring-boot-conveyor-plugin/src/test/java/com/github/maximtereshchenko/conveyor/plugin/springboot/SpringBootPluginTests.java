@@ -19,6 +19,7 @@ import java.nio.file.Path;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TreeSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -49,8 +50,8 @@ final class SpringBootPluginTests {
                     Stage.ARCHIVE,
                     Step.FINALIZE,
                     null,
-                    Set.of(),
-                    Set.of(),
+                    new TreeSet<>(),
+                    new TreeSet<>(),
                     Cache.DISABLED
                 ),
                 new ConveyorTask(
@@ -58,8 +59,8 @@ final class SpringBootPluginTests {
                     Stage.ARCHIVE,
                     Step.FINALIZE,
                     null,
-                    Set.of(),
-                    Set.of(),
+                    new TreeSet<>(),
+                    new TreeSet<>(),
                     Cache.DISABLED
                 ),
                 new ConveyorTask(
@@ -67,8 +68,8 @@ final class SpringBootPluginTests {
                     Stage.ARCHIVE,
                     Step.FINALIZE,
                     null,
-                    Set.of(),
-                    Set.of(),
+                    new TreeSet<>(),
+                    new TreeSet<>(),
                     Cache.DISABLED
                 ),
                 new ConveyorTask(
@@ -76,8 +77,8 @@ final class SpringBootPluginTests {
                     Stage.ARCHIVE,
                     Step.FINALIZE,
                     null,
-                    Set.of(),
-                    Set.of(),
+                    new TreeSet<>(),
+                    new TreeSet<>(),
                     Cache.DISABLED
                 ),
                 new ConveyorTask(
@@ -85,8 +86,8 @@ final class SpringBootPluginTests {
                     Stage.ARCHIVE,
                     Step.FINALIZE,
                     null,
-                    Set.of(container),
-                    Set.of(destination),
+                    new TreeSet<>(Set.of(container)),
+                    new TreeSet<>(Set.of(destination)),
                     Cache.ENABLED
                 )
             );

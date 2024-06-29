@@ -21,8 +21,8 @@ public final class ${normalizedName} implements ConveyorPlugin {
                 Stage.ARCHIVE,
                 Step.RUN,
                 () -> Optional.of(Paths.get(configuration.get("path"))),
-                Set.of(),
-                Set.of(),
+                new TreeSet<>(),
+                new TreeSet<>(),
                 Cache.DISABLED
             )
         );

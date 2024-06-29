@@ -12,6 +12,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 public final class JunitJupiterPlugin implements ConveyorPlugin {
 
@@ -37,8 +38,8 @@ public final class JunitJupiterPlugin implements ConveyorPlugin {
                     classesDirectory,
                     schematic
                 ),
-                Set.of(testClassesDirectory, classesDirectory),
-                Set.of(),
+                new TreeSet<>(Set.of(testClassesDirectory, classesDirectory)),
+                new TreeSet<>(),
                 Cache.ENABLED
             )
         );

@@ -36,8 +36,8 @@ public final class ${normalizedName} implements ConveyorPlugin {
                 writeInstant(path);
                 return Optional.empty();
             },
-            Set.of(),
-            Set.of(),
+            new TreeSet<>(),
+            new TreeSet<>(),
             Cache.DISABLED
         );
     }

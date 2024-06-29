@@ -18,6 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -48,8 +49,8 @@ final class ExecutablePluginTests {
                     Stage.ARCHIVE,
                     Step.FINALIZE,
                     null,
-                    Set.of(),
-                    Set.of(),
+                    new TreeSet<>(),
+                    new TreeSet<>(),
                     Cache.DISABLED
                 ),
                 new ConveyorTask(
@@ -57,8 +58,8 @@ final class ExecutablePluginTests {
                     Stage.ARCHIVE,
                     Step.FINALIZE,
                     null,
-                    Set.of(),
-                    Set.of(),
+                    new TreeSet<>(),
+                    new TreeSet<>(),
                     Cache.DISABLED
                 ),
                 new ConveyorTask(
@@ -66,8 +67,8 @@ final class ExecutablePluginTests {
                     Stage.ARCHIVE,
                     Step.FINALIZE,
                     null,
-                    Set.of(classes),
-                    Set.of(destination),
+                    new TreeSet<>(Set.of(classes)),
+                    new TreeSet<>(Set.of(destination)),
                     Cache.ENABLED
                 )
             );

@@ -55,8 +55,8 @@ public final class ${normalizedName} implements ConveyorPlugin {
                     }
                     return Optional.empty();
                 },
-                Set.of(),
-                Set.of(),
+                new TreeSet<>(),
+                new TreeSet<>(),
                 Cache.DISABLED
             )
         );

@@ -12,6 +12,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 public final class ExecutablePlugin implements ConveyorPlugin {
 
@@ -33,8 +34,8 @@ public final class ExecutablePlugin implements ConveyorPlugin {
                 Stage.ARCHIVE,
                 Step.FINALIZE,
                 new ExtractDependenciesAction(schematic, classesDirectory),
-                Set.of(),
-                Set.of(),
+                new TreeSet<>(),
+                new TreeSet<>(),
                 Cache.DISABLED
             ),
             new ConveyorTask(
@@ -42,8 +43,8 @@ public final class ExecutablePlugin implements ConveyorPlugin {
                 Stage.ARCHIVE,
                 Step.FINALIZE,
                 new WriteManifestAction(classesDirectory, configuration.get("main.class")),
-                Set.of(),
-                Set.of(),
+                new TreeSet<>(),
+                new TreeSet<>(),
                 Cache.DISABLED
             ),
             new ConveyorTask(
@@ -51,8 +52,8 @@ public final class ExecutablePlugin implements ConveyorPlugin {
                 Stage.ARCHIVE,
                 Step.FINALIZE,
                 new ArchiveExecutableAction(classesDirectory, destination),
-                Set.of(classesDirectory),
-                Set.of(destination),
+                new TreeSet<>(Set.of(classesDirectory)),
+                new TreeSet<>(Set.of(destination)),
                 Cache.ENABLED
             )
         );

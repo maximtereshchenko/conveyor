@@ -19,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -53,8 +54,8 @@ final class CopyResourcesTests {
                     Stage.COMPILE,
                     Step.FINALIZE,
                     null,
-                    Set.of(),
-                    Set.of(),
+                    new TreeSet<>(),
+                    new TreeSet<>(),
                     Cache.DISABLED
                 ),
                 new ConveyorTask(
@@ -62,8 +63,8 @@ final class CopyResourcesTests {
                     Stage.TEST,
                     Step.PREPARE,
                     null,
-                    Set.of(),
-                    Set.of(),
+                    new TreeSet<>(),
+                    new TreeSet<>(),
                     Cache.DISABLED
                 )
             );
