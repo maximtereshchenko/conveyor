@@ -34,6 +34,10 @@ final class Properties {
         return propertiesModel.path(SchematicPropertyKey.REMOTE_REPOSITORY_CACHE_DIRECTORY);
     }
 
+    Path tasksCacheDirectory() {
+        return propertiesModel.path(SchematicPropertyKey.TASKS_CACHE_DIRECTORY);
+    }
+
     Optional<String> value(String key) {
         return propertiesModel.value(key)
             .map(this::interpolated);

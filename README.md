@@ -66,6 +66,10 @@ A build tool for Java projects
     * Given schematic dependencies, task performs operations on the project and optionally produces
       artifact to be used by other schematics
     * Task can opt in for caching by declaring its inputs and outputs
+    * The property `conveyor.tasks.cache.directory` defines the directory, where tasks should store
+      cached outputs. It is relative to the directory, where the schematic definition is located.
+      The default value is `.conveyor-cache/tasks` located in the root schematic's directory
+      following by directories consisting of schematic's group and name
 * Properties
     * Properties are user-defined key-value pairs
     * Properties are inherited from a schematic used as a template
@@ -120,5 +124,5 @@ A build tool for Java projects
     * Remote repository is defined with a URL to a repository with `Maven 2` layout
     * The property `conveyor.repository.remote.cache.directory` defines the directory, where remote
       directories should store downloaded artifacts and schematics. It is relative to the directory,
-      where the schematic definition is located. The default value is `.conveyor-cache` located in
-      the root schematic's directory
+      where the schematic definition is located. The default value is `.conveyor-cache/repository`
+      located in the root schematic's directory

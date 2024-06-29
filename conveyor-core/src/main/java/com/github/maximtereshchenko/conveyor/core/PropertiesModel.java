@@ -39,13 +39,15 @@ final class PropertiesModel {
     PropertiesModel withResolvedPath(
         SchematicPropertyKey schematicPropertyKey,
         Path path,
-        String defaultValue
+        Path defaultValue
     ) {
         var copy = new HashMap<>(all);
         copy.put(
             schematicPropertyKey.fullName(),
             new PathValue(
-                path.resolve(value(schematicPropertyKey.fullName()).orElse(defaultValue))
+                value(schematicPropertyKey.fullName())
+                    .map(path::resolve)
+                    .orElse(defaultValue)
                     .normalize()
             )
         );

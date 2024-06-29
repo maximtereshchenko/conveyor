@@ -407,6 +407,66 @@ final class TasksFeatureTests extends ConveyorTest {
     }
 
     @Test
+    void givenCacheableTask_whenConstructToStage_thenCacheIsInDefaultDirectory(
+        @TempDir Path path,
+        ConveyorModule module,
+        BuilderFactory factory
+    ) throws Exception {
+        factory.repositoryBuilder(path)
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("cache")
+            )
+            .jar(
+                factory.jarBuilder("cache", path)
+            )
+            .install(path);
+
+        module.construct(factory.schematicDefinitionBuilder()
+            .repository(path)
+            .plugin("cache")
+            .conveyorJson(path), Stage.COMPILE);
+
+        var cache = path.resolve(".conveyor-cache")
+            .resolve("tasks")
+            .resolve("group")
+            .resolve("project")
+            .resolve("cache");
+        assertThat(cache.resolve("0").resolve("output")).exists();
+        assertThat(cache.resolve("inputs")).exists();
+        assertThat(cache.resolve("outputs")).exists();
+    }
+
+    @Test
+    void givenTaskCacheDirectoryProperty_whenConstructToStage_thenCacheIsInSpecifiedDirectory(
+        @TempDir Path path,
+        ConveyorModule module,
+        BuilderFactory factory
+    ) throws Exception {
+        factory.repositoryBuilder(path)
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("cache")
+            )
+            .jar(
+                factory.jarBuilder("cache", path)
+            )
+            .install(path);
+        var customCacheDirectory = path.resolve("custom-cache-directory");
+
+        module.construct(factory.schematicDefinitionBuilder()
+            .repository(path)
+            .plugin("cache")
+            .property("conveyor.tasks.cache.directory", customCacheDirectory.toString())
+            .conveyorJson(path), Stage.COMPILE);
+
+        var cache = customCacheDirectory.resolve("cache");
+        assertThat(cache.resolve("0").resolve("output")).exists();
+        assertThat(cache.resolve("inputs")).exists();
+        assertThat(cache.resolve("outputs")).exists();
+    }
+
+    @Test
     void givenCacheableTaskInputChanged_whenConstructToStage_thenTaskExecutedDuringNextConstruction(
         @TempDir Path path,
         ConveyorModule module,

@@ -97,6 +97,7 @@ final class Schematic {
         return plugins(completeModel, properties, preferences, repositories)
             .executeTasks(
                 conveyorSchematic,
+                properties,
                 stage
             )
             .map(path ->
@@ -252,12 +253,20 @@ final class Schematic {
     private <M extends LocalInheritanceHierarchyModel> Properties properties(
         M localInheritanceHierarchyModel
     ) {
+        var conveyorCache = localInheritanceHierarchyModel.rootPath()
+            .getParent()
+            .resolve(".conveyor-cache");
         return new Properties(
             localInheritanceHierarchyModel.properties()
                 .withResolvedPath(
                     SchematicPropertyKey.REMOTE_REPOSITORY_CACHE_DIRECTORY,
                     localInheritanceHierarchyModel.rootPath().getParent(),
-                    ".conveyor-cache"
+                    conveyorCache.resolve("repository")
+                )
+                .withResolvedPath(
+                    SchematicPropertyKey.TASKS_CACHE_DIRECTORY,
+                    localInheritanceHierarchyModel.path().getParent(),
+                    localInheritanceHierarchyModel.id().path(conveyorCache.resolve("tasks"))
                 )
         );
     }

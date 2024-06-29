@@ -43,7 +43,7 @@ final class StandaloneLocalSchematicModel implements LocalSchematicModel {
             .withResolvedPath(
                 SchematicPropertyKey.TEMPLATE_LOCATION,
                 path.getParent(),
-                "../" + DEFAULT_SCHEMATIC_DEFINITION_NAME
+                path.getParent().getParent().resolve(DEFAULT_SCHEMATIC_DEFINITION_NAME)
             )
             .with(SchematicPropertyKey.SCHEMATIC_DIRECTORY, path.getParent().toString());
     }

@@ -26,26 +26,36 @@ final class Plugins {
         this.classpathFactory = classpathFactory;
     }
 
-    Optional<Path> executeTasks(ConveyorSchematic conveyorSchematic, Stage stage) {
+    Optional<Path> executeTasks(
+        ConveyorSchematic conveyorSchematic,
+        Properties properties,
+        Stage stage
+    ) {
         var artifacts = new ArrayList<Path>();
         for (var task : tasks(conveyorSchematic, stage)) {
             LOGGER.log(System.Logger.Level.INFO, "Executing task {0}", task.name());
-            action(task, conveyorSchematic).get().ifPresent(artifacts::add);
+            action(
+                task,
+                properties,
+                conveyorSchematic.path().getParent()
+            )
+                .get()
+                .ifPresent(artifacts::add);
         }
         return artifacts.isEmpty() ? Optional.empty() : Optional.of(artifacts.getLast());
     }
 
-    private Supplier<Optional<Path>> action(ConveyorTask task, ConveyorSchematic schematic) {
-        var directory = schematic.path().getParent();
-        var cache = directory.resolve(".conveyor").resolve("cache").resolve(task.name());
+    private Supplier<Optional<Path>> action(
+        ConveyorTask task,
+        Properties properties,
+        Path directory
+    ) {
         return switch (task.cache()) {
             case ENABLED -> new CacheableAction(
                 task.action(),
                 task.inputs(),
                 task.outputs(),
-                cache.resolve("input-checksum"),
-                cache.resolve("output-checksum"),
-                cache,
+                new TaskCache(properties.tasksCacheDirectory().resolve(task.name())),
                 directory
             );
             case DISABLED -> task.action();

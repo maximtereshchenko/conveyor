@@ -22,7 +22,7 @@ public final class ${normalizedName} implements ConveyorPlugin {
         var output = directory.resolve("output");
         return List.of(
             new ConveyorTask(
-                "",
+                "cache",
                 Stage.COMPILE,
                 Step.RUN,
                 () -> {
