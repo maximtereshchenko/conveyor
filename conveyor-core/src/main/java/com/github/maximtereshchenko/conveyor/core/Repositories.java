@@ -5,17 +5,17 @@ import com.github.maximtereshchenko.conveyor.api.schematic.SchematicDefinition;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.LinkedHashSet;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.Set;
 
 final class Repositories {
 
-    private final Set<Repository<Path>> all;
+    private final LinkedHashSet<Repository<Path>> all;
     private final SchematicDefinitionConverter schematicDefinitionConverter;
 
     Repositories(
-        Set<Repository<Path>> all,
+        LinkedHashSet<Repository<Path>> all,
         SchematicDefinitionConverter schematicDefinitionConverter
     ) {
         this.all = all;
