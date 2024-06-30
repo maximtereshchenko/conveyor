@@ -34,9 +34,7 @@ public final class CompilePlugin implements ConveyorPlugin {
                 Stage.COMPILE,
                 Step.RUN,
                 configuredPath(configuration, "sources.directory"),
-                schematic.classpath(
-                    Set.of(DependencyScope.IMPLEMENTATION)
-                ),
+                schematic.classpath(Set.of(DependencyScope.IMPLEMENTATION)),
                 classesDirectory,
                 compiler
             ),

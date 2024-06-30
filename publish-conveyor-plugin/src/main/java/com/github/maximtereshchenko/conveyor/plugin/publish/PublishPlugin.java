@@ -2,7 +2,10 @@ package com.github.maximtereshchenko.conveyor.plugin.publish;
 
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import com.github.maximtereshchenko.conveyor.common.api.Step;
-import com.github.maximtereshchenko.conveyor.plugin.api.*;
+import com.github.maximtereshchenko.conveyor.plugin.api.Cache;
+import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
+import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
+import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
 
 import java.nio.file.Paths;
 import java.util.List;
@@ -21,23 +24,19 @@ public final class PublishPlugin implements ConveyorPlugin {
         ConveyorSchematic schematic,
         Map<String, String> configuration
     ) {
-        var artifact = Paths.get(configuration.get("artifact.location"))
-            .toAbsolutePath()
-            .normalize();
         return List.of(
             new ConveyorTask(
                 "publish-artifact",
                 Stage.PUBLISH,
                 Step.RUN,
                 new PublishArtifactAction(
-                    artifact,
+                    Paths.get(configuration.get("artifact.location"))
+                        .toAbsolutePath()
+                        .normalize(),
                     configuration.get("repository"),
                     schematic
                 ),
-                Set.of(
-                    new PathConveyorTaskInput(artifact),
-                    new PathConveyorTaskInput(schematic.path())
-                ),
+                Set.of(),
                 Set.of(),
                 Cache.DISABLED
             )

@@ -28,14 +28,16 @@ final class SpringBootPluginTests {
     void givenPlugin_whenTasks_thenTaskBindToArchiveFinalize(@TempDir Path path)
         throws IOException {
         var container = path.resolve("container");
+        var classes = path.resolve("classes");
         var destination = path.resolve("destination");
+        var dependency = path.resolve("dependency");
 
         assertThat(
             plugin.tasks(
-                FakeConveyorSchematic.from(path),
+                FakeConveyorSchematic.from(path, dependency),
                 Map.of(
                     "container.directory", container.toString(),
-                    "classes.directory", path.resolve("classes").toString(),
+                    "classes.directory", classes.toString(),
                     "destination", destination.toString()
                 )
             )
@@ -43,13 +45,16 @@ final class SpringBootPluginTests {
             .usingRecursiveFieldByFieldElementComparatorIgnoringFields("action")
             .containsExactly(
                 new ConveyorTask(
-                    "copy-dependencies",
+                    "copy-classpath",
                     Stage.ARCHIVE,
                     Step.FINALIZE,
                     null,
-                    Set.of(),
-                    Set.of(),
-                    Cache.DISABLED
+                    Set.of(
+                        new PathConveyorTaskInput(classes),
+                        new PathConveyorTaskInput(dependency)
+                    ),
+                    Set.of(new PathConveyorTaskOutput(container.resolve("classpath"))),
+                    Cache.ENABLED
                 ),
                 new ConveyorTask(
                     "extract-spring-boot-launcher",

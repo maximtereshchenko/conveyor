@@ -1,5 +1,6 @@
 package com.github.maximtereshchenko.conveyor.plugin.springboot;
 
+import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import com.github.maximtereshchenko.conveyor.common.api.Step;
 import com.github.maximtereshchenko.conveyor.plugin.api.*;
@@ -10,6 +11,8 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class SpringBootPlugin implements ConveyorPlugin {
 
@@ -23,22 +26,23 @@ public final class SpringBootPlugin implements ConveyorPlugin {
         ConveyorSchematic schematic,
         Map<String, String> configuration
     ) {
+        var classesDirectory = configuredPath(configuration, "classes.directory");
         var containerDirectory = configuredPath(configuration, "container.directory");
         var classpathDirectory = "classpath";
+        var classpathDestination = containerDirectory.resolve(classpathDirectory);
+        var dependencies = schematic.classpath(Set.of(DependencyScope.IMPLEMENTATION));
         var destination = configuredPath(configuration, "destination");
         return List.of(
             new ConveyorTask(
-                "copy-dependencies",
+                "copy-classpath",
                 Stage.ARCHIVE,
                 Step.FINALIZE,
-                new CopyClassPathAction(
-                    configuredPath(configuration, "classes.directory"),
-                    containerDirectory.resolve(classpathDirectory),
-                    schematic
-                ),
-                Set.of(),
-                Set.of(),
-                Cache.DISABLED
+                new CopyClasspathAction(classesDirectory, dependencies, classpathDestination),
+                Stream.concat(Stream.of(classesDirectory), dependencies.stream())
+                    .map(PathConveyorTaskInput::new)
+                    .collect(Collectors.toSet()),
+                Set.of(new PathConveyorTaskOutput(classpathDestination)),
+                Cache.ENABLED
             ),
             new ConveyorTask(
                 "extract-spring-boot-launcher",
