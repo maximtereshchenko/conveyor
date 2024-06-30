@@ -8,6 +8,7 @@ public record PathConveyorTaskInput(Path path) implements ConveyorTaskInput {
     public int compareTo(ConveyorTaskInput input) {
         return switch (input) {
             case PathConveyorTaskInput pathInput -> path.compareTo(pathInput.path());
+            case KeyValueConveyorTaskInput ignored -> 1;
         };
     }
 }

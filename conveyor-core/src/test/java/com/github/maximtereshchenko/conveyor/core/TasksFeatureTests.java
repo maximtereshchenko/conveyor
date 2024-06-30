@@ -556,6 +556,47 @@ final class TasksFeatureTests extends ConveyorTest {
         assertThat(instant(output)).isNotEqualTo(instant);
     }
 
+    @Test
+    void givenCacheableTaskInputConfigurationChanged_whenConstructToStage_thenTaskIsExecuted(
+        @TempDir Path path,
+        ConveyorModule module,
+        BuilderFactory factory
+    ) throws Exception {
+        factory.repositoryBuilder(path)
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("cache")
+            )
+            .jar(
+                factory.jarBuilder("cache", path)
+            )
+            .install(path);
+        var output = path.resolve("output");
+
+        module.construct(
+            factory.schematicDefinitionBuilder()
+                .repository(path)
+                .plugin("cache")
+                .conveyorJson(path),
+            Stage.COMPILE
+        );
+        var instant = instant(output);
+        module.construct(
+            factory.schematicDefinitionBuilder()
+                .repository(path)
+                .plugin(
+                    "group",
+                    "cache",
+                    "1.0.0",
+                    Map.of("input", "changed")
+                )
+                .conveyorJson(path),
+            Stage.COMPILE
+        );
+
+        assertThat(instant(output)).isNotEqualTo(instant);
+    }
+
     private Instant instant(Path path, String fileName) throws IOException {
         return instant(path.resolve(fileName));
     }

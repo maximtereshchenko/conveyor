@@ -103,8 +103,9 @@ final class SchematicModelFactory {
         Path path,
         Function<StandaloneLocalSchematicModel, ExtendableLocalInheritanceHierarchyModel> combiner
     ) {
-        var extendableLocalInheritanceHierarchyModel = combiner.apply(standaloneLocalSchematicModel(
-            path));
+        var extendableLocalInheritanceHierarchyModel = combiner.apply(
+            standaloneLocalSchematicModel(path)
+        );
         if (hasLocalTemplate(extendableLocalInheritanceHierarchyModel)) {
             return extendableLocalInheritanceHierarchyModel(
                 extendableLocalInheritanceHierarchyModel.templatePath(),

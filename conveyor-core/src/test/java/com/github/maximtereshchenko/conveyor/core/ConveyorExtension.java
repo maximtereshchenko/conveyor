@@ -35,7 +35,7 @@ final class ConveyorExtension implements ParameterResolver {
         );
         store.getOrComputeIfAbsent(
             ConveyorModule.class,
-            key -> new ConveyorFacade(jacksonAdapter)
+            key -> new ConveyorModuleProxy(jacksonAdapter)
         );
         store.getOrComputeIfAbsent(
             BuilderFactory.class,

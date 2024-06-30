@@ -33,10 +33,20 @@ public final class ${normalizedName} implements ConveyorPlugin {
                     }
                     return Optional.empty();
                 },
-                Set.of(new PathConveyorTaskInput(directory.resolve("input"))),
+                inputs(directory, configuration),
                 Set.of(new PathConveyorTaskOutput(output)),
                 Cache.ENABLED
             )
         );
+    }
+
+    private Set<ConveyorTaskInput> inputs(Path directory, Map<String, String> configuration) {
+        var inputs = new HashSet<ConveyorTaskInput>();
+        var inputName = "input";
+        inputs.add(new PathConveyorTaskInput(directory.resolve(inputName)));
+        if (configuration.containsKey(inputName)) {
+            inputs.add(new KeyValueConveyorTaskInput(inputName, configuration.get(inputName)));
+        }
+        return inputs;
     }
 }

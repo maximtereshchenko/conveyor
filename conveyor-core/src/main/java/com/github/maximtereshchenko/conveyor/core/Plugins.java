@@ -66,7 +66,13 @@ final class Plugins {
         return conveyorPlugins()
             .filter(conveyorPlugin -> named(conveyorPlugin.name()).isEnabled())
             .sorted(this::byPosition)
-            .flatMap(conveyorPlugin -> tasks(conveyorSchematic, conveyorPlugin))
+            .map(conveyorPlugin ->
+                conveyorPlugin.tasks(
+                    conveyorSchematic,
+                    named(conveyorPlugin.name()).configuration()
+                )
+            )
+            .flatMap(Collection::stream)
             .filter(task -> isBeforeOrEqual(task, stage))
             .sorted(byStageAndStep())
             .toList();
@@ -91,17 +97,6 @@ final class Plugins {
 
     private boolean isBeforeOrEqual(ConveyorTask task, Stage stage) {
         return task.stage().compareTo(stage) <= 0;
-    }
-
-    private Stream<ConveyorTask> tasks(
-        ConveyorSchematic conveyorSchematic,
-        ConveyorPlugin conveyorPlugin
-    ) {
-        return conveyorPlugin.tasks(
-                conveyorSchematic,
-                named(conveyorPlugin.name()).configuration()
-            )
-            .stream();
     }
 
     private Stream<ConveyorPlugin> conveyorPlugins() {
