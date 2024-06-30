@@ -1,5 +1,6 @@
 package com.github.maximtereshchenko.conveyor.plugin.compile;
 
+import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import com.github.maximtereshchenko.conveyor.common.api.Step;
 import com.github.maximtereshchenko.conveyor.plugin.api.Cache;
@@ -26,10 +27,18 @@ final class CompilePluginTests extends BaseTest {
         var classes = path.resolve("classes");
         var testSources = path.resolve("test-sources");
         var testClasses = path.resolve("test-classes");
+        var implementationDependency = path.resolve("implementation");
+        var testDependency = path.resolve("test");
 
         assertThat(
             plugin.tasks(
-                FakeConveyorSchematic.from(path),
+                FakeConveyorSchematic.from(
+                    path,
+                    Map.of(
+                        implementationDependency, DependencyScope.IMPLEMENTATION,
+                        testDependency, DependencyScope.TEST
+                    )
+                ),
                 Map.of(
                     "sources.directory", sources.toString(),
                     "classes.directory", classes.toString(),
@@ -45,7 +54,10 @@ final class CompilePluginTests extends BaseTest {
                     Stage.COMPILE,
                     Step.RUN,
                     null,
-                    Set.of(new PathConveyorTaskInput(sources)),
+                    Set.of(
+                        new PathConveyorTaskInput(sources),
+                        new PathConveyorTaskInput(implementationDependency)
+                    ),
                     Set.of(new PathConveyorTaskOutput(classes)),
                     Cache.ENABLED
                 ),
@@ -65,7 +77,9 @@ final class CompilePluginTests extends BaseTest {
                     null,
                     Set.of(
                         new PathConveyorTaskInput(classes),
-                        new PathConveyorTaskInput(testSources)
+                        new PathConveyorTaskInput(testSources),
+                        new PathConveyorTaskInput(implementationDependency),
+                        new PathConveyorTaskInput(testDependency)
                     ),
                     Set.of(new PathConveyorTaskOutput(testClasses)),
                     Cache.ENABLED

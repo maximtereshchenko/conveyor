@@ -1,5 +1,6 @@
 package com.github.maximtereshchenko.conveyor.plugin.compile;
 
+import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import com.github.maximtereshchenko.conveyor.common.api.Step;
 import com.github.maximtereshchenko.conveyor.compiler.Compiler;
@@ -10,6 +11,8 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class CompilePlugin implements ConveyorPlugin {
 
@@ -23,25 +26,19 @@ public final class CompilePlugin implements ConveyorPlugin {
         ConveyorSchematic schematic,
         Map<String, String> configuration
     ) {
-        var sourcesDirectory = configuredPath(configuration, "sources.directory");
         var classesDirectory = configuredPath(configuration, "classes.directory");
-        var testSourcesDirectory = configuredPath(configuration, "test.sources.directory");
-        var testClassesDirectory = configuredPath(configuration, "test.classes.directory");
         var compiler = new Compiler();
         return List.of(
-            new ConveyorTask(
+            compileSourcesConveyorTask(
                 "compile-sources",
                 Stage.COMPILE,
                 Step.RUN,
-                new CompileSourcesAction(
-                    sourcesDirectory,
-                    classesDirectory,
-                    compiler,
-                    schematic
+                configuredPath(configuration, "sources.directory"),
+                schematic.classpath(
+                    Set.of(DependencyScope.IMPLEMENTATION)
                 ),
-                Set.of(new PathConveyorTaskInput(sourcesDirectory)),
-                Set.of(new PathConveyorTaskOutput(classesDirectory)),
-                Cache.ENABLED
+                classesDirectory,
+                compiler
             ),
             new ConveyorTask(
                 "publish-exploded-jar-artifact",
@@ -52,24 +49,52 @@ public final class CompilePlugin implements ConveyorPlugin {
                 Set.of(),
                 Cache.DISABLED
             ),
-            new ConveyorTask(
+            compileSourcesConveyorTask(
                 "compile-test-sources",
                 Stage.TEST,
                 Step.PREPARE,
-                new CompileTestSourcesAction(
-                    testSourcesDirectory,
-                    testClassesDirectory,
-                    compiler,
-                    schematic,
-                    classesDirectory
-                ),
-                Set.of(
-                    new PathConveyorTaskInput(classesDirectory),
-                    new PathConveyorTaskInput(testSourcesDirectory)
-                ),
-                Set.of(new PathConveyorTaskOutput(testClassesDirectory)),
-                Cache.ENABLED
+                configuredPath(configuration, "test.sources.directory"),
+                Stream.concat(
+                        schematic.classpath(
+                                Set.of(DependencyScope.IMPLEMENTATION, DependencyScope.TEST)
+                            )
+                            .stream(),
+                        Stream.of(classesDirectory)
+                    )
+                    .collect(Collectors.toSet()),
+                configuredPath(configuration, "test.classes.directory"),
+                compiler
             )
+        );
+    }
+
+    private ConveyorTask compileSourcesConveyorTask(
+        String name,
+        Stage stage,
+        Step step,
+        Path sourcesDirectory,
+        Set<Path> classpath,
+        Path classesDirectory,
+        Compiler compiler
+    ) {
+        return new ConveyorTask(
+            name,
+            stage,
+            step,
+            new CompileSourcesAction(
+                sourcesDirectory,
+                classpath,
+                classesDirectory,
+                compiler
+            ),
+            Stream.concat(
+                    Stream.of(sourcesDirectory),
+                    classpath.stream()
+                )
+                .map(PathConveyorTaskInput::new)
+                .collect(Collectors.toSet()),
+            Set.of(new PathConveyorTaskOutput(classesDirectory)),
+            Cache.ENABLED
         );
     }
 

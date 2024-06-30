@@ -7,18 +7,17 @@ import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public final class FakeConveyorSchematic implements ConveyorSchematic {
 
     private final Path path;
-    private final Set<Path> dependencies;
+    private final Map<Path, DependencyScope> dependencies;
     private final List<PublishedArtifact> published = new ArrayList<>();
 
-    private FakeConveyorSchematic(Path path, Set<Path> dependencies) {
+    private FakeConveyorSchematic(Path path, Map<Path, DependencyScope> dependencies) {
         this.path = path;
         this.dependencies = dependencies;
     }
@@ -30,6 +29,19 @@ public final class FakeConveyorSchematic implements ConveyorSchematic {
 
     public static FakeConveyorSchematic from(Path directory, Set<Path> dependencies)
         throws IOException {
+        return from(
+            directory,
+            dependencies.stream()
+                .collect(
+                    Collectors.toMap(Function.identity(), path -> DependencyScope.IMPLEMENTATION)
+                )
+        );
+    }
+
+    public static FakeConveyorSchematic from(
+        Path directory,
+        Map<Path, DependencyScope> dependencies
+    ) throws IOException {
         var conveyorJson = directory.resolve("conveyor.json");
         if (!Files.exists(conveyorJson)) {
             Files.createFile(conveyorJson);
@@ -49,7 +61,11 @@ public final class FakeConveyorSchematic implements ConveyorSchematic {
 
     @Override
     public Set<Path> classpath(Set<DependencyScope> scopes) {
-        return dependencies;
+        return dependencies.entrySet()
+            .stream()
+            .filter(entry -> scopes.contains(entry.getValue()))
+            .map(Map.Entry::getKey)
+            .collect(Collectors.toSet());
     }
 
     @Override
