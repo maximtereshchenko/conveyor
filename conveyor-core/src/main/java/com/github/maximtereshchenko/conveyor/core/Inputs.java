@@ -10,8 +10,22 @@ import java.util.zip.Checksum;
 
 final class Inputs extends Boundaries<ConveyorTaskInput> {
 
+    private final Set<ConveyorTaskInput> all;
+    private boolean isChecksumCached = false;
+    private long checksum = 0;
+
     Inputs(Set<ConveyorTaskInput> all) {
-        super(all);
+        this.all = all;
+    }
+
+    @Override
+    long checksum() {
+        if (isChecksumCached) {
+            return checksum;
+        }
+        checksum = checksum(all);
+        isChecksumCached = true;
+        return checksum;
     }
 
     @Override

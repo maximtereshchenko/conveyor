@@ -28,10 +28,11 @@ final class ExecutablePluginTests {
         throws IOException {
         var classes = path.resolve("classes");
         var destination = path.resolve("destination");
+        var dependency = path.resolve("dependency");
 
         assertThat(
             plugin.tasks(
-                FakeConveyorSchematic.from(path),
+                FakeConveyorSchematic.from(path, dependency),
                 Map.of(
                     "classes.directory", classes.toString(),
                     "main.class", "",
@@ -46,9 +47,12 @@ final class ExecutablePluginTests {
                     Stage.ARCHIVE,
                     Step.FINALIZE,
                     null,
-                    Set.of(),
-                    Set.of(),
-                    Cache.DISABLED
+                    Set.of(
+                        new PathConveyorTaskInput(classes),
+                        new PathConveyorTaskInput(dependency)
+                    ),
+                    Set.of(new PathConveyorTaskOutput(classes)),
+                    Cache.ENABLED
                 ),
                 new ConveyorTask(
                     "write-manifest",

@@ -68,8 +68,6 @@ final class ClasspathFactory {
             this.artifact = artifact;
         }
 
-        abstract Optional<Artifact> resolved(Relations relations);
-
         Artifact artifact() {
             return artifact;
         }
@@ -80,6 +78,8 @@ final class ClasspathFactory {
                 .map(dependency -> new Edge(artifact, dependency))
                 .toList();
         }
+
+        abstract Optional<Artifact> resolved(Relations relations);
     }
 
     private static class Relations {

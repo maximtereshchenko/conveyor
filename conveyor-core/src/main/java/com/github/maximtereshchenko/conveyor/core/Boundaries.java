@@ -11,25 +11,13 @@ import java.util.zip.Checksum;
 
 abstract class Boundaries<T extends Comparable<T>> {
 
-    private final Set<T> all;
-
-    Boundaries(Set<T> all) {
-        this.all = all;
-    }
-
-    Set<T> all() {
-        return all;
-    }
-
-    long checksum() {
+    long checksum(Set<T> elements) {
         var checksum = new CRC32C();
-        for (var element : new TreeSet<>(all)) {
+        for (var element : new TreeSet<>(elements)) {
             update(checksum, element);
         }
         return checksum.getValue();
     }
-
-    abstract void update(Checksum checksum, T element);
 
     void update(Checksum checksum, Path path) {
         try {
@@ -40,4 +28,8 @@ abstract class Boundaries<T extends Comparable<T>> {
             throw new UncheckedIOException(e);
         }
     }
+
+    abstract long checksum();
+
+    abstract void update(Checksum checksum, T element);
 }

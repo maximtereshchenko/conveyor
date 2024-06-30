@@ -10,8 +10,15 @@ import java.util.zip.Checksum;
 
 final class Outputs extends Boundaries<ConveyorTaskOutput> {
 
+    private final Set<ConveyorTaskOutput> all;
+
     Outputs(Set<ConveyorTaskOutput> all) {
-        super(all);
+        this.all = all;
+    }
+
+    @Override
+    long checksum() {
+        return checksum(all);
     }
 
     @Override
@@ -22,8 +29,7 @@ final class Outputs extends Boundaries<ConveyorTaskOutput> {
     }
 
     Set<Path> paths() {
-        return all()
-            .stream()
+        return all.stream()
             .map(output ->
                 switch (output) {
                     case PathConveyorTaskOutput pathOutput -> pathOutput.path();
