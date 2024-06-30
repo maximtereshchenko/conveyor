@@ -6,21 +6,21 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.Set;
-import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.function.Supplier;
 
 final class CacheableAction implements Supplier<Optional<Path>> {
 
     private final Supplier<Optional<Path>> original;
-    private final SortedSet<Path> inputs;
-    private final SortedSet<Path> outputs;
+    private final Set<Path> inputs;
+    private final Set<Path> outputs;
     private final TaskCache taskCache;
     private final Path directory;
 
     CacheableAction(
         Supplier<Optional<Path>> original,
-        SortedSet<Path> inputs,
-        SortedSet<Path> outputs,
+        Set<Path> inputs,
+        Set<Path> outputs,
         TaskCache taskCache,
         Path directory
     ) {
@@ -55,7 +55,7 @@ final class CacheableAction implements Supplier<Optional<Path>> {
 
     private long checksum(Set<Path> paths) throws IOException {
         var visitor = new ChecksumFileVisitor();
-        for (var path : paths) {
+        for (var path : new TreeSet<>(paths)) {
             if (Files.exists(path)) {
                 Files.walkFileTree(path, visitor);
             }

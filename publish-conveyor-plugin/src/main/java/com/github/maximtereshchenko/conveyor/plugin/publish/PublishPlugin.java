@@ -11,7 +11,6 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
 public final class PublishPlugin implements ConveyorPlugin {
 
@@ -38,8 +37,8 @@ public final class PublishPlugin implements ConveyorPlugin {
                     configuration.get("repository"),
                     schematic
                 ),
-                new TreeSet<>(Set.of(artifact, schematic.path())),
-                new TreeSet<>(),
+                Set.of(artifact, schematic.path()),
+                Set.of(),
                 Cache.DISABLED
             )
         );

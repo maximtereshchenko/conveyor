@@ -12,7 +12,6 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
 public final class ArchivePlugin implements ConveyorPlugin {
 
@@ -34,8 +33,8 @@ public final class ArchivePlugin implements ConveyorPlugin {
                 Stage.ARCHIVE,
                 Step.RUN,
                 new ArchiveAction(classesDirectory, destination),
-                new TreeSet<>(Set.of(classesDirectory)),
-                new TreeSet<>(Set.of(destination)),
+                Set.of(classesDirectory),
+                Set.of(destination),
                 Cache.ENABLED
             ),
             new ConveyorTask(
@@ -43,8 +42,8 @@ public final class ArchivePlugin implements ConveyorPlugin {
                 Stage.ARCHIVE,
                 Step.FINALIZE,
                 new PublishJarArtifactTask(destination),
-                new TreeSet<>(),
-                new TreeSet<>(),
+                Set.of(),
+                Set.of(),
                 Cache.DISABLED
             )
         );

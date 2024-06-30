@@ -26,8 +26,8 @@ public final class ${normalizedName} implements ConveyorPlugin {
                     writeProperties(schematic, Set.of(configuration.get("keys").split(",")));
                     return Optional.empty();
                 },
-                new TreeSet<>(),
-                new TreeSet<>(),
+                Set.of(),
+                Set.of(),
                 Cache.DISABLED
             )
         );

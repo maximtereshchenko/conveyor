@@ -13,7 +13,6 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
 public final class CompilePlugin implements ConveyorPlugin {
 
@@ -43,8 +42,8 @@ public final class CompilePlugin implements ConveyorPlugin {
                     compiler,
                     schematic
                 ),
-                new TreeSet<>(Set.of(sourcesDirectory)),
-                new TreeSet<>(Set.of(classesDirectory)),
+                Set.of(sourcesDirectory),
+                Set.of(classesDirectory),
                 Cache.ENABLED
             ),
             new ConveyorTask(
@@ -52,8 +51,8 @@ public final class CompilePlugin implements ConveyorPlugin {
                 Stage.COMPILE,
                 Step.FINALIZE,
                 new PublishExplodedJarArtifactTask(classesDirectory),
-                new TreeSet<>(),
-                new TreeSet<>(),
+                Set.of(),
+                Set.of(),
                 Cache.DISABLED
             ),
             new ConveyorTask(
@@ -67,8 +66,8 @@ public final class CompilePlugin implements ConveyorPlugin {
                     schematic,
                     classesDirectory
                 ),
-                new TreeSet<>(Set.of(classesDirectory, testSourcesDirectory)),
-                new TreeSet<>(Set.of(testClassesDirectory)),
+                Set.of(classesDirectory, testSourcesDirectory),
+                Set.of(testClassesDirectory),
                 Cache.ENABLED
             )
         );

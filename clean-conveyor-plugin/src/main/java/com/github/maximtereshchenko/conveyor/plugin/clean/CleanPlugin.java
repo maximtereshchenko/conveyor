@@ -10,7 +10,7 @@ import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeSet;
+import java.util.Set;
 
 public final class CleanPlugin implements ConveyorPlugin {
 
@@ -30,8 +30,8 @@ public final class CleanPlugin implements ConveyorPlugin {
                 Stage.CLEAN,
                 Step.RUN,
                 new CleanAction(Paths.get(configuration.get("directory"))),
-                new TreeSet<>(),
-                new TreeSet<>(),
+                Set.of(),
+                Set.of(),
                 Cache.DISABLED
             )
         );

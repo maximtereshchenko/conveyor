@@ -13,7 +13,6 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
 public final class SpringBootPlugin implements ConveyorPlugin {
 
@@ -40,8 +39,8 @@ public final class SpringBootPlugin implements ConveyorPlugin {
                     containerDirectory.resolve(classpathDirectory),
                     schematic
                 ),
-                new TreeSet<>(),
-                new TreeSet<>(),
+                Set.of(),
+                Set.of(),
                 Cache.DISABLED
             ),
             new ConveyorTask(
@@ -49,8 +48,8 @@ public final class SpringBootPlugin implements ConveyorPlugin {
                 Stage.ARCHIVE,
                 Step.FINALIZE,
                 new ExtractSpringBootLauncherAction(containerDirectory),
-                new TreeSet<>(),
-                new TreeSet<>(),
+                Set.of(),
+                Set.of(),
                 Cache.DISABLED
             ),
             new ConveyorTask(
@@ -62,8 +61,8 @@ public final class SpringBootPlugin implements ConveyorPlugin {
                     classpathDirectory,
                     configuration.get("launched.class")
                 ),
-                new TreeSet<>(),
-                new TreeSet<>(),
+                Set.of(),
+                Set.of(),
                 Cache.DISABLED
             ),
             new ConveyorTask(
@@ -71,8 +70,8 @@ public final class SpringBootPlugin implements ConveyorPlugin {
                 Stage.ARCHIVE,
                 Step.FINALIZE,
                 new WriteManifestAction(containerDirectory),
-                new TreeSet<>(),
-                new TreeSet<>(),
+                Set.of(),
+                Set.of(),
                 Cache.DISABLED
             ),
             new ConveyorTask(
@@ -80,8 +79,8 @@ public final class SpringBootPlugin implements ConveyorPlugin {
                 Stage.ARCHIVE,
                 Step.FINALIZE,
                 new ArchiveExecutableAction(containerDirectory, destination),
-                new TreeSet<>(Set.of(containerDirectory)),
-                new TreeSet<>(Set.of(destination)),
+                Set.of(containerDirectory),
+                Set.of(destination),
                 Cache.ENABLED
             )
         );

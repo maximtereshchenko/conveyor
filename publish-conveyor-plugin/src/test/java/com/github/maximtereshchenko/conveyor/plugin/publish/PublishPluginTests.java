@@ -17,7 +17,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -44,8 +43,8 @@ final class PublishPluginTests {
                     Stage.PUBLISH,
                     Step.RUN,
                     null,
-                    new TreeSet<>(Set.of(artifact, schematic.path())),
-                    new TreeSet<>(),
+                    Set.of(artifact, schematic.path()),
+                    Set.of(),
                     Cache.DISABLED
                 )
             );

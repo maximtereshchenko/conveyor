@@ -19,7 +19,6 @@ import java.nio.file.Path;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.TreeSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -50,8 +49,8 @@ final class SpringBootPluginTests {
                     Stage.ARCHIVE,
                     Step.FINALIZE,
                     null,
-                    new TreeSet<>(),
-                    new TreeSet<>(),
+                    Set.of(),
+                    Set.of(),
                     Cache.DISABLED
                 ),
                 new ConveyorTask(
@@ -59,8 +58,8 @@ final class SpringBootPluginTests {
                     Stage.ARCHIVE,
                     Step.FINALIZE,
                     null,
-                    new TreeSet<>(),
-                    new TreeSet<>(),
+                    Set.of(),
+                    Set.of(),
                     Cache.DISABLED
                 ),
                 new ConveyorTask(
@@ -68,8 +67,8 @@ final class SpringBootPluginTests {
                     Stage.ARCHIVE,
                     Step.FINALIZE,
                     null,
-                    new TreeSet<>(),
-                    new TreeSet<>(),
+                    Set.of(),
+                    Set.of(),
                     Cache.DISABLED
                 ),
                 new ConveyorTask(
@@ -77,8 +76,8 @@ final class SpringBootPluginTests {
                     Stage.ARCHIVE,
                     Step.FINALIZE,
                     null,
-                    new TreeSet<>(),
-                    new TreeSet<>(),
+                    Set.of(),
+                    Set.of(),
                     Cache.DISABLED
                 ),
                 new ConveyorTask(
@@ -86,8 +85,8 @@ final class SpringBootPluginTests {
                     Stage.ARCHIVE,
                     Step.FINALIZE,
                     null,
-                    new TreeSet<>(Set.of(container)),
-                    new TreeSet<>(Set.of(destination)),
+                    Set.of(container),
+                    Set.of(destination),
                     Cache.ENABLED
                 )
             );

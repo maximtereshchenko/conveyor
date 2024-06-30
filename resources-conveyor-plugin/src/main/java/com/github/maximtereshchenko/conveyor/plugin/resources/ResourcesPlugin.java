@@ -11,7 +11,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeSet;
+import java.util.Set;
 
 public final class ResourcesPlugin implements ConveyorPlugin {
 
@@ -34,8 +34,8 @@ public final class ResourcesPlugin implements ConveyorPlugin {
                     configuredPath(configuration, "resources.directory"),
                     configuredPath(configuration, "classes.directory")
                 ),
-                new TreeSet<>(),
-                new TreeSet<>(),
+                Set.of(),
+                Set.of(),
                 Cache.DISABLED
             ),
             new ConveyorTask(
@@ -46,8 +46,8 @@ public final class ResourcesPlugin implements ConveyorPlugin {
                     configuredPath(configuration, "test.resources.directory"),
                     configuredPath(configuration, "test.classes.directory")
                 ),
-                new TreeSet<>(),
-                new TreeSet<>(),
+                Set.of(),
+                Set.of(),
                 Cache.DISABLED
             )
         );

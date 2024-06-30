@@ -5,7 +5,7 @@ import com.github.maximtereshchenko.conveyor.common.api.Step;
 
 import java.nio.file.Path;
 import java.util.Optional;
-import java.util.SortedSet;
+import java.util.Set;
 import java.util.function.Supplier;
 
 public record ConveyorTask(
@@ -13,7 +13,7 @@ public record ConveyorTask(
     Stage stage,
     Step step,
     Supplier<Optional<Path>> action,
-    SortedSet<Path> inputs,
-    SortedSet<Path> outputs,
+    Set<Path> inputs,
+    Set<Path> outputs,
     Cache cache
 ) {}

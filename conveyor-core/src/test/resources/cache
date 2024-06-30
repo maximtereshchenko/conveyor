@@ -33,8 +33,8 @@ public final class ${normalizedName} implements ConveyorPlugin {
                     }
                     return Optional.empty();
                 },
-                new TreeSet<>(Set.of(directory.resolve("input"))),
-                new TreeSet<>(Set.of(output)),
+                Set.of(directory.resolve("input")),
+                Set.of(output),
                 Cache.ENABLED
             )
         );

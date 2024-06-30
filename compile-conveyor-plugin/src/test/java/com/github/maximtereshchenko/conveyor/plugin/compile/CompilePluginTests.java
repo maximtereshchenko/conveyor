@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -44,8 +43,8 @@ final class CompilePluginTests extends BaseTest {
                     Stage.COMPILE,
                     Step.RUN,
                     null,
-                    new TreeSet<>(Set.of(sources)),
-                    new TreeSet<>(Set.of(classes)),
+                    Set.of(sources),
+                    Set.of(classes),
                     Cache.ENABLED
                 ),
                 new ConveyorTask(
@@ -53,8 +52,8 @@ final class CompilePluginTests extends BaseTest {
                     Stage.COMPILE,
                     Step.FINALIZE,
                     null,
-                    new TreeSet<>(),
-                    new TreeSet<>(),
+                    Set.of(),
+                    Set.of(),
                     Cache.DISABLED
                 ),
                 new ConveyorTask(
@@ -62,8 +61,8 @@ final class CompilePluginTests extends BaseTest {
                     Stage.TEST,
                     Step.PREPARE,
                     null,
-                    new TreeSet<>(Set.of(classes, testSources)),
-                    new TreeSet<>(Set.of(testClasses)),
+                    Set.of(classes, testSources),
+                    Set.of(testClasses),
                     Cache.ENABLED
                 )
             );
