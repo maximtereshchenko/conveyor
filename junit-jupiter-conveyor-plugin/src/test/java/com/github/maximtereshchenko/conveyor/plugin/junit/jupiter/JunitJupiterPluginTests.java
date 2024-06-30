@@ -1,5 +1,6 @@
 package com.github.maximtereshchenko.conveyor.plugin.junit.jupiter;
 
+import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import com.github.maximtereshchenko.conveyor.common.api.Step;
 import com.github.maximtereshchenko.conveyor.common.test.Directories;
@@ -41,10 +42,18 @@ final class JunitJupiterPluginTests {
         throws IOException {
         var testClasses = path.resolve("test-classes");
         var classes = path.resolve("classes");
+        var implementationDependency = path.resolve("implementation");
+        var testDependency = path.resolve("test");
 
         assertThat(
             plugin.tasks(
-                FakeConveyorSchematic.from(path),
+                FakeConveyorSchematic.from(
+                    path,
+                    Map.of(
+                        implementationDependency, DependencyScope.IMPLEMENTATION,
+                        testDependency, DependencyScope.TEST
+                    )
+                ),
                 Map.of(
                     "test.classes.directory", testClasses.toString(),
                     "classes.directory", classes.toString()
@@ -59,8 +68,10 @@ final class JunitJupiterPluginTests {
                     Step.RUN,
                     null,
                     Set.of(
+                        new PathConveyorTaskInput(classes),
                         new PathConveyorTaskInput(testClasses),
-                        new PathConveyorTaskInput(classes)
+                        new PathConveyorTaskInput(implementationDependency),
+                        new PathConveyorTaskInput(testDependency)
                     ),
                     Set.of(),
                     Cache.ENABLED

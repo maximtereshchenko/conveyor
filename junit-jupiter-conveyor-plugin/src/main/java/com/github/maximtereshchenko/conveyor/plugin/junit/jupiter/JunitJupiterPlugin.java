@@ -1,5 +1,6 @@
 package com.github.maximtereshchenko.conveyor.plugin.junit.jupiter;
 
+import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import com.github.maximtereshchenko.conveyor.common.api.Step;
 import com.github.maximtereshchenko.conveyor.plugin.api.*;
@@ -9,6 +10,8 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class JunitJupiterPlugin implements ConveyorPlugin {
 
@@ -24,20 +27,25 @@ public final class JunitJupiterPlugin implements ConveyorPlugin {
     ) {
         var testClassesDirectory = configuredPath(configuration, "test.classes.directory");
         var classesDirectory = configuredPath(configuration, "classes.directory");
+        var dependencies = schematic.classpath(
+            Set.of(DependencyScope.IMPLEMENTATION, DependencyScope.TEST)
+        );
         return List.of(
             new ConveyorTask(
                 "execute-junit-jupiter-tests",
                 Stage.TEST,
                 Step.RUN,
                 new RunJunitJupiterTestsAction(
-                    testClassesDirectory,
                     classesDirectory,
-                    schematic
+                    testClassesDirectory,
+                    dependencies
                 ),
-                Set.of(
-                    new PathConveyorTaskInput(testClassesDirectory),
-                    new PathConveyorTaskInput(classesDirectory)
-                ),
+                Stream.concat(
+                        Stream.of(classesDirectory, testClassesDirectory),
+                        dependencies.stream()
+                    )
+                    .map(PathConveyorTaskInput::new)
+                    .collect(Collectors.toSet()),
                 Set.of(),
                 Cache.ENABLED
             )

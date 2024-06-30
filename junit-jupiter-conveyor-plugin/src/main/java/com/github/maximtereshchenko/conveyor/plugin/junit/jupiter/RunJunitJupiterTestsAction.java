@@ -1,7 +1,5 @@
 package com.github.maximtereshchenko.conveyor.plugin.junit.jupiter;
 
-import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
 import org.junit.platform.engine.discovery.DiscoverySelectors;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
 import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
@@ -13,27 +11,25 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collection;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 final class RunJunitJupiterTestsAction implements Supplier<Optional<Path>> {
 
-    private final Path testClassesDirectory;
     private final Path classesDirectory;
-    private final ConveyorSchematic schematic;
+    private final Path testClassesDirectory;
+    private final Set<Path> dependencies;
 
     RunJunitJupiterTestsAction(
-        Path testClassesDirectory,
         Path classesDirectory,
-        ConveyorSchematic schematic
+        Path testClassesDirectory,
+        Set<Path> dependencies
     ) {
-        this.testClassesDirectory = testClassesDirectory;
         this.classesDirectory = classesDirectory;
-        this.schematic = schematic;
+        this.testClassesDirectory = testClassesDirectory;
+        this.dependencies = dependencies;
     }
 
     @Override
@@ -45,13 +41,10 @@ final class RunJunitJupiterTestsAction implements Supplier<Optional<Path>> {
     }
 
     private Set<Path> classpath() {
-        return Stream.of(
-                schematic.classpath(Set.of(DependencyScope.IMPLEMENTATION, DependencyScope.TEST)),
-                Set.of(classesDirectory),
-                Set.of(testClassesDirectory)
-            )
-            .flatMap(Collection::stream)
-            .collect(Collectors.toSet());
+        var classpath = new HashSet<>(dependencies);
+        classpath.add(classesDirectory);
+        classpath.add(testClassesDirectory);
+        return classpath;
     }
 
     private void executeTests() {
