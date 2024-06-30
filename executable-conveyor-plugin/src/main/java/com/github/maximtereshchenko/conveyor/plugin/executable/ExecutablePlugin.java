@@ -2,10 +2,7 @@ package com.github.maximtereshchenko.conveyor.plugin.executable;
 
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import com.github.maximtereshchenko.conveyor.common.api.Step;
-import com.github.maximtereshchenko.conveyor.plugin.api.Cache;
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
+import com.github.maximtereshchenko.conveyor.plugin.api.*;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -51,8 +48,8 @@ public final class ExecutablePlugin implements ConveyorPlugin {
                 Stage.ARCHIVE,
                 Step.FINALIZE,
                 new ArchiveExecutableAction(classesDirectory, destination),
-                Set.of(classesDirectory),
-                Set.of(destination),
+                Set.of(new PathConveyorTaskInput(classesDirectory)),
+                Set.of(new PathConveyorTaskOutput(destination)),
                 Cache.ENABLED
             )
         );

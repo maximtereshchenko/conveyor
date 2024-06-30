@@ -3,9 +3,7 @@ package com.github.maximtereshchenko.conveyor.plugin.executable;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import com.github.maximtereshchenko.conveyor.common.api.Step;
 import com.github.maximtereshchenko.conveyor.common.test.Directories;
-import com.github.maximtereshchenko.conveyor.plugin.api.Cache;
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
+import com.github.maximtereshchenko.conveyor.plugin.api.*;
 import com.github.maximtereshchenko.conveyor.plugin.test.ConveyorTasks;
 import com.github.maximtereshchenko.conveyor.plugin.test.FakeConveyorSchematic;
 import com.github.maximtereshchenko.conveyor.zip.ZipArchive;
@@ -66,8 +64,8 @@ final class ExecutablePluginTests {
                     Stage.ARCHIVE,
                     Step.FINALIZE,
                     null,
-                    Set.of(classes),
-                    Set.of(destination),
+                    Set.of(new PathConveyorTaskInput(classes)),
+                    Set.of(new PathConveyorTaskOutput(destination)),
                     Cache.ENABLED
                 )
             );

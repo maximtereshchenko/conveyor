@@ -53,8 +53,8 @@ final class Plugins {
         return switch (task.cache()) {
             case ENABLED -> new CacheableAction(
                 task.action(),
-                task.inputs(),
-                task.outputs(),
+                new Inputs(task.inputs()),
+                new Outputs(task.outputs()),
                 new TaskCache(properties.tasksCacheDirectory().resolve(task.name())),
                 directory
             );

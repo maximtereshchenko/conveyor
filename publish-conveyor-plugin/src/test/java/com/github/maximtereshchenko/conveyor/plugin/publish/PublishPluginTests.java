@@ -2,10 +2,7 @@ package com.github.maximtereshchenko.conveyor.plugin.publish;
 
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import com.github.maximtereshchenko.conveyor.common.api.Step;
-import com.github.maximtereshchenko.conveyor.plugin.api.ArtifactClassifier;
-import com.github.maximtereshchenko.conveyor.plugin.api.Cache;
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
+import com.github.maximtereshchenko.conveyor.plugin.api.*;
 import com.github.maximtereshchenko.conveyor.plugin.test.ConveyorTasks;
 import com.github.maximtereshchenko.conveyor.plugin.test.FakeConveyorSchematic;
 import com.github.maximtereshchenko.conveyor.plugin.test.PublishedArtifact;
@@ -43,7 +40,10 @@ final class PublishPluginTests {
                     Stage.PUBLISH,
                     Step.RUN,
                     null,
-                    Set.of(artifact, schematic.path()),
+                    Set.of(
+                        new PathConveyorTaskInput(artifact),
+                        new PathConveyorTaskInput(schematic.path())
+                    ),
                     Set.of(),
                     Cache.DISABLED
                 )

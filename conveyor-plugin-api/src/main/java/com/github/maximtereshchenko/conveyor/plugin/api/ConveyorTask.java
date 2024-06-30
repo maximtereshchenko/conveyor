@@ -13,7 +13,7 @@ public record ConveyorTask(
     Stage stage,
     Step step,
     Supplier<Optional<Path>> action,
-    Set<Path> inputs,
-    Set<Path> outputs,
+    Set<ConveyorTaskInput> inputs,
+    Set<ConveyorTaskOutput> outputs,
     Cache cache
 ) {}

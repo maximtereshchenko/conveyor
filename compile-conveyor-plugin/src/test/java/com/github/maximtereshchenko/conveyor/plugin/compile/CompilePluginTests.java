@@ -4,6 +4,8 @@ import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import com.github.maximtereshchenko.conveyor.common.api.Step;
 import com.github.maximtereshchenko.conveyor.plugin.api.Cache;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
+import com.github.maximtereshchenko.conveyor.plugin.api.PathConveyorTaskInput;
+import com.github.maximtereshchenko.conveyor.plugin.api.PathConveyorTaskOutput;
 import com.github.maximtereshchenko.conveyor.plugin.test.FakeConveyorSchematic;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -43,8 +45,8 @@ final class CompilePluginTests extends BaseTest {
                     Stage.COMPILE,
                     Step.RUN,
                     null,
-                    Set.of(sources),
-                    Set.of(classes),
+                    Set.of(new PathConveyorTaskInput(sources)),
+                    Set.of(new PathConveyorTaskOutput(classes)),
                     Cache.ENABLED
                 ),
                 new ConveyorTask(
@@ -61,8 +63,11 @@ final class CompilePluginTests extends BaseTest {
                     Stage.TEST,
                     Step.PREPARE,
                     null,
-                    Set.of(classes, testSources),
-                    Set.of(testClasses),
+                    Set.of(
+                        new PathConveyorTaskInput(classes),
+                        new PathConveyorTaskInput(testSources)
+                    ),
+                    Set.of(new PathConveyorTaskOutput(testClasses)),
                     Cache.ENABLED
                 )
             );

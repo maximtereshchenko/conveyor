@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Set;
 
 final class TaskCache {
 
@@ -14,16 +13,13 @@ final class TaskCache {
         this.directory = directory;
     }
 
-    boolean inputsChanged(long expected) {
-        return changed(inputs(), expected);
+    boolean changed(Inputs inputs, Outputs outputs) {
+        return changed(inputsChecksumPath(), inputs.checksum()) ||
+               changed(outputsChecksumPath(), outputs.checksum());
     }
 
-    boolean outputsChanged(long expected) {
-        return changed(outputs(), expected);
-    }
-
-    boolean restore(long checksum, Path destination) {
-        var source = directory.resolve(String.valueOf(checksum));
+    boolean restore(Inputs inputs, Path destination) {
+        var source = directory.resolve(String.valueOf(inputs.checksum()));
         if (!Files.exists(source)) {
             return false;
         }
@@ -35,12 +31,12 @@ final class TaskCache {
         }
     }
 
-    void store(long checksum, Set<Path> outputs, Path root) {
+    void store(Inputs inputs, Outputs outputs, Path root) {
         try {
             var existingDestination = Files.createDirectories(
-                directory.resolve(String.valueOf(checksum))
+                directory.resolve(String.valueOf(inputs.checksum()))
             );
-            for (var path : outputs) {
+            for (var path : outputs.paths()) {
                 if (Files.exists(path)) { //TODO test
                     var to = existingDestination.resolve(root.relativize(path));
                     if (Files.isRegularFile(path)) {
@@ -54,9 +50,9 @@ final class TaskCache {
         }
     }
 
-    void remember(long inputsChecksum, long outputsChecksum) {
-        write(inputs(), inputsChecksum);
-        write(outputs(), outputsChecksum);
+    void remember(Inputs inputs, Outputs outputs) {
+        write(inputsChecksumPath(), inputs.checksum());
+        write(outputsChecksumPath(), outputs.checksum());
     }
 
     private boolean changed(Path path, long expected) {
@@ -78,11 +74,11 @@ final class TaskCache {
         }
     }
 
-    private Path inputs() {
+    private Path inputsChecksumPath() {
         return directory.resolve("inputs");
     }
 
-    private Path outputs() {
+    private Path outputsChecksumPath() {
         return directory.resolve("outputs");
     }
 }

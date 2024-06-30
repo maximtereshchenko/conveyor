@@ -7,6 +7,7 @@ import com.github.maximtereshchenko.conveyor.compiler.Compiler;
 import com.github.maximtereshchenko.conveyor.plugin.api.Cache;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
+import com.github.maximtereshchenko.conveyor.plugin.api.PathConveyorTaskInput;
 import com.github.maximtereshchenko.conveyor.plugin.test.ConveyorTasks;
 import com.github.maximtereshchenko.conveyor.plugin.test.FakeConveyorSchematic;
 import org.apiguardian.api.API;
@@ -57,7 +58,10 @@ final class JunitJupiterPluginTests {
                     Stage.TEST,
                     Step.RUN,
                     null,
-                    Set.of(testClasses, classes),
+                    Set.of(
+                        new PathConveyorTaskInput(testClasses),
+                        new PathConveyorTaskInput(classes)
+                    ),
                     Set.of(),
                     Cache.ENABLED
                 )

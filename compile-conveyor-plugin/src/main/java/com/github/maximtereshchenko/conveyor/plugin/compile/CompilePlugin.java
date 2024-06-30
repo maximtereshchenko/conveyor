@@ -3,10 +3,7 @@ package com.github.maximtereshchenko.conveyor.plugin.compile;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import com.github.maximtereshchenko.conveyor.common.api.Step;
 import com.github.maximtereshchenko.conveyor.compiler.Compiler;
-import com.github.maximtereshchenko.conveyor.plugin.api.Cache;
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
+import com.github.maximtereshchenko.conveyor.plugin.api.*;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -42,8 +39,8 @@ public final class CompilePlugin implements ConveyorPlugin {
                     compiler,
                     schematic
                 ),
-                Set.of(sourcesDirectory),
-                Set.of(classesDirectory),
+                Set.of(new PathConveyorTaskInput(sourcesDirectory)),
+                Set.of(new PathConveyorTaskOutput(classesDirectory)),
                 Cache.ENABLED
             ),
             new ConveyorTask(
@@ -66,8 +63,11 @@ public final class CompilePlugin implements ConveyorPlugin {
                     schematic,
                     classesDirectory
                 ),
-                Set.of(classesDirectory, testSourcesDirectory),
-                Set.of(testClassesDirectory),
+                Set.of(
+                    new PathConveyorTaskInput(classesDirectory),
+                    new PathConveyorTaskInput(testSourcesDirectory)
+                ),
+                Set.of(new PathConveyorTaskOutput(testClassesDirectory)),
                 Cache.ENABLED
             )
         );

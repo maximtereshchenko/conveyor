@@ -3,9 +3,7 @@ package com.github.maximtereshchenko.conveyor.plugin.springboot;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import com.github.maximtereshchenko.conveyor.common.api.Step;
 import com.github.maximtereshchenko.conveyor.common.test.Directories;
-import com.github.maximtereshchenko.conveyor.plugin.api.Cache;
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
+import com.github.maximtereshchenko.conveyor.plugin.api.*;
 import com.github.maximtereshchenko.conveyor.plugin.test.ConveyorTasks;
 import com.github.maximtereshchenko.conveyor.plugin.test.FakeConveyorSchematic;
 import com.github.maximtereshchenko.conveyor.springboot.Configuration;
@@ -85,8 +83,8 @@ final class SpringBootPluginTests {
                     Stage.ARCHIVE,
                     Step.FINALIZE,
                     null,
-                    Set.of(container),
-                    Set.of(destination),
+                    Set.of(new PathConveyorTaskInput(container)),
+                    Set.of(new PathConveyorTaskOutput(destination)),
                     Cache.ENABLED
                 )
             );

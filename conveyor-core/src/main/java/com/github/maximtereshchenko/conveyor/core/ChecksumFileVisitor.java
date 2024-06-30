@@ -7,21 +7,20 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.zip.CRC32C;
 import java.util.zip.Checksum;
 
 final class ChecksumFileVisitor extends SimpleFileVisitor<Path> {
 
-    private final Checksum checksum = new CRC32C();
+    private final Checksum checksum;
+
+    ChecksumFileVisitor(Checksum checksum) {
+        this.checksum = checksum;
+    }
 
     @Override
     public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
         checksum.update(file.toString().getBytes(StandardCharsets.UTF_8));
         checksum.update(Files.readAllBytes(file));
         return FileVisitResult.CONTINUE;
-    }
-
-    long checksum() {
-        return checksum.getValue();
     }
 }
