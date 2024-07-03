@@ -8,6 +8,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -47,7 +48,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
                     Map.of("keys", "template.key,key")
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("properties"))
@@ -89,7 +90,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
                     Map.of("keys", "key")
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("properties"))
@@ -130,7 +131,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
                     Map.of("keys", "to.be.removed")
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("properties"))
@@ -165,7 +166,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
                     Map.of("keys", "conveyor.schematic.name")
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("properties"))
@@ -206,7 +207,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
                     Map.of("keys", "conveyor.schematic.group")
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("properties"))
@@ -247,7 +248,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
                     Map.of("keys", "conveyor.schematic.version")
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("properties"))
@@ -282,7 +283,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
                     Map.of("keys", "conveyor.schematic.group")
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("properties"))
@@ -315,7 +316,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
             )
             .conveyorJson(path);
 
-        module.construct(conveyorJson, Stage.COMPILE);
+        module.construct(conveyorJson, List.of(Stage.COMPILE));
 
         assertThat(path.resolve("properties"))
             .content()
@@ -348,7 +349,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
             )
             .conveyorJson(path);
 
-        module.construct(conveyorJson, Stage.COMPILE);
+        module.construct(conveyorJson, List.of(Stage.COMPILE));
 
         assertThat(path.resolve("properties"))
             .content()
@@ -383,7 +384,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
                     Map.of("keys", "templated,key")
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("properties"))
@@ -420,7 +421,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
                     Map.of("key", "prefix-${templated}")
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("configuration"))
@@ -467,7 +468,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
                     DependencyScope.IMPLEMENTATION
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("dependencies"))
@@ -553,7 +554,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
                         .conveyorJson(depends)
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(depends.resolve("dependencies"))
@@ -589,7 +590,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
                     Map.of("instant", "COMPILE-RUN")
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("instant")).exists();
@@ -623,7 +624,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
                     Map.of("instant", "COMPILE-RUN")
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("instant")).exists();
@@ -662,7 +663,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
                     Map.of("instant", "COMPILE-RUN")
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("instant")).exists();
@@ -697,7 +698,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
                     Map.of("instant", "COMPILE-RUN")
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("instant")).exists();
@@ -740,7 +741,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
                     DependencyScope.IMPLEMENTATION
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("dependencies"))
@@ -786,7 +787,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
                     DependencyScope.IMPLEMENTATION
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("dependencies"))
@@ -836,7 +837,7 @@ final class PropertiesFeatureTests extends ConveyorTest {
                     DependencyScope.IMPLEMENTATION
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("dependencies"))

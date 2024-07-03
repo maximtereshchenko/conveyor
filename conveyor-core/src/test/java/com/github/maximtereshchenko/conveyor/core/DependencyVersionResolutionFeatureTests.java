@@ -10,6 +10,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -66,7 +67,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                 .repository(path)
                 .plugin("classpath")
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("classpath"))
@@ -125,7 +126,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                 .plugin("first")
                 .plugin("second")
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("classpath"))
@@ -214,7 +215,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                 .plugin("first")
                 .plugin("second")
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("classpath"))
@@ -277,7 +278,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                     DependencyScope.TEST
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("dependencies"))
@@ -345,7 +346,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                 .dependency("first")
                 .dependency("second")
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("dependencies"))
@@ -444,7 +445,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                 .dependency("first")
                 .dependency("second")
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("dependencies"))
@@ -501,7 +502,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                 .preference("transitive", "2.0.0")
                 .dependency("dependency")
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("dependencies"))
@@ -537,7 +538,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                     Map.of("instant", "COMPILE-RUN")
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("instant")).exists();
@@ -578,7 +579,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                     DependencyScope.IMPLEMENTATION
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("dependencies"))
@@ -618,7 +619,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                     Map.of("instant", "COMPILE-RUN")
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("instant")).exists();
@@ -662,7 +663,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                     Map.of("instant", "COMPILE-RUN")
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("instant")).exists();
@@ -778,7 +779,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                     DependencyScope.IMPLEMENTATION
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("dependencies"))
@@ -827,7 +828,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                     Map.of("instant", "COMPILE-RUN")
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("instant")).exists();
@@ -868,7 +869,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                     Map.of("instant", "COMPILE-RUN")
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("instant")).exists();
@@ -919,7 +920,7 @@ final class DependencyVersionResolutionFeatureTests extends ConveyorTest {
                 .plugin("dependencies")
                 .dependency("dependency")
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("dependencies"))

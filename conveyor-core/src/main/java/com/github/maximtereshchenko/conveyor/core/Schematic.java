@@ -5,6 +5,7 @@ import com.github.maximtereshchenko.conveyor.common.api.Stage;
 
 import java.nio.file.Path;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -62,7 +63,7 @@ final class Schematic {
 
     ConstructionRepository construct(
         ConstructionRepository constructionRepository,
-        Stage... stages
+        List<Stage> stages
     ) {
         LOGGER.log(
             System.Logger.Level.INFO,

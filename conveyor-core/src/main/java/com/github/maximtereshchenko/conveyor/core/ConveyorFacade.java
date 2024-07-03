@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public final class ConveyorFacade implements ConveyorModule {
@@ -30,7 +31,7 @@ public final class ConveyorFacade implements ConveyorModule {
     }
 
     @Override
-    public void construct(Path path, Stage... stages) {
+    public void construct(Path path, List<Stage> stages) {
         var start = Instant.now();
         schematics(path).construct(stages);
         LOGGER.log(

@@ -63,7 +63,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                         .conveyorJson(project)
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(project.resolve("instant")).exists();
@@ -108,7 +108,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                         .conveyorJson(project)
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(project.resolve("instant")).exists();
@@ -140,7 +140,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                     Map.of("instant", "COMPILE-RUN")
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("instant")).exists();
@@ -179,7 +179,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                         .conveyorJson(included)
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(included.resolve("instant")).exists();
@@ -212,7 +212,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                     Map.of("instant", "COMPILE-RUN")
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("instant")).exists();
@@ -244,8 +244,8 @@ final class RepositoriesFeatureTests extends ConveyorTest {
             )
             .conveyorJson(path);
 
-        module.construct(schematic, Stage.COMPILE);
-        module.construct(schematic, Stage.COMPILE);
+        module.construct(schematic, List.of(Stage.COMPILE));
+        module.construct(schematic, List.of(Stage.COMPILE));
 
         assertThat(wireMockServer.getServeEvents().getRequests())
             .filteredOn(serveEvent -> serveEvent.getRequest().getUrl().contains("instant"))
@@ -285,7 +285,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                     Map.of("instant", "COMPILE-RUN")
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(cache)
@@ -322,7 +322,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                     Map.of("instant", "COMPILE-RUN")
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("cache"))
@@ -366,7 +366,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                 .repository(wireMockServer.baseUrl())
                 .plugin("classpath")
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("classpath"))
@@ -410,7 +410,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                 .plugin("dependencies")
                 .dependency("dependency")
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("dependencies"))
@@ -451,7 +451,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                     Map.of("keys", "pom.key")
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("properties"))
@@ -520,7 +520,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                     Map.of("scope", dependencyScope.toString())
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("dependencies"))
@@ -568,7 +568,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                     Map.of("instant", "COMPILE-RUN")
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("instant")).exists();
@@ -615,7 +615,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                     Map.of("instant", "COMPILE-RUN")
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("instant")).exists();
@@ -659,7 +659,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                     Map.of("instant", "COMPILE-RUN")
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("instant")).exists();
@@ -708,7 +708,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                 .repository(wireMockServer.baseUrl())
                 .plugin("dependencies")
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("dependencies"))
@@ -764,7 +764,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                     Map.of("scope", "TEST")
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("dependencies"))
@@ -825,7 +825,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                     Map.of("scope", "TEST")
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("dependencies"))
@@ -875,7 +875,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                 .repository(wireMockServer.baseUrl())
                 .plugin("dependencies")
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("dependencies"))
@@ -925,7 +925,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                 .repository(wireMockServer.baseUrl())
                 .plugin("dependencies")
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("dependencies"))
@@ -988,7 +988,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                 .plugin("dependencies")
                 .dependency("dependency")
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("dependencies"))
@@ -1031,7 +1031,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                     Map.of("keys", "duplicate.key")
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("properties"))
@@ -1061,7 +1061,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
             .plugin("instant")
             .conveyorJson(path);
 
-        assertThatCode(() -> module.construct(conveyorJson, Stage.COMPILE))
+        assertThatCode(() -> module.construct(conveyorJson, List.of(Stage.COMPILE)))
             .doesNotThrowAnyException();
     }
 
@@ -1099,7 +1099,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                     )
                 )
                 .conveyorJson(path),
-            Stage.PUBLISH
+            List.of(Stage.PUBLISH)
         );
 
         assertThat(
@@ -1121,8 +1121,9 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         var conveyorJson = factory.schematicDefinitionBuilder()
             .plugin("non-existent")
             .conveyorJson(path);
+        var stages = List.of(Stage.COMPILE);
 
-        assertThatThrownBy(() -> module.construct(conveyorJson, Stage.COMPILE))
+        assertThatThrownBy(() -> module.construct(conveyorJson, stages))
             .isInstanceOf(NoSuchElementException.class)
             .hasMessage("group:non-existent:1.0.0");
     }
@@ -1162,7 +1163,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                     Map.of("instant", "COMPILE-RUN")
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("instant")).exists();

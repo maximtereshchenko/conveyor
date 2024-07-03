@@ -5,6 +5,7 @@ import com.github.maximtereshchenko.conveyor.api.port.SchematicDefinitionConvert
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 
 import java.nio.file.Path;
+import java.util.List;
 
 final class ConveyorModuleProxy implements ConveyorModule {
 
@@ -15,7 +16,7 @@ final class ConveyorModuleProxy implements ConveyorModule {
     }
 
     @Override
-    public void construct(Path path, Stage... stages) {
+    public void construct(Path path, List<Stage> stages) {
         new ConveyorFacade(schematicDefinitionConverter).construct(path, stages);
     }
 }

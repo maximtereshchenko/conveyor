@@ -8,6 +8,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -41,7 +42,7 @@ final class PluginsFeatureTests extends ConveyorTest {
                     Map.of("keys", "user.defined.property")
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("properties"))
@@ -76,7 +77,7 @@ final class PluginsFeatureTests extends ConveyorTest {
                     Map.of("configuration", "${property}-suffix")
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("configuration"))
@@ -111,7 +112,7 @@ final class PluginsFeatureTests extends ConveyorTest {
                     Map.of("user.defined.configuration", "value")
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("configuration"))
@@ -152,7 +153,7 @@ final class PluginsFeatureTests extends ConveyorTest {
                     )
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("instant")).doesNotExist();
@@ -187,7 +188,7 @@ final class PluginsFeatureTests extends ConveyorTest {
                 .repository(path)
                 .plugin("classpath")
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("classpath"))
@@ -233,7 +234,7 @@ final class PluginsFeatureTests extends ConveyorTest {
                 .repository(path)
                 .plugin("classpath")
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("classpath"))
@@ -277,7 +278,7 @@ final class PluginsFeatureTests extends ConveyorTest {
                 .repository(path)
                 .plugin("classpath")
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("classpath"))
@@ -316,7 +317,7 @@ final class PluginsFeatureTests extends ConveyorTest {
                 .repository(path)
                 .template("template")
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("instant")).exists();
@@ -360,7 +361,7 @@ final class PluginsFeatureTests extends ConveyorTest {
                     Map.of("instant", "COMPILE-RUN")
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("instant")).exists();
@@ -403,7 +404,7 @@ final class PluginsFeatureTests extends ConveyorTest {
                     Map.of("key", "schematic-value")
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("configuration"))
@@ -452,7 +453,7 @@ final class PluginsFeatureTests extends ConveyorTest {
                     Map.of("to.be.removed", "")
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("configuration"))
@@ -497,7 +498,7 @@ final class PluginsFeatureTests extends ConveyorTest {
                     Map.of("key", "value")
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("configuration"))

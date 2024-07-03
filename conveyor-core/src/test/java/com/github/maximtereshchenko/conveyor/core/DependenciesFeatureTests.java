@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -58,7 +59,7 @@ final class DependenciesFeatureTests extends ConveyorTest {
                 .plugin("dependencies")
                 .dependency("schematic-dependency")
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("dependencies"))
@@ -114,7 +115,7 @@ final class DependenciesFeatureTests extends ConveyorTest {
                     DependencyScope.IMPLEMENTATION
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("dependencies"))
@@ -158,7 +159,7 @@ final class DependenciesFeatureTests extends ConveyorTest {
                 .plugin("dependencies")
                 .dependency("dependency")
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("dependencies"))
@@ -225,7 +226,7 @@ final class DependenciesFeatureTests extends ConveyorTest {
                         .conveyorJson(second)
                 )
                 .conveyorJson(path),
-            Stage.ARCHIVE
+            List.of(Stage.ARCHIVE)
         );
 
         assertThat(second.resolve("dependencies"))
@@ -277,7 +278,7 @@ final class DependenciesFeatureTests extends ConveyorTest {
                     new ExclusionDefinition("group", "excluded")
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("dependencies"))
@@ -338,7 +339,7 @@ final class DependenciesFeatureTests extends ConveyorTest {
                     new ExclusionDefinition("group", "excluded")
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("dependencies"))
@@ -400,7 +401,7 @@ final class DependenciesFeatureTests extends ConveyorTest {
                 .plugin("dependencies")
                 .dependency("dependency")
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("dependencies"))

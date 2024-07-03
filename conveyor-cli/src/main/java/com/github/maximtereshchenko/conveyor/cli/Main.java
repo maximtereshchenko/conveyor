@@ -23,7 +23,7 @@ final class Main {
                 Arrays.stream(args, 1, args.length)
                     .map(String::toUpperCase)
                     .map(Stage::valueOf)
-                    .toArray(Stage[]::new)
+                    .toList() //TODO consider LinkedHashSet
             );
         System.exit(0);
     }

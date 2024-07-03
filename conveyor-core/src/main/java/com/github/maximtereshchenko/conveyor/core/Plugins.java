@@ -12,11 +12,17 @@ import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 final class Plugins {
 
     private static final System.Logger LOGGER = System.getLogger(Plugins.class.getName());
+    private static final Map<Stage, Stage> STAGE_DEPENDENCIES = Map.of(
+        Stage.PUBLISH, Stage.ARCHIVE,
+        Stage.ARCHIVE, Stage.TEST,
+        Stage.TEST, Stage.COMPILE
+    );
 
     private final LinkedHashSet<Plugin> all;
     private final ClasspathFactory classpathFactory;
@@ -29,14 +35,15 @@ final class Plugins {
     Optional<Path> executeTasks(
         ConveyorSchematic conveyorSchematic,
         Properties properties,
-        Stage... stages
+        List<Stage> stages
     ) {
         var artifacts = new ArrayList<Path>();
         var tasks = tasks(conveyorSchematic);
         for (var stage : stages) {
+            var activeStages = activeStages(stage);
             for (var task : tasks) {
-                if (task.stage().compareTo(stage) > 0) {
-                    break;
+                if (!activeStages.contains(task.stage())) {
+                    continue;
                 }
                 LOGGER.log(System.Logger.Level.INFO, "Executing task {0}", task.name());
                 action(
@@ -49,7 +56,13 @@ final class Plugins {
             }
         }
 
+        //TODO refactor
         return artifacts.isEmpty() ? Optional.empty() : Optional.of(artifacts.getLast());
+    }
+
+    private Set<Stage> activeStages(Stage stage) {
+        return Stream.iterate(stage, Objects::nonNull, STAGE_DEPENDENCIES::get)
+            .collect(Collectors.toCollection(() -> EnumSet.noneOf(Stage.class)));
     }
 
     private Supplier<Optional<Path>> action(

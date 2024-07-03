@@ -43,7 +43,7 @@ final class TasksFeatureTests extends ConveyorTest {
                     Map.of("instant", "COMPILE-RUN")
                 )
                 .conveyorJson(path),
-            Stage.TEST
+            List.of(Stage.TEST)
         );
 
         assertThat(path.resolve("instant")).exists();
@@ -75,7 +75,7 @@ final class TasksFeatureTests extends ConveyorTest {
                     Map.of("instant", "COMPILE-RUN")
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("instant")).exists();
@@ -102,10 +102,46 @@ final class TasksFeatureTests extends ConveyorTest {
                 .repository(path)
                 .plugin("instant")
                 .conveyorJson(path),
-            Stage.CLEAN
+            List.of(Stage.CLEAN)
         );
 
         assertThat(path.resolve("instant")).doesNotExist();
+    }
+
+    @Test
+    void givenTaskBoundToNotRequiredStage_whenConstructToStage_thenTaskWasNotExecuted(
+        @TempDir Path path,
+        ConveyorModule module,
+        BuilderFactory factory
+    ) throws Exception {
+        factory.repositoryBuilder(path)
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("instant")
+            )
+            .jar(
+                factory.jarBuilder("instant", path)
+            )
+            .install(path);
+
+        module.construct(
+            factory.schematicDefinitionBuilder()
+                .repository(path)
+                .plugin(
+                    "group",
+                    "instant",
+                    "1.0.0",
+                    Map.of(
+                        "clean", "CLEAN-RUN",
+                        "compile", "COMPILE-RUN"
+                    )
+                )
+                .conveyorJson(path),
+            List.of(Stage.COMPILE)
+        );
+
+        assertThat(path.resolve("clean")).doesNotExist();
+        assertThat(path.resolve("compile")).exists();
     }
 
     @Test
@@ -132,7 +168,6 @@ final class TasksFeatureTests extends ConveyorTest {
                     "instant",
                     "1.0.0",
                     Map.of(
-                        "clean", "CLEAN-RUN",
                         "compile", "COMPILE-RUN",
                         "test", "TEST-RUN",
                         "archive", "ARCHIVE-RUN",
@@ -140,12 +175,11 @@ final class TasksFeatureTests extends ConveyorTest {
                     )
                 )
                 .conveyorJson(path),
-            Stage.PUBLISH
+            List.of(Stage.PUBLISH)
         );
 
         assertThat(
             List.of(
-                instant(path, "clean"),
                 instant(path, "compile"),
                 instant(path, "test"),
                 instant(path, "archive"),
@@ -185,7 +219,7 @@ final class TasksFeatureTests extends ConveyorTest {
                     )
                 )
                 .conveyorJson(path),
-            Stage.PUBLISH
+            List.of(Stage.PUBLISH)
         );
 
         assertThat(
@@ -239,7 +273,7 @@ final class TasksFeatureTests extends ConveyorTest {
                     Map.of("first", "COMPILE-RUN")
                 )
                 .conveyorJson(path),
-            Stage.PUBLISH
+            List.of(Stage.PUBLISH)
         );
 
         assertThat(List.of(instant(path, "second"), instant(path, "first")))
@@ -275,7 +309,7 @@ final class TasksFeatureTests extends ConveyorTest {
                 .plugin("dependencies")
                 .dependency("dependency")
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("dependencies"))
@@ -321,7 +355,7 @@ final class TasksFeatureTests extends ConveyorTest {
                 .plugin("dependencies")
                 .dependency("dependency")
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("dependencies"))
@@ -370,7 +404,7 @@ final class TasksFeatureTests extends ConveyorTest {
                     DependencyScope.TEST
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("dependencies"))
@@ -399,9 +433,9 @@ final class TasksFeatureTests extends ConveyorTest {
             .conveyorJson(path);
         var output = path.resolve("output").resolve("instant");
 
-        module.construct(conveyorJson, Stage.COMPILE);
+        module.construct(conveyorJson, List.of(Stage.COMPILE));
         var instant = instant(output);
-        module.construct(conveyorJson, Stage.COMPILE);
+        module.construct(conveyorJson, List.of(Stage.COMPILE));
 
         assertThat(instant(output)).isEqualTo(instant);
     }
@@ -425,7 +459,7 @@ final class TasksFeatureTests extends ConveyorTest {
         module.construct(factory.schematicDefinitionBuilder()
             .repository(path)
             .plugin("cache")
-            .conveyorJson(path), Stage.COMPILE);
+            .conveyorJson(path), List.of(Stage.COMPILE));
 
         var cache = path.resolve(".conveyor-cache")
             .resolve("tasks")
@@ -458,7 +492,7 @@ final class TasksFeatureTests extends ConveyorTest {
             .repository(path)
             .plugin("cache")
             .property("conveyor.tasks.cache.directory", customCacheDirectory.toString())
-            .conveyorJson(path), Stage.COMPILE);
+            .conveyorJson(path), List.of(Stage.COMPILE));
 
         var cache = customCacheDirectory.resolve("cache");
         assertThat(cache.resolve("0").resolve("output")).exists();
@@ -487,10 +521,10 @@ final class TasksFeatureTests extends ConveyorTest {
             .conveyorJson(path);
         var output = path.resolve("output").resolve("instant");
 
-        module.construct(conveyorJson, Stage.COMPILE);
+        module.construct(conveyorJson, List.of(Stage.COMPILE));
         var instant = instant(output);
         Files.writeString(path.resolve("input"), "changed");
-        module.construct(conveyorJson, Stage.COMPILE);
+        module.construct(conveyorJson, List.of(Stage.COMPILE));
 
         assertThat(instant(output)).isNotEqualTo(instant);
     }
@@ -516,10 +550,10 @@ final class TasksFeatureTests extends ConveyorTest {
             .conveyorJson(path);
         var output = path.resolve("output").resolve("instant");
 
-        module.construct(conveyorJson, Stage.COMPILE);
+        module.construct(conveyorJson, List.of(Stage.COMPILE));
         var instant = instant(output);
         Files.writeString(output, "changed");
-        module.construct(conveyorJson, Stage.COMPILE);
+        module.construct(conveyorJson, List.of(Stage.COMPILE));
 
         assertThat(instant(output)).isEqualTo(instant);
     }
@@ -548,10 +582,10 @@ final class TasksFeatureTests extends ConveyorTest {
             Files.createDirectories(path.resolve("input")).resolve("initial")
         );
 
-        module.construct(conveyorJson, Stage.COMPILE);
+        module.construct(conveyorJson, List.of(Stage.COMPILE));
         var instant = instant(output);
         Files.move(initial, initial.getParent().resolve("moved"));
-        module.construct(conveyorJson, Stage.COMPILE);
+        module.construct(conveyorJson, List.of(Stage.COMPILE));
 
         assertThat(instant(output)).isNotEqualTo(instant);
     }
@@ -578,7 +612,7 @@ final class TasksFeatureTests extends ConveyorTest {
                 .repository(path)
                 .plugin("cache")
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
         var instant = instant(output);
         module.construct(
@@ -591,7 +625,7 @@ final class TasksFeatureTests extends ConveyorTest {
                     Map.of("input", "changed")
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(instant(output)).isNotEqualTo(instant);
@@ -617,9 +651,9 @@ final class TasksFeatureTests extends ConveyorTest {
             .plugin("cache")
             .conveyorJson(path);
 
-        module.construct(conveyorJson, Stage.COMPILE);
+        module.construct(conveyorJson, List.of(Stage.COMPILE));
         var redundant = Files.createFile(path.resolve("output").resolve("redundant"));
-        module.construct(conveyorJson, Stage.COMPILE);
+        module.construct(conveyorJson, List.of(Stage.COMPILE));
 
         assertThat(redundant).doesNotExist();
     }

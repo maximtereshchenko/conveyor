@@ -19,7 +19,7 @@ final class Schematics {
         this.initial = initial;
     }
 
-    void construct(Stage... stages) {
+    void construct(List<Stage> stages) {
         var schematicsInConstructionOrder = schematicsInConstructionOrder();
         log(schematicsInConstructionOrder);
         var constructionRepository = new ConstructionRepository();

@@ -11,6 +11,7 @@ import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -50,7 +51,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
                     Map.of("keys", "template.key")
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("properties"))
@@ -89,7 +90,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
                 .template("template")
                 .repository(path)
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(instantPath(path)).exists();
@@ -129,7 +130,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
                 .repository(path)
                 .plugin("dependencies")
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("dependencies"))
@@ -181,7 +182,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
                     Map.of("scope", "TEST")
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(path.resolve("dependencies"))
@@ -222,7 +223,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
                     Map.of("keys", "template.key")
                 )
                 .conveyorJson(project),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(project.resolve("properties"))
@@ -262,7 +263,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
             factory.schematicDefinitionBuilder()
                 .template("template")
                 .conveyorJson(project),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(instantPath(project)).exists();
@@ -303,7 +304,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
                 .template("template")
                 .plugin("dependencies")
                 .conveyorJson(project),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(project.resolve("dependencies"))
@@ -356,7 +357,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
                     Map.of("scope", "TEST")
                 )
                 .conveyorJson(project),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(project.resolve("dependencies"))
@@ -397,7 +398,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
                     Map.of("instant", "COMPILE-RUN")
                 )
                 .conveyorJson(project),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(instantPath(project)).exists();
@@ -438,7 +439,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
                 )
                 .property("template.key", "value")
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(included.resolve("properties"))
@@ -480,7 +481,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
                     Map.of("instant", "COMPILE-RUN")
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(instantPath(included)).exists();
@@ -523,7 +524,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
                 )
                 .dependency("dependency")
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(included.resolve("dependencies"))
@@ -578,7 +579,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
                     DependencyScope.TEST
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(included.resolve("dependencies"))
@@ -621,7 +622,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
                         .conveyorJson(included)
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(instantPath(included)).exists();
@@ -661,7 +662,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
                     Map.of("instant", "COMPILE-RUN")
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(constructed(path)).isBefore(constructed(included));
@@ -736,7 +737,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
                     Map.of("instant", "COMPILE-RUN")
                 )
                 .conveyorJson(path),
-            Stage.ARCHIVE
+            List.of(Stage.ARCHIVE)
         );
 
         assertThat(constructed(dependency)).isBefore(constructed(depends));
@@ -775,7 +776,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
                 .name("included")
                 .template("template")
                 .conveyorJson(included),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(constructed(included)).isAfter(constructed(path));
@@ -841,7 +842,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
             .inclusion(projectSchematic)
             .conveyorJson(path);
 
-        module.construct(projectSchematic, Stage.COMPILE);
+        module.construct(projectSchematic, List.of(Stage.COMPILE));
 
         assertThat(
             Stream.of(path, project, projectDepth1a, projectDepth2a, projectDepth1b, projectDepth2b)
@@ -911,7 +912,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
             )
             .conveyorJson(path);
 
-        module.construct(dependsSchematic, Stage.ARCHIVE);
+        module.construct(dependsSchematic, List.of(Stage.ARCHIVE));
 
         assertThat(depends.resolve("dependencies"))
             .content()
@@ -953,7 +954,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
             )
             .conveyorJson(path);
 
-        module.construct(includedSchematic, Stage.COMPILE);
+        module.construct(includedSchematic, List.of(Stage.COMPILE));
 
         assertThat(instantPath(unrelated)).doesNotExist();
     }
@@ -1004,7 +1005,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
             )
             .conveyorJson(path);
 
-        module.construct(includedSchematic, Stage.COMPILE);
+        module.construct(includedSchematic, List.of(Stage.COMPILE));
 
         assertThat(instantPath(transitive)).exists();
     }
@@ -1051,7 +1052,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
                     Map.of("instant", "PUBLISH-RUN")
                 )
                 .conveyorJson(path),
-            Stage.PUBLISH
+            List.of(Stage.PUBLISH)
         );
 
         assertThat(instantPath(path)).exists();
@@ -1096,7 +1097,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
                 .repository(path)
                 .inclusion(Paths.get("..", "inclusion", "conveyor.json"))
                 .conveyorJson(path.resolve("template")),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(instantPath(inclusion)).exists();
@@ -1139,7 +1140,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
                 .repository(path)
                 .inclusion(inclusion)
                 .conveyorJson(path.resolve("template")),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(instantPath(inclusion)).exists();
@@ -1203,7 +1204,7 @@ final class InheritanceFeatureTests extends ConveyorTest {
                     Map.of("instant", "COMPILE-RUN")
                 )
                 .conveyorJson(path),
-            Stage.COMPILE
+            List.of(Stage.COMPILE)
         );
 
         assertThat(

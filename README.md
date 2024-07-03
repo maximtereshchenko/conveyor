@@ -9,7 +9,8 @@ A build tool for Java projects
     * Schematic is defined by an optional group, name and an optional version. If group or version
       is absent, then the schematic is defined by its template's group or version
     * A schematic can be constructed up to the specified stage: CLEAN, COMPILE, TEST, ARCHIVE or
-      PUBLISH
+      PUBLISH. Stages transition from COMPILE up to specified stage. CLEAN is a special stage, it
+      should be explicitly specified to be active
 * Dependency version resolution
     * Given the same dependency is required but with different versions, the highest version wins
       taken into account the presence of the dependency requiring that version in the result class
@@ -57,9 +58,6 @@ A build tool for Java projects
       empty string to the key
     * The configuration defined in the schematic is merged with the inherited configuration
 * Tasks
-    * Only tasks bound to the stage equal to or lower the target stage will be executed during the
-      construction of the schematic
-    * Tasks are executed in stage ascending order (CLEAN, COMPILE, TEST, ARCHIVE, PUBLISH)
     * Tasks bound to the same stage are executed in step ascending order (PREPARE, RUN, FINALIZE)
     * Tasks bound to the same stage and step are executed in order of originating plugins in the
       schematic definition
