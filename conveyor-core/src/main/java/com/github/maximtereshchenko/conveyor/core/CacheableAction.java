@@ -29,7 +29,7 @@ final class CacheableAction implements Supplier<Optional<Path>> {
     @Override
     public Optional<Path> get() {
         if (taskCache.changed(inputs, outputs)) {
-            if (!taskCache.restore(inputs, directory)) {
+            if (!taskCache.restore(inputs, outputs, directory)) {
                 original.get();
                 taskCache.store(inputs, outputs, directory);
             }

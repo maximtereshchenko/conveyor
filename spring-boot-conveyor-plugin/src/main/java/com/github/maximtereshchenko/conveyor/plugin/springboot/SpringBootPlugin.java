@@ -42,7 +42,7 @@ public final class SpringBootPlugin implements ConveyorPlugin {
                     .map(PathConveyorTaskInput::new)
                     .collect(Collectors.toSet()),
                 Set.of(new PathConveyorTaskOutput(classpathDestination)),
-                Cache.ENABLED
+                Cache.ENABLED //TODO disable
             ),
             new ConveyorTask(
                 "extract-spring-boot-launcher",

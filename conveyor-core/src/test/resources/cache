@@ -27,7 +27,10 @@ public final class ${normalizedName} implements ConveyorPlugin {
                 Step.RUN,
                 () -> {
                     try {
-                        Files.writeString(output, Instant.now().toString());
+                        Files.writeString(
+                            Files.createDirectories(output).resolve("instant"),
+                            Instant.now().toString()
+                        );
                     } catch (IOException e) {
                         throw new UncheckedIOException(e);
                     }

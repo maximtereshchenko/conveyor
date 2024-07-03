@@ -397,7 +397,7 @@ final class TasksFeatureTests extends ConveyorTest {
             .repository(path)
             .plugin("cache")
             .conveyorJson(path);
-        var output = path.resolve("output");
+        var output = path.resolve("output").resolve("instant");
 
         module.construct(conveyorJson, Stage.COMPILE);
         var instant = instant(output);
@@ -485,7 +485,7 @@ final class TasksFeatureTests extends ConveyorTest {
             .repository(path)
             .plugin("cache")
             .conveyorJson(path);
-        var output = path.resolve("output");
+        var output = path.resolve("output").resolve("instant");
 
         module.construct(conveyorJson, Stage.COMPILE);
         var instant = instant(output);
@@ -514,7 +514,7 @@ final class TasksFeatureTests extends ConveyorTest {
             .repository(path)
             .plugin("cache")
             .conveyorJson(path);
-        var output = path.resolve("output");
+        var output = path.resolve("output").resolve("instant");
 
         module.construct(conveyorJson, Stage.COMPILE);
         var instant = instant(output);
@@ -543,7 +543,7 @@ final class TasksFeatureTests extends ConveyorTest {
             .repository(path)
             .plugin("cache")
             .conveyorJson(path);
-        var output = path.resolve("output");
+        var output = path.resolve("output").resolve("instant");
         var initial = Files.createFile(
             Files.createDirectories(path.resolve("input")).resolve("initial")
         );
@@ -571,7 +571,7 @@ final class TasksFeatureTests extends ConveyorTest {
                 factory.jarBuilder("cache", path)
             )
             .install(path);
-        var output = path.resolve("output");
+        var output = path.resolve("output").resolve("instant");
 
         module.construct(
             factory.schematicDefinitionBuilder()
@@ -595,6 +595,33 @@ final class TasksFeatureTests extends ConveyorTest {
         );
 
         assertThat(instant(output)).isNotEqualTo(instant);
+    }
+
+    @Test
+    void givenCacheableTaskOutputContainsRedundantFile_whenConstructToStage_thenFileIsDeleted(
+        @TempDir Path path,
+        ConveyorModule module,
+        BuilderFactory factory
+    ) throws Exception {
+        factory.repositoryBuilder(path)
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("cache")
+            )
+            .jar(
+                factory.jarBuilder("cache", path)
+            )
+            .install(path);
+        var conveyorJson = factory.schematicDefinitionBuilder()
+            .repository(path)
+            .plugin("cache")
+            .conveyorJson(path);
+
+        module.construct(conveyorJson, Stage.COMPILE);
+        var redundant = Files.createFile(path.resolve("output").resolve("redundant"));
+        module.construct(conveyorJson, Stage.COMPILE);
+
+        assertThat(redundant).doesNotExist();
     }
 
     private Instant instant(Path path, String fileName) throws IOException {

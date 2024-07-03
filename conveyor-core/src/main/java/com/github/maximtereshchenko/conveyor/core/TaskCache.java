@@ -18,11 +18,12 @@ final class TaskCache {
                changed(outputsChecksumPath(), outputs.checksum());
     }
 
-    boolean restore(Inputs inputs, Path destination) {
+    boolean restore(Inputs inputs, Outputs outputs, Path destination) {
         var source = directory.resolve(String.valueOf(inputs.checksum()));
         if (!Files.exists(source)) {
             return false;
         }
+        outputs.delete();
         try {
             Files.walkFileTree(source, new CopyRecursively(source, destination));
             return true;
