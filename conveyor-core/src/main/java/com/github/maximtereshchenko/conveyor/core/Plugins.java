@@ -29,19 +29,26 @@ final class Plugins {
     Optional<Path> executeTasks(
         ConveyorSchematic conveyorSchematic,
         Properties properties,
-        Stage stage
+        Stage... stages
     ) {
         var artifacts = new ArrayList<Path>();
-        for (var task : tasks(conveyorSchematic, stage)) {
-            LOGGER.log(System.Logger.Level.INFO, "Executing task {0}", task.name());
-            action(
-                task,
-                properties,
-                conveyorSchematic.path().getParent()
-            )
-                .get()
-                .ifPresent(artifacts::add);
+        var tasks = tasks(conveyorSchematic);
+        for (var stage : stages) {
+            for (var task : tasks) {
+                if (task.stage().compareTo(stage) > 0) {
+                    break;
+                }
+                LOGGER.log(System.Logger.Level.INFO, "Executing task {0}", task.name());
+                action(
+                    task,
+                    properties,
+                    conveyorSchematic.path().getParent()
+                )
+                    .get()
+                    .ifPresent(artifacts::add);
+            }
         }
+
         return artifacts.isEmpty() ? Optional.empty() : Optional.of(artifacts.getLast());
     }
 
@@ -62,7 +69,7 @@ final class Plugins {
         };
     }
 
-    private List<ConveyorTask> tasks(ConveyorSchematic conveyorSchematic, Stage stage) {
+    private List<ConveyorTask> tasks(ConveyorSchematic conveyorSchematic) {
         return conveyorPlugins()
             .filter(conveyorPlugin -> named(conveyorPlugin.name()).isEnabled())
             .sorted(this::byPosition)
@@ -73,7 +80,6 @@ final class Plugins {
                 )
             )
             .flatMap(Collection::stream)
-            .filter(task -> isBeforeOrEqual(task, stage))
             .sorted(byStageAndStep())
             .toList();
     }
@@ -93,10 +99,6 @@ final class Plugins {
 
     private Comparator<ConveyorTask> byStageAndStep() {
         return Comparator.comparing(ConveyorTask::stage).thenComparing(ConveyorTask::step);
-    }
-
-    private boolean isBeforeOrEqual(ConveyorTask task, Stage stage) {
-        return task.stage().compareTo(stage) <= 0;
     }
 
     private Stream<ConveyorPlugin> conveyorPlugins() {

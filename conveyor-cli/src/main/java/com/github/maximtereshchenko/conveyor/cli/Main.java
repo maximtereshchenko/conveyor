@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Locale;
+import java.util.Arrays;
 import java.util.Properties;
 
 final class Main {
@@ -20,7 +20,10 @@ final class Main {
         new ConveyorFacade(JacksonAdapter.configured())
             .construct(
                 Paths.get(args[0]).toAbsolutePath().normalize(),
-                Stage.valueOf(args[1].toUpperCase(Locale.ROOT))
+                Arrays.stream(args, 1, args.length)
+                    .map(String::toUpperCase)
+                    .map(Stage::valueOf)
+                    .toArray(Stage[]::new)
             );
         System.exit(0);
     }

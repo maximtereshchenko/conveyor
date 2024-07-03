@@ -60,7 +60,10 @@ final class Schematic {
             );
     }
 
-    ConstructionRepository construct(ConstructionRepository constructionRepository, Stage stage) {
+    ConstructionRepository construct(
+        ConstructionRepository constructionRepository,
+        Stage... stages
+    ) {
         LOGGER.log(
             System.Logger.Level.INFO,
             () -> "Constructing %s:%s:%s".formatted(
@@ -98,7 +101,7 @@ final class Schematic {
             .executeTasks(
                 conveyorSchematic,
                 properties,
-                stage
+                stages
             )
             .map(path ->
                 updatedConstructionRepository.withArtifact(

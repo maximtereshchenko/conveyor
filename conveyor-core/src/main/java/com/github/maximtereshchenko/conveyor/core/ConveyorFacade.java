@@ -30,9 +30,9 @@ public final class ConveyorFacade implements ConveyorModule {
     }
 
     @Override
-    public void construct(Path path, Stage stage) {
+    public void construct(Path path, Stage... stages) {
         var start = Instant.now();
-        schematics(path).construct(stage);
+        schematics(path).construct(stages);
         LOGGER.log(
             System.Logger.Level.INFO,
             () -> "Construction took %ds".formatted(

@@ -15,7 +15,7 @@ final class ConveyorModuleProxy implements ConveyorModule {
     }
 
     @Override
-    public void construct(Path path, Stage stage) {
-        new ConveyorFacade(schematicDefinitionConverter).construct(path, stage);
+    public void construct(Path path, Stage... stages) {
+        new ConveyorFacade(schematicDefinitionConverter).construct(path, stages);
     }
 }

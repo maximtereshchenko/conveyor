@@ -19,12 +19,12 @@ final class Schematics {
         this.initial = initial;
     }
 
-    void construct(Stage stage) {
+    void construct(Stage... stages) {
         var schematicsInConstructionOrder = schematicsInConstructionOrder();
         log(schematicsInConstructionOrder);
         var constructionRepository = new ConstructionRepository();
         for (var schematic : schematicsInConstructionOrder) {
-            constructionRepository = schematic.construct(constructionRepository, stage);
+            constructionRepository = schematic.construct(constructionRepository, stages);
         }
     }
 
