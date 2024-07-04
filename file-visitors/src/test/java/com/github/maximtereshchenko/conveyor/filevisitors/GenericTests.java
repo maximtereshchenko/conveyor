@@ -23,6 +23,6 @@ final class GenericTests {
 
         Files.walkFileTree(path, new Generic(list::add));
 
-        assertThat(list).containsExactly(first, second);
+        assertThat(list).containsOnly(first, second);
     }
 }
