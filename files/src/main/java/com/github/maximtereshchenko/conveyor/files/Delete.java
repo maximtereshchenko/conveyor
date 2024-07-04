@@ -1,4 +1,4 @@
-package com.github.maximtereshchenko.conveyor.filevisitors;
+package com.github.maximtereshchenko.conveyor.files;
 
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
@@ -7,7 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 
-public final class Delete extends SimpleFileVisitor<Path> {
+final class Delete extends SimpleFileVisitor<Path> {
 
     @Override
     public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {

@@ -9,7 +9,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Optional;
 
-final class RemoteMavenRepository extends UriRepository<InputStream> {
+final class RemoteMavenRepository extends UriRepository<Resource> {
 
     private static final System.Logger LOGGER =
         System.getLogger(RemoteMavenRepository.class.getName());
@@ -23,13 +23,13 @@ final class RemoteMavenRepository extends UriRepository<InputStream> {
     }
 
     @Override
-    public Optional<InputStream> artifact(URI uri) {
+    public Optional<Resource> artifact(URI uri) {
         var response = getResponse(uri);
         if (response.statusCode() != 200) {
             return Optional.empty();
         }
         LOGGER.log(System.Logger.Level.INFO, "Downloaded from {0}: {1}", name, uri);
-        return Optional.of(response.body());
+        return Optional.of(new Resource(response::body));
     }
 
     @Override
@@ -53,7 +53,7 @@ final class RemoteMavenRepository extends UriRepository<InputStream> {
             );
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new IllegalArgumentException(e);
+            throw new IllegalStateException(e);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

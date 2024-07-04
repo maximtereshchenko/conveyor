@@ -1,9 +1,7 @@
 package com.github.maximtereshchenko.conveyor.plugin.clean;
 
-import com.github.maximtereshchenko.conveyor.filevisitors.Delete;
+import com.github.maximtereshchenko.conveyor.files.FileTree;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
@@ -22,19 +20,11 @@ final class CleanAction implements Supplier<Optional<Path>> {
     @Override
     public Optional<Path> get() {
         if (Files.exists(path)) {
-            deleteRecursively(path);
+            new FileTree(path).delete();
             LOGGER.log(System.Logger.Level.INFO, "Removed {0}", path);
         } else {
             LOGGER.log(System.Logger.Level.WARNING, "{0} does not exist", path);
         }
         return Optional.empty();
-    }
-
-    private void deleteRecursively(Path path) {
-        try {
-            Files.walkFileTree(path, new Delete());
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
     }
 }

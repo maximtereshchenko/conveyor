@@ -1,9 +1,8 @@
 package com.github.maximtereshchenko.conveyor.plugin.springboot;
 
+import com.github.maximtereshchenko.conveyor.files.FileTree;
 import com.github.maximtereshchenko.conveyor.springboot.Configuration;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
@@ -34,13 +33,10 @@ final class WritePropertiesAction implements Supplier<Optional<Path>> {
     }
 
     private void write() {
-        try (var outputStream = Files.newOutputStream(destination)) {
-            var properties = properties();
-            properties.store(outputStream, null);
-            LOGGER.log(System.Logger.Level.INFO, "Wrote {0} to {1}", properties, destination);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        var properties = properties();
+        new FileTree(destination)
+            .write(outputStream -> properties.store(outputStream, null));
+        LOGGER.log(System.Logger.Level.INFO, "Wrote {0} to {1}", properties, destination);
     }
 
     private Properties properties() {

@@ -4,7 +4,7 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":file-visitors"))
+    implementation(project(":files"))
     testImplementation(project(":test-common"))
     testImplementation(platform(libs.junit.bom))
     testImplementation(libs.junit.jupiter.api)

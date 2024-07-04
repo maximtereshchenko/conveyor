@@ -1,6 +1,7 @@
 package ${normalizedName};
 
 import com.github.maximtereshchenko.conveyor.common.api.*;
+import com.github.maximtereshchenko.conveyor.files.*;
 import com.github.maximtereshchenko.conveyor.plugin.api.*;
 
 import java.io.*;
@@ -33,7 +34,7 @@ public final class ${normalizedName} implements ConveyorPlugin {
             Step.valueOf(stageAndStep[1]),
             () -> {
                 sleep();
-                writeInstant(path);
+                new FileTree(path).write(Instant.now().toString());
                 return Optional.empty();
             },
             Set.of(),
@@ -47,14 +48,6 @@ public final class ${normalizedName} implements ConveyorPlugin {
             TimeUnit.MILLISECONDS.sleep(10);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-        }
-    }
-
-    private void writeInstant(Path path) {
-        try {
-            Files.writeString(path, Instant.now().toString());
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
         }
     }
 }

@@ -1,10 +1,10 @@
 package com.github.maximtereshchenko.conveyor.common.test;
 
+import com.github.maximtereshchenko.conveyor.files.FileTree;
+
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -42,12 +42,13 @@ public final class Directories {
         Path... exclusions
     ) {
         assertThat(
-            files(actual)
+            new FileTree(actual)
+                .files()
                 .stream()
                 .filter(path -> !List.of(exclusions).contains(path))
         )
             .zipSatisfy(
-                files(expected),
+                new FileTree(expected).files(),
                 (actualFile, expectedFile) -> {
                     assertThat(actual.relativize(actualFile))
                         .isEqualTo(expected.relativize(expectedFile));
@@ -59,21 +60,5 @@ public final class Directories {
     public static Path createDirectoriesForFile(Path path) throws IOException {
         Files.createDirectories(path.getParent());
         return path;
-    }
-
-    public static List<Path> files(Path path) {
-        if (!Files.exists(path)) {
-            return List.of();
-        }
-        if (Files.isRegularFile(path)) {
-            return List.of(path);
-        }
-        try (var stream = Files.list(path)) {
-            return stream.map(Directories::files)
-                .flatMap(Collection::stream)
-                .toList();
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
     }
 }

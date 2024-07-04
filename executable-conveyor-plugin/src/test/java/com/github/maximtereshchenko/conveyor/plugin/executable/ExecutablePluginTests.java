@@ -3,6 +3,7 @@ package com.github.maximtereshchenko.conveyor.plugin.executable;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import com.github.maximtereshchenko.conveyor.common.api.Step;
 import com.github.maximtereshchenko.conveyor.common.test.Directories;
+import com.github.maximtereshchenko.conveyor.files.FileTree;
 import com.github.maximtereshchenko.conveyor.plugin.api.*;
 import com.github.maximtereshchenko.conveyor.plugin.test.ConveyorTasks;
 import com.github.maximtereshchenko.conveyor.plugin.test.FakeConveyorSchematic;
@@ -112,7 +113,7 @@ final class ExecutablePluginTests {
             )
         );
 
-        assertThat(Directories.files(classes)).containsExactly(manifest(classes));
+        assertThat(new FileTree(classes).files()).containsExactly(manifest(classes));
     }
 
     @Test

@@ -1,10 +1,8 @@
 package com.github.maximtereshchenko.conveyor.core;
 
-import com.github.maximtereshchenko.conveyor.filevisitors.Copy;
+import com.github.maximtereshchenko.conveyor.files.Copy;
+import com.github.maximtereshchenko.conveyor.files.FileTree;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 
 final class TaskCache {
@@ -22,58 +20,39 @@ final class TaskCache {
 
     boolean restore(Inputs inputs, Outputs outputs, Path destination) {
         var source = directory.resolve(String.valueOf(inputs.checksum()));
-        if (!Files.exists(source)) {
+        var fileTree = new FileTree(source);
+        if (!fileTree.exists()) {
             return false;
         }
         outputs.delete();
-        try {
-            Files.walkFileTree(source, new Copy(source, destination));
-            return true;
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        fileTree.copyTo(destination);
+        return true;
     }
 
     void store(Inputs inputs, Outputs outputs, Path root) {
-        try {
-            for (var path : outputs.paths()) {
-                Files.walkFileTree(
-                    path,
+        for (var path : outputs.paths()) {
+            new FileTree(path)
+                .walk(
                     new Copy(
                         path,
                         directory.resolve(String.valueOf(inputs.checksum()))
                             .resolve(root.relativize(path))
                     )
                 );
-            }
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
         }
     }
 
     void remember(Inputs inputs, Outputs outputs) {
-        write(inputsChecksumPath(), inputs.checksum());
-        write(outputsChecksumPath(), outputs.checksum());
+        new FileTree(inputsChecksumPath()).write(inputs.checksum());
+        new FileTree(outputsChecksumPath()).write(outputs.checksum());
     }
 
     private boolean changed(Path path, long expected) {
-        if (!Files.exists(path)) {
+        var fileTree = new FileTree(path);
+        if (!fileTree.exists()) {
             return true;
         }
-        try {
-            return Long.parseLong(Files.readString(path)) != expected;
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-    }
-
-    private void write(Path path, long checksum) {
-        try {
-            Files.createDirectories(path.getParent());
-            Files.writeString(path, String.valueOf(checksum));
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        return Long.parseLong(fileTree.read()) != expected;
     }
 
     private Path inputsChecksumPath() {

@@ -1,9 +1,7 @@
 package com.github.maximtereshchenko.conveyor.plugin.resources;
 
-import com.github.maximtereshchenko.conveyor.filevisitors.Copy;
+import com.github.maximtereshchenko.conveyor.files.FileTree;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
@@ -22,16 +20,8 @@ final class CopyResourcesAction implements Supplier<Optional<Path>> {
     @Override
     public Optional<Path> get() {
         if (Files.exists(resourcesDirectory) && Files.exists(classesDirectory)) {
-            copy();
+            new FileTree(resourcesDirectory).copyTo(classesDirectory);
         }
         return Optional.empty();
-    }
-
-    private void copy() {
-        try {
-            Files.walkFileTree(resourcesDirectory, new Copy(resourcesDirectory, classesDirectory));
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
     }
 }

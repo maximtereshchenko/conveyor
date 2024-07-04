@@ -1,6 +1,7 @@
 package ${normalizedName};
 
 import com.github.maximtereshchenko.conveyor.common.api.*;
+import com.github.maximtereshchenko.conveyor.files.*;
 import com.github.maximtereshchenko.conveyor.plugin.api.*;
 
 import java.io.*;
@@ -23,17 +24,13 @@ public final class ${normalizedName} implements ConveyorPlugin {
                 Stage.COMPILE,
                 Step.RUN,
                 () -> {
-                    try {
-                        Files.writeString(
-                            schematic.path().getParent().resolve("configuration"),
+                    new FileTree(schematic.path().getParent().resolve("configuration"))
+                        .write(
                             configuration.entrySet()
                                 .stream()
                                 .map(Map.Entry::toString)
                                 .collect(Collectors.joining(System.lineSeparator()))
                         );
-                    } catch (IOException e) {
-                        throw new UncheckedIOException(e);
-                    }
                     return Optional.empty();
                 },
                 Set.of(),

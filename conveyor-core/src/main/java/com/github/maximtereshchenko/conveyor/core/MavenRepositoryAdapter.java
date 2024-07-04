@@ -3,17 +3,14 @@ package com.github.maximtereshchenko.conveyor.core;
 import com.github.maximtereshchenko.conveyor.api.port.SchematicDefinitionConverter;
 import com.github.maximtereshchenko.conveyor.api.schematic.*;
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
+import com.github.maximtereshchenko.conveyor.files.FileTree;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UncheckedIOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Function;
 
-final class MavenRepositoryAdapter implements Repository<InputStream> {
+final class MavenRepositoryAdapter implements Repository<Resource> {
 
     private final Repository<Path> original;
     private final PomDefinitionFactory pomDefinitionFactory;
@@ -35,7 +32,7 @@ final class MavenRepositoryAdapter implements Repository<InputStream> {
     }
 
     @Override
-    public Optional<InputStream> artifact(
+    public Optional<Resource> artifact(
         Id id,
         Version version,
         Classifier classifier
@@ -44,9 +41,9 @@ final class MavenRepositoryAdapter implements Repository<InputStream> {
             case SCHEMATIC_DEFINITION -> original.artifact(id, version, Classifier.POM)
                 .map(this::pomDefinition)
                 .map(this::schematicDefinition)
-                .map(this::inputStream);
+                .map(this::resource);
             case JAR, POM -> original.artifact(id, version, classifier)
-                .map(this::inputStream);
+                .map(Resource::new);
         };
     }
 
@@ -60,24 +57,14 @@ final class MavenRepositoryAdapter implements Repository<InputStream> {
         original.publish(id, version, classifier, resource);
     }
 
-    private InputStream inputStream(Path path) {
-        try {
-            return Files.newInputStream(path);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-    }
-
-    private InputStream inputStream(SchematicDefinition schematicDefinition) {
-        return new ByteArrayInputStream(schematicDefinitionConverter.bytes(schematicDefinition));
+    private Resource resource(SchematicDefinition schematicDefinition) {
+        return new Resource(() ->
+            new ByteArrayInputStream(schematicDefinitionConverter.bytes(schematicDefinition))
+        );
     }
 
     private PomDefinition pomDefinition(Path path) {
-        try (var inputStream = Files.newInputStream(path)) {
-            return pomDefinitionFactory.pomDefinition(inputStream);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        return new FileTree(path).read(pomDefinitionFactory::pomDefinition);
     }
 
     private SchematicDefinition schematicDefinition(PomDefinition pomDefinition) {

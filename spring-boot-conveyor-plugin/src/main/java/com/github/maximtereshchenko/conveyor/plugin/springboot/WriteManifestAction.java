@@ -1,9 +1,8 @@
 package com.github.maximtereshchenko.conveyor.plugin.springboot;
 
+import com.github.maximtereshchenko.conveyor.files.FileTree;
 import com.github.maximtereshchenko.conveyor.springboot.Configuration;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
@@ -31,19 +30,12 @@ final class WriteManifestAction implements Supplier<Optional<Path>> {
     }
 
     private void write() {
-        try {
-            var manifestLocation = Files.createDirectories(containerDirectory.resolve("META-INF"))
-                .resolve("MANIFEST.MF");
-            try (var outputStream = Files.newOutputStream(manifestLocation)) {
-                var manifest = new Manifest();
-                var mainAttributes = manifest.getMainAttributes();
-                mainAttributes.put(Attributes.Name.MAIN_CLASS, Configuration.MAIN_CLASS_NAME);
-                mainAttributes.put(Attributes.Name.MANIFEST_VERSION, "1.0");
-                manifest.write(outputStream);
-            }
-            LOGGER.log(System.Logger.Level.INFO, "Wrote {0}", manifestLocation);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        var manifest = new Manifest();
+        var mainAttributes = manifest.getMainAttributes();
+        mainAttributes.put(Attributes.Name.MAIN_CLASS, Configuration.MAIN_CLASS_NAME);
+        mainAttributes.put(Attributes.Name.MANIFEST_VERSION, "1.0");
+        var manifestLocation = containerDirectory.resolve("META-INF").resolve("MANIFEST.MF");
+        new FileTree(manifestLocation).write(manifest::write);
+        LOGGER.log(System.Logger.Level.INFO, "Wrote {0}", manifestLocation);
     }
 }

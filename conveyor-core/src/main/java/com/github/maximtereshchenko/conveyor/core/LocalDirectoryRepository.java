@@ -1,7 +1,7 @@
 package com.github.maximtereshchenko.conveyor.core;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
+import com.github.maximtereshchenko.conveyor.files.FileTree;
+
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,15 +30,10 @@ final class LocalDirectoryRepository extends UriRepository<Path> {
 
     @Override
     void publish(URI uri, Resource resource) {
-        try (var inputStream = resource.inputStream()) {
-            var destination = Paths.get(uri);
-            Files.deleteIfExists(destination);
-            Files.createDirectories(destination.getParent());
-            try (var outputStream = Files.newOutputStream(destination)) {
-                inputStream.transferTo(outputStream);
-            }
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
+        var fileTree = new FileTree(Paths.get(uri));
+        if (fileTree.exists()) {
+            return;
         }
+        resource.transferTo(fileTree);
     }
 }

@@ -1,4 +1,4 @@
-package com.github.maximtereshchenko.conveyor.filevisitors;
+package com.github.maximtereshchenko.conveyor.files;
 
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
@@ -8,9 +8,9 @@ import java.nio.file.attribute.BasicFileAttributes;
 
 public final class Generic extends SimpleFileVisitor<Path> {
 
-    private final PathConsumer consumer;
+    private final IOConsumer<Path> consumer;
 
-    public Generic(PathConsumer consumer) {
+    public Generic(IOConsumer<Path> consumer) {
         this.consumer = consumer;
     }
 

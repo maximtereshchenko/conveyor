@@ -2,8 +2,6 @@ package com.github.maximtereshchenko.conveyor.plugin.archive;
 
 import com.github.maximtereshchenko.conveyor.zip.ZipArchiveContainer;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
@@ -32,17 +30,12 @@ final class ArchiveAction implements Supplier<Optional<Path>> {
     }
 
     private void archive() {
-        try {
-            Files.createDirectories(destination.getParent());
-            new ZipArchiveContainer(classesDirectory).archive(destination);
-            LOGGER.log(
-                System.Logger.Level.INFO,
-                "Archived {0} to {1}",
-                classesDirectory,
-                destination
-            );
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        new ZipArchiveContainer(classesDirectory).archive(destination);
+        LOGGER.log(
+            System.Logger.Level.INFO,
+            "Archived {0} to {1}",
+            classesDirectory,
+            destination
+        );
     }
 }

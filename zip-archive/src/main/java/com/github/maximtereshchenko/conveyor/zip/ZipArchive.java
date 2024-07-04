@@ -1,8 +1,9 @@
 package com.github.maximtereshchenko.conveyor.zip;
 
+import com.github.maximtereshchenko.conveyor.files.FileTree;
+
 import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.file.Files;
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.zip.ZipInputStream;
 
@@ -14,23 +15,22 @@ public final class ZipArchive {
         this.path = path;
     }
 
-    public void extract(Path target) {
-        try (var zipInputStream = new ZipInputStream(Files.newInputStream(path))) {
+    public void extract(Path destination) {
+        new FileTree(path).transfer(inputStream -> extract(inputStream, destination));
+    }
+
+    private void extract(InputStream inputStream, Path destination) throws IOException {
+        try (var zipInputStream = new ZipInputStream(inputStream)) {
             for (
                 var entry = zipInputStream.getNextEntry();
                 entry != null;
                 entry = zipInputStream.getNextEntry()
             ) {
                 if (!entry.isDirectory()) {
-                    var file = target.resolve(entry.getName());
-                    Files.createDirectories(file.getParent());
-                    try (var outputStream = Files.newOutputStream(file)) {
-                        zipInputStream.transferTo(outputStream);
-                    }
+                    new FileTree(destination.resolve(entry.getName()))
+                        .write(zipInputStream::transferTo);
                 }
             }
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
         }
     }
 }

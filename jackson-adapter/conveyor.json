@@ -11,6 +11,10 @@
       "name": "conveyor-api"
     },
     {
+      "group": "${conveyor.schematic.group}",
+      "name": "files"
+    },
+    {
       "group": "com.fasterxml.jackson.datatype",
       "name": "jackson-datatype-jdk8"
     },

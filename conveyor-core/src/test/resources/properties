@@ -1,6 +1,7 @@
 package ${normalizedName};
 
 import com.github.maximtereshchenko.conveyor.common.api.*;
+import com.github.maximtereshchenko.conveyor.files.*;
 import com.github.maximtereshchenko.conveyor.plugin.api.*;
 
 import java.io.*;
@@ -34,9 +35,8 @@ public final class ${normalizedName} implements ConveyorPlugin {
     }
 
     private void writeProperties(ConveyorSchematic schematic, Set<String> keys) {
-        try {
-            Files.writeString(
-                schematic.path().getParent().resolve("properties"),
+        new FileTree(schematic.path().getParent().resolve("properties"))
+            .write(
                 keys.stream()
                     .map(key ->
                         schematic.propertyValue(key)
@@ -45,8 +45,5 @@ public final class ${normalizedName} implements ConveyorPlugin {
                     .flatMap(Optional::stream)
                     .collect(Collectors.joining(System.lineSeparator()))
             );
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
     }
 }

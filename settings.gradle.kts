@@ -18,7 +18,7 @@ include("publish-conveyor-plugin")
 include("executable-conveyor-plugin")
 include("spring-boot-conveyor-plugin")
 include("spring-boot-launcher")
-include("file-visitors")
+include("files")
 dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {

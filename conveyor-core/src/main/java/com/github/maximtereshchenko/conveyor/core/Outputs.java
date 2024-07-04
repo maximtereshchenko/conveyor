@@ -1,12 +1,9 @@
 package com.github.maximtereshchenko.conveyor.core;
 
-import com.github.maximtereshchenko.conveyor.filevisitors.Delete;
+import com.github.maximtereshchenko.conveyor.files.FileTree;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskOutput;
 import com.github.maximtereshchenko.conveyor.plugin.api.PathConveyorTaskOutput;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -39,24 +36,18 @@ final class Outputs extends Boundaries<ConveyorTaskOutput> {
                     case PathConveyorTaskOutput pathOutput -> pathOutput.path();
                 }
             )
-            .filter(Files::exists)
             .collect(Collectors.toSet());
     }
 
     void delete() {
-        for (var output : all) {
-            switch (output) {
-                case PathConveyorTaskOutput pathOutput -> {
-                    var path = pathOutput.path();
-                    if (Files.isDirectory(path)) {
-                        try {
-                            Files.walkFileTree(path, new Delete());
-                        } catch (IOException e) {
-                            throw new UncheckedIOException(e);
-                        }
-                    }
+        all.stream()
+            .map(output ->
+                switch (output) {
+                    case PathConveyorTaskOutput pathOutput -> pathOutput.path();
                 }
-            }
-        }
+            )
+            .map(FileTree::new)
+            .filter(FileTree::isDirectory)
+            .forEach(FileTree::delete);
     }
 }

@@ -6,7 +6,7 @@ plugins {
 dependencies {
     implementation(project(":conveyor-plugin-api"))
     implementation(project(":compiler"))
-    implementation(project(":file-visitors"))
+    implementation(project(":files"))
     testImplementation(project(":test-common"))
     testImplementation(project(":conveyor-plugin-test"))
     testImplementation(platform(libs.junit.bom))

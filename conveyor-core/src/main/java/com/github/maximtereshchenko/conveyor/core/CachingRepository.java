@@ -1,15 +1,14 @@
 package com.github.maximtereshchenko.conveyor.core;
 
-import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.Optional;
 
 final class CachingRepository implements Repository<Path> {
 
-    private final Repository<InputStream> original;
+    private final Repository<Resource> original;
     private final LocalDirectoryRepository cache;
 
-    CachingRepository(Repository<InputStream> original, LocalDirectoryRepository cache) {
+    CachingRepository(Repository<Resource> original, LocalDirectoryRepository cache) {
         this.original = original;
         this.cache = cache;
     }
@@ -24,7 +23,7 @@ final class CachingRepository implements Repository<Path> {
         return cache.artifact(id, version, classifier)
             .or(() ->
                 original.artifact(id, version, classifier)
-                    .flatMap(inputStream -> published(id, version, classifier, inputStream))
+                    .flatMap(resource -> published(id, version, classifier, resource))
             );
     }
 
@@ -42,9 +41,9 @@ final class CachingRepository implements Repository<Path> {
         Id id,
         Version version,
         Classifier classifier,
-        InputStream inputStream
+        Resource resource
     ) {
-        cache.publish(id, version, classifier, () -> inputStream);
+        cache.publish(id, version, classifier, resource);
         return cache.artifact(id, version, classifier);
     }
 }

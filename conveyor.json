@@ -22,7 +22,7 @@
     "./spring-boot-launcher",
     "./test-common",
     "./zip-archive",
-    "./file-visitors"
+    "./files"
   ],
   "repositories": [
     {
@@ -151,7 +151,7 @@
       },
       {
         "group": "${conveyor.schematic.group}",
-        "name": "file-visitors",
+        "name": "files",
         "version": "${conveyor.schematic.version}"
       },
       {

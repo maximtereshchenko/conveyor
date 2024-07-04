@@ -1,9 +1,7 @@
 package com.github.maximtereshchenko.conveyor.plugin.springboot;
 
-import com.github.maximtereshchenko.conveyor.filevisitors.Copy;
+import com.github.maximtereshchenko.conveyor.files.FileTree;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
@@ -27,20 +25,16 @@ final class CopyClasspathAction implements Supplier<Optional<Path>> {
 
     @Override
     public Optional<Path> get() {
-        try {
-            if (Files.exists(classesDirectory)) {
-                copyClasses();
-                copyDependencies();
-            }
-            return Optional.empty();
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
+        if (Files.exists(classesDirectory)) {
+            copyClasses();
+            copyDependencies();
         }
+        return Optional.empty();
     }
 
-    private void copyClasses() throws IOException {
+    private void copyClasses() {
         var classesDestination = destination.resolve("classes");
-        Files.walkFileTree(classesDirectory, new Copy(classesDirectory, classesDestination));
+        new FileTree(classesDirectory).copyTo(classesDestination);
         LOGGER.log(
             System.Logger.Level.INFO,
             "Copied {0} to {1}",
@@ -49,10 +43,10 @@ final class CopyClasspathAction implements Supplier<Optional<Path>> {
         );
     }
 
-    private void copyDependencies() throws IOException {
+    private void copyDependencies() {
         for (var dependency : dependencies) {
             var dependencyDestination = destination.resolve(dependency.getFileName());
-            Files.copy(dependency, dependencyDestination);
+            new FileTree(dependency).copyTo(dependencyDestination);
             LOGGER.log(System.Logger.Level.INFO, "Copied {0}", dependencyDestination);
         }
     }

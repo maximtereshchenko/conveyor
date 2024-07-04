@@ -1,6 +1,7 @@
 package ${normalizedName};
 
 import com.github.maximtereshchenko.conveyor.common.api.*;
+import com.github.maximtereshchenko.conveyor.files.*;
 import com.github.maximtereshchenko.conveyor.plugin.api.*;
 
 import java.io.*;
@@ -25,34 +26,30 @@ public final class ${normalizedName} implements ConveyorPlugin {
                 Stage.COMPILE,
                 Step.RUN,
                 () -> {
-                    try {
-                        Files.writeString(
-                            schematic.path().getParent().resolve("dependencies"),
-                            ServiceLoader.load(
-                                Supplier.class,
-                                URLClassLoader.newInstance(
-                                    schematic.classpath(
-                                        Set.of(
-                                            DependencyScope.valueOf(
-                                                configuration.getOrDefault("scope", "IMPLEMENTATION")
-                                            )
+                new FileTree(schematic.path().getParent().resolve("dependencies"))
+                    .write(
+                        ServiceLoader.load(
+                            Supplier.class,
+                            URLClassLoader.newInstance(
+                                schematic.classpath(
+                                    Set.of(
+                                        DependencyScope.valueOf(
+                                            configuration.getOrDefault("scope", "IMPLEMENTATION")
                                         )
                                     )
-                                        .stream()
-                                        .map(this::url)
-                                        .toArray(URL[]::new),
-                                    getClass().getClassLoader()
                                 )
+                                    .stream()
+                                    .map(this::url)
+                                    .toArray(URL[]::new),
+                                getClass().getClassLoader()
                             )
-                                .stream()
-                                .map(ServiceLoader.Provider::get)
-                                .map(Supplier::get)
-                                .map(Object::toString)
-                                .collect(Collectors.joining(System.lineSeparator()))
-                        );
-                    } catch (IOException e) {
-                        throw new UncheckedIOException(e);
-                    }
+                        )
+                            .stream()
+                            .map(ServiceLoader.Provider::get)
+                            .map(Supplier::get)
+                            .map(Object::toString)
+                            .collect(Collectors.joining(System.lineSeparator()))
+                    );
                     return Optional.empty();
                 },
                 Set.of(),

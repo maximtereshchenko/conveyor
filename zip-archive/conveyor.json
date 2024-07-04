@@ -8,7 +8,7 @@
   "dependencies": [
     {
       "group": "${conveyor.schematic.group}",
-      "name": "file-visitors"
+      "name": "files"
     },
     {
       "group": "${conveyor.schematic.group}",

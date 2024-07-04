@@ -1,7 +1,5 @@
 package com.github.maximtereshchenko.conveyor.core;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Optional;
 
 interface Repository<T> {
@@ -19,11 +17,5 @@ interface Repository<T> {
 
     enum Classifier {
         SCHEMATIC_DEFINITION, JAR, POM
-    }
-
-    @FunctionalInterface
-    interface Resource {
-
-        InputStream inputStream() throws IOException;
     }
 }

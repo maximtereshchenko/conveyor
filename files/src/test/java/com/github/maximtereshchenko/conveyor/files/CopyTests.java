@@ -1,4 +1,4 @@
-package com.github.maximtereshchenko.conveyor.filevisitors;
+package com.github.maximtereshchenko.conveyor.files;
 
 import com.github.maximtereshchenko.conveyor.common.test.Directories;
 import org.junit.jupiter.api.Test;

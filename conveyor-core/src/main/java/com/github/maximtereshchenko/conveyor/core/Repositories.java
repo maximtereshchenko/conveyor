@@ -3,7 +3,6 @@ package com.github.maximtereshchenko.conveyor.core;
 import com.github.maximtereshchenko.conveyor.api.port.SchematicDefinitionConverter;
 import com.github.maximtereshchenko.conveyor.api.schematic.SchematicDefinition;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashSet;
 import java.util.NoSuchElementException;
@@ -41,14 +40,7 @@ final class Repositories {
     ) {
         all.stream()
             .filter(repository -> repository.hasName(repositoryName))
-            .forEach(repository ->
-                repository.publish(
-                    id,
-                    version,
-                    classifier,
-                    () -> Files.newInputStream(path)
-                )
-            );
+            .forEach(repository -> repository.publish(id, version, classifier, new Resource(path)));
     }
 
     private Path path(Id id, Version version, Repository.Classifier classifier) {

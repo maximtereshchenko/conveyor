@@ -1,7 +1,7 @@
 package com.github.maximtereshchenko.conveyor.plugin.executable;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
+import com.github.maximtereshchenko.conveyor.files.FileTree;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
@@ -31,18 +31,11 @@ final class WriteManifestAction implements Supplier<Optional<Path>> {
     }
 
     private void write() {
-        try {
-            var destination = Files.createDirectories(classesDirectory.resolve("META-INF"))
-                .resolve("MANIFEST.MF");
-            try (var outputStream = Files.newOutputStream(destination)) {
-                var manifest = new Manifest();
-                manifest.getMainAttributes().put(Attributes.Name.MAIN_CLASS, mainClass);
-                manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
-                manifest.write(outputStream);
-            }
-            LOGGER.log(System.Logger.Level.INFO, "Wrote {0}", destination);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        var manifest = new Manifest();
+        manifest.getMainAttributes().put(Attributes.Name.MAIN_CLASS, mainClass);
+        manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
+        var destination = classesDirectory.resolve("META-INF").resolve("MANIFEST.MF");
+        new FileTree(destination).write(manifest::write);
+        LOGGER.log(System.Logger.Level.INFO, "Wrote {0}", destination);
     }
 }

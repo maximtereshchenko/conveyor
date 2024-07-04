@@ -11,10 +11,11 @@ import com.github.maximtereshchenko.conveyor.api.schematic.NoTemplateDefinition;
 import com.github.maximtereshchenko.conveyor.api.schematic.RepositoryDefinition;
 import com.github.maximtereshchenko.conveyor.api.schematic.SchematicDefinition;
 import com.github.maximtereshchenko.conveyor.api.schematic.TemplateDefinition;
+import com.github.maximtereshchenko.conveyor.files.FileTree;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UncheckedIOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 
 public final class JacksonAdapter implements SchematicDefinitionConverter {
@@ -47,13 +48,7 @@ public final class JacksonAdapter implements SchematicDefinitionConverter {
 
     @Override
     public SchematicDefinition schematicDefinition(Path path) {
-        try (var reader = Files.newBufferedReader(path)) {
-            var schematicDefinition = objectMapper.readValue(reader, SchematicDefinition.class);
-            LOGGER.log(System.Logger.Level.DEBUG, "Read schematic definition {0}", path);
-            return schematicDefinition;
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        return new FileTree(path).read(inputStream -> read(inputStream, path));
     }
 
     @Override
@@ -63,5 +58,11 @@ public final class JacksonAdapter implements SchematicDefinitionConverter {
         } catch (JsonProcessingException e) {
             throw new UncheckedIOException(e);
         }
+    }
+
+    private SchematicDefinition read(InputStream inputStream, Path path) throws IOException {
+        var schematicDefinition = objectMapper.readValue(inputStream, SchematicDefinition.class);
+        LOGGER.log(System.Logger.Level.DEBUG, "Read schematic definition {0}", path);
+        return schematicDefinition;
     }
 }

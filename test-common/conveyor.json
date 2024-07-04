@@ -7,6 +7,10 @@
   },
   "dependencies": [
     {
+      "group": "${conveyor.schematic.group}",
+      "name": "files"
+    },
+    {
       "group": "org.junit.jupiter",
       "name": "junit-jupiter-api"
     },

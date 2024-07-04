@@ -1,6 +1,7 @@
 package ${normalizedName};
 
 import com.github.maximtereshchenko.conveyor.common.api.*;
+import com.github.maximtereshchenko.conveyor.files.*;
 import com.github.maximtereshchenko.conveyor.plugin.api.*;
 
 import java.io.*;
@@ -26,15 +27,8 @@ public final class ${normalizedName} implements ConveyorPlugin {
                 Stage.COMPILE,
                 Step.RUN,
                 () -> {
-                    try {
-                        if (!"true".equals(configuration.get("skip"))) {
-                            Files.writeString(
-                                Files.createDirectories(output).resolve("instant"),
-                                Instant.now().toString()
-                            );
-                        }
-                    } catch (IOException e) {
-                        throw new UncheckedIOException(e);
+                    if (!"true".equals(configuration.get("skip"))) {
+                        new FileTree(output.resolve("instant")).write(Instant.now().toString());
                     }
                     return Optional.empty();
                 },

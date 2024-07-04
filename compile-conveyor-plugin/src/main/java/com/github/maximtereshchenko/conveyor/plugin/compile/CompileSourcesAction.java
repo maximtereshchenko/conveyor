@@ -1,13 +1,10 @@
 package com.github.maximtereshchenko.conveyor.plugin.compile;
 
 import com.github.maximtereshchenko.conveyor.compiler.Compiler;
-import com.github.maximtereshchenko.conveyor.filevisitors.Generic;
+import com.github.maximtereshchenko.conveyor.files.FileTree;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -37,21 +34,11 @@ final class CompileSourcesAction implements Supplier<Optional<Path>> {
     @Override
     public Optional<Path> get() {
         if (Files.exists(sourcesDirectory)) {
-            compiler.compile(files(sourcesDirectory), classpath, outputDirectory);
+            compiler.compile(new FileTree(sourcesDirectory).files(), classpath, outputDirectory);
             LOGGER.log(System.Logger.Level.INFO, "Compiled classes to {0}", outputDirectory);
         } else {
             LOGGER.log(System.Logger.Level.WARNING, "No sources to compile");
         }
         return Optional.empty();
-    }
-
-    private Set<Path> files(Path directory) {
-        try {
-            var files = new HashSet<Path>();
-            Files.walkFileTree(directory, new Generic(files::add));
-            return files;
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
     }
 }
