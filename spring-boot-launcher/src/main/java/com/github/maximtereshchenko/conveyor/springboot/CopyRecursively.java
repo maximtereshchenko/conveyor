@@ -33,7 +33,7 @@ final class CopyRecursively extends SimpleFileVisitor<Path> {
 
     private Path resolved(Path original) {
         var relative = source.relativize(original);
-        return IntStream.range(0, relative.getNameCount())
+        return IntStream.range(0, relative.getNameCount()) //TODO why?
             .mapToObj(relative::getName)
             .map(Path::toString)
             .reduce(destination, Path::resolve, (a, b) -> a);

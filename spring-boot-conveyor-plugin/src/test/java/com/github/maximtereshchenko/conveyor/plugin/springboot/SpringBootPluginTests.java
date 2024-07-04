@@ -147,14 +147,15 @@ final class SpringBootPluginTests {
         @TempDir Path path
     ) throws IOException {
         var container = path.resolve("container");
+        var classes = Files.createDirectory(path.resolve("classes"));
+        Files.createFile(classes.resolve("Dummy.class"));
 
         ConveyorTasks.executeTasks(
             plugin.tasks(
                 FakeConveyorSchematic.from(path, Files.createFile(path.resolve("dependency"))),
                 Map.of(
                     "container.directory", container.toString(),
-                    "classes.directory",
-                    Files.createDirectory(path.resolve("classes")).toString(),
+                    "classes.directory", classes.toString(),
                     "launched.class", "Main",
                     "destination", path.resolve("executable").toString()
                 )
@@ -168,14 +169,15 @@ final class SpringBootPluginTests {
     void givenClasses_whenExecuteTasks_thenSpringBootLauncherIsExtracted(@TempDir Path path)
         throws IOException {
         var container = path.resolve("container");
+        var classes = Files.createDirectory(path.resolve("classes"));
+        Files.createFile(classes.resolve("Dummy.class"));
 
         ConveyorTasks.executeTasks(
             plugin.tasks(
                 FakeConveyorSchematic.from(path),
                 Map.of(
                     "container.directory", container.toString(),
-                    "classes.directory",
-                    Files.createDirectory(path.resolve("classes")).toString(),
+                    "classes.directory", classes.toString(),
                     "launched.class", "Main",
                     "destination", path.resolve("executable").toString()
                 )
@@ -197,14 +199,15 @@ final class SpringBootPluginTests {
     void givenClasses_whenExecuteTasks_thenPropertiesAreWritten(@TempDir Path path)
         throws IOException {
         var container = path.resolve("container");
+        var classes = Files.createDirectory(path.resolve("classes"));
+        Files.createFile(classes.resolve("Dummy.class"));
 
         ConveyorTasks.executeTasks(
             plugin.tasks(
                 FakeConveyorSchematic.from(path),
                 Map.of(
                     "container.directory", container.toString(),
-                    "classes.directory",
-                    Files.createDirectory(path.resolve("classes")).toString(),
+                    "classes.directory", classes.toString(),
                     "launched.class", "Main",
                     "destination", path.resolve("executable").toString()
                 )
@@ -222,19 +225,21 @@ final class SpringBootPluginTests {
     void givenClasses_whenExecuteTasks_thenManifestIsWritten(@TempDir Path path)
         throws IOException {
         var container = path.resolve("container");
+        var classes = Files.createDirectory(path.resolve("classes"));
+        Files.createFile(classes.resolve("Dummy.class"));
 
         ConveyorTasks.executeTasks(
             plugin.tasks(
                 FakeConveyorSchematic.from(path),
                 Map.of(
                     "container.directory", container.toString(),
-                    "classes.directory",
-                    Files.createDirectory(path.resolve("classes")).toString(),
+                    "classes.directory", classes.toString(),
                     "launched.class", "Main",
                     "destination", path.resolve("executable").toString()
                 )
             )
         );
+
         assertThat(container.resolve("META-INF").resolve("MANIFEST.MF"))
             .content()
             .contains("Main-Class: " + Configuration.MAIN_CLASS_NAME);
@@ -244,6 +249,8 @@ final class SpringBootPluginTests {
     void givenClasses_whenExecuteTasks_thenExecutableIsCreated(@TempDir Path path)
         throws IOException {
         var container = path.resolve("container");
+        var classes = Files.createDirectory(path.resolve("classes"));
+        Files.createFile(classes.resolve("Dummy.class"));
         var executable = path.resolve("executable");
 
         ConveyorTasks.executeTasks(
@@ -251,8 +258,7 @@ final class SpringBootPluginTests {
                 FakeConveyorSchematic.from(path),
                 Map.of(
                     "container.directory", container.toString(),
-                    "classes.directory",
-                    Files.createDirectory(path.resolve("classes")).toString(),
+                    "classes.directory", classes.toString(),
                     "launched.class", "Main",
                     "destination", executable.toString()
                 )

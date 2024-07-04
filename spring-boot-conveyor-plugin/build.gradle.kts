@@ -6,6 +6,7 @@ dependencies {
     implementation(project(":conveyor-plugin-api"))
     implementation(project(":zip-archive"))
     implementation(project(":spring-boot-launcher"))
+    implementation(project(":file-visitors"))
     testImplementation(project(":test-common"))
     testImplementation(project(":conveyor-plugin-test"))
     testImplementation(platform(libs.junit.bom))

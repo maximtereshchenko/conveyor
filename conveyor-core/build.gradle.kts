@@ -6,6 +6,7 @@ plugins {
 dependencies {
     api(project(":conveyor-api"))
     api(project(":conveyor-plugin-api"))
+    implementation(project(":file-visitors"))
     testImplementation(project(":compiler"))
     testImplementation(project(":zip-archive"))
     testImplementation(project(":jackson-adapter"))

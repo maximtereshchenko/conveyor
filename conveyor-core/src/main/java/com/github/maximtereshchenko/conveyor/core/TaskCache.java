@@ -1,5 +1,7 @@
 package com.github.maximtereshchenko.conveyor.core;
 
+import com.github.maximtereshchenko.conveyor.filevisitors.Copy;
+
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
@@ -25,7 +27,7 @@ final class TaskCache {
         }
         outputs.delete();
         try {
-            Files.walkFileTree(source, new CopyRecursively(source, destination));
+            Files.walkFileTree(source, new Copy(source, destination));
             return true;
         } catch (IOException e) {
             throw new UncheckedIOException(e);
@@ -34,17 +36,15 @@ final class TaskCache {
 
     void store(Inputs inputs, Outputs outputs, Path root) {
         try {
-            var existingDestination = Files.createDirectories(
-                directory.resolve(String.valueOf(inputs.checksum()))
-            );
             for (var path : outputs.paths()) {
-                if (Files.exists(path)) { //TODO test
-                    var to = existingDestination.resolve(root.relativize(path));
-                    if (Files.isRegularFile(path)) {
-                        Files.createDirectories(to.getParent()); //TODO
-                    }
-                    Files.walkFileTree(path, new CopyRecursively(path, to));
-                }
+                Files.walkFileTree(
+                    path,
+                    new Copy(
+                        path,
+                        directory.resolve(String.valueOf(inputs.checksum()))
+                            .resolve(root.relativize(path))
+                    )
+                );
             }
         } catch (IOException e) {
             throw new UncheckedIOException(e);

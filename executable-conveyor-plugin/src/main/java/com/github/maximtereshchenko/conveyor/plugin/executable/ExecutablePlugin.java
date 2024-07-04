@@ -37,7 +37,8 @@ public final class ExecutablePlugin implements ConveyorPlugin {
                 Stream.concat(dependencies.stream(), Stream.of(classesDirectory))
                     .map(PathConveyorTaskInput::new)
                     .collect(Collectors.toSet()),
-                Set.of(new PathConveyorTaskOutput(classesDirectory)), //TODO copy classes and dependencies to separate directory
+                Set.of(new PathConveyorTaskOutput(classesDirectory)),
+                //TODO copy classes and dependencies to separate directory
                 Cache.ENABLED
             ),
             new ConveyorTask(

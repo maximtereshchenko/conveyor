@@ -1,5 +1,7 @@
 package com.github.maximtereshchenko.conveyor.plugin.springboot;
 
+import com.github.maximtereshchenko.conveyor.filevisitors.Copy;
+
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
@@ -38,10 +40,7 @@ final class CopyClasspathAction implements Supplier<Optional<Path>> {
 
     private void copyClasses() throws IOException {
         var classesDestination = destination.resolve("classes");
-        Files.walkFileTree(
-            classesDirectory,
-            new CopyRecursively(classesDirectory, classesDestination)
-        );
+        Files.walkFileTree(classesDirectory, new Copy(classesDirectory, classesDestination));
         LOGGER.log(
             System.Logger.Level.INFO,
             "Copied {0} to {1}",

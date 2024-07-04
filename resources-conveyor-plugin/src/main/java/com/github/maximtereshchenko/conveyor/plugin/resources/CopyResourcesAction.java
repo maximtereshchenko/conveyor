@@ -1,5 +1,7 @@
 package com.github.maximtereshchenko.conveyor.plugin.resources;
 
+import com.github.maximtereshchenko.conveyor.filevisitors.Copy;
+
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
@@ -27,10 +29,7 @@ final class CopyResourcesAction implements Supplier<Optional<Path>> {
 
     private void copy() {
         try {
-            Files.walkFileTree(
-                resourcesDirectory,
-                new CopyRecursively(resourcesDirectory, classesDirectory)
-            );
+            Files.walkFileTree(resourcesDirectory, new Copy(resourcesDirectory, classesDirectory));
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
