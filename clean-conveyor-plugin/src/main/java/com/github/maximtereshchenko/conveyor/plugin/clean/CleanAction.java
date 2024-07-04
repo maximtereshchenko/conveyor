@@ -1,5 +1,7 @@
 package com.github.maximtereshchenko.conveyor.plugin.clean;
 
+import com.github.maximtereshchenko.conveyor.filevisitors.Delete;
+
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
@@ -30,7 +32,7 @@ final class CleanAction implements Supplier<Optional<Path>> {
 
     private void deleteRecursively(Path path) {
         try {
-            Files.walkFileTree(path, new DeleteRecursivelyFileVisitor());
+            Files.walkFileTree(path, new Delete());
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

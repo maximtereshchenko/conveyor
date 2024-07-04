@@ -1,5 +1,6 @@
 package com.github.maximtereshchenko.conveyor.core;
 
+import com.github.maximtereshchenko.conveyor.filevisitors.Delete;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskOutput;
 import com.github.maximtereshchenko.conveyor.plugin.api.PathConveyorTaskOutput;
 
@@ -48,7 +49,7 @@ final class Outputs extends Boundaries<ConveyorTaskOutput> {
                     var path = pathOutput.path();
                     if (Files.isDirectory(path)) {
                         try {
-                            Files.walkFileTree(path, new DeleteRecursivelyFileVisitor());
+                            Files.walkFileTree(path, new Delete());
                         } catch (IOException e) {
                             throw new UncheckedIOException(e);
                         }
