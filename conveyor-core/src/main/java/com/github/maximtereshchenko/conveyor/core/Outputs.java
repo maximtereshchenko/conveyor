@@ -39,6 +39,7 @@ final class Outputs extends Boundaries<ConveyorTaskOutput> {
                     case PathConveyorTaskOutput pathOutput -> pathOutput.path();
                 }
             )
+            .filter(Files::exists)
             .collect(Collectors.toSet());
     }
 

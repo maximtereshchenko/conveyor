@@ -69,6 +69,7 @@ final class TaskCache {
 
     private void write(Path path, long checksum) {
         try {
+            Files.createDirectories(path.getParent());
             Files.writeString(path, String.valueOf(checksum));
         } catch (IOException e) {
             throw new UncheckedIOException(e);

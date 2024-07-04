@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 
 final class TasksFeatureTests extends ConveyorTest {
 
@@ -656,6 +657,35 @@ final class TasksFeatureTests extends ConveyorTest {
         module.construct(conveyorJson, List.of(Stage.COMPILE));
 
         assertThat(redundant).doesNotExist();
+    }
+
+    @Test
+    void givenCacheableTaskOutputDoesNotExist_whenConstructToStage_thenNoExceptionThrown(
+        @TempDir Path path,
+        ConveyorModule module,
+        BuilderFactory factory
+    ) throws Exception {
+        factory.repositoryBuilder(path)
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("cache")
+            )
+            .jar(
+                factory.jarBuilder("cache", path)
+            )
+            .install(path);
+        var conveyorJson = factory.schematicDefinitionBuilder()
+            .repository(path)
+            .plugin(
+                "group",
+                "cache",
+                "1.0.0",
+                Map.of("skip", "true")
+            )
+            .conveyorJson(path);
+        var stages = List.of(Stage.COMPILE);
+
+        assertThatCode(() -> module.construct(conveyorJson, stages)).doesNotThrowAnyException();
     }
 
     private Instant instant(Path path, String fileName) throws IOException {

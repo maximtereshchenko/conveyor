@@ -27,10 +27,12 @@ public final class ${normalizedName} implements ConveyorPlugin {
                 Step.RUN,
                 () -> {
                     try {
-                        Files.writeString(
-                            Files.createDirectories(output).resolve("instant"),
-                            Instant.now().toString()
-                        );
+                        if (!"true".equals(configuration.get("skip"))) {
+                            Files.writeString(
+                                Files.createDirectories(output).resolve("instant"),
+                                Instant.now().toString()
+                            );
+                        }
                     } catch (IOException e) {
                         throw new UncheckedIOException(e);
                     }
