@@ -1,10 +1,7 @@
 package com.github.maximtereshchenko.conveyor.plugin.resources;
 
 import java.io.IOException;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
+import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 
 final class CopyRecursively extends SimpleFileVisitor<Path> {
@@ -26,7 +23,7 @@ final class CopyRecursively extends SimpleFileVisitor<Path> {
 
     @Override
     public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-        Files.copy(file, resolved(file));
+        Files.copy(file, resolved(file), StandardCopyOption.REPLACE_EXISTING);
         return FileVisitResult.CONTINUE;
     }
 

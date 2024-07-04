@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 
 final class CopyResourcesTests {
 
@@ -88,6 +89,26 @@ final class CopyResourcesTests {
         );
 
         assertThat(classes).isEmptyDirectory();
+    }
+
+    @Test
+    void givenResourcesAlreadyCopied_whenExecuteTasks_thenNoExceptionThrown(
+        @TempDir Path path
+    ) throws IOException {
+        var classes = Files.createDirectory(path.resolve("classes"));
+        var resources = Files.createDirectory(path.resolve("resources"));
+        Files.copy(Files.createFile(resources.resolve("resource")), classes.resolve("resource"));
+        var tasks = plugin.tasks(
+            FakeConveyorSchematic.from(path),
+            Map.of(
+                "resources.directory", resources.toString(),
+                "classes.directory", classes.toString(),
+                "test.resources.directory", resources.toString(),
+                "test.classes.directory", classes.toString()
+            )
+        );
+
+        assertThatCode(() -> ConveyorTasks.executeTasks(tasks)).doesNotThrowAnyException();
     }
 
     @Test
