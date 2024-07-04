@@ -1,11 +1,13 @@
 package com.github.maximtereshchenko.conveyor.plugin.compile;
 
 import com.github.maximtereshchenko.conveyor.compiler.Compiler;
+import com.github.maximtereshchenko.conveyor.filevisitors.Generic;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -45,9 +47,9 @@ final class CompileSourcesAction implements Supplier<Optional<Path>> {
 
     private Set<Path> files(Path directory) {
         try {
-            var visitor = new CollectingFileVisitor();
-            Files.walkFileTree(directory, visitor);
-            return visitor.collected();
+            var files = new HashSet<Path>();
+            Files.walkFileTree(directory, new Generic(files::add));
+            return files;
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

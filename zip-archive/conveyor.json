@@ -8,6 +8,10 @@
   "dependencies": [
     {
       "group": "${conveyor.schematic.group}",
+      "name": "file-visitors"
+    },
+    {
+      "group": "${conveyor.schematic.group}",
       "name": "test-common",
       "scope": "test"
     },
