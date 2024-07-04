@@ -2,7 +2,6 @@
 
 set -Eeuo pipefail
 
-rm -rf ./.conveyor-cache
 rm -rf ./.conveyor-repository
 rm -rf ./.gradle-repository
 rm -f ./conveyor-cli-1.0.0-executable.jar

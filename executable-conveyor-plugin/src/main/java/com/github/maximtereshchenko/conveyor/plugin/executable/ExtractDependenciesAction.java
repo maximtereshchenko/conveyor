@@ -2,6 +2,9 @@ package com.github.maximtereshchenko.conveyor.plugin.executable;
 
 import com.github.maximtereshchenko.conveyor.zip.ZipArchive;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.Set;
@@ -30,6 +33,11 @@ final class ExtractDependenciesAction implements Supplier<Optional<Path>> {
                 dependency,
                 classesDirectory
             );
+        }
+        try {
+            Files.deleteIfExists(classesDirectory.resolve("module-info.class"));
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
         return Optional.empty();
     }

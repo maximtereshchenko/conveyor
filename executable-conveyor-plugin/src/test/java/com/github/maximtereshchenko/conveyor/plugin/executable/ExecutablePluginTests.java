@@ -144,6 +144,30 @@ final class ExecutablePluginTests {
     }
 
     @Test
+    void givenDependencyWithModuleInfo_whenExecuteTasks_thenModuleInfoIsNotExtractedToClasses(
+        @TempDir Path path
+    ) throws IOException {
+        var dependencyContainer = Files.createDirectory(path.resolve("dependency-container"));
+        Files.createFile(dependencyContainer.resolve("module-info.class"));
+        var dependency = path.resolve("dependency");
+        new ZipArchiveContainer(dependencyContainer).archive(dependency);
+        var classes = Files.createDirectory(path.resolve("classes"));
+
+        ConveyorTasks.executeTasks(
+            plugin.tasks(
+                FakeConveyorSchematic.from(path, dependency),
+                Map.of(
+                    "classes.directory", classes.toString(),
+                    "main.class", "",
+                    "destination", path.resolve("executable").toString()
+                )
+            )
+        );
+
+        assertThat(classes.resolve("module-info.class")).doesNotExist();
+    }
+
+    @Test
     void givenClassesWithDependencies_whenExecuteTasks_thenExecutableExists(
         @TempDir Path path
     ) throws IOException {
