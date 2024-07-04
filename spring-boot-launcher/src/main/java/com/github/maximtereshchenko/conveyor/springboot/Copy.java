@@ -6,23 +6,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.stream.IntStream;
 
-final class CopyRecursively extends SimpleFileVisitor<Path> {
+final class Copy extends SimpleFileVisitor<Path> {
 
     private final Path source;
     private final Path destination;
 
-    CopyRecursively(Path source, Path destination) {
+    Copy(Path source, Path destination) {
         this.source = source;
         this.destination = destination;
-    }
-
-    @Override
-    public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
-        throws IOException {
-        Files.createDirectories(resolved(dir));
-        return FileVisitResult.CONTINUE;
     }
 
     @Override
@@ -32,10 +24,10 @@ final class CopyRecursively extends SimpleFileVisitor<Path> {
     }
 
     private Path resolved(Path original) {
-        var relative = source.relativize(original);
-        return IntStream.range(0, relative.getNameCount()) //TODO why?
-            .mapToObj(relative::getName)
-            .map(Path::toString)
-            .reduce(destination, Path::resolve, (a, b) -> a);
+        var result = destination;
+        for (var part : source.relativize(original)) {
+            result = result.resolve(part.toString());
+        }
+        return result;
     }
 }

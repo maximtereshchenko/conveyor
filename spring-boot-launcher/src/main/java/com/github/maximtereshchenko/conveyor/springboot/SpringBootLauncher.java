@@ -60,7 +60,7 @@ final class SpringBootLauncher {
     private void copyClassPath(Path directory) throws IOException, URISyntaxException {
         try (var fileSystem = fileSystem()) {
             var path = fileSystem.getPath(classPathDirectory);
-            Files.walkFileTree(path, new CopyRecursively(path, directory));
+            Files.walkFileTree(path, new Copy(path, directory));
         }
     }
 
