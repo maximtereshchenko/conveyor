@@ -21,7 +21,8 @@
     "./spring-boot-conveyor-plugin",
     "./spring-boot-launcher",
     "./test-common",
-    "./zip-archive"
+    "./zip-archive",
+    "./file-visitors"
   ],
   "repositories": [
     {
@@ -146,6 +147,11 @@
       {
         "group": "${conveyor.schematic.group}",
         "name": "conveyor-api",
+        "version": "${conveyor.schematic.version}"
+      },
+      {
+        "group": "${conveyor.schematic.group}",
+        "name": "file-visitors",
         "version": "${conveyor.schematic.version}"
       },
       {

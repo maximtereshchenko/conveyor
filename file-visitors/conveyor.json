@@ -1,0 +1,30 @@
+{
+  "name": "file-visitors",
+  "template": {
+    "group": "com.github.maximtereshchenko.conveyor",
+    "name": "conveyor-template",
+    "version": "1.0.0"
+  },
+  "dependencies": [
+    {
+      "group": "${conveyor.schematic.group}",
+      "name": "test-common",
+      "scope": "test"
+    },
+    {
+      "group": "org.junit.jupiter",
+      "name": "junit-jupiter-api",
+      "scope": "test"
+    },
+    {
+      "group": "org.junit.jupiter",
+      "name": "junit-jupiter-params",
+      "scope": "test"
+    },
+    {
+      "group": "org.assertj",
+      "name": "assertj-core",
+      "scope": "test"
+    }
+  ]
+}
