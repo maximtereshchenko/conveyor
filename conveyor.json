@@ -20,7 +20,7 @@
     "./resources-conveyor-plugin",
     "./spring-boot-conveyor-plugin",
     "./spring-boot-launcher",
-    "./test-common",
+    "./assertions",
     "./zip-archive",
     "./files"
   ],
@@ -111,7 +111,7 @@
       },
       {
         "group": "${conveyor.schematic.group}",
-        "name": "test-common",
+        "name": "assertions",
         "version": "${conveyor.schematic.version}"
       },
       {

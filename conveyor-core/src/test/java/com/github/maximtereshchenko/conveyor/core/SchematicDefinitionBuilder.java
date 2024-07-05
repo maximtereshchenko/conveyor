@@ -2,12 +2,10 @@ package com.github.maximtereshchenko.conveyor.core;
 
 import com.github.maximtereshchenko.conveyor.api.schematic.*;
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
-import com.github.maximtereshchenko.conveyor.common.test.Directories;
+import com.github.maximtereshchenko.conveyor.files.FileTree;
 import com.github.maximtereshchenko.conveyor.jackson.JacksonAdapter;
 
-import java.io.IOException;
 import java.net.URI;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
@@ -31,8 +29,8 @@ final class SchematicDefinitionBuilder {
         this.jacksonAdapter = jacksonAdapter;
     }
 
-    void write(Path path) throws IOException {
-        try (var outputStream = Files.newOutputStream(path)) {
+    void write(Path path) {
+        new FileTree(path).write(outputStream ->
             outputStream.write(
                 jacksonAdapter.bytes(
                     new SchematicDefinition(
@@ -51,8 +49,8 @@ final class SchematicDefinitionBuilder {
                         dependencies
                     )
                 )
-            );
-        }
+            )
+        );
     }
 
     String group() {
@@ -89,8 +87,8 @@ final class SchematicDefinitionBuilder {
         return this;
     }
 
-    Path conveyorJson(Path directory) throws IOException {
-        var path = Directories.createDirectoriesForFile(directory.resolve("conveyor.json"));
+    Path conveyorJson(Path directory) {
+        var path = directory.resolve("conveyor.json");
         write(path);
         return path;
     }

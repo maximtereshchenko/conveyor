@@ -1,5 +1,7 @@
 package com.github.maximtereshchenko.conveyor.plugin.compile;
 
+import com.github.maximtereshchenko.conveyor.files.FileTree;
+import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
 import com.github.maximtereshchenko.conveyor.plugin.test.ConveyorTasks;
 import com.github.maximtereshchenko.conveyor.plugin.test.FakeConveyorSchematic;
 import org.junit.jupiter.api.Test;
@@ -9,9 +11,11 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static com.github.maximtereshchenko.conveyor.common.test.MoreAssertions.assertThat;
 
-final class CompileSourcesTests extends BaseTest {
+final class CompileSourcesTests {
+
+    private final ConveyorPlugin plugin = new CompilePlugin();
 
     @Test
     void givenNoSources_whenExecuteTasks_thenNoArtifact(@TempDir Path path) throws IOException {
@@ -36,13 +40,11 @@ final class CompileSourcesTests extends BaseTest {
     void givenSources_whenExecuteTasks_thenSourcesAreCompiled(@TempDir Path path)
         throws IOException {
         var sources = path.resolve("sources");
-        write(
-            sources.resolve("Main.java"),
-            """
-            package main;
-            class Main {}
-            """
-        );
+        new FileTree(sources.resolve("Main.java"))
+            .write("""
+                   package main;
+                   class Main {}
+                   """);
         var classes = path.resolve("classes");
         var nonExistent = path.resolve("non-existent");
 
@@ -65,13 +67,11 @@ final class CompileSourcesTests extends BaseTest {
     void givenDependency_whenExecuteTasks_thenSourcesAreCompiledWithDependency(@TempDir Path path)
         throws IOException {
         var dependencySources = path.resolve("dependency-sources");
-        write(
-            dependencySources.resolve("Dependency.java"),
-            """
-            package dependency;
-            public class Dependency {}
-            """
-        );
+        new FileTree(dependencySources.resolve("Dependency.java"))
+            .write("""
+                   package dependency;
+                   public class Dependency {}
+                   """);
         var dependencyClasses = path.resolve("dependency-classes");
         var nonExistent = path.resolve("non-existent");
         ConveyorTasks.executeTasks(
@@ -86,18 +86,16 @@ final class CompileSourcesTests extends BaseTest {
             )
         );
         var dependentSources = path.resolve("dependent-sources");
-        write(
-            dependentSources.resolve("Main.java"),
-            """
-            package main;
-            import dependency.Dependency;
-            class Main {
-                public static void main(String[] args){
-                    System.out.println(new Dependency());
-                }
-            }
-            """
-        );
+        new FileTree(dependentSources.resolve("Main.java"))
+            .write("""
+                   package main;
+                   import dependency.Dependency;
+                   class Main {
+                       public static void main(String[] args){
+                           System.out.println(new Dependency());
+                       }
+                   }
+                   """);
         var dependentClasses = path.resolve("dependent-classes");
 
         ConveyorTasks.executeTasks(
@@ -120,22 +118,18 @@ final class CompileSourcesTests extends BaseTest {
         @TempDir Path path
     ) throws IOException {
         var firstDependencySources = path.resolve("first-dependency-sources");
-        write(
-            firstDependencySources.resolve("FirstDependency.java"),
-            """
-            package firstdependency;
-            public class FirstDependency {}
-            """
-        );
+        new FileTree(firstDependencySources.resolve("FirstDependency.java"))
+            .write("""
+                   package firstdependency;
+                   public class FirstDependency {}
+                   """);
         var firstDependencyClasses = path.resolve("first-dependency-classes");
         var secondDependencySources = path.resolve("second-dependency-sources");
-        write(
-            secondDependencySources.resolve("SecondDependency.java"),
-            """
-            package seconddependency;
-            public class SecondDependency {}
-            """
-        );
+        new FileTree(secondDependencySources.resolve("SecondDependency.java"))
+            .write("""
+                   package seconddependency;
+                   public class SecondDependency {}
+                   """);
         var secondDependencyClasses = path.resolve("second-dependency-classes");
         var schematic = FakeConveyorSchematic.from(path);
         var nonExistent = path.resolve("non-existent");
@@ -162,20 +156,18 @@ final class CompileSourcesTests extends BaseTest {
             )
         );
         var dependentSources = path.resolve("dependent-sources");
-        write(
-            dependentSources.resolve("Main.java"),
-            """
-            package main;
-            import firstdependency.FirstDependency;
-            import seconddependency.SecondDependency;
-            class Main {
-                public static void main(String[] args){
-                    System.out.println(new FirstDependency());
-                    System.out.println(new SecondDependency());
-                }
-            }
-            """
-        );
+        new FileTree(dependentSources.resolve("Main.java"))
+            .write("""
+                   package main;
+                   import firstdependency.FirstDependency;
+                   import seconddependency.SecondDependency;
+                   class Main {
+                       public static void main(String[] args){
+                           System.out.println(new FirstDependency());
+                           System.out.println(new SecondDependency());
+                       }
+                   }
+                   """);
         var dependentClasses = path.resolve("dependent-classes");
 
         ConveyorTasks.executeTasks(

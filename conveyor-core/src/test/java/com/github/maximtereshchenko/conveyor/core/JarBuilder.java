@@ -1,7 +1,7 @@
 package com.github.maximtereshchenko.conveyor.core;
 
-import com.github.maximtereshchenko.conveyor.common.test.Directories;
 import com.github.maximtereshchenko.conveyor.compiler.Compiler;
+import com.github.maximtereshchenko.conveyor.files.FileTree;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
 import com.github.maximtereshchenko.conveyor.zip.ZipArchiveContainer;
 
@@ -87,29 +87,22 @@ final class JarBuilder {
     void write(Path path) throws IOException {
         var sources = temporaryDirectory.resolve("sources");
         var classes = temporaryDirectory.resolve("classes");
+        var sourceClass = sources.resolve(normalizedName())
+            .resolve(normalizedName() + ".java");
+        new FileTree(sourceClass).write(interpolated(classJava()));
         compiler.compile(
-            Set.of(
-                Files.writeString(
-                    Directories.createDirectoriesForFile(
-                        sources.resolve(normalizedName())
-                            .resolve(normalizedName() + ".java")
-                    ),
-                    interpolated(classJava())
-                )
-            ),
+            Set.of(sourceClass),
             Stream.of(System.getProperty("java.class.path").split(":"))
                 .map(Paths::get)
                 .collect(Collectors.toSet()),
             classes
         );
-        Files.writeString(
-            Directories.createDirectoriesForFile(
-                classes.resolve("META-INF")
-                    .resolve("services")
-                    .resolve(service())
-            ),
-            normalizedName() + '.' + normalizedName()
-        );
+        new FileTree(
+            classes.resolve("META-INF")
+                .resolve("services")
+                .resolve(service())
+        )
+            .write(normalizedName() + '.' + normalizedName());
         new ZipArchiveContainer(classes).archive(path);
     }
 

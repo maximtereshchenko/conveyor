@@ -2,7 +2,6 @@ package com.github.maximtereshchenko.conveyor.plugin.springboot;
 
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import com.github.maximtereshchenko.conveyor.common.api.Step;
-import com.github.maximtereshchenko.conveyor.common.test.Directories;
 import com.github.maximtereshchenko.conveyor.plugin.api.*;
 import com.github.maximtereshchenko.conveyor.plugin.test.ConveyorTasks;
 import com.github.maximtereshchenko.conveyor.plugin.test.FakeConveyorSchematic;
@@ -18,7 +17,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static com.github.maximtereshchenko.conveyor.common.test.MoreAssertions.assertThat;
 
 final class SpringBootPluginTests {
 
@@ -136,10 +135,8 @@ final class SpringBootPluginTests {
             )
         );
 
-        Directories.assertThatDirectoryContentsEqual(
-            container.resolve("classpath").resolve("classes"),
-            classes
-        );
+        assertThat(container.resolve("classpath").resolve("classes"))
+            .directoryContentIsEqualTo(classes);
     }
 
     @Test
@@ -268,7 +265,7 @@ final class SpringBootPluginTests {
         assertThat(executable).exists();
         var extracted = Files.createDirectory(path.resolve("extracted"));
         new ZipArchive(executable).extract(extracted);
-        Directories.assertThatDirectoryContentsEqual(extracted, container);
+        assertThat(extracted).directoryContentIsEqualTo(container);
     }
 
     private Properties properties(Path path) throws IOException {

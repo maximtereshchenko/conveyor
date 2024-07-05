@@ -3,8 +3,8 @@ package com.github.maximtereshchenko.conveyor.plugin.junit.jupiter;
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import com.github.maximtereshchenko.conveyor.common.api.Step;
-import com.github.maximtereshchenko.conveyor.common.test.Directories;
 import com.github.maximtereshchenko.conveyor.compiler.Compiler;
+import com.github.maximtereshchenko.conveyor.files.FileTree;
 import com.github.maximtereshchenko.conveyor.plugin.api.Cache;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.CodeSource;
@@ -29,8 +28,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
+import static com.github.maximtereshchenko.conveyor.common.test.MoreAssertions.assertThat;
+import static com.github.maximtereshchenko.conveyor.common.test.MoreAssertions.assertThatCode;
 
 final class JunitJupiterPluginTests {
 
@@ -99,28 +98,20 @@ final class JunitJupiterPluginTests {
         var testSources = path.resolve("testSources");
         var testClasses = path.resolve("testClasses");
         var classPath = classpath();
-        compiler.compile(
-            Set.of(
-                Files.writeString(
-                    Directories.createDirectoriesForFile(
-                        testSources.resolve("test").resolve("MyTest.java")
-                    ),
-                    """
-                    package test;
-                    import org.junit.jupiter.api.Test;
-                    import static org.junit.jupiter.api.Assertions.assertTrue;
-                    final class MyTest {
-                        @Test
-                        void test() {
-                            assertTrue(true);
-                        }
-                    }
-                    """
-                )
-            ),
-            classPath,
-            testClasses
-        );
+        var testSourceClass = testSources.resolve("test").resolve("MyTest.java");
+        new FileTree(testSourceClass)
+            .write("""
+                   package test;
+                   import org.junit.jupiter.api.Test;
+                   import static org.junit.jupiter.api.Assertions.assertTrue;
+                   final class MyTest {
+                       @Test
+                       void test() {
+                           assertTrue(true);
+                       }
+                   }
+                   """);
+        compiler.compile(Set.of(testSourceClass), classPath, testClasses);
         var tasks = plugin.tasks(
             FakeConveyorSchematic.from(path, classPath),
             Map.of(

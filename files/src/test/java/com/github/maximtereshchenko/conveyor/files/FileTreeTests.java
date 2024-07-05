@@ -9,8 +9,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
+import static com.github.maximtereshchenko.conveyor.common.test.MoreAssertions.assertThat;
+import static com.github.maximtereshchenko.conveyor.common.test.MoreAssertions.assertThatCode;
 
 final class FileTreeTests {
 

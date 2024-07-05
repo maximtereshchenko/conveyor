@@ -1,48 +1,35 @@
 package com.github.maximtereshchenko.conveyor.zip;
 
-import com.github.maximtereshchenko.conveyor.common.test.Directories;
+import com.github.maximtereshchenko.conveyor.common.test.DirectoryEntriesSource;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Set;
-import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import static com.github.maximtereshchenko.conveyor.common.test.Directories.temporaryDirectory;
-import static org.assertj.core.api.Assertions.assertThatCode;
+import static com.github.maximtereshchenko.conveyor.common.test.MoreAssertions.assertThat;
+import static com.github.maximtereshchenko.conveyor.common.test.MoreAssertions.assertThatCode;
 
 final class ZipArchiveTests {
 
-    static Stream<Arguments> entries() {
-        return Directories.differentDirectoryEntries()
-            .map(Arguments::arguments);
-    }
-
     @ParameterizedTest
-    @MethodSource("entries")
+    @DirectoryEntriesSource
     void givenArchiveContainer_whenArchive_thenContentsAreEqual(
-        Set<String> entries,
+        Path directory,
         @TempDir Path path
     ) throws IOException {
-        var archiveContainer = Directories.writeFiles(
-            Directories.temporaryDirectory(path),
-            entries
-        );
-        var archive = temporaryDirectory(path).resolve("archive");
-        var extracted = temporaryDirectory(path);
+        var archive = path.resolve("archive");
+        var extracted = path.resolve("extracted");
 
-        new ZipArchiveContainer(archiveContainer).archive(archive);
+        new ZipArchiveContainer(directory).archive(archive);
         new ZipArchive(archive).extract(extracted);
 
-        Directories.assertThatDirectoryContentsEqual(archiveContainer, extracted);
+        assertThat(extracted).directoryContentIsEqualTo(directory);
     }
 
     @Test

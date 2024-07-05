@@ -1,6 +1,6 @@
 package com.github.maximtereshchenko.conveyor.core;
 
-import com.github.maximtereshchenko.conveyor.common.test.Directories;
+import com.github.maximtereshchenko.conveyor.files.FileTree;
 import com.github.tomakehurst.wiremock.WireMockServer;
 
 import java.io.IOException;
@@ -58,12 +58,7 @@ final class RepositoryBuilder {
     void install(Path directory) throws IOException {
         for (var uri : uris) {
             var source = path(uri);
-            Files.copy(
-                source,
-                Directories.createDirectoriesForFile(
-                    directory.resolve(temporaryDirectory.relativize(source))
-                )
-            );
+            new FileTree(source).copyTo(directory.resolve(temporaryDirectory.relativize(source)));
         }
     }
 
@@ -91,9 +86,9 @@ final class RepositoryBuilder {
     }
 
     private Path path(URI uri) throws IOException {
-        return Directories.createDirectoriesForFile(
-            Paths.get(URI.create(temporaryDirectory.toUri().toString() + '/' + uri))
-        );
+        var path = Paths.get(URI.create(temporaryDirectory.toUri().toString() + '/' + uri));
+        Files.createDirectories(path.getParent());
+        return path;
     }
 
     private URI uri(String group, String name, String version, String extension) {

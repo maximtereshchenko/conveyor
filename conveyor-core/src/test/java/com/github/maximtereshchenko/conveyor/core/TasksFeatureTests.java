@@ -13,8 +13,8 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
+import static com.github.maximtereshchenko.conveyor.common.test.MoreAssertions.assertThat;
+import static com.github.maximtereshchenko.conveyor.common.test.MoreAssertions.assertThatCode;
 
 final class TasksFeatureTests extends ConveyorTest {
 

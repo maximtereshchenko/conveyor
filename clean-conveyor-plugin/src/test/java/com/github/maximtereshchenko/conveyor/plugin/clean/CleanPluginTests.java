@@ -2,7 +2,7 @@ package com.github.maximtereshchenko.conveyor.plugin.clean;
 
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import com.github.maximtereshchenko.conveyor.common.api.Step;
-import com.github.maximtereshchenko.conveyor.common.test.Directories;
+import com.github.maximtereshchenko.conveyor.common.test.DirectoryEntriesSource;
 import com.github.maximtereshchenko.conveyor.plugin.api.Cache;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
@@ -11,26 +11,18 @@ import com.github.maximtereshchenko.conveyor.plugin.test.FakeConveyorSchematic;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
+import static com.github.maximtereshchenko.conveyor.common.test.MoreAssertions.assertThat;
+import static com.github.maximtereshchenko.conveyor.common.test.MoreAssertions.assertThatCode;
 
 final class CleanPluginTests {
 
     private final ConveyorPlugin plugin = new CleanPlugin();
-
-    static Stream<Arguments> entries() {
-        return Directories.differentDirectoryEntries()
-            .map(Arguments::arguments);
-    }
 
     @Test
     void givenPlugin_whenTasks_thenTaskBindToCleanRun(@TempDir Path path) throws IOException {
@@ -66,20 +58,15 @@ final class CleanPluginTests {
     }
 
     @ParameterizedTest
-    @MethodSource("entries")
-    void givenDirectory_whenExecuteTasks_thenDirectoryIsDeleted(
-        Set<String> entries,
-        @TempDir Path path
-    ) throws IOException {
-        Directories.writeFiles(path, entries);
-
+    @DirectoryEntriesSource
+    void givenDirectory_whenExecuteTasks_thenDirectoryIsDeleted(Path directory) throws IOException {
         ConveyorTasks.executeTasks(
             plugin.tasks(
-                FakeConveyorSchematic.from(path),
-                Map.of("directory", path.toString())
+                FakeConveyorSchematic.from(directory),
+                Map.of("directory", directory.toString())
             )
         );
 
-        assertThat(path).doesNotExist();
+        assertThat(directory).doesNotExist();
     }
 }

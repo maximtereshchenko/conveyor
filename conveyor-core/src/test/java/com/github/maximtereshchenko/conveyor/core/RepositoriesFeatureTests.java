@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
-import static org.assertj.core.api.Assertions.*;
+import static com.github.maximtereshchenko.conveyor.common.test.MoreAssertions.*;
 
 @ExtendWith(WireMockExtension.class)
 final class RepositoriesFeatureTests extends ConveyorTest {
@@ -1117,7 +1117,7 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         @TempDir Path path,
         ConveyorModule module,
         BuilderFactory factory
-    ) throws Exception {
+    ) {
         var conveyorJson = factory.schematicDefinitionBuilder()
             .plugin("non-existent")
             .conveyorJson(path);

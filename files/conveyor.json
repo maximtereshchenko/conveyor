@@ -8,7 +8,7 @@
   "dependencies": [
     {
       "group": "${conveyor.schematic.group}",
-      "name": "test-common",
+      "name": "assertions",
       "scope": "test"
     },
     {

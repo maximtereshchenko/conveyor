@@ -1,40 +1,29 @@
 package com.github.maximtereshchenko.conveyor.files;
 
-import com.github.maximtereshchenko.conveyor.common.test.Directories;
+import com.github.maximtereshchenko.conveyor.common.test.DirectoryEntriesSource;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Set;
-import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static com.github.maximtereshchenko.conveyor.common.test.MoreAssertions.assertThat;
 
 final class CopyTests {
 
-    static Stream<Arguments> entries() {
-        return Directories.differentDirectoryEntries()
-            .map(Arguments::arguments);
-    }
-
     @ParameterizedTest
-    @MethodSource("entries")
+    @DirectoryEntriesSource
     void givenDirectory_whenCopyFileVisitor_thenDirectoryIsCopied(
-        Set<String> entries,
+        Path directory,
         @TempDir Path path
     ) throws IOException {
-        var source = path.resolve("source");
-        Directories.writeFiles(source, entries);
         var copy = path.resolve("copy");
 
-        Files.walkFileTree(source, new Copy(source, copy));
+        Files.walkFileTree(directory, new Copy(directory, copy));
 
-        Directories.assertThatDirectoryContentsEqual(copy, source);
+        assertThat(copy).directoryContentIsEqualTo(directory);
     }
 
     @Test

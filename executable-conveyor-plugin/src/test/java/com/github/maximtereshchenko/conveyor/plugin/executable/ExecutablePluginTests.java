@@ -2,7 +2,6 @@ package com.github.maximtereshchenko.conveyor.plugin.executable;
 
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import com.github.maximtereshchenko.conveyor.common.api.Step;
-import com.github.maximtereshchenko.conveyor.common.test.Directories;
 import com.github.maximtereshchenko.conveyor.files.FileTree;
 import com.github.maximtereshchenko.conveyor.plugin.api.*;
 import com.github.maximtereshchenko.conveyor.plugin.test.ConveyorTasks;
@@ -18,7 +17,7 @@ import java.nio.file.Path;
 import java.util.Map;
 import java.util.Set;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static com.github.maximtereshchenko.conveyor.common.test.MoreAssertions.assertThat;
 
 final class ExecutablePluginTests {
 
@@ -137,8 +136,7 @@ final class ExecutablePluginTests {
             )
         );
 
-        Directories.assertThatDirectoryContentsEqual(
-            classes,
+        assertThat(classes).directoryContentIsEqualToIgnoring(
             dependencyContainer,
             manifest(classes)
         );
@@ -190,10 +188,7 @@ final class ExecutablePluginTests {
         assertThat(executable).exists();
         var extracted = Files.createDirectory(path.resolve("extracted"));
         new ZipArchive(executable).extract(extracted);
-        Directories.assertThatDirectoryContentsEqual(
-            extracted,
-            classes
-        );
+        assertThat(extracted).directoryContentIsEqualTo(classes);
     }
 
     @Test

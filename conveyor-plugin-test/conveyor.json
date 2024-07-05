@@ -9,10 +9,6 @@
     {
       "group": "${conveyor.schematic.group}",
       "name": "conveyor-plugin-api"
-    },
-    {
-      "group": "org.assertj",
-      "name": "assertj-core"
     }
   ]
 }

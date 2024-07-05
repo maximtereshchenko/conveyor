@@ -11,7 +11,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static com.github.maximtereshchenko.conveyor.common.test.MoreAssertions.assertThat;
 
 final class DependenciesFeatureTests extends ConveyorTest {
 

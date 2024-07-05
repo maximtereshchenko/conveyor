@@ -1,24 +1,21 @@
 package com.github.maximtereshchenko.compiler;
 
-import com.github.maximtereshchenko.conveyor.common.test.Directories;
 import com.github.maximtereshchenko.conveyor.compiler.Compiler;
+import com.github.maximtereshchenko.conveyor.files.FileTree;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Set;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static com.github.maximtereshchenko.conveyor.common.test.MoreAssertions.assertThat;
 
 final class CompilerTests {
 
     private final Compiler compiler = new Compiler();
 
     @Test
-    void givenSources_whenExecuteTasks_thenSourcesAreCompiled(@TempDir Path path)
-        throws IOException {
+    void givenSources_whenExecuteTasks_thenSourcesAreCompiled(@TempDir Path path) {
         var sources = path.resolve("sources");
         var classes = path.resolve("classes");
 
@@ -46,8 +43,7 @@ final class CompilerTests {
     }
 
     @Test
-    void givenDependency_whenExecuteTasks_thenSourcesAreCompiledWithDependency(@TempDir Path path)
-        throws IOException {
+    void givenDependency_whenExecuteTasks_thenSourcesAreCompiledWithDependency(@TempDir Path path) {
         var dependencySources = path.resolve("dependency-sources");
         var dependencyClasses = path.resolve("dependency-classes");
         compiler.compile(
@@ -91,7 +87,7 @@ final class CompilerTests {
     @Test
     void givenMultipleDependencies_whenExecuteTasks_thenSourcesAreCompiledWithAllDependencies(
         @TempDir Path path
-    ) throws IOException {
+    ) {
         var firstDependencySources = path.resolve("first-dependency-sources");
         var firstDependencyClasses = path.resolve("first-dependency-classes");
         compiler.compile(
@@ -151,7 +147,8 @@ final class CompilerTests {
         assertThat(dependentClasses.resolve("main").resolve("Main.class")).exists();
     }
 
-    Path write(Path path, String content) throws IOException {
-        return Files.writeString(Directories.createDirectoriesForFile(path), content);
+    private Path write(Path path, String content) {
+        new FileTree(path).write(content);
+        return path;
     }
 }

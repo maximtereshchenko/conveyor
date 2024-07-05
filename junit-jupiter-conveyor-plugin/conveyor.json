@@ -20,7 +20,7 @@
     },
     {
       "group": "${conveyor.schematic.group}",
-      "name": "test-common",
+      "name": "assertions",
       "scope": "test"
     },
     {
@@ -34,13 +34,13 @@
       "scope": "test"
     },
     {
-      "group": "org.junit.jupiter",
-      "name": "junit-jupiter-api",
+      "group": "${conveyor.schematic.group}",
+      "name": "files",
       "scope": "test"
     },
     {
-      "group": "org.assertj",
-      "name": "assertj-core",
+      "group": "org.junit.jupiter",
+      "name": "junit-jupiter-api",
       "scope": "test"
     },
     {

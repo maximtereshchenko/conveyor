@@ -3,10 +3,7 @@ package com.github.maximtereshchenko.conveyor.plugin.compile;
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import com.github.maximtereshchenko.conveyor.common.api.Step;
-import com.github.maximtereshchenko.conveyor.plugin.api.Cache;
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
-import com.github.maximtereshchenko.conveyor.plugin.api.PathConveyorTaskInput;
-import com.github.maximtereshchenko.conveyor.plugin.api.PathConveyorTaskOutput;
+import com.github.maximtereshchenko.conveyor.plugin.api.*;
 import com.github.maximtereshchenko.conveyor.plugin.test.FakeConveyorSchematic;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -16,9 +13,11 @@ import java.nio.file.Path;
 import java.util.Map;
 import java.util.Set;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static com.github.maximtereshchenko.conveyor.common.test.MoreAssertions.assertThat;
 
-final class CompilePluginTests extends BaseTest {
+final class CompilePluginTests {
+
+    private final ConveyorPlugin plugin = new CompilePlugin();
 
     @Test
     void givenPlugin_whenTasks_thenTaskBindToCompileRunFinalizeTestPrepare(@TempDir Path path)
