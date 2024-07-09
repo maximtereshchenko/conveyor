@@ -6,7 +6,6 @@ import com.github.maximtereshchenko.conveyor.plugin.api.*;
 import java.nio.file.*;
 import java.util.*;
 
-//TODO duplication from publisher
 public final class ${normalizedName} implements ConveyorPlugin {
 
     @Override
@@ -19,10 +18,10 @@ public final class ${normalizedName} implements ConveyorPlugin {
         return List.of(
             new ConveyorTask(
                 "",
-                Stage.ARCHIVE,
+                Stage.valueOf(configuration.getOrDefault("stage", "ARCHIVE")),
                 Step.RUN,
                 () -> schematic.publish(
-                    Convention.CONSTRUCTION_REPOSITORY_NAME,
+                    configuration.getOrDefault("repository", Convention.CONSTRUCTION_REPOSITORY_NAME),
                     Paths.get(configuration.get("path")),
                     ArtifactClassifier.CLASSES
                 ),

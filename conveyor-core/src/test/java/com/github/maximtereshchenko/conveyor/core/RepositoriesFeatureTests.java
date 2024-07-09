@@ -1074,10 +1074,10 @@ final class RepositoriesFeatureTests extends ConveyorTest {
         factory.repositoryBuilder(path)
             .schematicDefinition(
                 factory.schematicDefinitionBuilder()
-                    .name("publisher")
+                    .name("artifact")
             )
             .jar(
-                factory.jarBuilder("publisher", path)
+                factory.jarBuilder("artifact", path)
             )
             .install(path);
         var published = path.resolve("published");
@@ -1091,11 +1091,12 @@ final class RepositoriesFeatureTests extends ConveyorTest {
                 .repository("published", published)
                 .plugin(
                     "group",
-                    "publisher",
+                    "artifact",
                     "1.0.0",
                     Map.of(
-                        "path", Files.createFile(path.resolve("file")).toString(),
-                        "repository", "published"
+                        "stage", "PUBLISH",
+                        "repository", "published",
+                        "path", Files.createFile(path.resolve("file")).toString()
                     )
                 )
                 .conveyorJson(path),
