@@ -5,26 +5,24 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-final class ConstructionRepository implements Repository<Path> {
+final class ConstructionRepository implements Repository<Path, Path> {
 
-    private final Map<Coordinates, Path> schematicDefinitions;
-    private final Map<Coordinates, Path> artifacts;
-
-    private ConstructionRepository(
-        Map<Coordinates, Path> schematicDefinitions,
-        Map<Coordinates, Path> artifacts
-    ) {
-        this.schematicDefinitions = schematicDefinitions;
-        this.artifacts = artifacts;
-    }
-
-    ConstructionRepository() {
-        this(Map.of(), Map.of());
-    }
+    private final Map<Coordinates, Path> schematicDefinitions = new HashMap<>();
+    private final Map<Coordinates, Path> artifacts = new HashMap<>();
 
     @Override
-    public boolean hasName(String name) {
-        return false;
+    public void publish(
+        Id id,
+        Version version,
+        Classifier classifier,
+        Path artifact
+    ) {
+        var coordinates = new Coordinates(id, version);
+        switch (classifier) {
+            case SCHEMATIC_DEFINITION -> schematicDefinitions.put(coordinates, artifact);
+            case JAR -> artifacts.put(coordinates, artifact);
+            case POM -> throw new IllegalArgumentException();
+        }
     }
 
     @Override
@@ -39,28 +37,6 @@ final class ConstructionRepository implements Repository<Path> {
             case JAR -> Optional.ofNullable(artifacts.get(new Coordinates(id, version)));
             case POM -> Optional.empty();
         };
-    }
-
-    @Override
-    public void publish(
-        Id id,
-        Version version,
-        Classifier classifier,
-        Resource resource
-    ) {
-        throw new IllegalArgumentException();
-    }
-
-    ConstructionRepository withSchematicDefinition(Id id, Version version, Path path) {
-        var copy = new HashMap<>(schematicDefinitions);
-        copy.put(new Coordinates(id, version), path);
-        return new ConstructionRepository(copy, artifacts);
-    }
-
-    ConstructionRepository withArtifact(Id id, Version version, Path path) {
-        var copy = new HashMap<>(artifacts);
-        copy.put(new Coordinates(id, version), path);
-        return new ConstructionRepository(schematicDefinitions, copy);
     }
 
     private record Coordinates(Id id, Version version) {}

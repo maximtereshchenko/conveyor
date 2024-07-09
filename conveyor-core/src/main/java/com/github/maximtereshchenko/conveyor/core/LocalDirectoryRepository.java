@@ -8,24 +8,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 
-final class LocalDirectoryRepository extends UriRepository<Path> {
+final class LocalDirectoryRepository extends UriRepository<Resource, Path> {
 
     LocalDirectoryRepository(Path path) {
         super(path.toUri());
-    }
-
-    @Override
-    public boolean hasName(String name) {
-        return false;
-    }
-
-    @Override
-    Optional<Path> artifact(URI uri) {
-        var requested = Paths.get(uri);
-        if (Files.exists(requested)) {
-            return Optional.of(requested);
-        }
-        return Optional.empty();
     }
 
     @Override
@@ -35,5 +21,14 @@ final class LocalDirectoryRepository extends UriRepository<Path> {
             return;
         }
         resource.transferTo(fileTree);
+    }
+
+    @Override
+    Optional<Path> artifact(URI uri) {
+        var requested = Paths.get(uri);
+        if (Files.exists(requested)) {
+            return Optional.of(requested);
+        }
+        return Optional.empty();
     }
 }

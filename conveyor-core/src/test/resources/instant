@@ -35,7 +35,6 @@ public final class ${normalizedName} implements ConveyorPlugin {
             () -> {
                 sleep();
                 new FileTree(path).write(Instant.now().toString());
-                return Optional.empty();
             },
             Set.of(),
             Set.of(),

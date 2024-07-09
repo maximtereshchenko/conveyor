@@ -5,11 +5,9 @@ import com.github.maximtereshchenko.conveyor.files.FileTree;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Optional;
 import java.util.Set;
-import java.util.function.Supplier;
 
-final class CompileSourcesAction implements Supplier<Optional<Path>> {
+final class CompileSourcesAction implements Runnable {
 
     private static final System.Logger LOGGER =
         System.getLogger(CompileSourcesAction.class.getName());
@@ -32,13 +30,12 @@ final class CompileSourcesAction implements Supplier<Optional<Path>> {
     }
 
     @Override
-    public Optional<Path> get() {
+    public void run() {
         if (Files.exists(sourcesDirectory)) {
             compiler.compile(new FileTree(sourcesDirectory).files(), classpath, outputDirectory);
             LOGGER.log(System.Logger.Level.INFO, "Compiled classes to {0}", outputDirectory);
         } else {
             LOGGER.log(System.Logger.Level.WARNING, "No sources to compile");
         }
-        return Optional.empty();
     }
 }

@@ -4,10 +4,8 @@ import com.github.maximtereshchenko.conveyor.zip.ZipArchiveContainer;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Optional;
-import java.util.function.Supplier;
 
-final class ArchiveAction implements Supplier<Optional<Path>> {
+final class ArchiveAction implements Runnable {
 
     private static final System.Logger LOGGER = System.getLogger(ArchiveAction.class.getName());
 
@@ -20,13 +18,12 @@ final class ArchiveAction implements Supplier<Optional<Path>> {
     }
 
     @Override
-    public Optional<Path> get() {
+    public void run() {
         if (Files.exists(classesDirectory)) {
             archive();
         } else {
             LOGGER.log(System.Logger.Level.WARNING, "Nothing to archive");
         }
-        return Optional.empty();
     }
 
     private void archive() {

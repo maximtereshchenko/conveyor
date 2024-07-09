@@ -6,6 +6,7 @@ import com.github.maximtereshchenko.conveyor.plugin.api.*;
 import java.nio.file.*;
 import java.util.*;
 
+//TODO duplication from publisher
 public final class ${normalizedName} implements ConveyorPlugin {
 
     @Override
@@ -20,7 +21,11 @@ public final class ${normalizedName} implements ConveyorPlugin {
                 "",
                 Stage.ARCHIVE,
                 Step.RUN,
-                () -> Optional.of(Paths.get(configuration.get("path"))),
+                () -> schematic.publish(
+                    Convention.CONSTRUCTION_REPOSITORY_NAME,
+                    Paths.get(configuration.get("path")),
+                    ArtifactClassifier.JAR
+                ),
                 Set.of(),
                 Set.of(),
                 Cache.DISABLED

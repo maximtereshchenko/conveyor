@@ -6,6 +6,7 @@ import com.github.maximtereshchenko.conveyor.common.test.DirectoryEntriesSource;
 import com.github.maximtereshchenko.conveyor.plugin.api.*;
 import com.github.maximtereshchenko.conveyor.plugin.test.ConveyorTasks;
 import com.github.maximtereshchenko.conveyor.plugin.test.FakeConveyorSchematic;
+import com.github.maximtereshchenko.conveyor.plugin.test.PublishedArtifact;
 import com.github.maximtereshchenko.conveyor.zip.ZipArchive;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -62,10 +63,11 @@ final class ArchivePluginTests {
     @Test
     void givenNoClasses_whenExecuteTask_thenNoArtifact(@TempDir Path path) throws IOException {
         var archive = path.resolve("archive");
+        var schematic = FakeConveyorSchematic.from(path);
 
-        var artifacts = ConveyorTasks.executeTasks(
+        ConveyorTasks.executeTasks(
             plugin.tasks(
-                FakeConveyorSchematic.from(path),
+                schematic,
                 Map.of(
                     "classes.directory", path.resolve("classes").toString(),
                     "destination", archive.toString()
@@ -73,7 +75,7 @@ final class ArchivePluginTests {
             )
         );
 
-        assertThat(artifacts).isEmpty();
+        assertThat(schematic.published()).isEmpty();
         assertThat(archive).doesNotExist();
     }
 
@@ -84,10 +86,11 @@ final class ArchivePluginTests {
         @TempDir Path path
     ) throws IOException {
         var archive = path.resolve("archive");
+        var schematic = FakeConveyorSchematic.from(path);
 
-        var artifacts = ConveyorTasks.executeTasks(
+        ConveyorTasks.executeTasks(
             plugin.tasks(
-                FakeConveyorSchematic.from(path),
+                schematic,
                 Map.of(
                     "classes.directory", directory.toString(),
                     "destination", archive.toString()
@@ -95,9 +98,16 @@ final class ArchivePluginTests {
             )
         );
 
-        assertThat(artifacts).hasSize(1);
+        assertThat(schematic.published())
+            .containsExactly(
+                new PublishedArtifact(
+                    Convention.CONSTRUCTION_REPOSITORY_NAME,
+                    archive,
+                    ArtifactClassifier.JAR
+                )
+            );
         var extracted = path.resolve("extracted");
-        new ZipArchive(artifacts.getLast()).extract(extracted);
+        new ZipArchive(archive).extract(extracted);
         assertThat(extracted).directoryContentIsEqualTo(directory);
     }
 }

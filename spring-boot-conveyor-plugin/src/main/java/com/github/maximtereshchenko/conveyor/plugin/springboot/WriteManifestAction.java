@@ -5,12 +5,10 @@ import com.github.maximtereshchenko.conveyor.springboot.Configuration;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Optional;
-import java.util.function.Supplier;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
-final class WriteManifestAction implements Supplier<Optional<Path>> {
+final class WriteManifestAction implements Runnable {
 
     private static final System.Logger LOGGER =
         System.getLogger(WriteManifestAction.class.getName());
@@ -22,14 +20,10 @@ final class WriteManifestAction implements Supplier<Optional<Path>> {
     }
 
     @Override
-    public Optional<Path> get() {
-        if (Files.exists(containerDirectory)) {
-            write();
+    public void run() {
+        if (!Files.exists(containerDirectory)) {
+            return;
         }
-        return Optional.empty();
-    }
-
-    private void write() {
         var manifest = new Manifest();
         var mainAttributes = manifest.getMainAttributes();
         mainAttributes.put(Attributes.Name.MAIN_CLASS, Configuration.MAIN_CLASS_NAME);

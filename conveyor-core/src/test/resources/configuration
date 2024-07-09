@@ -31,7 +31,6 @@ public final class ${normalizedName} implements ConveyorPlugin {
                                 .map(Map.Entry::toString)
                                 .collect(Collectors.joining(System.lineSeparator()))
                         );
-                    return Optional.empty();
                 },
                 Set.of(),
                 Set.of(),

@@ -10,11 +10,11 @@ import java.util.Optional;
 
 final class Repositories {
 
-    private final LinkedHashSet<Repository<Path>> all;
+    private final LinkedHashSet<NamedRepository> all;
     private final SchematicDefinitionConverter schematicDefinitionConverter;
 
     Repositories(
-        LinkedHashSet<Repository<Path>> all,
+        LinkedHashSet<NamedRepository> all,
         SchematicDefinitionConverter schematicDefinitionConverter
     ) {
         this.all = all;
@@ -39,8 +39,8 @@ final class Repositories {
         Path path
     ) {
         all.stream()
-            .filter(repository -> repository.hasName(repositoryName))
-            .forEach(repository -> repository.publish(id, version, classifier, new Resource(path)));
+            .filter(repository -> repository.name().equals(repositoryName))
+            .forEach(repository -> repository.publish(id, version, classifier, path));
     }
 
     private Path path(Id id, Version version, Repository.Classifier classifier) {

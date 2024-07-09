@@ -4,11 +4,9 @@ import com.github.maximtereshchenko.conveyor.files.FileTree;
 import com.github.maximtereshchenko.conveyor.zip.ZipArchive;
 
 import java.nio.file.Path;
-import java.util.Optional;
 import java.util.Set;
-import java.util.function.Supplier;
 
-final class ExtractDependenciesAction implements Supplier<Optional<Path>> {
+final class ExtractDependenciesAction implements Runnable {
 
     private static final System.Logger LOGGER =
         System.getLogger(ExtractDependenciesAction.class.getName());
@@ -22,7 +20,7 @@ final class ExtractDependenciesAction implements Supplier<Optional<Path>> {
     }
 
     @Override
-    public Optional<Path> get() {
+    public void run() {
         for (var dependency : dependencies) {
             new ZipArchive(dependency).extract(classesDirectory);
             LOGGER.log(
@@ -33,6 +31,5 @@ final class ExtractDependenciesAction implements Supplier<Optional<Path>> {
             );
         }
         new FileTree(classesDirectory.resolve("module-info.class")).delete();
-        return Optional.empty();
     }
 }

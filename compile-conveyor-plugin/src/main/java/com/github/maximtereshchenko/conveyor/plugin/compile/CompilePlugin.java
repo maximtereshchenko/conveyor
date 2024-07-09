@@ -42,7 +42,7 @@ public final class CompilePlugin implements ConveyorPlugin {
                 "publish-exploded-jar-artifact",
                 Stage.COMPILE,
                 Step.FINALIZE,
-                new PublishExplodedJarArtifactTask(classesDirectory),
+                new PublishExplodedJarArtifactTask(classesDirectory, schematic),
                 Set.of(),
                 Set.of(),
                 Cache.DISABLED

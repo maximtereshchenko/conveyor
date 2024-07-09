@@ -20,10 +20,11 @@ final class CompileSourcesTests {
     @Test
     void givenNoSources_whenExecuteTasks_thenNoArtifact(@TempDir Path path) throws IOException {
         var nonExistent = path.resolve("non-existent");
+        var schematic = FakeConveyorSchematic.from(path);
 
-        var artifacts = ConveyorTasks.executeTasks(
+        ConveyorTasks.executeTasks(
             plugin.tasks(
-                FakeConveyorSchematic.from(path),
+                schematic,
                 Map.of(
                     "sources.directory", path.resolve("sources").toString(),
                     "classes.directory", path.resolve("classes").toString(),
@@ -33,7 +34,7 @@ final class CompileSourcesTests {
             )
         );
 
-        assertThat(artifacts).isEmpty();
+        assertThat(schematic.published()).isEmpty();
     }
 
     @Test

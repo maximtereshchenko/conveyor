@@ -5,10 +5,8 @@ import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Optional;
-import java.util.function.Supplier;
 
-final class PublishArtifactAction implements Supplier<Optional<Path>> {
+final class PublishArtifactAction implements Runnable {
 
     private static final System.Logger LOGGER =
         System.getLogger(PublishArtifactAction.class.getName());
@@ -24,10 +22,9 @@ final class PublishArtifactAction implements Supplier<Optional<Path>> {
     }
 
     @Override
-    public Optional<Path> get() {
+    public void run() {
         publish(artifact, ArtifactClassifier.JAR);
         publish(schematic.path(), ArtifactClassifier.SCHEMATIC_DEFINITION);
-        return Optional.empty();
     }
 
     private void publish(Path path, ArtifactClassifier artifactClassifier) {

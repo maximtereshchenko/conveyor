@@ -10,14 +10,14 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Function;
 
-final class MavenRepositoryAdapter implements Repository<Resource> {
+final class MavenRepositoryAdapter implements Repository<Path, Resource> {
 
-    private final Repository<Path> original;
+    private final Repository<Path, Path> original;
     private final PomDefinitionFactory pomDefinitionFactory;
     private final SchematicDefinitionConverter schematicDefinitionConverter;
 
     MavenRepositoryAdapter(
-        Repository<Path> original,
+        Repository<Path, Path> original,
         PomDefinitionFactory pomDefinitionFactory,
         SchematicDefinitionConverter schematicDefinitionConverter
     ) {
@@ -27,8 +27,13 @@ final class MavenRepositoryAdapter implements Repository<Resource> {
     }
 
     @Override
-    public boolean hasName(String name) {
-        return original.hasName(name);
+    public void publish(
+        Id id,
+        Version version,
+        Classifier classifier,
+        Path artifact
+    ) {
+        original.publish(id, version, classifier, artifact);
     }
 
     @Override
@@ -45,16 +50,6 @@ final class MavenRepositoryAdapter implements Repository<Resource> {
             case JAR, POM -> original.artifact(id, version, classifier)
                 .map(Resource::new);
         };
-    }
-
-    @Override
-    public void publish(
-        Id id,
-        Version version,
-        Classifier classifier,
-        Resource resource
-    ) {
-        original.publish(id, version, classifier, resource);
     }
 
     private Resource resource(SchematicDefinition schematicDefinition) {

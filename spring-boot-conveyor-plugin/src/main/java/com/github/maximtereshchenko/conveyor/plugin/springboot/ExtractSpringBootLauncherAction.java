@@ -7,10 +7,8 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Optional;
-import java.util.function.Supplier;
 
-final class ExtractSpringBootLauncherAction implements Supplier<Optional<Path>> {
+final class ExtractSpringBootLauncherAction implements Runnable {
 
     private static final System.Logger LOGGER =
         System.getLogger(ExtractSpringBootLauncherAction.class.getName());
@@ -22,13 +20,13 @@ final class ExtractSpringBootLauncherAction implements Supplier<Optional<Path>> 
     }
 
     @Override
-    public Optional<Path> get() {
-        if (Files.exists(destination)) {
-            var path = path();
-            new ZipArchive(path).extract(destination);
-            LOGGER.log(System.Logger.Level.INFO, "Extracted {0} to {1}", path, destination);
+    public void run() {
+        if (!Files.exists(destination)) {
+            return;
         }
-        return Optional.empty();
+        var path = path();
+        new ZipArchive(path).extract(destination);
+        LOGGER.log(System.Logger.Level.INFO, "Extracted {0} to {1}", path, destination);
     }
 
     private Path path() {

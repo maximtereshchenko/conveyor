@@ -5,11 +5,9 @@ import com.github.maximtereshchenko.conveyor.springboot.Configuration;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Optional;
 import java.util.Properties;
-import java.util.function.Supplier;
 
-final class WritePropertiesAction implements Supplier<Optional<Path>> {
+final class WritePropertiesAction implements Runnable {
 
     private static final System.Logger LOGGER =
         System.getLogger(WritePropertiesAction.class.getName());
@@ -25,14 +23,10 @@ final class WritePropertiesAction implements Supplier<Optional<Path>> {
     }
 
     @Override
-    public Optional<Path> get() {
-        if (Files.exists(destination.getParent())) {
-            write();
+    public void run() {
+        if (!Files.exists(destination.getParent())) {
+            return;
         }
-        return Optional.empty();
-    }
-
-    private void write() {
         var properties = properties();
         new FileTree(destination)
             .write(outputStream -> properties.store(outputStream, null));

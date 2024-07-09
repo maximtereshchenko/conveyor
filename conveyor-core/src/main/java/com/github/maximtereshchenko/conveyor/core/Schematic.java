@@ -2,6 +2,7 @@ package com.github.maximtereshchenko.conveyor.core;
 
 import com.github.maximtereshchenko.conveyor.api.port.SchematicDefinitionConverter;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
+import com.github.maximtereshchenko.conveyor.plugin.api.Convention;
 
 import java.nio.file.Path;
 import java.util.LinkedHashSet;
@@ -61,10 +62,7 @@ final class Schematic {
             );
     }
 
-    ConstructionRepository construct(
-        ConstructionRepository constructionRepository,
-        List<Stage> stages
-    ) {
+    void construct(ConstructionRepository constructionRepository, List<Stage> stages) {
         LOGGER.log(
             System.Logger.Level.INFO,
             () -> "Constructing %s:%s:%s".formatted(
@@ -73,12 +71,13 @@ final class Schematic {
                 localModel.version()
             )
         );
-        var updatedConstructionRepository = constructionRepository.withSchematicDefinition(
+        constructionRepository.publish(
             localModel.id(),
             localModel.version(),
+            Repository.Classifier.SCHEMATIC_DEFINITION,
             localModel.path()
         );
-        var repositories = repositories(updatedConstructionRepository, properties(localModel));
+        var repositories = repositories(constructionRepository, properties(localModel));
         var completeModel = schematicModelFactory.completeInheritanceHierarchyModel(
             localModel,
             repositories
@@ -98,20 +97,12 @@ final class Schematic {
             dependencies,
             repositories
         );
-        return plugins(completeModel, properties, preferences, repositories)
+        plugins(completeModel, properties, preferences, repositories)
             .executeTasks(
                 conveyorSchematic,
                 properties,
                 stages
-            )
-            .map(path ->
-                updatedConstructionRepository.withArtifact(
-                    completeModel.id(),
-                    completeModel.version(),
-                    path
-                )
-            )
-            .orElse(updatedConstructionRepository);
+            );
     }
 
     private boolean dependencyExists(
@@ -166,11 +157,16 @@ final class Schematic {
     ) {
         return new Repositories(
             Stream.concat(
-                    Stream.of(constructionRepository),
+                    Stream.of(
+                        new NamedRepository(
+                            Convention.CONSTRUCTION_REPOSITORY_NAME,
+                            constructionRepository
+                        )
+                    ),
                     localModel.repositories()
                         .stream()
                         .map(repositoryModel ->
-                            repository(
+                            namedRepository(
                                 repositoryModel,
                                 localModel.path(),
                                 properties
@@ -182,23 +178,25 @@ final class Schematic {
         );
     }
 
-    private Repository<Path> repository(
+    private NamedRepository namedRepository(
         RepositoryModel repositoryModel,
         Path path,
         Properties properties
     ) {
-        return switch (repositoryModel) {
-            case LocalDirectoryRepositoryModel model -> new NamedLocalDirectoryRepository(
-                new LocalDirectoryRepository(
-                    absolutePath(path.getParent(), model.path())
-                ),
-                model.name()
-            );
-            case RemoteRepositoryModel model -> remoteRepository(path, properties, model);
-        };
+        return new NamedRepository(
+            repositoryModel.name(),
+            switch (repositoryModel) {
+                case LocalDirectoryRepositoryModel model -> new PathRepositoryAdapter(
+                    new LocalDirectoryRepository(
+                        absolutePath(path.getParent(), model.path())
+                    )
+                );
+                case RemoteRepositoryModel model -> remoteRepository(path, properties, model);
+            }
+        );
     }
 
-    private Repository<Path> remoteRepository(
+    private Repository<Path, Path> remoteRepository(
         Path path,
         Properties properties,
         RemoteRepositoryModel remoteRepositoryModel

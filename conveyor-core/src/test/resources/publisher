@@ -26,7 +26,6 @@ public final class ${normalizedName} implements ConveyorPlugin {
                         Paths.get(configuration.get("path")),
                         ArtifactClassifier.JAR
                     );
-                    return Optional.empty();
                 },
                 Set.of(),
                 Set.of(),

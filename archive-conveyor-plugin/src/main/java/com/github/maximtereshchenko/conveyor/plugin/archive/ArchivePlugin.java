@@ -38,7 +38,7 @@ public final class ArchivePlugin implements ConveyorPlugin {
                 "publish-jar-artifact",
                 Stage.ARCHIVE,
                 Step.FINALIZE,
-                new PublishJarArtifactTask(destination),
+                new PublishJarArtifactTask(destination, schematic),
                 Set.of(),
                 Set.of(),
                 Cache.DISABLED

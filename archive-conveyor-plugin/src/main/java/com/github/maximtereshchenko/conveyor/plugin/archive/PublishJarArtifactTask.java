@@ -1,23 +1,31 @@
 package com.github.maximtereshchenko.conveyor.plugin.archive;
 
+import com.github.maximtereshchenko.conveyor.plugin.api.ArtifactClassifier;
+import com.github.maximtereshchenko.conveyor.plugin.api.Convention;
+import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Optional;
-import java.util.function.Supplier;
 
-final class PublishJarArtifactTask implements Supplier<Optional<Path>> {
+final class PublishJarArtifactTask implements Runnable {
 
     private final Path path;
+    private final ConveyorSchematic schematic;
 
-    PublishJarArtifactTask(Path path) {
+    PublishJarArtifactTask(Path path, ConveyorSchematic schematic) {
         this.path = path;
+        this.schematic = schematic;
     }
 
     @Override
-    public Optional<Path> get() {
-        if (Files.exists(path)) {
-            return Optional.of(path);
+    public void run() {
+        if (!Files.exists(path)) {
+            return;
         }
-        return Optional.empty();
+        schematic.publish(
+            Convention.CONSTRUCTION_REPOSITORY_NAME,
+            path,
+            ArtifactClassifier.JAR
+        );
     }
 }

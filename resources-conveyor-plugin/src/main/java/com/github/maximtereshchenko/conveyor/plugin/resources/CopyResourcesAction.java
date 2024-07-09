@@ -4,10 +4,8 @@ import com.github.maximtereshchenko.conveyor.files.FileTree;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Optional;
-import java.util.function.Supplier;
 
-final class CopyResourcesAction implements Supplier<Optional<Path>> {
+final class CopyResourcesAction implements Runnable {
 
     private final Path resourcesDirectory;
     private final Path classesDirectory;
@@ -18,10 +16,9 @@ final class CopyResourcesAction implements Supplier<Optional<Path>> {
     }
 
     @Override
-    public Optional<Path> get() {
+    public void run() {
         if (Files.exists(resourcesDirectory) && Files.exists(classesDirectory)) {
             new FileTree(resourcesDirectory).copyTo(classesDirectory);
         }
-        return Optional.empty();
     }
 }

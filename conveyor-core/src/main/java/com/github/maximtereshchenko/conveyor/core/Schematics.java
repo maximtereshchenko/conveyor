@@ -24,7 +24,7 @@ final class Schematics {
         log(schematicsInConstructionOrder);
         var constructionRepository = new ConstructionRepository();
         for (var schematic : schematicsInConstructionOrder) {
-            constructionRepository = schematic.construct(constructionRepository, stages);
+            schematic.construct(constructionRepository, stages);
         }
     }
 

@@ -12,11 +12,9 @@ import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
-import java.util.function.Supplier;
 
-final class RunJunitJupiterTestsAction implements Supplier<Optional<Path>> {
+final class RunJunitJupiterTestsAction implements Runnable {
 
     private final Path classesDirectory;
     private final Path testClassesDirectory;
@@ -33,11 +31,17 @@ final class RunJunitJupiterTestsAction implements Supplier<Optional<Path>> {
     }
 
     @Override
-    public Optional<Path> get() {
-        if (Files.exists(testClassesDirectory)) {
-            runWithContextClassLoader(classLoader(classpath()), this::executeTests);
+    public void run() {
+        if (!Files.exists(testClassesDirectory)) {
+            return;
         }
-        return Optional.empty();
+        var contextClassLoader = Thread.currentThread().getContextClassLoader();
+        try {
+            Thread.currentThread().setContextClassLoader(classLoader(classpath()));
+            executeTests();
+        } finally {
+            Thread.currentThread().setContextClassLoader(contextClassLoader);
+        }
     }
 
     private Set<Path> classpath() {
@@ -80,16 +84,6 @@ final class RunJunitJupiterTestsAction implements Supplier<Optional<Path>> {
             return path.toUri().toURL();
         } catch (MalformedURLException e) {
             throw new UncheckedIOException(e);
-        }
-    }
-
-    private void runWithContextClassLoader(ClassLoader classLoader, Runnable runnable) {
-        var contextClassLoader = Thread.currentThread().getContextClassLoader();
-        try {
-            Thread.currentThread().setContextClassLoader(classLoader);
-            runnable.run();
-        } finally {
-            Thread.currentThread().setContextClassLoader(contextClassLoader);
         }
     }
 }

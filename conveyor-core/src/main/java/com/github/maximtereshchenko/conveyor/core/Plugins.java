@@ -11,7 +11,6 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -32,12 +31,11 @@ final class Plugins {
         this.classpathFactory = classpathFactory;
     }
 
-    Optional<Path> executeTasks(
+    void executeTasks(
         ConveyorSchematic conveyorSchematic,
         Properties properties,
         List<Stage> stages
     ) {
-        var artifacts = new ArrayList<Path>();
         var tasks = tasks(conveyorSchematic);
         for (var stage : stages) {
             var activeStages = activeStages(stage);
@@ -51,13 +49,9 @@ final class Plugins {
                     properties,
                     conveyorSchematic.path().getParent()
                 )
-                    .get()
-                    .ifPresent(artifacts::add);
+                    .run();
             }
         }
-
-        //TODO refactor
-        return artifacts.isEmpty() ? Optional.empty() : Optional.of(artifacts.getLast());
     }
 
     private Set<Stage> activeStages(Stage stage) {
@@ -65,7 +59,7 @@ final class Plugins {
             .collect(Collectors.toCollection(() -> EnumSet.noneOf(Stage.class)));
     }
 
-    private Supplier<Optional<Path>> action(
+    private Runnable action(
         ConveyorTask task,
         Properties properties,
         Path directory

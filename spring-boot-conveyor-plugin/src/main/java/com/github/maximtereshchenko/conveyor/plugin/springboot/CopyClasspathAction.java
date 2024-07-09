@@ -4,11 +4,9 @@ import com.github.maximtereshchenko.conveyor.files.FileTree;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Optional;
 import java.util.Set;
-import java.util.function.Supplier;
 
-final class CopyClasspathAction implements Supplier<Optional<Path>> {
+final class CopyClasspathAction implements Runnable {
 
     private static final System.Logger LOGGER =
         System.getLogger(CopyClasspathAction.class.getName());
@@ -24,12 +22,12 @@ final class CopyClasspathAction implements Supplier<Optional<Path>> {
     }
 
     @Override
-    public Optional<Path> get() {
-        if (Files.exists(classesDirectory)) {
-            copyClasses();
-            copyDependencies();
+    public void run() {
+        if (!Files.exists(classesDirectory)) {
+            return;
         }
-        return Optional.empty();
+        copyClasses();
+        copyDependencies();
     }
 
     private void copyClasses() {

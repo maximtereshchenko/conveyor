@@ -7,9 +7,10 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.file.Path;
 import java.util.Optional;
 
-final class RemoteMavenRepository extends UriRepository<Resource> {
+final class RemoteMavenRepository extends UriRepository<Path, Resource> {
 
     private static final System.Logger LOGGER =
         System.getLogger(RemoteMavenRepository.class.getName());
@@ -23,23 +24,18 @@ final class RemoteMavenRepository extends UriRepository<Resource> {
     }
 
     @Override
-    public Optional<Resource> artifact(URI uri) {
+    void publish(URI uri, Path artifact) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    Optional<Resource> artifact(URI uri) {
         var response = getResponse(uri);
         if (response.statusCode() != 200) {
             return Optional.empty();
         }
         LOGGER.log(System.Logger.Level.INFO, "Downloaded from {0}: {1}", name, uri);
         return Optional.of(new Resource(response::body));
-    }
-
-    @Override
-    void publish(URI uri, Resource resource) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean hasName(String name) {
-        return this.name.equals(name);
     }
 
     private HttpResponse<InputStream> getResponse(URI uri) {

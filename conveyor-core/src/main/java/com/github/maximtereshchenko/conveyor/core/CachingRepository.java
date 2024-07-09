@@ -3,28 +3,14 @@ package com.github.maximtereshchenko.conveyor.core;
 import java.nio.file.Path;
 import java.util.Optional;
 
-final class CachingRepository implements Repository<Path> {
+final class CachingRepository implements Repository<Path, Path> {
 
-    private final Repository<Resource> original;
+    private final Repository<Path, Resource> original;
     private final LocalDirectoryRepository cache;
 
-    CachingRepository(Repository<Resource> original, LocalDirectoryRepository cache) {
+    CachingRepository(Repository<Path, Resource> original, LocalDirectoryRepository cache) {
         this.original = original;
         this.cache = cache;
-    }
-
-    @Override
-    public boolean hasName(String name) {
-        return original.hasName(name);
-    }
-
-    @Override
-    public Optional<Path> artifact(Id id, Version version, Classifier classifier) {
-        return cache.artifact(id, version, classifier)
-            .or(() ->
-                original.artifact(id, version, classifier)
-                    .flatMap(resource -> published(id, version, classifier, resource))
-            );
     }
 
     @Override
@@ -32,9 +18,18 @@ final class CachingRepository implements Repository<Path> {
         Id id,
         Version version,
         Classifier classifier,
-        Resource resource
+        Path artifact
     ) {
-        original.publish(id, version, classifier, resource);
+        original.publish(id, version, classifier, artifact);
+    }
+
+    @Override
+    public Optional<Path> artifact(Id id, Version version, Classifier classifier) {
+        return cache.artifact(id, version, classifier)
+            .or(() ->
+                original.artifact(id, version, classifier)
+                    .flatMap(artifact -> published(id, version, classifier, artifact))
+            );
     }
 
     private Optional<Path> published(

@@ -30,7 +30,6 @@ public final class ${normalizedName} implements ConveyorPlugin {
                     if (!"true".equals(configuration.get("skip"))) {
                         new FileTree(output.resolve("instant")).write(Instant.now().toString());
                     }
-                    return Optional.empty();
                 },
                 inputs(directory, configuration),
                 Set.of(new PathConveyorTaskOutput(output)),

@@ -3,7 +3,7 @@ package com.github.maximtereshchenko.conveyor.core;
 import java.net.URI;
 import java.util.Optional;
 
-abstract class UriRepository<T> implements Repository<T> {
+abstract class UriRepository<I, O> implements Repository<I, O> {
 
     private final URI base;
 
@@ -12,18 +12,18 @@ abstract class UriRepository<T> implements Repository<T> {
     }
 
     @Override
-    public Optional<T> artifact(Id id, Version version, Classifier classifier) {
-        return artifact(uri(id, version, classifier));
-    }
-
-    @Override
     public void publish(
         Id id,
         Version version,
         Classifier classifier,
-        Resource resource
+        I artifact
     ) {
-        publish(uri(id, version, classifier), resource);
+        publish(uri(id, version, classifier), artifact);
+    }
+
+    @Override
+    public Optional<O> artifact(Id id, Version version, Classifier classifier) {
+        return artifact(uri(id, version, classifier));
     }
 
     URI uri(Id id, Version version, Classifier classifier) {
@@ -44,7 +44,7 @@ abstract class UriRepository<T> implements Repository<T> {
         );
     }
 
-    abstract Optional<T> artifact(URI uri);
+    abstract void publish(URI uri, I artifact);
 
-    abstract void publish(URI uri, Resource resource);
+    abstract Optional<O> artifact(URI uri);
 }

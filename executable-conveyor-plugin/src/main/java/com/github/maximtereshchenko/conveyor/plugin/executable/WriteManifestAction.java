@@ -4,12 +4,10 @@ import com.github.maximtereshchenko.conveyor.files.FileTree;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Optional;
-import java.util.function.Supplier;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
-final class WriteManifestAction implements Supplier<Optional<Path>> {
+final class WriteManifestAction implements Runnable {
 
     private static final System.Logger LOGGER =
         System.getLogger(WriteManifestAction.class.getName());
@@ -23,14 +21,10 @@ final class WriteManifestAction implements Supplier<Optional<Path>> {
     }
 
     @Override
-    public Optional<Path> get() {
-        if (Files.exists(classesDirectory)) {
-            write();
+    public void run() {
+        if (!Files.exists(classesDirectory)) {
+            return;
         }
-        return Optional.empty();
-    }
-
-    private void write() {
         var manifest = new Manifest();
         manifest.getMainAttributes().put(Attributes.Name.MAIN_CLASS, mainClass);
         manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
