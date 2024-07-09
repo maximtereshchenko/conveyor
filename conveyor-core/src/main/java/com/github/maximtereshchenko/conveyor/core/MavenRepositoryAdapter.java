@@ -47,7 +47,7 @@ final class MavenRepositoryAdapter implements Repository<Path, Resource> {
                 .map(this::pomDefinition)
                 .map(this::schematicDefinition)
                 .map(this::resource);
-            case JAR, POM -> original.artifact(id, version, classifier)
+            case CLASSES, POM -> original.artifact(id, version, classifier)
                 .map(Resource::new);
         };
     }

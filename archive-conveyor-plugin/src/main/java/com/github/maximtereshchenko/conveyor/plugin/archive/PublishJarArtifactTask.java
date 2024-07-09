@@ -25,7 +25,7 @@ final class PublishJarArtifactTask implements Runnable {
         schematic.publish(
             Convention.CONSTRUCTION_REPOSITORY_NAME,
             path,
-            ArtifactClassifier.JAR
+            ArtifactClassifier.CLASSES
         );
     }
 }

@@ -28,7 +28,7 @@ final class Repositories {
     }
 
     Path jar(Id id, Version version) {
-        return path(id, version, Repository.Classifier.JAR);
+        return path(id, version, Repository.Classifier.CLASSES);
     }
 
     void publish(

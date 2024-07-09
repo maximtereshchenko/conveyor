@@ -14,6 +14,6 @@ interface Repository<I, O> {
     Optional<O> artifact(Id id, Version version, Classifier classifier);
 
     enum Classifier {
-        SCHEMATIC_DEFINITION, JAR, POM
+        SCHEMATIC_DEFINITION, CLASSES, POM
     }
 }

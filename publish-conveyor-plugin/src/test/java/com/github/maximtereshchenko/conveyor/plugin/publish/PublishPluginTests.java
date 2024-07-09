@@ -67,7 +67,7 @@ final class PublishPluginTests {
         );
 
         assertThat(schematic.published())
-            .contains(new PublishedArtifact("target", artifact, ArtifactClassifier.JAR));
+            .contains(new PublishedArtifact("target", artifact, ArtifactClassifier.CLASSES));
     }
 
     @Test
@@ -87,7 +87,7 @@ final class PublishPluginTests {
         );
 
         assertThat(schematic.published())
-            .doesNotContain(new PublishedArtifact("target", artifact, ArtifactClassifier.JAR));
+            .doesNotContain(new PublishedArtifact("target", artifact, ArtifactClassifier.CLASSES));
     }
 
     @Test

@@ -55,7 +55,7 @@ final class ConveyorSchematicAdapter implements ConveyorSchematic {
             version,
             switch (artifactClassifier) {
                 case SCHEMATIC_DEFINITION -> Repository.Classifier.SCHEMATIC_DEFINITION;
-                case JAR -> Repository.Classifier.JAR;
+                case CLASSES -> Repository.Classifier.CLASSES;
             },
             path
         );

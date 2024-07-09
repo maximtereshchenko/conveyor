@@ -103,7 +103,7 @@ final class ArchivePluginTests {
                 new PublishedArtifact(
                     Convention.CONSTRUCTION_REPOSITORY_NAME,
                     archive,
-                    ArtifactClassifier.JAR
+                    ArtifactClassifier.CLASSES
                 )
             );
         var extracted = path.resolve("extracted");

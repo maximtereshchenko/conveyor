@@ -23,7 +23,7 @@ final class PublishArtifactAction implements Runnable {
 
     @Override
     public void run() {
-        publish(artifact, ArtifactClassifier.JAR);
+        publish(artifact, ArtifactClassifier.CLASSES);
         publish(schematic.path(), ArtifactClassifier.SCHEMATIC_DEFINITION);
     }
 
@@ -36,7 +36,7 @@ final class PublishArtifactAction implements Runnable {
             System.Logger.Level.INFO,
             "Published {0}:{1} to {2}",
             path,
-            ArtifactClassifier.JAR,
+            artifactClassifier,
             repository
         );
     }

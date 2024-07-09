@@ -24,7 +24,7 @@ public final class ${normalizedName} implements ConveyorPlugin {
                 () -> schematic.publish(
                     Convention.CONSTRUCTION_REPOSITORY_NAME,
                     Paths.get(configuration.get("path")),
-                    ArtifactClassifier.JAR
+                    ArtifactClassifier.CLASSES
                 ),
                 Set.of(),
                 Set.of(),

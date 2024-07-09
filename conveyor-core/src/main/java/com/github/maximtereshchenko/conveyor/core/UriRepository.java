@@ -37,7 +37,7 @@ abstract class UriRepository<I, O> implements Repository<I, O> {
                 version,
                 switch (classifier) {
                     case SCHEMATIC_DEFINITION -> "json";
-                    case JAR -> "jar";
+                    case CLASSES -> "jar";
                     case POM -> "pom";
                 }
             )
