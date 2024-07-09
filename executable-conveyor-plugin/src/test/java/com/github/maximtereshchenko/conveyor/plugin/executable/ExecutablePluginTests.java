@@ -3,9 +3,11 @@ package com.github.maximtereshchenko.conveyor.plugin.executable;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import com.github.maximtereshchenko.conveyor.common.api.Step;
 import com.github.maximtereshchenko.conveyor.files.FileTree;
-import com.github.maximtereshchenko.conveyor.plugin.api.*;
-import com.github.maximtereshchenko.conveyor.plugin.test.ConveyorTasks;
-import com.github.maximtereshchenko.conveyor.plugin.test.FakeConveyorSchematic;
+import com.github.maximtereshchenko.conveyor.plugin.api.Cache;
+import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
+import com.github.maximtereshchenko.conveyor.plugin.api.PathConveyorTaskInput;
+import com.github.maximtereshchenko.conveyor.plugin.api.PathConveyorTaskOutput;
+import com.github.maximtereshchenko.conveyor.plugin.test.Dsl;
 import com.github.maximtereshchenko.conveyor.zip.ZipArchive;
 import com.github.maximtereshchenko.conveyor.zip.ZipArchiveContainer;
 import org.junit.jupiter.api.Test;
@@ -14,14 +16,11 @@ import org.junit.jupiter.api.io.TempDir;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Map;
 import java.util.Set;
 
 import static com.github.maximtereshchenko.conveyor.common.test.MoreAssertions.assertThat;
 
 final class ExecutablePluginTests {
-
-    private final ConveyorPlugin plugin = new ExecutablePlugin();
 
     @Test
     void givenPlugin_whenTasks_thenTaskBindToArchiveFinalize(@TempDir Path path)
@@ -30,18 +29,13 @@ final class ExecutablePluginTests {
         var destination = path.resolve("destination");
         var dependency = path.resolve("dependency");
 
-        assertThat(
-            plugin.tasks(
-                FakeConveyorSchematic.from(path, dependency),
-                Map.of(
-                    "classes.directory", classes.toString(),
-                    "main.class", "",
-                    "destination", destination.toString()
-                )
-            )
-        )
-            .usingRecursiveFieldByFieldElementComparatorIgnoringFields("action")
-            .containsExactly(
+        new Dsl(new ExecutablePlugin(), path)
+            .givenDependency(dependency)
+            .givenConfiguration("classes.directory", classes)
+            .givenConfiguration("main.class")
+            .givenConfiguration("destination", destination)
+            .tasks()
+            .contain(
                 new ConveyorTask(
                     "extract-dependencies",
                     Stage.ARCHIVE,
@@ -80,16 +74,12 @@ final class ExecutablePluginTests {
         var classes = path.resolve("classes");
         var executable = path.resolve("executable");
 
-        ConveyorTasks.executeTasks(
-            plugin.tasks(
-                FakeConveyorSchematic.from(path),
-                Map.of(
-                    "classes.directory", classes.toString(),
-                    "main.class", "",
-                    "destination", executable.toString()
-                )
-            )
-        );
+        new Dsl(new ExecutablePlugin(), path)
+            .givenConfiguration("classes.directory", classes)
+            .givenConfiguration("main.class")
+            .givenConfiguration("destination", executable)
+            .tasks()
+            .execute();
 
         assertThat(classes).doesNotExist();
         assertThat(executable).doesNotExist();
@@ -101,16 +91,12 @@ final class ExecutablePluginTests {
     ) throws IOException {
         var classes = Files.createDirectory(path.resolve("classes"));
 
-        ConveyorTasks.executeTasks(
-            plugin.tasks(
-                FakeConveyorSchematic.from(path),
-                Map.of(
-                    "classes.directory", classes.toString(),
-                    "main.class", "",
-                    "destination", path.resolve("executable").toString()
-                )
-            )
-        );
+        new Dsl(new ExecutablePlugin(), path)
+            .givenConfiguration("classes.directory", classes)
+            .givenConfiguration("main.class")
+            .givenConfiguration("destination", path.resolve("executable"))
+            .tasks()
+            .execute();
 
         assertThat(new FileTree(classes).files()).containsExactly(manifest(classes));
     }
@@ -125,21 +111,16 @@ final class ExecutablePluginTests {
         new ZipArchiveContainer(dependencyContainer).archive(dependency);
         var classes = Files.createDirectory(path.resolve("classes"));
 
-        ConveyorTasks.executeTasks(
-            plugin.tasks(
-                FakeConveyorSchematic.from(path, dependency),
-                Map.of(
-                    "classes.directory", classes.toString(),
-                    "main.class", "",
-                    "destination", path.resolve("executable").toString()
-                )
-            )
-        );
+        new Dsl(new ExecutablePlugin(), path)
+            .givenDependency(dependency)
+            .givenConfiguration("classes.directory", classes)
+            .givenConfiguration("main.class")
+            .givenConfiguration("destination", path.resolve("executable"))
+            .tasks()
+            .execute();
 
-        assertThat(classes).directoryContentIsEqualToIgnoring(
-            dependencyContainer,
-            manifest(classes)
-        );
+        assertThat(classes)
+            .directoryContentIsEqualToIgnoring(dependencyContainer, manifest(classes));
     }
 
     @Test
@@ -152,16 +133,13 @@ final class ExecutablePluginTests {
         new ZipArchiveContainer(dependencyContainer).archive(dependency);
         var classes = Files.createDirectory(path.resolve("classes"));
 
-        ConveyorTasks.executeTasks(
-            plugin.tasks(
-                FakeConveyorSchematic.from(path, dependency),
-                Map.of(
-                    "classes.directory", classes.toString(),
-                    "main.class", "",
-                    "destination", path.resolve("executable").toString()
-                )
-            )
-        );
+        new Dsl(new ExecutablePlugin(), path)
+            .givenDependency(dependency)
+            .givenConfiguration("classes.directory", classes)
+            .givenConfiguration("main.class")
+            .givenConfiguration("destination", path.resolve("executable"))
+            .tasks()
+            .execute();
 
         assertThat(classes.resolve("module-info.class")).doesNotExist();
     }
@@ -174,16 +152,12 @@ final class ExecutablePluginTests {
         Files.createFile(classes.resolve("file"));
         var executable = path.resolve("executable");
 
-        ConveyorTasks.executeTasks(
-            plugin.tasks(
-                FakeConveyorSchematic.from(path),
-                Map.of(
-                    "classes.directory", classes.toString(),
-                    "main.class", "",
-                    "destination", executable.toString()
-                )
-            )
-        );
+        new Dsl(new ExecutablePlugin(), path)
+            .givenConfiguration("classes.directory", classes)
+            .givenConfiguration("main.class")
+            .givenConfiguration("destination", executable)
+            .tasks()
+            .execute();
 
         assertThat(executable).exists();
         var extracted = Files.createDirectory(path.resolve("extracted"));
@@ -198,16 +172,12 @@ final class ExecutablePluginTests {
         var classes = Files.createDirectory(path.resolve("classes"));
         var executable = path.resolve("executable");
 
-        ConveyorTasks.executeTasks(
-            plugin.tasks(
-                FakeConveyorSchematic.from(path),
-                Map.of(
-                    "classes.directory", classes.toString(),
-                    "main.class", "main.Main",
-                    "destination", executable.toString()
-                )
-            )
-        );
+        new Dsl(new ExecutablePlugin(), path)
+            .givenConfiguration("classes.directory", classes)
+            .givenConfiguration("main.class", "main.Main")
+            .givenConfiguration("destination", executable)
+            .tasks()
+            .execute();
 
         assertThat(executable).exists();
         var extracted = Files.createDirectory(path.resolve("extracted"));

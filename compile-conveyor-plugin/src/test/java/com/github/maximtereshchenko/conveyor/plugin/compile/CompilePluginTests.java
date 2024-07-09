@@ -3,21 +3,19 @@ package com.github.maximtereshchenko.conveyor.plugin.compile;
 import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import com.github.maximtereshchenko.conveyor.common.api.Step;
-import com.github.maximtereshchenko.conveyor.plugin.api.*;
-import com.github.maximtereshchenko.conveyor.plugin.test.FakeConveyorSchematic;
+import com.github.maximtereshchenko.conveyor.plugin.api.Cache;
+import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
+import com.github.maximtereshchenko.conveyor.plugin.api.PathConveyorTaskInput;
+import com.github.maximtereshchenko.conveyor.plugin.api.PathConveyorTaskOutput;
+import com.github.maximtereshchenko.conveyor.plugin.test.Dsl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Map;
 import java.util.Set;
 
-import static com.github.maximtereshchenko.conveyor.common.test.MoreAssertions.assertThat;
-
 final class CompilePluginTests {
-
-    private final ConveyorPlugin plugin = new CompilePlugin();
 
     @Test
     void givenPlugin_whenTasks_thenTaskBindToCompileRunFinalizeTestPrepare(@TempDir Path path)
@@ -29,25 +27,15 @@ final class CompilePluginTests {
         var implementationDependency = path.resolve("implementation");
         var testDependency = path.resolve("test");
 
-        assertThat(
-            plugin.tasks(
-                FakeConveyorSchematic.from(
-                    path,
-                    Map.of(
-                        implementationDependency, DependencyScope.IMPLEMENTATION,
-                        testDependency, DependencyScope.TEST
-                    )
-                ),
-                Map.of(
-                    "sources.directory", sources.toString(),
-                    "classes.directory", classes.toString(),
-                    "test.sources.directory", testSources.toString(),
-                    "test.classes.directory", testClasses.toString()
-                )
-            )
-        )
-            .usingRecursiveFieldByFieldElementComparatorIgnoringFields("action")
-            .containsExactly(
+        new Dsl(new CompilePlugin(), path)
+            .givenDependency(implementationDependency, DependencyScope.IMPLEMENTATION)
+            .givenDependency(testDependency, DependencyScope.TEST)
+            .givenConfiguration("sources.directory", sources)
+            .givenConfiguration("classes.directory", classes)
+            .givenConfiguration("test.sources.directory", testSources)
+            .givenConfiguration("test.classes.directory", testClasses)
+            .tasks()
+            .contain(
                 new ConveyorTask(
                     "compile-sources",
                     Stage.COMPILE,

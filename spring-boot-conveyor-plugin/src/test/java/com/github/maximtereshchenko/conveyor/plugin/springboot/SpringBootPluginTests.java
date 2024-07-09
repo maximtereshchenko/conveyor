@@ -2,9 +2,11 @@ package com.github.maximtereshchenko.conveyor.plugin.springboot;
 
 import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import com.github.maximtereshchenko.conveyor.common.api.Step;
-import com.github.maximtereshchenko.conveyor.plugin.api.*;
-import com.github.maximtereshchenko.conveyor.plugin.test.ConveyorTasks;
-import com.github.maximtereshchenko.conveyor.plugin.test.FakeConveyorSchematic;
+import com.github.maximtereshchenko.conveyor.plugin.api.Cache;
+import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
+import com.github.maximtereshchenko.conveyor.plugin.api.PathConveyorTaskInput;
+import com.github.maximtereshchenko.conveyor.plugin.api.PathConveyorTaskOutput;
+import com.github.maximtereshchenko.conveyor.plugin.test.Dsl;
 import com.github.maximtereshchenko.conveyor.springboot.Configuration;
 import com.github.maximtereshchenko.conveyor.zip.ZipArchive;
 import org.junit.jupiter.api.Test;
@@ -21,8 +23,6 @@ import static com.github.maximtereshchenko.conveyor.common.test.MoreAssertions.a
 
 final class SpringBootPluginTests {
 
-    private final ConveyorPlugin plugin = new SpringBootPlugin();
-
     @Test
     void givenPlugin_whenTasks_thenTaskBindToArchiveFinalize(@TempDir Path path)
         throws IOException {
@@ -31,18 +31,13 @@ final class SpringBootPluginTests {
         var destination = path.resolve("destination");
         var dependency = path.resolve("dependency");
 
-        assertThat(
-            plugin.tasks(
-                FakeConveyorSchematic.from(path, dependency),
-                Map.of(
-                    "container.directory", container.toString(),
-                    "classes.directory", classes.toString(),
-                    "destination", destination.toString()
-                )
-            )
-        )
-            .usingRecursiveFieldByFieldElementComparatorIgnoringFields("action")
-            .containsExactly(
+        new Dsl(new SpringBootPlugin(), path)
+            .givenDependency(dependency)
+            .givenConfiguration("container.directory", container)
+            .givenConfiguration("classes.directory", classes)
+            .givenConfiguration("destination", destination)
+            .tasks()
+            .contain(
                 new ConveyorTask(
                     "copy-classpath",
                     Stage.ARCHIVE,
@@ -99,17 +94,13 @@ final class SpringBootPluginTests {
         var container = path.resolve("container");
         var executable = path.resolve("executable");
 
-        ConveyorTasks.executeTasks(
-            plugin.tasks(
-                FakeConveyorSchematic.from(path),
-                Map.of(
-                    "container.directory", container.toString(),
-                    "classes.directory", path.resolve("classes").toString(),
-                    "launched.class", "Main",
-                    "destination", executable.toString()
-                )
-            )
-        );
+        new Dsl(new SpringBootPlugin(), path)
+            .givenConfiguration("container.directory", container)
+            .givenConfiguration("classes.directory", path.resolve("classes"))
+            .givenConfiguration("launched.class", "Main")
+            .givenConfiguration("destination", executable)
+            .tasks()
+            .execute();
 
         assertThat(container).doesNotExist();
         assertThat(executable).doesNotExist();
@@ -123,17 +114,13 @@ final class SpringBootPluginTests {
         Files.createFile(classes.resolve("file"));
         var executable = path.resolve("executable");
 
-        ConveyorTasks.executeTasks(
-            plugin.tasks(
-                FakeConveyorSchematic.from(path),
-                Map.of(
-                    "container.directory", container.toString(),
-                    "classes.directory", classes.toString(),
-                    "launched.class", "Main",
-                    "destination", executable.toString()
-                )
-            )
-        );
+        new Dsl(new SpringBootPlugin(), path)
+            .givenConfiguration("container.directory", container)
+            .givenConfiguration("classes.directory", classes)
+            .givenConfiguration("launched.class", "Main")
+            .givenConfiguration("destination", executable)
+            .tasks()
+            .execute();
 
         assertThat(container.resolve("classpath").resolve("classes"))
             .directoryContentIsEqualTo(classes);
@@ -147,17 +134,14 @@ final class SpringBootPluginTests {
         var classes = Files.createDirectory(path.resolve("classes"));
         Files.createFile(classes.resolve("Dummy.class"));
 
-        ConveyorTasks.executeTasks(
-            plugin.tasks(
-                FakeConveyorSchematic.from(path, Files.createFile(path.resolve("dependency"))),
-                Map.of(
-                    "container.directory", container.toString(),
-                    "classes.directory", classes.toString(),
-                    "launched.class", "Main",
-                    "destination", path.resolve("executable").toString()
-                )
-            )
-        );
+        new Dsl(new SpringBootPlugin(), path)
+            .givenDependency(Files.createFile(path.resolve("dependency")))
+            .givenConfiguration("container.directory", container)
+            .givenConfiguration("classes.directory", classes)
+            .givenConfiguration("launched.class", "Main")
+            .givenConfiguration("destination", path.resolve("executable"))
+            .tasks()
+            .execute();
 
         assertThat(container.resolve("classpath").resolve("dependency")).exists();
     }
@@ -169,17 +153,13 @@ final class SpringBootPluginTests {
         var classes = Files.createDirectory(path.resolve("classes"));
         Files.createFile(classes.resolve("Dummy.class"));
 
-        ConveyorTasks.executeTasks(
-            plugin.tasks(
-                FakeConveyorSchematic.from(path),
-                Map.of(
-                    "container.directory", container.toString(),
-                    "classes.directory", classes.toString(),
-                    "launched.class", "Main",
-                    "destination", path.resolve("executable").toString()
-                )
-            )
-        );
+        new Dsl(new SpringBootPlugin(), path)
+            .givenConfiguration("container.directory", container)
+            .givenConfiguration("classes.directory", classes)
+            .givenConfiguration("launched.class", "Main")
+            .givenConfiguration("destination", path.resolve("executable"))
+            .tasks()
+            .execute();
 
         assertThat(
             container.resolve("com")
@@ -199,17 +179,13 @@ final class SpringBootPluginTests {
         var classes = Files.createDirectory(path.resolve("classes"));
         Files.createFile(classes.resolve("Dummy.class"));
 
-        ConveyorTasks.executeTasks(
-            plugin.tasks(
-                FakeConveyorSchematic.from(path),
-                Map.of(
-                    "container.directory", container.toString(),
-                    "classes.directory", classes.toString(),
-                    "launched.class", "Main",
-                    "destination", path.resolve("executable").toString()
-                )
-            )
-        );
+        new Dsl(new SpringBootPlugin(), path)
+            .givenConfiguration("container.directory", container)
+            .givenConfiguration("classes.directory", classes)
+            .givenConfiguration("launched.class", "Main")
+            .givenConfiguration("destination", path.resolve("executable"))
+            .tasks()
+            .execute();
 
         assertThat(properties(container.resolve(Configuration.PROPERTIES_CLASS_PATH_LOCATION)))
             .containsOnly(
@@ -225,17 +201,13 @@ final class SpringBootPluginTests {
         var classes = Files.createDirectory(path.resolve("classes"));
         Files.createFile(classes.resolve("Dummy.class"));
 
-        ConveyorTasks.executeTasks(
-            plugin.tasks(
-                FakeConveyorSchematic.from(path),
-                Map.of(
-                    "container.directory", container.toString(),
-                    "classes.directory", classes.toString(),
-                    "launched.class", "Main",
-                    "destination", path.resolve("executable").toString()
-                )
-            )
-        );
+        new Dsl(new SpringBootPlugin(), path)
+            .givenConfiguration("container.directory", container)
+            .givenConfiguration("classes.directory", classes)
+            .givenConfiguration("launched.class", "Main")
+            .givenConfiguration("destination", path.resolve("executable"))
+            .tasks()
+            .execute();
 
         assertThat(container.resolve("META-INF").resolve("MANIFEST.MF"))
             .content()
@@ -250,17 +222,13 @@ final class SpringBootPluginTests {
         Files.createFile(classes.resolve("Dummy.class"));
         var executable = path.resolve("executable");
 
-        ConveyorTasks.executeTasks(
-            plugin.tasks(
-                FakeConveyorSchematic.from(path),
-                Map.of(
-                    "container.directory", container.toString(),
-                    "classes.directory", classes.toString(),
-                    "launched.class", "Main",
-                    "destination", executable.toString()
-                )
-            )
-        );
+        new Dsl(new SpringBootPlugin(), path)
+            .givenConfiguration("container.directory", container)
+            .givenConfiguration("classes.directory", classes)
+            .givenConfiguration("launched.class", "Main")
+            .givenConfiguration("destination", executable)
+            .tasks()
+            .execute();
 
         assertThat(executable).exists();
         var extracted = Files.createDirectory(path.resolve("extracted"));

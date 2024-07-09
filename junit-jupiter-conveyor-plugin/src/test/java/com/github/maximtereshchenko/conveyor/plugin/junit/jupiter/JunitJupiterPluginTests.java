@@ -6,11 +6,9 @@ import com.github.maximtereshchenko.conveyor.common.api.Step;
 import com.github.maximtereshchenko.conveyor.compiler.Compiler;
 import com.github.maximtereshchenko.conveyor.files.FileTree;
 import com.github.maximtereshchenko.conveyor.plugin.api.Cache;
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
 import com.github.maximtereshchenko.conveyor.plugin.api.PathConveyorTaskInput;
-import com.github.maximtereshchenko.conveyor.plugin.test.ConveyorTasks;
-import com.github.maximtereshchenko.conveyor.plugin.test.FakeConveyorSchematic;
+import com.github.maximtereshchenko.conveyor.plugin.test.Dsl;
 import org.apiguardian.api.API;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -23,17 +21,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.github.maximtereshchenko.conveyor.common.test.MoreAssertions.assertThat;
-import static com.github.maximtereshchenko.conveyor.common.test.MoreAssertions.assertThatCode;
-
 final class JunitJupiterPluginTests {
 
-    private final ConveyorPlugin plugin = new JunitJupiterPlugin();
     private final Compiler compiler = new Compiler();
 
     @Test
@@ -44,23 +37,13 @@ final class JunitJupiterPluginTests {
         var implementationDependency = path.resolve("implementation");
         var testDependency = path.resolve("test");
 
-        assertThat(
-            plugin.tasks(
-                FakeConveyorSchematic.from(
-                    path,
-                    Map.of(
-                        implementationDependency, DependencyScope.IMPLEMENTATION,
-                        testDependency, DependencyScope.TEST
-                    )
-                ),
-                Map.of(
-                    "test.classes.directory", testClasses.toString(),
-                    "classes.directory", classes.toString()
-                )
-            )
-        )
-            .usingRecursiveFieldByFieldElementComparatorIgnoringFields("action")
-            .containsExactly(
+        new Dsl(new JunitJupiterPlugin(), path)
+            .givenDependency(implementationDependency, DependencyScope.IMPLEMENTATION)
+            .givenDependency(testDependency, DependencyScope.TEST)
+            .givenConfiguration("test.classes.directory", testClasses)
+            .givenConfiguration("classes.directory", classes)
+            .tasks()
+            .contain(
                 new ConveyorTask(
                     "execute-junit-jupiter-tests",
                     Stage.TEST,
@@ -81,15 +64,12 @@ final class JunitJupiterPluginTests {
     @Test
     void givenNoTestClasses_whenExecuteTasks_thenNoTestsAreExecuted(@TempDir Path path)
         throws IOException {
-        var tasks = plugin.tasks(
-            FakeConveyorSchematic.from(path),
-            Map.of(
-                "test.classes.directory", path.resolve("testClasses").toString(),
-                "classes.directory", path.resolve("classes").toString()
-            )
-        );
-
-        assertThatCode(() -> ConveyorTasks.executeTasks(tasks)).doesNotThrowAnyException();
+        new Dsl(new JunitJupiterPlugin(), path)
+            .givenConfiguration("test.classes.directory", path.resolve("testClasses"))
+            .givenConfiguration("classes.directory", path.resolve("classes"))
+            .tasks()
+            .execute()
+            .thenNoException();
     }
 
     @Test
@@ -97,7 +77,7 @@ final class JunitJupiterPluginTests {
         throws IOException {
         var testSources = path.resolve("testSources");
         var testClasses = path.resolve("testClasses");
-        var classPath = classpath();
+        var classpath = classpath();
         var testSourceClass = testSources.resolve("test").resolve("MyTest.java");
         new FileTree(testSourceClass)
             .write("""
@@ -111,16 +91,15 @@ final class JunitJupiterPluginTests {
                        }
                    }
                    """);
-        compiler.compile(Set.of(testSourceClass), classPath, testClasses);
-        var tasks = plugin.tasks(
-            FakeConveyorSchematic.from(path, classPath),
-            Map.of(
-                "test.classes.directory", testClasses.toString(),
-                "classes.directory", path.resolve("classes").toString()
-            )
-        );
+        compiler.compile(Set.of(testSourceClass), classpath, testClasses);
 
-        assertThatCode(() -> ConveyorTasks.executeTasks(tasks)).doesNotThrowAnyException();
+        new Dsl(new JunitJupiterPlugin(), path)
+            .givenDependencies(classpath)
+            .givenConfiguration("test.classes.directory", testClasses)
+            .givenConfiguration("classes.directory", path.resolve("classes"))
+            .tasks()
+            .execute()
+            .thenNoException();
     }
 
     private Set<Path> classpath() {
