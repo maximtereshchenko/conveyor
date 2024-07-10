@@ -1,7 +1,9 @@
 package com.github.maximtereshchenko.conveyor.files;
 
+import com.github.maximtereshchenko.conveyor.common.test.DirectoryEntriesSource;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -84,5 +86,13 @@ final class FileTreeTests {
         var fileTree = new FileTree(path.resolve("file"));
 
         assertThatCode(fileTree::delete).doesNotThrowAnyException();
+    }
+
+    @ParameterizedTest
+    @DirectoryEntriesSource
+    void givenDirectory_whenDelete_thenDirectoryIsDeleted(Path directory) {
+        new FileTree(directory).delete();
+
+        assertThat(directory).doesNotExist();
     }
 }
