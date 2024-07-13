@@ -1,7 +1,5 @@
 package com.github.maximtereshchenko.conveyor.api.schematic;
 
-import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
-
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;

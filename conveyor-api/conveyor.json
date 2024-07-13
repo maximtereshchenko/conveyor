@@ -4,11 +4,5 @@
     "group": "com.github.maximtereshchenko.conveyor",
     "name": "conveyor-template",
     "version": "1.0.0"
-  },
-  "dependencies": [
-    {
-      "group": "${conveyor.schematic.group}",
-      "name": "conveyor-common-api"
-    }
-  ]
+  }
 }

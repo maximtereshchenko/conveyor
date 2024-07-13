@@ -1,8 +1,5 @@
 package com.github.maximtereshchenko.conveyor.plugin.springboot;
 
-import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
-import com.github.maximtereshchenko.conveyor.common.api.Stage;
-import com.github.maximtereshchenko.conveyor.common.api.Step;
 import com.github.maximtereshchenko.conveyor.plugin.api.*;
 import com.github.maximtereshchenko.conveyor.springboot.Configuration;
 
@@ -30,13 +27,13 @@ public final class SpringBootPlugin implements ConveyorPlugin {
         var containerDirectory = configuredPath(configuration, "container.directory");
         var classpathDirectory = "classpath";
         var classpathDestination = containerDirectory.resolve(classpathDirectory);
-        var dependencies = schematic.classpath(Set.of(DependencyScope.IMPLEMENTATION));
+        var dependencies = schematic.classpath(Set.of(ClasspathScope.IMPLEMENTATION));
         var destination = configuredPath(configuration, "destination");
         return List.of(
             new ConveyorTask(
                 "copy-classpath",
-                Stage.ARCHIVE,
-                Step.FINALIZE,
+                BindingStage.ARCHIVE,
+                BindingStep.FINALIZE,
                 new CopyClasspathAction(classesDirectory, dependencies, classpathDestination),
                 Stream.concat(Stream.of(classesDirectory), dependencies.stream())
                     .map(PathConveyorTaskInput::new)
@@ -46,8 +43,8 @@ public final class SpringBootPlugin implements ConveyorPlugin {
             ),
             new ConveyorTask(
                 "extract-spring-boot-launcher",
-                Stage.ARCHIVE,
-                Step.FINALIZE,
+                BindingStage.ARCHIVE,
+                BindingStep.FINALIZE,
                 new ExtractSpringBootLauncherAction(containerDirectory),
                 Set.of(),
                 Set.of(),
@@ -55,8 +52,8 @@ public final class SpringBootPlugin implements ConveyorPlugin {
             ),
             new ConveyorTask(
                 "write-properties",
-                Stage.ARCHIVE,
-                Step.FINALIZE,
+                BindingStage.ARCHIVE,
+                BindingStep.FINALIZE,
                 new WritePropertiesAction(
                     containerDirectory.resolve(Configuration.PROPERTIES_CLASS_PATH_LOCATION),
                     classpathDirectory,
@@ -68,8 +65,8 @@ public final class SpringBootPlugin implements ConveyorPlugin {
             ),
             new ConveyorTask(
                 "write-manifest",
-                Stage.ARCHIVE,
-                Step.FINALIZE,
+                BindingStage.ARCHIVE,
+                BindingStep.FINALIZE,
                 new WriteManifestAction(containerDirectory),
                 Set.of(),
                 Set.of(),
@@ -77,8 +74,8 @@ public final class SpringBootPlugin implements ConveyorPlugin {
             ),
             new ConveyorTask(
                 "archive-executable",
-                Stage.ARCHIVE,
-                Step.FINALIZE,
+                BindingStage.ARCHIVE,
+                BindingStep.FINALIZE,
                 new ArchiveExecutableAction(containerDirectory, destination),
                 Set.of(new PathConveyorTaskInput(containerDirectory)),
                 Set.of(new PathConveyorTaskOutput(destination)),

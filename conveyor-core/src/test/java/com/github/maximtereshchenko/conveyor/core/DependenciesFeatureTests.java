@@ -1,9 +1,9 @@
 package com.github.maximtereshchenko.conveyor.core;
 
 import com.github.maximtereshchenko.conveyor.api.ConveyorModule;
+import com.github.maximtereshchenko.conveyor.api.Stage;
+import com.github.maximtereshchenko.conveyor.api.schematic.DependencyScope;
 import com.github.maximtereshchenko.conveyor.api.schematic.ExclusionDefinition;
-import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
-import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 

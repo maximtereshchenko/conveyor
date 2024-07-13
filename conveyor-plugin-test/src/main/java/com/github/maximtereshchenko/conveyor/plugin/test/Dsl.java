@@ -1,6 +1,6 @@
 package com.github.maximtereshchenko.conveyor.plugin.test;
 
-import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
+import com.github.maximtereshchenko.conveyor.plugin.api.ClasspathScope;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
 
 import java.io.IOException;
@@ -14,7 +14,7 @@ public final class Dsl {
 
     private final ConveyorPlugin plugin;
     private final Path path;
-    private final Map<Path, DependencyScope> dependencies = new HashMap<>();
+    private final Map<Path, ClasspathScope> dependencies = new HashMap<>();
     private final Map<String, String> configuration = new HashMap<>();
 
     public Dsl(ConveyorPlugin plugin, Path path) {
@@ -41,10 +41,10 @@ public final class Dsl {
     }
 
     public Dsl givenDependency(Path path) {
-        return givenDependency(path, DependencyScope.IMPLEMENTATION);
+        return givenDependency(path, ClasspathScope.IMPLEMENTATION);
     }
 
-    public Dsl givenDependency(Path path, DependencyScope scope) {
+    public Dsl givenDependency(Path path, ClasspathScope scope) {
         dependencies.put(path, scope);
         return this;
     }

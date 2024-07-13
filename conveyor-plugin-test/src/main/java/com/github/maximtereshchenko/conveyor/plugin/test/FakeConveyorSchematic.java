@@ -1,7 +1,7 @@
 package com.github.maximtereshchenko.conveyor.plugin.test;
 
-import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
 import com.github.maximtereshchenko.conveyor.plugin.api.ArtifactClassifier;
+import com.github.maximtereshchenko.conveyor.plugin.api.ClasspathScope;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
 
 import java.nio.file.Path;
@@ -11,10 +11,10 @@ import java.util.stream.Collectors;
 final class FakeConveyorSchematic implements ConveyorSchematic {
 
     private final Path path;
-    private final Map<Path, DependencyScope> dependencies;
+    private final Map<Path, ClasspathScope> dependencies;
     private final List<PublishedArtifact> published = new ArrayList<>();
 
-    FakeConveyorSchematic(Path path, Map<Path, DependencyScope> dependencies) {
+    FakeConveyorSchematic(Path path, Map<Path, ClasspathScope> dependencies) {
         this.path = path;
         this.dependencies = dependencies;
     }
@@ -30,7 +30,7 @@ final class FakeConveyorSchematic implements ConveyorSchematic {
     }
 
     @Override
-    public Set<Path> classpath(Set<DependencyScope> scopes) {
+    public Set<Path> classpath(Set<ClasspathScope> scopes) {
         return dependencies.entrySet()
             .stream()
             .filter(entry -> scopes.contains(entry.getValue()))

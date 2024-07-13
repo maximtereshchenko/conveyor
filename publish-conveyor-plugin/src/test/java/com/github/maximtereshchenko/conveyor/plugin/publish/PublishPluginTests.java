@@ -1,10 +1,6 @@
 package com.github.maximtereshchenko.conveyor.plugin.publish;
 
-import com.github.maximtereshchenko.conveyor.common.api.Stage;
-import com.github.maximtereshchenko.conveyor.common.api.Step;
-import com.github.maximtereshchenko.conveyor.plugin.api.ArtifactClassifier;
-import com.github.maximtereshchenko.conveyor.plugin.api.Cache;
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
+import com.github.maximtereshchenko.conveyor.plugin.api.*;
 import com.github.maximtereshchenko.conveyor.plugin.test.Dsl;
 import com.github.maximtereshchenko.conveyor.plugin.test.PublishedArtifact;
 import org.junit.jupiter.api.Test;
@@ -28,8 +24,8 @@ final class PublishPluginTests {
             .contain(
                 new ConveyorTask(
                     "publish-artifact",
-                    Stage.PUBLISH,
-                    Step.RUN,
+                    BindingStage.PUBLISH,
+                    BindingStep.RUN,
                     null,
                     Set.of(),
                     Set.of(),

@@ -1,11 +1,6 @@
 package com.github.maximtereshchenko.conveyor.plugin.clean;
 
-import com.github.maximtereshchenko.conveyor.common.api.Stage;
-import com.github.maximtereshchenko.conveyor.common.api.Step;
-import com.github.maximtereshchenko.conveyor.plugin.api.Cache;
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
+import com.github.maximtereshchenko.conveyor.plugin.api.*;
 
 import java.nio.file.Paths;
 import java.util.List;
@@ -27,8 +22,8 @@ public final class CleanPlugin implements ConveyorPlugin {
         return List.of(
             new ConveyorTask(
                 "clean",
-                Stage.CLEAN,
-                Step.RUN,
+                BindingStage.CLEAN,
+                BindingStep.RUN,
                 new CleanAction(Paths.get(configuration.get("directory"))),
                 Set.of(),
                 Set.of(),

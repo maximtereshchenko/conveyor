@@ -1,12 +1,7 @@
 package com.github.maximtereshchenko.conveyor.plugin.executable;
 
-import com.github.maximtereshchenko.conveyor.common.api.Stage;
-import com.github.maximtereshchenko.conveyor.common.api.Step;
 import com.github.maximtereshchenko.conveyor.files.FileTree;
-import com.github.maximtereshchenko.conveyor.plugin.api.Cache;
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
-import com.github.maximtereshchenko.conveyor.plugin.api.PathConveyorTaskInput;
-import com.github.maximtereshchenko.conveyor.plugin.api.PathConveyorTaskOutput;
+import com.github.maximtereshchenko.conveyor.plugin.api.*;
 import com.github.maximtereshchenko.conveyor.plugin.test.Dsl;
 import com.github.maximtereshchenko.conveyor.zip.ZipArchive;
 import com.github.maximtereshchenko.conveyor.zip.ZipArchiveContainer;
@@ -38,8 +33,8 @@ final class ExecutablePluginTests {
             .contain(
                 new ConveyorTask(
                     "extract-dependencies",
-                    Stage.ARCHIVE,
-                    Step.FINALIZE,
+                    BindingStage.ARCHIVE,
+                    BindingStep.FINALIZE,
                     null,
                     Set.of(
                         new PathConveyorTaskInput(classes),
@@ -50,8 +45,8 @@ final class ExecutablePluginTests {
                 ),
                 new ConveyorTask(
                     "write-manifest",
-                    Stage.ARCHIVE,
-                    Step.FINALIZE,
+                    BindingStage.ARCHIVE,
+                    BindingStep.FINALIZE,
                     null,
                     Set.of(),
                     Set.of(),
@@ -59,8 +54,8 @@ final class ExecutablePluginTests {
                 ),
                 new ConveyorTask(
                     "archive-executable",
-                    Stage.ARCHIVE,
-                    Step.FINALIZE,
+                    BindingStage.ARCHIVE,
+                    BindingStep.FINALIZE,
                     null,
                     Set.of(new PathConveyorTaskInput(classes)),
                     Set.of(new PathConveyorTaskOutput(destination)),

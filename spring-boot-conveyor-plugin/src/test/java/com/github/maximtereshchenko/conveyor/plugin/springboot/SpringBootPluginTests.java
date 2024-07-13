@@ -1,11 +1,6 @@
 package com.github.maximtereshchenko.conveyor.plugin.springboot;
 
-import com.github.maximtereshchenko.conveyor.common.api.Stage;
-import com.github.maximtereshchenko.conveyor.common.api.Step;
-import com.github.maximtereshchenko.conveyor.plugin.api.Cache;
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
-import com.github.maximtereshchenko.conveyor.plugin.api.PathConveyorTaskInput;
-import com.github.maximtereshchenko.conveyor.plugin.api.PathConveyorTaskOutput;
+import com.github.maximtereshchenko.conveyor.plugin.api.*;
 import com.github.maximtereshchenko.conveyor.plugin.test.Dsl;
 import com.github.maximtereshchenko.conveyor.springboot.Configuration;
 import com.github.maximtereshchenko.conveyor.zip.ZipArchive;
@@ -40,8 +35,8 @@ final class SpringBootPluginTests {
             .contain(
                 new ConveyorTask(
                     "copy-classpath",
-                    Stage.ARCHIVE,
-                    Step.FINALIZE,
+                    BindingStage.ARCHIVE,
+                    BindingStep.FINALIZE,
                     null,
                     Set.of(
                         new PathConveyorTaskInput(classes),
@@ -52,8 +47,8 @@ final class SpringBootPluginTests {
                 ),
                 new ConveyorTask(
                     "extract-spring-boot-launcher",
-                    Stage.ARCHIVE,
-                    Step.FINALIZE,
+                    BindingStage.ARCHIVE,
+                    BindingStep.FINALIZE,
                     null,
                     Set.of(),
                     Set.of(),
@@ -61,8 +56,8 @@ final class SpringBootPluginTests {
                 ),
                 new ConveyorTask(
                     "write-properties",
-                    Stage.ARCHIVE,
-                    Step.FINALIZE,
+                    BindingStage.ARCHIVE,
+                    BindingStep.FINALIZE,
                     null,
                     Set.of(),
                     Set.of(),
@@ -70,8 +65,8 @@ final class SpringBootPluginTests {
                 ),
                 new ConveyorTask(
                     "write-manifest",
-                    Stage.ARCHIVE,
-                    Step.FINALIZE,
+                    BindingStage.ARCHIVE,
+                    BindingStep.FINALIZE,
                     null,
                     Set.of(),
                     Set.of(),
@@ -79,8 +74,8 @@ final class SpringBootPluginTests {
                 ),
                 new ConveyorTask(
                     "archive-executable",
-                    Stage.ARCHIVE,
-                    Step.FINALIZE,
+                    BindingStage.ARCHIVE,
+                    BindingStep.FINALIZE,
                     null,
                     Set.of(new PathConveyorTaskInput(container)),
                     Set.of(new PathConveyorTaskOutput(destination)),

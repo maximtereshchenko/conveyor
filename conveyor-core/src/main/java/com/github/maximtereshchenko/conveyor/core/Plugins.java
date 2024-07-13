@@ -1,6 +1,7 @@
 package com.github.maximtereshchenko.conveyor.core;
 
-import com.github.maximtereshchenko.conveyor.common.api.Stage;
+import com.github.maximtereshchenko.conveyor.api.Stage;
+import com.github.maximtereshchenko.conveyor.plugin.api.BindingStage;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
@@ -17,10 +18,10 @@ import java.util.stream.Stream;
 final class Plugins {
 
     private static final System.Logger LOGGER = System.getLogger(Plugins.class.getName());
-    private static final Map<Stage, Stage> STAGE_DEPENDENCIES = Map.of(
-        Stage.PUBLISH, Stage.ARCHIVE,
-        Stage.ARCHIVE, Stage.TEST,
-        Stage.TEST, Stage.COMPILE
+    private static final Map<BindingStage, BindingStage> STAGE_DEPENDENCIES = Map.of(
+        BindingStage.PUBLISH, BindingStage.ARCHIVE,
+        BindingStage.ARCHIVE, BindingStage.TEST,
+        BindingStage.TEST, BindingStage.COMPILE
     );
 
     private final LinkedHashSet<Plugin> all;
@@ -54,9 +55,13 @@ final class Plugins {
         }
     }
 
-    private Set<Stage> activeStages(Stage stage) {
-        return Stream.iterate(stage, Objects::nonNull, STAGE_DEPENDENCIES::get)
-            .collect(Collectors.toCollection(() -> EnumSet.noneOf(Stage.class)));
+    private Set<BindingStage> activeStages(Stage stage) {
+        return Stream.iterate(
+                BindingStage.valueOf(stage.toString()),
+                Objects::nonNull,
+                STAGE_DEPENDENCIES::get
+            )
+            .collect(Collectors.toCollection(() -> EnumSet.noneOf(BindingStage.class)));
     }
 
     private Runnable action(

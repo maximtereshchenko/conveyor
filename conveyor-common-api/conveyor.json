@@ -1,8 +1,0 @@
-{
-  "name": "conveyor-common-api",
-  "template": {
-    "group": "com.github.maximtereshchenko.conveyor",
-    "name": "conveyor-template",
-    "version": "1.0.0"
-  }
-}

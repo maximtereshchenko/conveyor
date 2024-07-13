@@ -1,5 +1,4 @@
 rootProject.name = "conveyor"
-include("conveyor-common-api")
 include("conveyor-plugin-api")
 include("conveyor-api")
 include("conveyor-core")

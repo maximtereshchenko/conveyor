@@ -1,6 +1,5 @@
 package ${normalizedName};
 
-import com.github.maximtereshchenko.conveyor.common.api.*;
 import com.github.maximtereshchenko.conveyor.plugin.api.*;
 
 import java.nio.file.*;
@@ -18,8 +17,8 @@ public final class ${normalizedName} implements ConveyorPlugin {
         return List.of(
             new ConveyorTask(
                 "",
-                Stage.valueOf(configuration.getOrDefault("stage", "ARCHIVE")),
-                Step.RUN,
+                BindingStage.valueOf(configuration.getOrDefault("stage", "ARCHIVE")),
+                BindingStep.RUN,
                 () -> schematic.publish(
                     configuration.getOrDefault("repository", Convention.CONSTRUCTION_REPOSITORY_NAME),
                     Paths.get(configuration.get("path")),

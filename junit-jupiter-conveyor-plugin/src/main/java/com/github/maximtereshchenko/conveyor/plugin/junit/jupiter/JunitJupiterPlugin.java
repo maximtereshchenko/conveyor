@@ -1,8 +1,5 @@
 package com.github.maximtereshchenko.conveyor.plugin.junit.jupiter;
 
-import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
-import com.github.maximtereshchenko.conveyor.common.api.Stage;
-import com.github.maximtereshchenko.conveyor.common.api.Step;
 import com.github.maximtereshchenko.conveyor.plugin.api.*;
 
 import java.nio.file.Path;
@@ -28,13 +25,13 @@ public final class JunitJupiterPlugin implements ConveyorPlugin {
         var testClassesDirectory = configuredPath(configuration, "test.classes.directory");
         var classesDirectory = configuredPath(configuration, "classes.directory");
         var dependencies = schematic.classpath(
-            Set.of(DependencyScope.IMPLEMENTATION, DependencyScope.TEST)
+            Set.of(ClasspathScope.IMPLEMENTATION, ClasspathScope.TEST)
         );
         return List.of(
             new ConveyorTask(
                 "execute-junit-jupiter-tests",
-                Stage.TEST,
-                Step.RUN,
+                BindingStage.TEST,
+                BindingStep.RUN,
                 new RunJunitJupiterTestsAction(
                     classesDirectory,
                     testClassesDirectory,

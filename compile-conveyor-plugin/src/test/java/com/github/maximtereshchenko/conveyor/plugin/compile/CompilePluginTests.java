@@ -1,12 +1,6 @@
 package com.github.maximtereshchenko.conveyor.plugin.compile;
 
-import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
-import com.github.maximtereshchenko.conveyor.common.api.Stage;
-import com.github.maximtereshchenko.conveyor.common.api.Step;
-import com.github.maximtereshchenko.conveyor.plugin.api.Cache;
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
-import com.github.maximtereshchenko.conveyor.plugin.api.PathConveyorTaskInput;
-import com.github.maximtereshchenko.conveyor.plugin.api.PathConveyorTaskOutput;
+import com.github.maximtereshchenko.conveyor.plugin.api.*;
 import com.github.maximtereshchenko.conveyor.plugin.test.Dsl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -28,8 +22,8 @@ final class CompilePluginTests {
         var testDependency = path.resolve("test");
 
         new Dsl(new CompilePlugin(), path)
-            .givenDependency(implementationDependency, DependencyScope.IMPLEMENTATION)
-            .givenDependency(testDependency, DependencyScope.TEST)
+            .givenDependency(implementationDependency, ClasspathScope.IMPLEMENTATION)
+            .givenDependency(testDependency, ClasspathScope.TEST)
             .givenConfiguration("sources.directory", sources)
             .givenConfiguration("classes.directory", classes)
             .givenConfiguration("test.sources.directory", testSources)
@@ -38,8 +32,8 @@ final class CompilePluginTests {
             .contain(
                 new ConveyorTask(
                     "compile-sources",
-                    Stage.COMPILE,
-                    Step.RUN,
+                    BindingStage.COMPILE,
+                    BindingStep.RUN,
                     null,
                     Set.of(
                         new PathConveyorTaskInput(sources),
@@ -50,8 +44,8 @@ final class CompilePluginTests {
                 ),
                 new ConveyorTask(
                     "publish-exploded-jar-artifact",
-                    Stage.COMPILE,
-                    Step.FINALIZE,
+                    BindingStage.COMPILE,
+                    BindingStep.FINALIZE,
                     null,
                     Set.of(),
                     Set.of(),
@@ -59,8 +53,8 @@ final class CompilePluginTests {
                 ),
                 new ConveyorTask(
                     "compile-test-sources",
-                    Stage.TEST,
-                    Step.PREPARE,
+                    BindingStage.TEST,
+                    BindingStep.PREPARE,
                     null,
                     Set.of(
                         new PathConveyorTaskInput(classes),

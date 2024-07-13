@@ -1,7 +1,5 @@
 package com.github.maximtereshchenko.conveyor.plugin.archive;
 
-import com.github.maximtereshchenko.conveyor.common.api.Stage;
-import com.github.maximtereshchenko.conveyor.common.api.Step;
 import com.github.maximtereshchenko.conveyor.plugin.api.*;
 
 import java.nio.file.Path;
@@ -27,8 +25,8 @@ public final class ArchivePlugin implements ConveyorPlugin {
         return List.of(
             new ConveyorTask(
                 "archive",
-                Stage.ARCHIVE,
-                Step.RUN,
+                BindingStage.ARCHIVE,
+                BindingStep.RUN,
                 new ArchiveAction(classesDirectory, destination),
                 Set.of(new PathConveyorTaskInput(classesDirectory)),
                 Set.of(new PathConveyorTaskOutput(destination)),
@@ -36,8 +34,8 @@ public final class ArchivePlugin implements ConveyorPlugin {
             ),
             new ConveyorTask(
                 "publish-jar-artifact",
-                Stage.ARCHIVE,
-                Step.FINALIZE,
+                BindingStage.ARCHIVE,
+                BindingStep.FINALIZE,
                 new PublishJarArtifactTask(destination, schematic),
                 Set.of(),
                 Set.of(),

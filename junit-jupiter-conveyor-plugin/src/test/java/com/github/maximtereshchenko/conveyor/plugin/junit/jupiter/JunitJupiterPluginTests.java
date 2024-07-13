@@ -1,13 +1,8 @@
 package com.github.maximtereshchenko.conveyor.plugin.junit.jupiter;
 
-import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
-import com.github.maximtereshchenko.conveyor.common.api.Stage;
-import com.github.maximtereshchenko.conveyor.common.api.Step;
 import com.github.maximtereshchenko.conveyor.compiler.Compiler;
 import com.github.maximtereshchenko.conveyor.files.FileTree;
-import com.github.maximtereshchenko.conveyor.plugin.api.Cache;
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
-import com.github.maximtereshchenko.conveyor.plugin.api.PathConveyorTaskInput;
+import com.github.maximtereshchenko.conveyor.plugin.api.*;
 import com.github.maximtereshchenko.conveyor.plugin.test.Dsl;
 import org.apiguardian.api.API;
 import org.junit.jupiter.api.Test;
@@ -38,16 +33,16 @@ final class JunitJupiterPluginTests {
         var testDependency = path.resolve("test");
 
         new Dsl(new JunitJupiterPlugin(), path)
-            .givenDependency(implementationDependency, DependencyScope.IMPLEMENTATION)
-            .givenDependency(testDependency, DependencyScope.TEST)
+            .givenDependency(implementationDependency, ClasspathScope.IMPLEMENTATION)
+            .givenDependency(testDependency, ClasspathScope.TEST)
             .givenConfiguration("test.classes.directory", testClasses)
             .givenConfiguration("classes.directory", classes)
             .tasks()
             .contain(
                 new ConveyorTask(
                     "execute-junit-jupiter-tests",
-                    Stage.TEST,
-                    Step.RUN,
+                    BindingStage.TEST,
+                    BindingStep.RUN,
                     null,
                     Set.of(
                         new PathConveyorTaskInput(classes),

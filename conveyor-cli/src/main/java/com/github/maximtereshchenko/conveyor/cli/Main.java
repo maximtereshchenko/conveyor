@@ -1,6 +1,6 @@
 package com.github.maximtereshchenko.conveyor.cli;
 
-import com.github.maximtereshchenko.conveyor.common.api.Stage;
+import com.github.maximtereshchenko.conveyor.api.Stage;
 import com.github.maximtereshchenko.conveyor.core.ConveyorFacade;
 import com.github.maximtereshchenko.conveyor.jackson.JacksonAdapter;
 

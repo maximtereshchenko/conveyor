@@ -9,7 +9,6 @@
     "./compiler",
     "./conveyor-api",
     "./conveyor-cli",
-    "./conveyor-common-api",
     "./conveyor-core",
     "./conveyor-plugin-api",
     "./conveyor-plugin-test",
@@ -127,11 +126,6 @@
       {
         "group": "${conveyor.schematic.group}",
         "name": "spring-boot-launcher",
-        "version": "${conveyor.schematic.version}"
-      },
-      {
-        "group": "${conveyor.schematic.group}",
-        "name": "conveyor-common-api",
         "version": "${conveyor.schematic.version}"
       },
       {

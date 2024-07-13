@@ -1,8 +1,8 @@
 package com.github.maximtereshchenko.conveyor.plugin.resources;
 
-import com.github.maximtereshchenko.conveyor.common.api.Stage;
-import com.github.maximtereshchenko.conveyor.common.api.Step;
 import com.github.maximtereshchenko.conveyor.common.test.DirectoryEntriesSource;
+import com.github.maximtereshchenko.conveyor.plugin.api.BindingStage;
+import com.github.maximtereshchenko.conveyor.plugin.api.BindingStep;
 import com.github.maximtereshchenko.conveyor.plugin.api.Cache;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
 import com.github.maximtereshchenko.conveyor.plugin.test.Dsl;
@@ -31,8 +31,8 @@ final class CopyResourcesTests {
             .contain(
                 new ConveyorTask(
                     "copy-resources",
-                    Stage.COMPILE,
-                    Step.FINALIZE,
+                    BindingStage.COMPILE,
+                    BindingStep.FINALIZE,
                     null,
                     Set.of(),
                     Set.of(),
@@ -40,8 +40,8 @@ final class CopyResourcesTests {
                 ),
                 new ConveyorTask(
                     "copy-test-resources",
-                    Stage.TEST,
-                    Step.PREPARE,
+                    BindingStage.TEST,
+                    BindingStep.PREPARE,
                     null,
                     Set.of(),
                     Set.of(),

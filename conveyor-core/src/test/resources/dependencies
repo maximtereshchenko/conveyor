@@ -1,6 +1,5 @@
 package ${normalizedName};
 
-import com.github.maximtereshchenko.conveyor.common.api.*;
 import com.github.maximtereshchenko.conveyor.files.*;
 import com.github.maximtereshchenko.conveyor.plugin.api.*;
 
@@ -23,8 +22,8 @@ public final class ${normalizedName} implements ConveyorPlugin {
         return List.of(
             new ConveyorTask(
                 "",
-                Stage.COMPILE,
-                Step.RUN,
+                BindingStage.COMPILE,
+                BindingStep.RUN,
                 () -> {
                 new FileTree(schematic.path().getParent().resolve("dependencies"))
                     .write(
@@ -33,7 +32,7 @@ public final class ${normalizedName} implements ConveyorPlugin {
                             URLClassLoader.newInstance(
                                 schematic.classpath(
                                     Set.of(
-                                        DependencyScope.valueOf(
+                                        ClasspathScope.valueOf(
                                             configuration.getOrDefault("scope", "IMPLEMENTATION")
                                         )
                                     )

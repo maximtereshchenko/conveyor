@@ -1,7 +1,5 @@
 package com.github.maximtereshchenko.conveyor.plugin.archive;
 
-import com.github.maximtereshchenko.conveyor.common.api.Stage;
-import com.github.maximtereshchenko.conveyor.common.api.Step;
 import com.github.maximtereshchenko.conveyor.common.test.DirectoryEntriesSource;
 import com.github.maximtereshchenko.conveyor.plugin.api.*;
 import com.github.maximtereshchenko.conveyor.plugin.test.Dsl;
@@ -31,8 +29,8 @@ final class ArchivePluginTests {
             .contain(
                 new ConveyorTask(
                     "archive",
-                    Stage.ARCHIVE,
-                    Step.RUN,
+                    BindingStage.ARCHIVE,
+                    BindingStep.RUN,
                     null,
                     Set.of(new PathConveyorTaskInput(classes)),
                     Set.of(new PathConveyorTaskOutput(destination)),
@@ -40,8 +38,8 @@ final class ArchivePluginTests {
                 ),
                 new ConveyorTask(
                     "publish-jar-artifact",
-                    Stage.ARCHIVE,
-                    Step.FINALIZE,
+                    BindingStage.ARCHIVE,
+                    BindingStep.FINALIZE,
                     null,
                     Set.of(),
                     Set.of(),

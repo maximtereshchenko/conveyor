@@ -1,8 +1,8 @@
 package com.github.maximtereshchenko.conveyor.plugin.clean;
 
-import com.github.maximtereshchenko.conveyor.common.api.Stage;
-import com.github.maximtereshchenko.conveyor.common.api.Step;
 import com.github.maximtereshchenko.conveyor.common.test.DirectoryEntriesSource;
+import com.github.maximtereshchenko.conveyor.plugin.api.BindingStage;
+import com.github.maximtereshchenko.conveyor.plugin.api.BindingStep;
 import com.github.maximtereshchenko.conveyor.plugin.api.Cache;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
 import com.github.maximtereshchenko.conveyor.plugin.test.Dsl;
@@ -26,8 +26,8 @@ final class CleanPluginTests {
             .contain(
                 new ConveyorTask(
                     "clean",
-                    Stage.CLEAN,
-                    Step.RUN,
+                    BindingStage.CLEAN,
+                    BindingStep.RUN,
                     null,
                     Set.of(),
                     Set.of(),

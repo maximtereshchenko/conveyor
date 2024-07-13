@@ -1,8 +1,5 @@
 package com.github.maximtereshchenko.conveyor.plugin.compile;
 
-import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
-import com.github.maximtereshchenko.conveyor.common.api.Stage;
-import com.github.maximtereshchenko.conveyor.common.api.Step;
 import com.github.maximtereshchenko.conveyor.compiler.Compiler;
 import com.github.maximtereshchenko.conveyor.plugin.api.*;
 
@@ -31,17 +28,17 @@ public final class CompilePlugin implements ConveyorPlugin {
         return List.of(
             compileSourcesConveyorTask(
                 "compile-sources",
-                Stage.COMPILE,
-                Step.RUN,
+                BindingStage.COMPILE,
+                BindingStep.RUN,
                 configuredPath(configuration, "sources.directory"),
-                schematic.classpath(Set.of(DependencyScope.IMPLEMENTATION)),
+                schematic.classpath(Set.of(ClasspathScope.IMPLEMENTATION)),
                 classesDirectory,
                 compiler
             ),
             new ConveyorTask(
                 "publish-exploded-jar-artifact",
-                Stage.COMPILE,
-                Step.FINALIZE,
+                BindingStage.COMPILE,
+                BindingStep.FINALIZE,
                 new PublishExplodedJarArtifactTask(classesDirectory, schematic),
                 Set.of(),
                 Set.of(),
@@ -49,12 +46,12 @@ public final class CompilePlugin implements ConveyorPlugin {
             ),
             compileSourcesConveyorTask(
                 "compile-test-sources",
-                Stage.TEST,
-                Step.PREPARE,
+                BindingStage.TEST,
+                BindingStep.PREPARE,
                 configuredPath(configuration, "test.sources.directory"),
                 Stream.concat(
                         schematic.classpath(
-                                Set.of(DependencyScope.IMPLEMENTATION, DependencyScope.TEST)
+                                Set.of(ClasspathScope.IMPLEMENTATION, ClasspathScope.TEST)
                             )
                             .stream(),
                         Stream.of(classesDirectory)
@@ -68,8 +65,8 @@ public final class CompilePlugin implements ConveyorPlugin {
 
     private ConveyorTask compileSourcesConveyorTask(
         String name,
-        Stage stage,
-        Step step,
+        BindingStage stage,
+        BindingStep step,
         Path sourcesDirectory,
         Set<Path> classpath,
         Path classesDirectory,

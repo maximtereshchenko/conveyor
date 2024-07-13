@@ -1,6 +1,5 @@
 package ${normalizedName};
 
-import com.github.maximtereshchenko.conveyor.common.api.*;
 import com.github.maximtereshchenko.conveyor.files.*;
 import com.github.maximtereshchenko.conveyor.plugin.api.*;
 
@@ -24,8 +23,8 @@ public final class ${normalizedName} implements ConveyorPlugin {
         return List.of(
             new ConveyorTask(
                 "cache",
-                Stage.COMPILE,
-                Step.RUN,
+                BindingStage.COMPILE,
+                BindingStep.RUN,
                 () -> {
                     if (!"true".equals(configuration.get("skip"))) {
                         new FileTree(output.resolve("instant")).write(Instant.now().toString());

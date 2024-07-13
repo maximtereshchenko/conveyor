@@ -1,7 +1,7 @@
 package com.github.maximtereshchenko.conveyor.core;
 
+import com.github.maximtereshchenko.conveyor.api.Stage;
 import com.github.maximtereshchenko.conveyor.api.port.SchematicDefinitionConverter;
-import com.github.maximtereshchenko.conveyor.common.api.Stage;
 import com.github.maximtereshchenko.conveyor.plugin.api.Convention;
 
 import java.nio.file.Path;

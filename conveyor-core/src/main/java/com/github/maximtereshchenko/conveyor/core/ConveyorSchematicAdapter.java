@@ -1,12 +1,14 @@
 package com.github.maximtereshchenko.conveyor.core;
 
-import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
+import com.github.maximtereshchenko.conveyor.api.schematic.DependencyScope;
 import com.github.maximtereshchenko.conveyor.plugin.api.ArtifactClassifier;
+import com.github.maximtereshchenko.conveyor.plugin.api.ClasspathScope;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
 
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 final class ConveyorSchematicAdapter implements ConveyorSchematic {
 
@@ -43,8 +45,13 @@ final class ConveyorSchematicAdapter implements ConveyorSchematic {
     }
 
     @Override
-    public Set<Path> classpath(Set<DependencyScope> scopes) {
-        return dependencies.classpath(scopes);
+    public Set<Path> classpath(Set<ClasspathScope> scopes) {
+        return dependencies.classpath(
+            scopes.stream()
+                .map(ClasspathScope::toString)
+                .map(DependencyScope::valueOf)
+                .collect(Collectors.toSet())
+        );
     }
 
     @Override

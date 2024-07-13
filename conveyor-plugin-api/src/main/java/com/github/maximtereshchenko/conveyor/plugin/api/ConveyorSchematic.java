@@ -1,7 +1,5 @@
 package com.github.maximtereshchenko.conveyor.plugin.api;
 
-import com.github.maximtereshchenko.conveyor.common.api.DependencyScope;
-
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.Set;
@@ -12,7 +10,7 @@ public interface ConveyorSchematic {
 
     Optional<String> propertyValue(String key);
 
-    Set<Path> classpath(Set<DependencyScope> scopes);
+    Set<Path> classpath(Set<ClasspathScope> scopes);
 
     void publish(String repository, Path path, ArtifactClassifier artifactClassifier);
 }
