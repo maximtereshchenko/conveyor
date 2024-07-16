@@ -25,7 +25,7 @@ public final class ${normalizedName} implements ConveyorPlugin {
                 "cache",
                 BindingStage.COMPILE,
                 BindingStep.RUN,
-                () -> {
+                (tracer) -> {
                     if (!"true".equals(configuration.get("skip"))) {
                         new FileTree(output.resolve("instant")).write(Instant.now().toString());
                     }

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 record InheritanceHierarchyModel<T extends SchematicModel>(LinkedHashSet<T> models)
     implements SchematicModel,
@@ -71,6 +72,15 @@ record InheritanceHierarchyModel<T extends SchematicModel>(LinkedHashSet<T> mode
     @Override
     public boolean inheritsFrom(InheritanceHierarchyModel<T> inheritanceHierarchyModel) {
         return models.containsAll(inheritanceHierarchyModel.models);
+    }
+
+    @Override
+    public String toString() {
+        return models.reversed()
+            .stream()
+            .map(SchematicModel::id)
+            .map(Id::toString)
+            .collect(Collectors.joining("->"));
     }
 
     private <O, I> LinkedHashSet<O> combine(

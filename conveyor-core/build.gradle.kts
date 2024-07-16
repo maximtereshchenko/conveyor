@@ -17,6 +17,5 @@ dependencies {
     testImplementation(libs.junit.jupiter.params)
 
     testImplementation(libs.wiremock)
-    testImplementation(libs.slf4j.jdk14)
     testImplementation(libs.jackson.dataformat.xml)
 }

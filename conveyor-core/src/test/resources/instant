@@ -31,7 +31,7 @@ public final class ${normalizedName} implements ConveyorPlugin {
             "",
             BindingStage.valueOf(stageAndStep[0]),
             BindingStep.valueOf(stageAndStep[1]),
-            () -> {
+            (tracer) -> {
                 sleep();
                 new FileTree(path).write(Instant.now().toString());
             },

@@ -12,15 +12,12 @@ import java.util.Optional;
 
 final class RemoteMavenRepository extends UriRepository<Path, Resource> {
 
-    private static final System.Logger LOGGER =
-        System.getLogger(RemoteMavenRepository.class.getName());
-
-    private final String name;
+    private final Tracer tracer;
     private final HttpClient httpClient = HttpClient.newHttpClient();
 
-    RemoteMavenRepository(String name, URI baseUri) {
+    RemoteMavenRepository(URI baseUri, Tracer tracer) {
         super(baseUri);
-        this.name = name;
+        this.tracer = tracer;
     }
 
     @Override
@@ -34,7 +31,7 @@ final class RemoteMavenRepository extends UriRepository<Path, Resource> {
         if (response.statusCode() != 200) {
             return Optional.empty();
         }
-        LOGGER.log(System.Logger.Level.INFO, "Downloaded from {0}: {1}", name, uri);
+        tracer.submitDownloadedArtifact(uri);
         return Optional.of(new Resource(response::body));
     }
 

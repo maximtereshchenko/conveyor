@@ -1,6 +1,9 @@
 package com.github.maximtereshchenko.conveyor.plugin.springboot;
 
 import com.github.maximtereshchenko.conveyor.files.FileTree;
+import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskAction;
+import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskTracer;
+import com.github.maximtereshchenko.conveyor.plugin.api.TracingImportance;
 import com.github.maximtereshchenko.conveyor.springboot.Configuration;
 
 import java.nio.file.Files;
@@ -8,10 +11,7 @@ import java.nio.file.Path;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
-final class WriteManifestAction implements Runnable {
-
-    private static final System.Logger LOGGER =
-        System.getLogger(WriteManifestAction.class.getName());
+final class WriteManifestAction implements ConveyorTaskAction {
 
     private final Path containerDirectory;
 
@@ -20,7 +20,7 @@ final class WriteManifestAction implements Runnable {
     }
 
     @Override
-    public void run() {
+    public void execute(ConveyorTaskTracer tracer) {
         if (!Files.exists(containerDirectory)) {
             return;
         }
@@ -30,6 +30,6 @@ final class WriteManifestAction implements Runnable {
         mainAttributes.put(Attributes.Name.MANIFEST_VERSION, "1.0");
         var manifestLocation = containerDirectory.resolve("META-INF").resolve("MANIFEST.MF");
         new FileTree(manifestLocation).write(manifest::write);
-        LOGGER.log(System.Logger.Level.INFO, "Wrote {0}", manifestLocation);
+        tracer.submit(TracingImportance.INFO, () -> "Wrote " + manifestLocation);
     }
 }

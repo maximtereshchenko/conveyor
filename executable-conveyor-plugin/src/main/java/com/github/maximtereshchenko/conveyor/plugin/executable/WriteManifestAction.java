@@ -1,16 +1,16 @@
 package com.github.maximtereshchenko.conveyor.plugin.executable;
 
 import com.github.maximtereshchenko.conveyor.files.FileTree;
+import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskAction;
+import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskTracer;
+import com.github.maximtereshchenko.conveyor.plugin.api.TracingImportance;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
-final class WriteManifestAction implements Runnable {
-
-    private static final System.Logger LOGGER =
-        System.getLogger(WriteManifestAction.class.getName());
+final class WriteManifestAction implements ConveyorTaskAction {
 
     private final Path classesDirectory;
     private final String mainClass;
@@ -21,7 +21,7 @@ final class WriteManifestAction implements Runnable {
     }
 
     @Override
-    public void run() {
+    public void execute(ConveyorTaskTracer tracer) {
         if (!Files.exists(classesDirectory)) {
             return;
         }
@@ -30,6 +30,6 @@ final class WriteManifestAction implements Runnable {
         manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
         var destination = classesDirectory.resolve("META-INF").resolve("MANIFEST.MF");
         new FileTree(destination).write(manifest::write);
-        LOGGER.log(System.Logger.Level.INFO, "Wrote {0}", destination);
+        tracer.submit(TracingImportance.INFO, () -> "Wrote " + destination);
     }
 }

@@ -86,7 +86,7 @@ final class JunitJupiterPluginTests {
                        }
                    }
                    """);
-        compiler.compile(Set.of(testSourceClass), classpath, testClasses);
+        compiler.compile(Set.of(testSourceClass), classpath, testClasses, System.err::println);
 
         new Dsl(new JunitJupiterPlugin(), path)
             .givenDependencies(classpath)

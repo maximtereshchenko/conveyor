@@ -1,15 +1,15 @@
 package com.github.maximtereshchenko.conveyor.plugin.springboot;
 
 import com.github.maximtereshchenko.conveyor.files.FileTree;
+import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskAction;
+import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskTracer;
+import com.github.maximtereshchenko.conveyor.plugin.api.TracingImportance;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Set;
 
-final class CopyClasspathAction implements Runnable {
-
-    private static final System.Logger LOGGER =
-        System.getLogger(CopyClasspathAction.class.getName());
+final class CopyClasspathAction implements ConveyorTaskAction {
 
     private final Path classesDirectory;
     private final Set<Path> dependencies;
@@ -22,30 +22,28 @@ final class CopyClasspathAction implements Runnable {
     }
 
     @Override
-    public void run() {
+    public void execute(ConveyorTaskTracer tracer) {
         if (!Files.exists(classesDirectory)) {
             return;
         }
-        copyClasses();
-        copyDependencies();
+        copyClasses(tracer);
+        copyDependencies(tracer);
     }
 
-    private void copyClasses() {
+    private void copyClasses(ConveyorTaskTracer tracer) {
         var classesDestination = destination.resolve("classes");
         new FileTree(classesDirectory).copyTo(classesDestination);
-        LOGGER.log(
-            System.Logger.Level.INFO,
-            "Copied {0} to {1}",
-            classesDirectory,
-            classesDestination
+        tracer.submit(
+            TracingImportance.INFO,
+            () -> "Copied %s to %s".formatted(classesDirectory, classesDestination)
         );
     }
 
-    private void copyDependencies() {
+    private void copyDependencies(ConveyorTaskTracer tracer) {
         for (var dependency : dependencies) {
             var dependencyDestination = destination.resolve(dependency.getFileName());
             new FileTree(dependency).copyTo(dependencyDestination);
-            LOGGER.log(System.Logger.Level.INFO, "Copied {0}", dependencyDestination);
+            tracer.submit(TracingImportance.INFO, () -> "Copied " + dependencyDestination);
         }
     }
 }

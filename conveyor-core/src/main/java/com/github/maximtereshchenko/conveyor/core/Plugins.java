@@ -1,7 +1,5 @@
 package com.github.maximtereshchenko.conveyor.core;
 
-import com.github.maximtereshchenko.conveyor.api.Stage;
-import com.github.maximtereshchenko.conveyor.plugin.api.BindingStage;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
@@ -11,89 +9,64 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.LinkedHashSet;
+import java.util.ServiceLoader;
+import java.util.Set;
 import java.util.stream.Stream;
 
 final class Plugins {
 
-    private static final System.Logger LOGGER = System.getLogger(Plugins.class.getName());
-    private static final Map<BindingStage, BindingStage> STAGE_DEPENDENCIES = Map.of(
-        BindingStage.PUBLISH, BindingStage.ARCHIVE,
-        BindingStage.ARCHIVE, BindingStage.TEST,
-        BindingStage.TEST, BindingStage.COMPILE
-    );
-
     private final LinkedHashSet<Plugin> all;
     private final ClasspathFactory classpathFactory;
+    private final Tracer tracer;
 
-    Plugins(LinkedHashSet<Plugin> all, ClasspathFactory classpathFactory) {
+    Plugins(LinkedHashSet<Plugin> all, ClasspathFactory classpathFactory, Tracer tracer) {
         this.all = all;
         this.classpathFactory = classpathFactory;
+        this.tracer = tracer;
     }
 
-    void executeTasks(
+    @Override
+    public String toString() {
+        return all.toString();
+    }
+
+    Tasks tasks(ConveyorSchematic conveyorSchematic, Properties properties) {
+        var tasks = new Tasks(
+            conveyorPlugins()
+                .filter(conveyorPlugin -> named(conveyorPlugin.name()).isEnabled())
+                .sorted(this::byPosition)
+                .flatMap(conveyorPlugin -> tasks(conveyorSchematic, properties, conveyorPlugin))
+                .sorted()
+                .toList()
+        );
+        tracer.submitTasks(tasks);
+        return tasks;
+    }
+
+    private Stream<Task> tasks(
         ConveyorSchematic conveyorSchematic,
         Properties properties,
-        List<Stage> stages
+        ConveyorPlugin conveyorPlugin
     ) {
-        var tasks = tasks(conveyorSchematic);
-        for (var stage : stages) {
-            var activeStages = activeStages(stage);
-            for (var task : tasks) {
-                if (!activeStages.contains(task.stage())) {
-                    continue;
-                }
-                LOGGER.log(System.Logger.Level.INFO, "Executing task {0}", task.name());
-                action(
-                    task,
-                    properties,
-                    conveyorSchematic.path().getParent()
-                )
-                    .run();
-            }
-        }
+        return conveyorPlugin.tasks(conveyorSchematic, named(conveyorPlugin.name()).configuration())
+            .stream()
+            .map(conveyorTask -> task(conveyorSchematic, properties, conveyorPlugin, conveyorTask));
     }
 
-    private Set<BindingStage> activeStages(Stage stage) {
-        return Stream.iterate(
-                BindingStage.valueOf(stage.toString()),
-                Objects::nonNull,
-                STAGE_DEPENDENCIES::get
-            )
-            .collect(Collectors.toCollection(() -> EnumSet.noneOf(BindingStage.class)));
-    }
-
-    private Runnable action(
-        ConveyorTask task,
+    private Task task(
+        ConveyorSchematic conveyorSchematic,
         Properties properties,
-        Path directory
+        ConveyorPlugin conveyorPlugin,
+        ConveyorTask conveyorTask
     ) {
-        return switch (task.cache()) {
-            case ENABLED -> new CacheableAction(
-                task.action(),
-                new Inputs(task.inputs()),
-                new Outputs(task.outputs()),
-                new TaskCache(properties.tasksCacheDirectory().resolve(task.name())),
-                directory
-            );
-            case DISABLED -> task.action();
-        };
-    }
-
-    private List<ConveyorTask> tasks(ConveyorSchematic conveyorSchematic) {
-        return conveyorPlugins()
-            .filter(conveyorPlugin -> named(conveyorPlugin.name()).isEnabled())
-            .sorted(this::byPosition)
-            .map(conveyorPlugin ->
-                conveyorPlugin.tasks(
-                    conveyorSchematic,
-                    named(conveyorPlugin.name()).configuration()
-                )
-            )
-            .flatMap(Collection::stream)
-            .sorted(byStageAndStep())
-            .toList();
+        return new Task(
+            conveyorTask,
+            new TaskCache(properties.tasksCacheDirectory().resolve(conveyorTask.name())),
+            conveyorSchematic.path().getParent(),
+            tracer.withContext("plugin", conveyorPlugin.name())
+                .withContext("task", conveyorTask.name())
+        );
     }
 
     private int byPosition(ConveyorPlugin first, ConveyorPlugin second) {
@@ -107,10 +80,6 @@ final class Plugins {
             }
         }
         return 0;
-    }
-
-    private Comparator<ConveyorTask> byStageAndStep() {
-        return Comparator.comparing(ConveyorTask::stage).thenComparing(ConveyorTask::step);
     }
 
     private Stream<ConveyorPlugin> conveyorPlugins() {

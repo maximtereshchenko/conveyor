@@ -4,38 +4,53 @@ import com.github.maximtereshchenko.conveyor.api.port.SchematicDefinitionConvert
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 final class SchematicModelFactory {
 
     private final SchematicDefinitionConverter schematicDefinitionConverter;
+    private final Tracer tracer;
 
-    SchematicModelFactory(SchematicDefinitionConverter schematicDefinitionConverter) {
+    SchematicModelFactory(
+        SchematicDefinitionConverter schematicDefinitionConverter,
+        Tracer tracer
+    ) {
         this.schematicDefinitionConverter = schematicDefinitionConverter;
+        this.tracer = tracer;
     }
 
     LinkedHashSet<ExtendableLocalInheritanceHierarchyModel> extendableLocalInheritanceHierarchyModels(
         Path path
     ) {
-        return allSchematicPaths(extendableLocalInheritanceHierarchyModel(path).rootPath())
-            .map(this::extendableLocalInheritanceHierarchyModel)
-            .collect(Collectors.toCollection(LinkedHashSet::new));
+        var allSchematicPaths = allSchematicPaths(
+            extendableLocalInheritanceHierarchyModel(path).rootPath()
+        );
+        var models = new LinkedHashSet<ExtendableLocalInheritanceHierarchyModel>();
+        for (var schematicPath : allSchematicPaths) {
+            var model = extendableLocalInheritanceHierarchyModel(schematicPath);
+            tracer.submitLocalModel(model);
+            models.add(model);
+        }
+        return models;
     }
 
     CompleteInheritanceHierarchyModel completeInheritanceHierarchyModel(
         ExtendableLocalInheritanceHierarchyModel localModel,
         Repositories repositories
     ) {
-        return switch (localModel.template()) {
+        var completeModel = switch (localModel.template()) {
             case NoTemplateModel ignored -> new CompleteInheritanceHierarchyModel(localModel);
             case SchematicTemplateModel model -> new CompleteInheritanceHierarchyModel(
                 inheritanceHierarchyModel(model.id(), model.version(), repositories),
                 localModel
             );
         };
+        tracer.submitCompleteModel(completeModel);
+        return completeModel;
     }
 
     InheritanceHierarchyModel<SchematicModel> inheritanceHierarchyModel(
@@ -43,12 +58,14 @@ final class SchematicModelFactory {
         Version version,
         Repositories repositories
     ) {
-        return inheritanceHierarchyModel(
+        var model = inheritanceHierarchyModel(
             id,
             version,
             repositories,
             InheritanceHierarchyModel<SchematicModel>::new
         );
+        tracer.submitModel(model);
+        return model;
     }
 
     private InheritanceHierarchyModel<SchematicModel> inheritanceHierarchyModel(
@@ -78,14 +95,16 @@ final class SchematicModelFactory {
         );
     }
 
-    private Stream<Path> allSchematicPaths(Path path) {
+    private List<Path> allSchematicPaths(Path path) {
         return Stream.concat(
-            Stream.of(path),
-            standaloneLocalSchematicModel(path)
-                .inclusions()
-                .stream()
-                .flatMap(this::allSchematicPaths)
-        );
+                Stream.of(path),
+                standaloneLocalSchematicModel(path)
+                    .inclusions()
+                    .stream()
+                    .map(this::allSchematicPaths)
+                    .flatMap(Collection::stream)
+            )
+            .toList();
     }
 
     private ExtendableLocalInheritanceHierarchyModel extendableLocalInheritanceHierarchyModel(

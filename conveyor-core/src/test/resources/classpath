@@ -23,7 +23,7 @@ public final class ${normalizedName} implements ConveyorPlugin {
                 "",
                 BindingStage.COMPILE,
                 BindingStep.RUN,
-                () -> {
+                (tracer) -> {
                     new FileTree(schematic.path().getParent().resolve("classpath"))
                         .write(
                             ServiceLoader.load(Supplier.class, getClass().getClassLoader())

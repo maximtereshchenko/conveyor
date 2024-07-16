@@ -1,16 +1,16 @@
 package com.github.maximtereshchenko.conveyor.plugin.springboot;
 
 import com.github.maximtereshchenko.conveyor.files.FileTree;
+import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskAction;
+import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskTracer;
+import com.github.maximtereshchenko.conveyor.plugin.api.TracingImportance;
 import com.github.maximtereshchenko.conveyor.springboot.Configuration;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Properties;
 
-final class WritePropertiesAction implements Runnable {
-
-    private static final System.Logger LOGGER =
-        System.getLogger(WritePropertiesAction.class.getName());
+final class WritePropertiesAction implements ConveyorTaskAction {
 
     private final Path destination;
     private final String classpathDirectory;
@@ -23,14 +23,17 @@ final class WritePropertiesAction implements Runnable {
     }
 
     @Override
-    public void run() {
+    public void execute(ConveyorTaskTracer tracer) {
         if (!Files.exists(destination.getParent())) {
             return;
         }
         var properties = properties();
         new FileTree(destination)
             .write(outputStream -> properties.store(outputStream, null));
-        LOGGER.log(System.Logger.Level.INFO, "Wrote {0} to {1}", properties, destination);
+        tracer.submit(
+            TracingImportance.INFO,
+            () -> "Wrote %s to %s".formatted(properties, destination)
+        );
     }
 
     private Properties properties() {

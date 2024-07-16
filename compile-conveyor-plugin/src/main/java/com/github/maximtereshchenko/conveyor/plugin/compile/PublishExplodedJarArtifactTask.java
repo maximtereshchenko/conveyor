@@ -1,13 +1,11 @@
 package com.github.maximtereshchenko.conveyor.plugin.compile;
 
-import com.github.maximtereshchenko.conveyor.plugin.api.ArtifactClassifier;
-import com.github.maximtereshchenko.conveyor.plugin.api.Convention;
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
+import com.github.maximtereshchenko.conveyor.plugin.api.*;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-final class PublishExplodedJarArtifactTask implements Runnable {
+final class PublishExplodedJarArtifactTask implements ConveyorTaskAction {
 
     private final Path path;
     private final ConveyorSchematic schematic;
@@ -18,7 +16,7 @@ final class PublishExplodedJarArtifactTask implements Runnable {
     }
 
     @Override
-    public void run() {
+    public void execute(ConveyorTaskTracer tracer) {
         if (!Files.exists(path)) {
             return;
         }

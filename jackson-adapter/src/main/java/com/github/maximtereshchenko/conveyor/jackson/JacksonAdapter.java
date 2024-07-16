@@ -13,14 +13,10 @@ import com.github.maximtereshchenko.conveyor.api.schematic.SchematicDefinition;
 import com.github.maximtereshchenko.conveyor.api.schematic.TemplateDefinition;
 import com.github.maximtereshchenko.conveyor.files.FileTree;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.file.Path;
 
 public final class JacksonAdapter implements SchematicDefinitionConverter {
-
-    private static final System.Logger LOGGER = System.getLogger(JacksonAdapter.class.getName());
 
     private final ObjectMapper objectMapper;
 
@@ -48,7 +44,8 @@ public final class JacksonAdapter implements SchematicDefinitionConverter {
 
     @Override
     public SchematicDefinition schematicDefinition(Path path) {
-        return new FileTree(path).read(inputStream -> read(inputStream, path));
+        return new FileTree(path)
+            .read(inputStream -> objectMapper.readValue(inputStream, SchematicDefinition.class));
     }
 
     @Override
@@ -58,11 +55,5 @@ public final class JacksonAdapter implements SchematicDefinitionConverter {
         } catch (JsonProcessingException e) {
             throw new UncheckedIOException(e);
         }
-    }
-
-    private SchematicDefinition read(InputStream inputStream, Path path) throws IOException {
-        var schematicDefinition = objectMapper.readValue(inputStream, SchematicDefinition.class);
-        LOGGER.log(System.Logger.Level.DEBUG, "Read schematic definition {0}", path);
-        return schematicDefinition;
     }
 }

@@ -2,15 +2,15 @@ package com.github.maximtereshchenko.conveyor.plugin.compile;
 
 import com.github.maximtereshchenko.conveyor.compiler.Compiler;
 import com.github.maximtereshchenko.conveyor.files.FileTree;
+import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskAction;
+import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskTracer;
+import com.github.maximtereshchenko.conveyor.plugin.api.TracingImportance;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Set;
 
-final class CompileSourcesAction implements Runnable {
-
-    private static final System.Logger LOGGER =
-        System.getLogger(CompileSourcesAction.class.getName());
+final class CompileSourcesAction implements ConveyorTaskAction {
 
     private final Path sourcesDirectory;
     private final Set<Path> classpath;
@@ -30,12 +30,17 @@ final class CompileSourcesAction implements Runnable {
     }
 
     @Override
-    public void run() {
+    public void execute(ConveyorTaskTracer tracer) {
         if (Files.exists(sourcesDirectory)) {
-            compiler.compile(new FileTree(sourcesDirectory).files(), classpath, outputDirectory);
-            LOGGER.log(System.Logger.Level.INFO, "Compiled classes to {0}", outputDirectory);
+            compiler.compile(
+                new FileTree(sourcesDirectory).files(),
+                classpath,
+                outputDirectory,
+                diagnostic -> tracer.submit(TracingImportance.WARN, diagnostic::toString)
+            );
+            tracer.submit(TracingImportance.INFO, () -> "Compiled classes to " + outputDirectory);
         } else {
-            LOGGER.log(System.Logger.Level.WARNING, "No sources to compile");
+            tracer.submit(TracingImportance.WARN, () -> "No sources to compile");
         }
     }
 }

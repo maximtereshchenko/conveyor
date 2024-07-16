@@ -22,7 +22,7 @@ public final class ${normalizedName} implements ConveyorPlugin {
                 "",
                 BindingStage.COMPILE,
                 BindingStep.RUN,
-                () -> {
+                (tracer) -> {
                     new FileTree(schematic.path().getParent().resolve("configuration"))
                         .write(
                             configuration.entrySet()

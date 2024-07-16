@@ -6,7 +6,7 @@ public record ConveyorTask(
     String name,
     BindingStage stage,
     BindingStep step,
-    Runnable action,
+    ConveyorTaskAction action,
     Set<ConveyorTaskInput> inputs,
     Set<ConveyorTaskOutput> outputs,
     Cache cache

@@ -1,5 +1,7 @@
 package com.github.maximtereshchenko.conveyor.plugin.junit.jupiter;
 
+import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskTracer;
+import com.github.maximtereshchenko.conveyor.plugin.api.TracingImportance;
 import org.junit.platform.engine.TestExecutionResult;
 import org.junit.platform.engine.support.descriptor.MethodSource;
 import org.junit.platform.launcher.TestExecutionListener;
@@ -12,22 +14,25 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 final class ReportingTestExecutionListener implements TestExecutionListener {
 
-    private static final System.Logger LOGGER =
-        System.getLogger(ReportingTestExecutionListener.class.getName());
-
+    private final ConveyorTaskTracer tracer;
     private final AtomicInteger passed = new AtomicInteger();
     private final AtomicInteger failed = new AtomicInteger();
     private final AtomicInteger skipped = new AtomicInteger();
 
+    ReportingTestExecutionListener(ConveyorTaskTracer tracer) {
+        this.tracer = tracer;
+    }
+
     @Override
     public void testPlanExecutionFinished(TestPlan testPlan) {
-        LOGGER.log(
-            System.Logger.Level.INFO,
-            "Tests run: total {0}, passed {1}, failed {2}, skipped {3}",
-            passed.get() + failed.get() + skipped.get(),
-            passed.get(),
-            failed.get(),
-            skipped.get()
+        tracer.submit(
+            TracingImportance.INFO,
+            () -> "Tests run: total %d, passed %d, failed %d, skipped %d".formatted(
+                passed.get() + failed.get() + skipped.get(),
+                passed.get(),
+                failed.get(),
+                skipped.get()
+            )
         );
     }
 
@@ -53,8 +58,8 @@ final class ReportingTestExecutionListener implements TestExecutionListener {
         MethodSource methodSource,
         String reason
     ) {
-        LOGGER.log(
-            System.Logger.Level.INFO,
+        tracer.submit(
+            TracingImportance.INFO,
             () -> message(testIdentifier, methodSource, "SKIPPED (%s)".formatted(reason))
         );
     }
@@ -66,8 +71,8 @@ final class ReportingTestExecutionListener implements TestExecutionListener {
     ) {
         switch (testExecutionResult.getStatus()) {
             case SUCCESSFUL -> {
-                LOGGER.log(
-                    System.Logger.Level.INFO,
+                tracer.submit(
+                    TracingImportance.INFO,
                     () -> message(testIdentifier, methodSource, "OK")
                 );
                 passed.incrementAndGet();
@@ -76,12 +81,12 @@ final class ReportingTestExecutionListener implements TestExecutionListener {
                 //empty
             }
             case FAILED -> {
-                LOGGER.log(
-                    System.Logger.Level.INFO,
+                tracer.submit(
+                    TracingImportance.INFO,
                     () -> message(testIdentifier, methodSource, "FAILED"),
                     testExecutionResult.getThrowable()
                         .map(throwable -> withTrimmedStackTrace(throwable, methodSource))
-                        .orElse(null)
+                        .orElseThrow()
                 );
                 failed.incrementAndGet();
             }

@@ -84,4 +84,9 @@ final class CompleteInheritanceHierarchyModel
     public LinkedHashSet<RepositoryModel> repositories() {
         return localModel.repositories();
     }
+
+    @Override
+    public String toString() {
+        return hierarchyModel.toString();
+    }
 }

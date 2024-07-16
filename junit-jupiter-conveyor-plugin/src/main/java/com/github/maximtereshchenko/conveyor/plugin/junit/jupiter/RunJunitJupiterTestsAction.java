@@ -1,5 +1,7 @@
 package com.github.maximtereshchenko.conveyor.plugin.junit.jupiter;
 
+import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskAction;
+import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskTracer;
 import org.junit.platform.engine.discovery.DiscoverySelectors;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
 import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
@@ -14,7 +16,7 @@ import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Set;
 
-final class RunJunitJupiterTestsAction implements Runnable {
+final class RunJunitJupiterTestsAction implements ConveyorTaskAction {
 
     private final Path classesDirectory;
     private final Path testClassesDirectory;
@@ -31,14 +33,14 @@ final class RunJunitJupiterTestsAction implements Runnable {
     }
 
     @Override
-    public void run() {
+    public void execute(ConveyorTaskTracer tracer) {
         if (!Files.exists(testClassesDirectory)) {
             return;
         }
         var contextClassLoader = Thread.currentThread().getContextClassLoader();
         try {
             Thread.currentThread().setContextClassLoader(classLoader(classpath()));
-            executeTests();
+            executeTests(tracer);
         } finally {
             Thread.currentThread().setContextClassLoader(contextClassLoader);
         }
@@ -51,12 +53,12 @@ final class RunJunitJupiterTestsAction implements Runnable {
         return classpath;
     }
 
-    private void executeTests() {
+    private void executeTests(ConveyorTaskTracer tracer) {
         var failureTestExecutionListener = new FailureTestExecutionListener();
         LauncherFactory.create()
             .execute(
                 launcherDiscoveryRequest(),
-                new ReportingTestExecutionListener(),
+                new ReportingTestExecutionListener(tracer),
                 failureTestExecutionListener
             );
         if (!failureTestExecutionListener.isSuccess()) {

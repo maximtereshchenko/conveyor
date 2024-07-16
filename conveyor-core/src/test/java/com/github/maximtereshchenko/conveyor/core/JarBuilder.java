@@ -95,7 +95,8 @@ final class JarBuilder {
             Stream.of(System.getProperty("java.class.path").split(":"))
                 .map(Paths::get)
                 .collect(Collectors.toSet()),
-            classes
+            classes,
+            System.err::println
         );
         new FileTree(
             classes.resolve("META-INF")

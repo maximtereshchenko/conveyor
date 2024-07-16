@@ -1,12 +1,13 @@
 package com.github.maximtereshchenko.conveyor.plugin.clean;
 
 import com.github.maximtereshchenko.conveyor.files.FileTree;
+import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskAction;
+import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskTracer;
+import com.github.maximtereshchenko.conveyor.plugin.api.TracingImportance;
 
 import java.nio.file.Path;
 
-final class CleanAction implements Runnable {
-
-    private static final System.Logger LOGGER = System.getLogger(CleanAction.class.getName());
+final class CleanAction implements ConveyorTaskAction {
 
     private final Path path;
 
@@ -15,13 +16,13 @@ final class CleanAction implements Runnable {
     }
 
     @Override
-    public void run() {
+    public void execute(ConveyorTaskTracer tracer) {
         var fileTree = new FileTree(path);
         if (fileTree.exists()) {
             fileTree.delete();
-            LOGGER.log(System.Logger.Level.INFO, "Removed {0}", path);
+            tracer.submit(TracingImportance.INFO, () -> "Removed " + path);
         } else {
-            LOGGER.log(System.Logger.Level.WARNING, "{0} does not exist", path);
+            tracer.submit(TracingImportance.WARN, () -> path + " does not exist");
         }
     }
 }

@@ -1,13 +1,14 @@
 package com.github.maximtereshchenko.conveyor.plugin.archive;
 
+import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskAction;
+import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskTracer;
+import com.github.maximtereshchenko.conveyor.plugin.api.TracingImportance;
 import com.github.maximtereshchenko.conveyor.zip.ZipArchiveContainer;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-final class ArchiveAction implements Runnable {
-
-    private static final System.Logger LOGGER = System.getLogger(ArchiveAction.class.getName());
+final class ArchiveAction implements ConveyorTaskAction {
 
     private final Path classesDirectory;
     private final Path destination;
@@ -18,21 +19,15 @@ final class ArchiveAction implements Runnable {
     }
 
     @Override
-    public void run() {
+    public void execute(ConveyorTaskTracer tracer) {
         if (Files.exists(classesDirectory)) {
-            archive();
+            new ZipArchiveContainer(classesDirectory).archive(destination);
+            tracer.submit(
+                TracingImportance.INFO,
+                () -> "Archived %s to %s".formatted(classesDirectory, destination)
+            );
         } else {
-            LOGGER.log(System.Logger.Level.WARNING, "Nothing to archive");
+            tracer.submit(TracingImportance.WARN, () -> "Nothing to archive");
         }
-    }
-
-    private void archive() {
-        new ZipArchiveContainer(classesDirectory).archive(destination);
-        LOGGER.log(
-            System.Logger.Level.INFO,
-            "Archived {0} to {1}",
-            classesDirectory,
-            destination
-        );
     }
 }

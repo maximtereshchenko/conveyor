@@ -26,7 +26,7 @@ public final class ConveyorTasks {
         try {
             tasks.stream()
                 .map(ConveyorTask::action)
-                .forEach(Runnable::run);
+                .forEach(action -> action.execute(new NoOpTracer()));
             return new Success(schematic);
         } catch (Exception e) {
             return new Failure(e);

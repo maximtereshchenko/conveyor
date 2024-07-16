@@ -54,11 +54,6 @@
       "scope": "test"
     },
     {
-      "group": "org.slf4j",
-      "name": "slf4j-jdk14",
-      "scope": "test"
-    },
-    {
       "group": "com.fasterxml.jackson.dataformat",
       "name": "jackson-dataformat-xml",
       "scope": "test"

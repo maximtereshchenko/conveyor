@@ -1,6 +1,8 @@
 package com.github.maximtereshchenko.conveyor.compiler;
 
+import javax.tools.DiagnosticListener;
 import javax.tools.JavaCompiler;
+import javax.tools.JavaFileObject;
 import javax.tools.ToolProvider;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -13,8 +15,19 @@ public final class Compiler {
 
     private final JavaCompiler javaCompiler = ToolProvider.getSystemJavaCompiler();
 
-    public void compile(Set<Path> sources, Set<Path> classpath, Path outputDirectory) {
-        if (Boolean.FALSE.equals(compilationTask(sources, classpath, outputDirectory).call())) {
+    public void compile(
+        Set<Path> sources,
+        Set<Path> classpath,
+        Path outputDirectory,
+        DiagnosticListener<JavaFileObject> diagnosticListener
+    ) {
+        var compilationTask = compilationTask(
+            sources,
+            classpath,
+            outputDirectory,
+            diagnosticListener
+        );
+        if (Boolean.FALSE.equals(compilationTask.call())) {
             throw new IllegalArgumentException("Could not compile");
         }
     }
@@ -22,9 +35,9 @@ public final class Compiler {
     private JavaCompiler.CompilationTask compilationTask(
         Set<Path> sources,
         Set<Path> classpath,
-        Path outputDirectory
+        Path outputDirectory,
+        DiagnosticListener<JavaFileObject> diagnosticListener
     ) {
-        var diagnosticListener = new LoggingDiagnosticListener();
         var fileManager = javaCompiler.getStandardFileManager(
             diagnosticListener,
             Locale.ROOT,

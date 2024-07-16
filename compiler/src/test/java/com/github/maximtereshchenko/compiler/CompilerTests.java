@@ -36,7 +36,8 @@ final class CompilerTests {
                 )
             ),
             Set.of(),
-            classes
+            classes,
+            System.err::println
         );
 
         assertThat(classes.resolve("main").resolve("Main.class")).exists();
@@ -57,7 +58,8 @@ final class CompilerTests {
                 )
             ),
             Set.of(),
-            dependencyClasses
+            dependencyClasses,
+            System.err::println
         );
         var dependentSources = path.resolve("dependent-sources");
         var dependentClasses = path.resolve("dependent-classes");
@@ -78,7 +80,8 @@ final class CompilerTests {
                 )
             ),
             Set.of(dependencyClasses),
-            dependentClasses
+            dependentClasses,
+            System.err::println
         );
 
         assertThat(dependentClasses.resolve("main").resolve("Main.class")).exists();
@@ -102,7 +105,8 @@ final class CompilerTests {
                 )
             ),
             Set.of(),
-            firstDependencyClasses
+            firstDependencyClasses,
+            System.err::println
         );
         var secondDependencySources = path.resolve("second-dependency-sources");
         var secondDependencyClasses = path.resolve("second-dependency-classes");
@@ -118,7 +122,8 @@ final class CompilerTests {
                 )
             ),
             Set.of(),
-            secondDependencyClasses
+            secondDependencyClasses,
+            System.err::println
         );
         var dependentSources = path.resolve("dependent-sources");
         var dependentClasses = path.resolve("dependent-classes");
@@ -141,7 +146,8 @@ final class CompilerTests {
                 )
             ),
             Set.of(firstDependencyClasses, secondDependencyClasses),
-            dependentClasses
+            dependentClasses,
+            System.err::println
         );
 
         assertThat(dependentClasses.resolve("main").resolve("Main.class")).exists();

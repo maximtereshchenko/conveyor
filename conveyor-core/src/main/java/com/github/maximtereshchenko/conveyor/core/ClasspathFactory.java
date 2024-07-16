@@ -7,13 +7,21 @@ import java.util.stream.Stream;
 
 final class ClasspathFactory {
 
+    private final Tracer tracer;
+
+    ClasspathFactory(Tracer tracer) {
+        this.tracer = tracer;
+    }
+
     Set<Path> classpath(Set<? extends Artifact> artifacts) {
         var relations = relations(artifacts);
-        return relations.ids()
+        var classpath = relations.ids()
             .map(relations::resolved)
             .flatMap(Optional::stream)
             .map(Artifact::path)
             .collect(Collectors.toSet());
+        tracer.submitClasspath(artifacts, classpath);
+        return classpath;
     }
 
     private Relations relations(Set<? extends Artifact> artifacts) {

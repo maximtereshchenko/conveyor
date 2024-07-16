@@ -4,21 +4,22 @@ import com.github.maximtereshchenko.conveyor.api.port.SchematicDefinitionConvert
 import com.github.maximtereshchenko.conveyor.api.schematic.SchematicDefinition;
 
 import java.nio.file.Path;
-import java.util.Map;
-import java.util.WeakHashMap;
 
-final class CachingSchematicDefinitionConverter implements SchematicDefinitionConverter {
+final class TracingSchematicDefinitionConverter implements SchematicDefinitionConverter {
 
     private final SchematicDefinitionConverter original;
-    private final Map<Path, SchematicDefinition> cache = new WeakHashMap<>();
+    private final Tracer tracer;
 
-    CachingSchematicDefinitionConverter(SchematicDefinitionConverter original) {
+    TracingSchematicDefinitionConverter(SchematicDefinitionConverter original, Tracer tracer) {
         this.original = original;
+        this.tracer = tracer;
     }
 
     @Override
     public SchematicDefinition schematicDefinition(Path path) {
-        return cache.computeIfAbsent(path, original::schematicDefinition);
+        var schematicDefinition = original.schematicDefinition(path);
+        tracer.submitSchematicDefinition(schematicDefinition, path);
+        return schematicDefinition;
     }
 
     @Override

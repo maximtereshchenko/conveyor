@@ -12,14 +12,13 @@ import java.util.stream.Stream;
 
 final class Schematic {
 
-    private static final System.Logger LOGGER = System.getLogger(Schematic.class.getName());
-
     private final ExtendableLocalInheritanceHierarchyModel localModel;
     private final ClasspathFactory classpathFactory;
     private final PomDefinitionFactory pomDefinitionFactory;
     private final SchematicDefinitionConverter schematicDefinitionConverter;
     private final SchematicModelFactory schematicModelFactory;
     private final PreferencesFactory preferencesFactory;
+    private final Tracer tracer;
 
     Schematic(
         ExtendableLocalInheritanceHierarchyModel localModel,
@@ -27,7 +26,8 @@ final class Schematic {
         PomDefinitionFactory pomDefinitionFactory,
         SchematicDefinitionConverter schematicDefinitionConverter,
         SchematicModelFactory schematicModelFactory,
-        PreferencesFactory preferencesFactory
+        PreferencesFactory preferencesFactory,
+        Tracer tracer
     ) {
         this.localModel = localModel;
         this.classpathFactory = classpathFactory;
@@ -35,6 +35,7 @@ final class Schematic {
         this.schematicDefinitionConverter = schematicDefinitionConverter;
         this.schematicModelFactory = schematicModelFactory;
         this.preferencesFactory = preferencesFactory;
+        this.tracer = tracer;
     }
 
     Id id() {
@@ -63,14 +64,7 @@ final class Schematic {
     }
 
     void construct(ConstructionRepository constructionRepository, List<Stage> stages) {
-        LOGGER.log(
-            System.Logger.Level.INFO,
-            () -> "Constructing %s:%s:%s".formatted(
-                localModel.id().group(),
-                localModel.id().name(),
-                localModel.version()
-            )
-        );
+        tracer.submitConstruction(localModel.id(), localModel.version());
         constructionRepository.publish(
             localModel.id(),
             localModel.version(),
@@ -88,21 +82,19 @@ final class Schematic {
             properties,
             repositories
         );
-        var dependencies = dependencies(completeModel, properties, preferences, repositories);
-        var conveyorSchematic = new ConveyorSchematicAdapter(
-            completeModel.path(),
-            completeModel.id(),
-            completeModel.version(),
-            properties,
-            dependencies,
-            repositories
-        );
         plugins(completeModel, properties, preferences, repositories)
-            .executeTasks(
-                conveyorSchematic,
-                properties,
-                stages
-            );
+            .tasks(
+                new ConveyorSchematicAdapter(
+                    completeModel.path(),
+                    completeModel.id(),
+                    completeModel.version(),
+                    properties,
+                    dependencies(completeModel, properties, preferences, repositories),
+                    repositories
+                ),
+                properties
+            )
+            .execute(stages);
     }
 
     private boolean dependencyExists(
@@ -208,8 +200,8 @@ final class Schematic {
             new MavenRepositoryAdapter(
                 new CachingRepository(
                     new RemoteMavenRepository(
-                        remoteRepositoryModel.name(),
-                        remoteRepositoryModel.uri()
+                        remoteRepositoryModel.uri(),
+                        tracer.withContext("repository", remoteRepositoryModel.name())
                     ),
                     cache
                 ),
@@ -230,7 +222,7 @@ final class Schematic {
         Preferences preferences,
         Repositories repositories
     ) {
-        return new Plugins(
+        var plugins = new Plugins(
             completeModel.plugins()
                 .stream()
                 .map(pluginModel ->
@@ -248,8 +240,11 @@ final class Schematic {
                     )
                 )
                 .collect(Collectors.toCollection(LinkedHashSet::new)),
-            classpathFactory
+            classpathFactory,
+            tracer
         );
+        tracer.submitPlugins(plugins);
+        return plugins;
     }
 
     private <M extends LocalInheritanceHierarchyModel> Properties properties(

@@ -97,4 +97,9 @@ final class ExtendableLocalInheritanceHierarchyModel
     ) {
         return original.inheritsFrom(extendableLocalInheritanceHierarchyModel.original);
     }
+
+    @Override
+    public String toString() {
+        return original.toString();
+    }
 }

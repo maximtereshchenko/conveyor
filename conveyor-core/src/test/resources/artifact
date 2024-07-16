@@ -19,7 +19,7 @@ public final class ${normalizedName} implements ConveyorPlugin {
                 "",
                 BindingStage.valueOf(configuration.getOrDefault("stage", "ARCHIVE")),
                 BindingStep.RUN,
-                () -> schematic.publish(
+                (tracer) -> schematic.publish(
                     configuration.getOrDefault("repository", Convention.CONSTRUCTION_REPOSITORY_NAME),
                     Paths.get(configuration.get("path")),
                     ArtifactClassifier.CLASSES

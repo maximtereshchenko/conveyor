@@ -1,15 +1,11 @@
 package com.github.maximtereshchenko.conveyor.plugin.publish;
 
-import com.github.maximtereshchenko.conveyor.plugin.api.ArtifactClassifier;
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
+import com.github.maximtereshchenko.conveyor.plugin.api.*;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-final class PublishArtifactAction implements Runnable {
-
-    private static final System.Logger LOGGER =
-        System.getLogger(PublishArtifactAction.class.getName());
+final class PublishArtifactAction implements ConveyorTaskAction {
 
     private final Path artifact;
     private final String repository;
@@ -22,22 +18,23 @@ final class PublishArtifactAction implements Runnable {
     }
 
     @Override
-    public void run() {
-        publish(artifact, ArtifactClassifier.CLASSES);
-        publish(schematic.path(), ArtifactClassifier.SCHEMATIC_DEFINITION);
+    public void execute(ConveyorTaskTracer tracer) {
+        publish(artifact, ArtifactClassifier.CLASSES, tracer);
+        publish(schematic.path(), ArtifactClassifier.SCHEMATIC_DEFINITION, tracer);
     }
 
-    private void publish(Path path, ArtifactClassifier artifactClassifier) {
+    private void publish(
+        Path path,
+        ArtifactClassifier artifactClassifier,
+        ConveyorTaskTracer tracer
+    ) {
         if (!Files.exists(path)) {
             return;
         }
         schematic.publish(repository, path, artifactClassifier);
-        LOGGER.log(
-            System.Logger.Level.INFO,
-            "Published {0}:{1} to {2}",
-            path,
-            artifactClassifier,
-            repository
+        tracer.submit(
+            TracingImportance.INFO,
+            () -> "Published %s:%s to %s".formatted(path, artifactClassifier, repository)
         );
     }
 }

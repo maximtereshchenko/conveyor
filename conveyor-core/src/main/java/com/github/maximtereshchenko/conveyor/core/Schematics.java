@@ -9,19 +9,19 @@ import java.util.Optional;
 
 final class Schematics {
 
-    private static final System.Logger LOGGER = System.getLogger(Schematics.class.getName());
-
     private final LinkedHashSet<Schematic> all;
     private final Schematic initial;
+    private final Tracer tracer;
 
-    Schematics(LinkedHashSet<Schematic> all, Schematic initial) {
+    Schematics(LinkedHashSet<Schematic> all, Schematic initial, Tracer tracer) {
         this.all = all;
         this.initial = initial;
+        this.tracer = tracer;
     }
 
     void construct(List<Stage> stages) {
         var schematicsInConstructionOrder = schematicsInConstructionOrder();
-        log(schematicsInConstructionOrder);
+        tracer.submitConstructionOrder(schematicsInConstructionOrder);
         var constructionRepository = new ConstructionRepository();
         for (var schematic : schematicsInConstructionOrder) {
             schematic.construct(constructionRepository, stages);
@@ -32,19 +32,6 @@ final class Schematics {
         return all.stream()
             .filter(schematic -> schematic.id().equals(id))
             .findAny();
-    }
-
-    private void log(List<Schematic> schematicsInConstructionOrder) {
-        LOGGER.log(System.Logger.Level.INFO, "Construction order:");
-        schematicsInConstructionOrder.forEach(schematic ->
-            LOGGER.log(
-                System.Logger.Level.INFO,
-                "{0}:{1}:{2}",
-                schematic.id().group(),
-                schematic.id().name(),
-                schematic.version()
-            )
-        );
     }
 
     private List<Schematic> schematicsInConstructionOrder() {

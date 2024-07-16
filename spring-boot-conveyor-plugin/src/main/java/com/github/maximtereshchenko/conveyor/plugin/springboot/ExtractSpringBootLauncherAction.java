@@ -1,5 +1,8 @@
 package com.github.maximtereshchenko.conveyor.plugin.springboot;
 
+import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskAction;
+import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskTracer;
+import com.github.maximtereshchenko.conveyor.plugin.api.TracingImportance;
 import com.github.maximtereshchenko.conveyor.springboot.Configuration;
 import com.github.maximtereshchenko.conveyor.zip.ZipArchive;
 
@@ -8,10 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-final class ExtractSpringBootLauncherAction implements Runnable {
-
-    private static final System.Logger LOGGER =
-        System.getLogger(ExtractSpringBootLauncherAction.class.getName());
+final class ExtractSpringBootLauncherAction implements ConveyorTaskAction {
 
     private final Path destination;
 
@@ -20,13 +20,16 @@ final class ExtractSpringBootLauncherAction implements Runnable {
     }
 
     @Override
-    public void run() {
+    public void execute(ConveyorTaskTracer tracer) {
         if (!Files.exists(destination)) {
             return;
         }
         var path = path();
         new ZipArchive(path).extract(destination);
-        LOGGER.log(System.Logger.Level.INFO, "Extracted {0} to {1}", path, destination);
+        tracer.submit(
+            TracingImportance.INFO,
+            () -> "Extracted %s to %s".formatted(path, destination)
+        );
     }
 
     private Path path() {
