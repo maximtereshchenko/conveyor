@@ -28,12 +28,16 @@ public final class ConveyorFacade implements ConveyorModule {
     ) {
         this.tracer = new Tracer(tracingOutput, tracingOutputLevel);
         this.schematicDefinitionConverter =
-            new TracingSchematicDefinitionConverter(schematicDefinitionConverter, tracer);
-        this.schematicModelFactory = new SchematicModelFactory(
-            this.schematicDefinitionConverter,
-            this.tracer
+            new CachingSchematicDefinitionConverter(
+                new TracingSchematicDefinitionConverter(schematicDefinitionConverter, tracer)
+            );
+        this.schematicModelFactory = new CachingSchematicModelFactory(
+            new DefaultSchematicModelFactory(
+                this.schematicDefinitionConverter,
+                this.tracer
+            )
         );
-        this.classpathFactory = new ClasspathFactory(tracer);
+        this.classpathFactory = new CachingClasspathFactory(new DefaultClasspathFactory(tracer));
         this.pomDefinitionFactory = PomDefinitionFactory.configured();
         this.preferencesFactory = new PreferencesFactory(this.schematicModelFactory);
     }

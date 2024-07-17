@@ -1,21 +1,21 @@
 package com.github.maximtereshchenko.conveyor.core;
 
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskAction;
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskTracer;
+import com.github.maximtereshchenko.conveyor.plugin.api.BindingStage;
+import com.github.maximtereshchenko.conveyor.plugin.api.BindingStep;
 
 import java.nio.file.Path;
 
-final class CacheableAction implements ConveyorTaskAction {
+final class CacheableTask implements Task {
 
-    private final ConveyorTaskAction original;
+    private final Task original;
     private final Inputs inputs;
     private final Outputs outputs;
     private final TaskCache taskCache;
     private final Path directory;
     private final Tracer tracer;
 
-    CacheableAction(
-        ConveyorTaskAction original,
+    CacheableTask(
+        Task original,
         Inputs inputs,
         Outputs outputs,
         TaskCache taskCache,
@@ -31,16 +31,36 @@ final class CacheableAction implements ConveyorTaskAction {
     }
 
     @Override
-    public void execute(ConveyorTaskTracer conveyorTaskTracer) {
+    public String name() {
+        return original.name();
+    }
+
+    @Override
+    public BindingStage stage() {
+        return original.stage();
+    }
+
+    @Override
+    public BindingStep step() {
+        return original.step();
+    }
+
+    @Override
+    public void execute() {
         if (taskCache.changed(inputs, outputs)) {
             if (taskCache.restore(inputs, outputs, directory)) {
-                tracer.submitTaskRestoredFromCache();
+                tracer.submitTaskRestoredFromCache(original.name());
             } else {
-                original.execute(conveyorTaskTracer);
+                original.execute();
                 taskCache.store(inputs, outputs, directory);
             }
             taskCache.remember(inputs, outputs);
         }
-        tracer.submitTaskUpToDate();
+        tracer.submitTaskUpToDate(original.name());
+    }
+
+    @Override
+    public int compareTo(Task task) {
+        return original.compareTo(task);
     }
 }

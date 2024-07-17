@@ -29,7 +29,11 @@ final class Tasks {
     void execute(List<Stage> stages) {
         stages.stream()
             .map(this::activeStages)
-            .forEach(activeStages -> all.forEach(task -> task.execute(activeStages)));
+            .forEach(activeStages ->
+                all.stream()
+                    .filter(task -> activeStages.contains(task.stage()))
+                    .forEach(Task::execute)
+            );
     }
 
     private Set<BindingStage> activeStages(Stage stage) {

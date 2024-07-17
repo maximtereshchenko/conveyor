@@ -14,7 +14,7 @@ final class Main {
         new ConveyorFacade(
             JacksonAdapter.configured(),
             System.out::println,
-            TracingOutputLevel.VERBOSE
+            TracingOutputLevel.NORMAL
         )
             .construct(
                 Paths.get(args[0]).toAbsolutePath().normalize(),

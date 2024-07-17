@@ -43,6 +43,14 @@ final class Plugin implements Artifact {
         return directlyReferencedArtifact.dependencies();
     }
 
+    @Override
+    public String toString() {
+        return "%s:%s".formatted(
+            directlyReferencedArtifact.id(),
+            directlyReferencedArtifact.version()
+        );
+    }
+
     boolean isEnabled() {
         return Boolean.parseBoolean(configuration().get(ENABLED_CONFIGURATION_KEY));
     }

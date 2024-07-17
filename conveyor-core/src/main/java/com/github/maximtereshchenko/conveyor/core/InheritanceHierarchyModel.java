@@ -78,8 +78,7 @@ record InheritanceHierarchyModel<T extends SchematicModel>(LinkedHashSet<T> mode
     public String toString() {
         return models.reversed()
             .stream()
-            .map(SchematicModel::id)
-            .map(Id::toString)
+            .map(model -> "%s:%s".formatted(model.id(), model.version()))
             .collect(Collectors.joining("->"));
     }
 

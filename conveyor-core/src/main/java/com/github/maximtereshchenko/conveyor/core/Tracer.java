@@ -43,18 +43,7 @@ final class Tracer {
     }
 
     void submitConstructionOrder(List<Schematic> schematicsInConstructionOrder) {
-        if (!isTraceable(Importance.INFO)) {
-            return;
-        }
-        output.write(formatted(Importance.INFO, "Construction order:"));
-        schematicsInConstructionOrder.forEach(schematic ->
-            output.write(
-                formatted(
-                    Importance.INFO,
-                    schematic.id().toString() + ':' + schematic.version()
-                )
-            )
-        );
+        submit(Importance.INFO, () -> "Construction order " + schematicsInConstructionOrder);
     }
 
     void submitDownloadedArtifact(URI uri) {
@@ -64,27 +53,27 @@ final class Tracer {
     void submitConstructionDuration(Instant start, Instant end) {
         submit(
             Importance.INFO,
-            () -> "Construction took " + Duration.between(start, end).getSeconds()
+            () -> "Construction took %ds".formatted(Duration.between(start, end).getSeconds())
         );
     }
 
     void submitConstruction(Id id, Version version) {
         submit(
             Importance.INFO,
-            () -> "Constructing %s:%s".formatted(id, version)
+            () -> "%s:%s construction started".formatted(id, version)
         );
     }
 
-    void submitTaskExecution() {
-        submit(Importance.INFO, () -> "Execution started");
+    void submitTaskExecution(String task) {
+        submit(Importance.INFO, () -> task + " execution started");
     }
 
-    void submitTaskUpToDate() {
-        submit(Importance.INFO, () -> "Inputs and outputs are up to date");
+    void submitTaskUpToDate(String task) {
+        submit(Importance.INFO, () -> task + " inputs and outputs are up to date");
     }
 
-    void submitTaskRestoredFromCache() {
-        submit(Importance.INFO, () -> "Outputs were restored from cache");
+    void submitTaskRestoredFromCache(String task) {
+        submit(Importance.INFO, () -> task + " outputs were restored from cache");
     }
 
     void submit(Importance importance, Supplier<String> supplier, Throwable... throwable) {

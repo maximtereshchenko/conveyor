@@ -38,6 +38,11 @@ final class Schematic {
         this.tracer = tracer;
     }
 
+    @Override
+    public String toString() {
+        return "%s:%s".formatted(localModel.id(), localModel.version());
+    }
+
     Id id() {
         return localModel.id();
     }

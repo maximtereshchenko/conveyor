@@ -60,13 +60,20 @@ final class Plugins {
         ConveyorPlugin conveyorPlugin,
         ConveyorTask conveyorTask
     ) {
-        return new Task(
-            conveyorTask,
-            new TaskCache(properties.tasksCacheDirectory().resolve(conveyorTask.name())),
-            conveyorSchematic.path().getParent(),
-            tracer.withContext("plugin", conveyorPlugin.name())
-                .withContext("task", conveyorTask.name())
-        );
+        var taskTracer = tracer.withContext("plugin", conveyorPlugin.name())
+            .withContext("task", conveyorTask.name());
+        var task = new ExecutableTask(conveyorTask, taskTracer);
+        return switch (conveyorTask.cache()) {
+            case ENABLED -> new CacheableTask(
+                task,
+                new Inputs(conveyorTask.inputs()),
+                new Outputs(conveyorTask.outputs()),
+                new TaskCache(properties.tasksCacheDirectory().resolve(conveyorTask.name())),
+                conveyorSchematic.path().getParent(),
+                taskTracer
+            );
+            case DISABLED -> task;
+        };
     }
 
     private int byPosition(ConveyorPlugin first, ConveyorPlugin second) {
