@@ -19,7 +19,9 @@ final class Copy extends SimpleFileVisitor<Path> {
 
     @Override
     public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-        Files.copy(file, resolved(file));
+        var fileDestination = resolved(file);
+        Files.createDirectories(fileDestination.getParent());
+        Files.copy(file, fileDestination);
         return FileVisitResult.CONTINUE;
     }
 

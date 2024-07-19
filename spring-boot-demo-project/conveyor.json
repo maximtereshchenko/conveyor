@@ -1,0 +1,70 @@
+{
+  "group": "com.example",
+  "name": "demo",
+  "version": "0.0.1-SNAPSHOT",
+  "template": {
+    "group": "org.springframework.boot",
+    "name": "spring-boot-starter-parent",
+    "version": "3.3.2"
+  },
+  "repositories": [
+    {
+      "name": "maven-central",
+      "uri": "https://repo1.maven.org/maven2"
+    },
+    {
+      "name": "conveyor-repository",
+      "path": "../.conveyor-repository"
+    }
+  ],
+  "properties": {
+    "conveyor.schematic.template.location": "./template.json",
+    "conveyor.version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "group": "com.github.maximtereshchenko.conveyor",
+      "name": "clean-conveyor-plugin",
+      "version": "${conveyor.version}"
+    },
+    {
+      "group": "com.github.maximtereshchenko.conveyor",
+      "name": "compile-conveyor-plugin",
+      "version": "${conveyor.version}"
+    },
+    {
+      "group": "com.github.maximtereshchenko.conveyor",
+      "name": "resources-conveyor-plugin",
+      "version": "${conveyor.version}"
+    },
+    {
+      "group": "com.github.maximtereshchenko.conveyor",
+      "name": "junit-jupiter-conveyor-plugin",
+      "version": "${conveyor.version}"
+    },
+    {
+      "group": "com.github.maximtereshchenko.conveyor",
+      "name": "archive-conveyor-plugin",
+      "version": "${conveyor.version}"
+    },
+    {
+      "group": "com.github.maximtereshchenko.conveyor",
+      "name": "spring-boot-conveyor-plugin",
+      "version": "${conveyor.version}",
+      "configuration": {
+        "launched.class": "com.example.demo.DemoApplication"
+      }
+    }
+  ],
+  "dependencies": [
+    {
+      "group": "org.springframework.boot",
+      "name": "spring-boot-starter-web"
+    },
+    {
+      "group": "org.springframework.boot",
+      "name": "spring-boot-starter-test",
+      "scope": "test"
+    }
+  ]
+}
