@@ -10,9 +10,9 @@
       "group": "${conveyor.schematic.group}",
       "name": "executable-conveyor-plugin",
       "configuration": {
-        "classes.directory": "${classes.directory}",
+        "classes.directory": "${conveyor.schematic.directory}/.conveyor/classes",
         "main.class": "com.github.maximtereshchenko.conveyor.cli.Main",
-        "destination": "${construction.directory}/${conveyor.schematic.name}-${conveyor.schematic.version}-executable.jar"
+        "destination": "${conveyor.schematic.directory}/.conveyor/${conveyor.schematic.name}-${conveyor.schematic.version}-executable.jar"
       }
     }
   ],

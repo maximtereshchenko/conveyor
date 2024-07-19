@@ -42,11 +42,7 @@
     "jackson-bom.version": "2.17.0",
     "assertj.version": "3.25.1",
     "wiremock.version": "3.4.2",
-    "apiguardian-api.version": "1.1.2",
-    "construction.directory": "${conveyor.schematic.directory}/.conveyor",
-    "classes.directory": "${construction.directory}/classes",
-    "test.classes.directory": "${construction.directory}/test-classes",
-    "artifact.location": "${construction.directory}/${conveyor.schematic.name}-${conveyor.schematic.version}.jar"
+    "apiguardian-api.version": "1.1.2"
   },
   "preferences": {
     "inclusions": [
@@ -189,7 +185,6 @@
       "group": "${conveyor.schematic.group}",
       "name": "publish-conveyor-plugin",
       "configuration": {
-        "artifact.location": "${artifact.location}",
         "repository": "conveyor-repository"
       }
     }

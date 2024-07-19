@@ -7,27 +7,25 @@ import java.nio.file.Path;
 
 final class PublishArtifactAction implements ConveyorTaskAction {
 
-    private final Path artifact;
-    private final String repository;
+    private final Path path;
     private final ConveyorSchematic schematic;
+    private final String repository;
+    private final ArtifactClassifier artifactClassifier;
 
-    PublishArtifactAction(Path artifact, String repository, ConveyorSchematic schematic) {
-        this.artifact = artifact;
-        this.repository = repository;
+    PublishArtifactAction(
+        Path path,
+        ConveyorSchematic schematic,
+        String repository,
+        ArtifactClassifier artifactClassifier
+    ) {
+        this.path = path;
         this.schematic = schematic;
+        this.repository = repository;
+        this.artifactClassifier = artifactClassifier;
     }
 
     @Override
     public void execute(ConveyorTaskTracer tracer) {
-        publish(artifact, ArtifactClassifier.CLASSES, tracer);
-        publish(schematic.path(), ArtifactClassifier.SCHEMATIC_DEFINITION, tracer);
-    }
-
-    private void publish(
-        Path path,
-        ArtifactClassifier artifactClassifier,
-        ConveyorTaskTracer tracer
-    ) {
         if (!Files.exists(path)) {
             return;
         }

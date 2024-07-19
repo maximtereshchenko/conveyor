@@ -23,6 +23,15 @@ final class PublishPluginTests {
             .tasks()
             .contain(
                 new ConveyorTask(
+                    "publish-schematic-definition",
+                    BindingStage.PUBLISH,
+                    BindingStep.RUN,
+                    null,
+                    Set.of(),
+                    Set.of(),
+                    Cache.DISABLED
+                ),
+                new ConveyorTask(
                     "publish-artifact",
                     BindingStage.PUBLISH,
                     BindingStep.RUN,
@@ -45,12 +54,34 @@ final class PublishPluginTests {
             .tasks()
             .execute()
             .thenArtifactsPublished(
-                new PublishedArtifact("target", artifact, ArtifactClassifier.CLASSES),
                 new PublishedArtifact(
                     "target",
                     path.resolve("conveyor.json"),
                     ArtifactClassifier.SCHEMATIC_DEFINITION
-                )
+                ),
+                new PublishedArtifact("target", artifact, ArtifactClassifier.CLASSES)
+            );
+    }
+
+    @Test
+    void givenNoArtifactLocationConfiguration_whenExecuteTask_thenArtifactPublishedFromDefaultLocation(
+        @TempDir Path path
+    ) throws IOException {
+        var jar = Files.createFile(
+            Files.createDirectory(path.resolve(".conveyor")).resolve("project-1.0.0.jar")
+        );
+
+        new Dsl(new PublishPlugin(), path)
+            .givenConfiguration("repository", "target")
+            .tasks()
+            .execute()
+            .thenArtifactsPublished(
+                new PublishedArtifact(
+                    "target",
+                    path.resolve("conveyor.json"),
+                    ArtifactClassifier.SCHEMATIC_DEFINITION
+                ),
+                new PublishedArtifact("target", jar, ArtifactClassifier.CLASSES)
             );
     }
 
