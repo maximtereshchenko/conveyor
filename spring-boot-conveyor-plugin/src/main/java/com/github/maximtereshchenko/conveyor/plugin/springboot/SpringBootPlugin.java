@@ -7,9 +7,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public final class SpringBootPlugin implements ConveyorPlugin {
 
@@ -23,68 +22,77 @@ public final class SpringBootPlugin implements ConveyorPlugin {
         ConveyorSchematic schematic,
         Map<String, String> configuration
     ) {
-        var classesDirectory = configuredPath(configuration, "classes.directory");
-        var containerDirectory = configuredPath(configuration, "container.directory");
-        var classpathDirectory = "classpath";
-        var classpathDestination = containerDirectory.resolve(classpathDirectory);
-        var dependencies = schematic.classpath(Set.of(ClasspathScope.IMPLEMENTATION));
-        var destination = configuredPath(configuration, "destination");
+        var conveyor = schematic.path().getParent().resolve(".conveyor");
+        var containerDirectory = configuredPath(configuration, "container.directory")
+            .orElseGet(() -> conveyor.resolve("executable-container"));
+        var classpathDirectoryName = "classpath";
+        var classpathDirectory = containerDirectory.resolve(classpathDirectoryName);
         return List.of(
-            new ConveyorTask(
-                "copy-classpath",
-                BindingStage.ARCHIVE,
-                BindingStep.FINALIZE,
-                new CopyClasspathAction(classesDirectory, dependencies, classpathDestination),
-                Stream.concat(Stream.of(classesDirectory), dependencies.stream())
-                    .map(PathConveyorTaskInput::new)
-                    .collect(Collectors.toSet()),
-                Set.of(new PathConveyorTaskOutput(classpathDestination)),
-                Cache.ENABLED //TODO disable
+            task(
+                "copy-classes",
+                new CopyClassesAction(
+                    configuredPath(configuration, "classes.directory")
+                        .orElseGet(() -> conveyor.resolve("classes")),
+                    classpathDirectory.resolve("classes")
+                )
             ),
-            new ConveyorTask(
+            task(
+                "copy-dependencies",
+                new CopyDependenciesAction(
+                    schematic.classpath(Set.of(ClasspathScope.IMPLEMENTATION)),
+                    classpathDirectory
+                )
+            ),
+            task(
                 "extract-spring-boot-launcher",
-                BindingStage.ARCHIVE,
-                BindingStep.FINALIZE,
-                new ExtractSpringBootLauncherAction(containerDirectory),
-                Set.of(),
-                Set.of(),
-                Cache.DISABLED
+                new ExtractSpringBootLauncherAction(containerDirectory)
             ),
-            new ConveyorTask(
+            task(
                 "write-properties",
-                BindingStage.ARCHIVE,
-                BindingStep.FINALIZE,
                 new WritePropertiesAction(
                     containerDirectory.resolve(Configuration.PROPERTIES_CLASS_PATH_LOCATION),
-                    classpathDirectory,
+                    classpathDirectoryName,
                     configuration.get("launched.class")
-                ),
-                Set.of(),
-                Set.of(),
-                Cache.DISABLED
+                )
             ),
-            new ConveyorTask(
+            task(
                 "write-manifest",
-                BindingStage.ARCHIVE,
-                BindingStep.FINALIZE,
-                new WriteManifestAction(containerDirectory),
-                Set.of(),
-                Set.of(),
-                Cache.DISABLED
+                new WriteManifestAction(containerDirectory)
             ),
-            new ConveyorTask(
+            task(
                 "archive-executable",
-                BindingStage.ARCHIVE,
-                BindingStep.FINALIZE,
-                new ArchiveExecutableAction(containerDirectory, destination),
-                Set.of(new PathConveyorTaskInput(containerDirectory)),
-                Set.of(new PathConveyorTaskOutput(destination)),
-                Cache.ENABLED
+                new ArchiveExecutableAction(
+                    containerDirectory,
+                    configuredPath(configuration, "destination")
+                        .orElseGet(() ->
+                            conveyor.resolve(
+                                "%s-%s-executable.jar".formatted(
+                                    schematic.name(),
+                                    schematic.version()
+                                )
+                            )
+                        )
+                )
             )
         );
     }
 
-    private Path configuredPath(Map<String, String> configuration, String property) {
-        return Paths.get(configuration.get(property)).toAbsolutePath().normalize();
+    private ConveyorTask task(String name, ConveyorTaskAction action) {
+        return new ConveyorTask(
+            name,
+            BindingStage.ARCHIVE,
+            BindingStep.FINALIZE,
+            action,
+            Set.of(),
+            Set.of(),
+            Cache.DISABLED
+        );
+    }
+
+    private Optional<Path> configuredPath(Map<String, String> configuration, String property) {
+        return Optional.ofNullable(configuration.get(property))
+            .map(Paths::get)
+            .map(Path::toAbsolutePath)
+            .map(Path::normalize);
     }
 }

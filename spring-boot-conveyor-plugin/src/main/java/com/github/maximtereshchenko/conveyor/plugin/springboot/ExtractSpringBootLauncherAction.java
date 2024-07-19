@@ -7,7 +7,6 @@ import com.github.maximtereshchenko.conveyor.springboot.Configuration;
 import com.github.maximtereshchenko.conveyor.zip.ZipArchive;
 
 import java.net.URISyntaxException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -21,9 +20,6 @@ final class ExtractSpringBootLauncherAction implements ConveyorTaskAction {
 
     @Override
     public void execute(ConveyorTaskTracer tracer) {
-        if (!Files.exists(destination)) {
-            return;
-        }
         var path = path();
         new ZipArchive(path).extract(destination);
         tracer.submit(

@@ -1,6 +1,9 @@
 package com.github.maximtereshchenko.conveyor.plugin.springboot;
 
-import com.github.maximtereshchenko.conveyor.plugin.api.*;
+import com.github.maximtereshchenko.conveyor.plugin.api.BindingStage;
+import com.github.maximtereshchenko.conveyor.plugin.api.BindingStep;
+import com.github.maximtereshchenko.conveyor.plugin.api.Cache;
+import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
 import com.github.maximtereshchenko.conveyor.plugin.test.Dsl;
 import com.github.maximtereshchenko.conveyor.springboot.Configuration;
 import com.github.maximtereshchenko.conveyor.zip.ZipArchive;
@@ -28,22 +31,28 @@ final class SpringBootPluginTests {
 
         new Dsl(new SpringBootPlugin(), path)
             .givenDependency(dependency)
-            .givenConfiguration("container.directory", container)
             .givenConfiguration("classes.directory", classes)
+            .givenConfiguration("container.directory", container)
             .givenConfiguration("destination", destination)
             .tasks()
             .contain(
                 new ConveyorTask(
-                    "copy-classpath",
+                    "copy-classes",
                     BindingStage.ARCHIVE,
                     BindingStep.FINALIZE,
                     null,
-                    Set.of(
-                        new PathConveyorTaskInput(classes),
-                        new PathConveyorTaskInput(dependency)
-                    ),
-                    Set.of(new PathConveyorTaskOutput(container.resolve("classpath"))),
-                    Cache.ENABLED
+                    Set.of(),
+                    Set.of(),
+                    Cache.DISABLED
+                ),
+                new ConveyorTask(
+                    "copy-dependencies",
+                    BindingStage.ARCHIVE,
+                    BindingStep.FINALIZE,
+                    null,
+                    Set.of(),
+                    Set.of(),
+                    Cache.DISABLED
                 ),
                 new ConveyorTask(
                     "extract-spring-boot-launcher",
@@ -77,28 +86,11 @@ final class SpringBootPluginTests {
                     BindingStage.ARCHIVE,
                     BindingStep.FINALIZE,
                     null,
-                    Set.of(new PathConveyorTaskInput(container)),
-                    Set.of(new PathConveyorTaskOutput(destination)),
-                    Cache.ENABLED
+                    Set.of(),
+                    Set.of(),
+                    Cache.DISABLED
                 )
             );
-    }
-
-    @Test
-    void givenNoClasses_whenExecuteTasks_thenNoExecutable(@TempDir Path path) throws IOException {
-        var container = path.resolve("container");
-        var executable = path.resolve("executable");
-
-        new Dsl(new SpringBootPlugin(), path)
-            .givenConfiguration("container.directory", container)
-            .givenConfiguration("classes.directory", path.resolve("classes"))
-            .givenConfiguration("launched.class", "Main")
-            .givenConfiguration("destination", executable)
-            .tasks()
-            .execute();
-
-        assertThat(container).doesNotExist();
-        assertThat(executable).doesNotExist();
     }
 
     @Test
@@ -122,17 +114,15 @@ final class SpringBootPluginTests {
     }
 
     @Test
-    void givenClasses_whenExecuteTasks_thenDependenciesAreCopiedToContainer(
+    void givenDependencies_whenExecuteTasks_thenDependenciesAreCopiedToContainer(
         @TempDir Path path
     ) throws IOException {
         var container = path.resolve("container");
-        var classes = Files.createDirectory(path.resolve("classes"));
-        Files.createFile(classes.resolve("Dummy.class"));
 
         new Dsl(new SpringBootPlugin(), path)
             .givenDependency(Files.createFile(path.resolve("dependency")))
             .givenConfiguration("container.directory", container)
-            .givenConfiguration("classes.directory", classes)
+            .givenConfiguration("classes.directory", path.resolve("classes"))
             .givenConfiguration("launched.class", "Main")
             .givenConfiguration("destination", path.resolve("executable"))
             .tasks()
@@ -142,15 +132,14 @@ final class SpringBootPluginTests {
     }
 
     @Test
-    void givenClasses_whenExecuteTasks_thenSpringBootLauncherIsExtracted(@TempDir Path path)
-        throws IOException {
+    void givenSpringBootLauncher_whenExecuteTasks_thenSpringBootLauncherIsExtracted(
+        @TempDir Path path
+    ) throws IOException {
         var container = path.resolve("container");
-        var classes = Files.createDirectory(path.resolve("classes"));
-        Files.createFile(classes.resolve("Dummy.class"));
 
         new Dsl(new SpringBootPlugin(), path)
             .givenConfiguration("container.directory", container)
-            .givenConfiguration("classes.directory", classes)
+            .givenConfiguration("classes.directory", path.resolve("classes"))
             .givenConfiguration("launched.class", "Main")
             .givenConfiguration("destination", path.resolve("executable"))
             .tasks()
@@ -168,15 +157,13 @@ final class SpringBootPluginTests {
     }
 
     @Test
-    void givenClasses_whenExecuteTasks_thenPropertiesAreWritten(@TempDir Path path)
+    void givenConfiguration_whenExecuteTasks_thenPropertiesAreWritten(@TempDir Path path)
         throws IOException {
         var container = path.resolve("container");
-        var classes = Files.createDirectory(path.resolve("classes"));
-        Files.createFile(classes.resolve("Dummy.class"));
 
         new Dsl(new SpringBootPlugin(), path)
             .givenConfiguration("container.directory", container)
-            .givenConfiguration("classes.directory", classes)
+            .givenConfiguration("classes.directory", path.resolve("classes"))
             .givenConfiguration("launched.class", "Main")
             .givenConfiguration("destination", path.resolve("executable"))
             .tasks()
@@ -190,15 +177,13 @@ final class SpringBootPluginTests {
     }
 
     @Test
-    void givenClasses_whenExecuteTasks_thenManifestIsWritten(@TempDir Path path)
+    void givenSpringBootLauncher_whenExecuteTasks_thenManifestIsWritten(@TempDir Path path)
         throws IOException {
         var container = path.resolve("container");
-        var classes = Files.createDirectory(path.resolve("classes"));
-        Files.createFile(classes.resolve("Dummy.class"));
 
         new Dsl(new SpringBootPlugin(), path)
             .givenConfiguration("container.directory", container)
-            .givenConfiguration("classes.directory", classes)
+            .givenConfiguration("classes.directory", path.resolve("classes"))
             .givenConfiguration("launched.class", "Main")
             .givenConfiguration("destination", path.resolve("executable"))
             .tasks()
@@ -210,7 +195,7 @@ final class SpringBootPluginTests {
     }
 
     @Test
-    void givenClasses_whenExecuteTasks_thenExecutableIsCreated(@TempDir Path path)
+    void givenContainer_whenExecuteTasks_thenExecutableIsCreated(@TempDir Path path)
         throws IOException {
         var container = path.resolve("container");
         var classes = Files.createDirectory(path.resolve("classes"));
@@ -228,6 +213,39 @@ final class SpringBootPluginTests {
         assertThat(executable).exists();
         var extracted = Files.createDirectory(path.resolve("extracted"));
         new ZipArchive(executable).extract(extracted);
+        assertThat(extracted).directoryContentIsEqualTo(container);
+    }
+
+    @Test
+    void givenNoConfiguration_whenExecuteTasks_thenExecutableIsCreatedFromDefaultSources(
+        @TempDir Path path
+    ) throws IOException {
+        var conveyor = path.resolve(".conveyor");
+        Files.createFile(Files.createDirectories(conveyor.resolve("classes"))
+            .resolve("Dummy.class"));
+
+        new Dsl(new SpringBootPlugin(), path)
+            .givenConfiguration("launched.class", "Main")
+            .tasks()
+            .execute();
+
+        var container = conveyor.resolve("executable-container");
+        assertThat(container.resolve("classpath").resolve("classes").resolve("Dummy.class"))
+            .exists();
+        assertThat(
+            container.resolve("com")
+                .resolve("github")
+                .resolve("maximtereshchenko")
+                .resolve("conveyor")
+                .resolve("springboot")
+                .resolve("SpringBootLauncher.class")
+        )
+            .exists();
+        assertThat(container.resolve(Configuration.PROPERTIES_CLASS_PATH_LOCATION)).exists();
+        assertThat(container.resolve("META-INF").resolve("MANIFEST.MF")).exists();
+        var extracted = Files.createDirectory(path.resolve("extracted"));
+        new ZipArchive(conveyor.resolve("project-1.0.0-executable.jar"))
+            .extract(extracted);
         assertThat(extracted).directoryContentIsEqualTo(container);
     }
 

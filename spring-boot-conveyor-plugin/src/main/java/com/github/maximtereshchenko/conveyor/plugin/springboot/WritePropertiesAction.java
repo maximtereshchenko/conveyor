@@ -6,7 +6,6 @@ import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskTracer;
 import com.github.maximtereshchenko.conveyor.plugin.api.TracingImportance;
 import com.github.maximtereshchenko.conveyor.springboot.Configuration;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Properties;
 
@@ -24,9 +23,6 @@ final class WritePropertiesAction implements ConveyorTaskAction {
 
     @Override
     public void execute(ConveyorTaskTracer tracer) {
-        if (!Files.exists(destination.getParent())) {
-            return;
-        }
         var properties = properties();
         new FileTree(destination)
             .write(outputStream -> properties.store(outputStream, null));

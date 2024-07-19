@@ -6,7 +6,6 @@ import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskTracer;
 import com.github.maximtereshchenko.conveyor.plugin.api.TracingImportance;
 import com.github.maximtereshchenko.conveyor.springboot.Configuration;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
@@ -21,9 +20,6 @@ final class WriteManifestAction implements ConveyorTaskAction {
 
     @Override
     public void execute(ConveyorTaskTracer tracer) {
-        if (!Files.exists(containerDirectory)) {
-            return;
-        }
         var manifest = new Manifest();
         var mainAttributes = manifest.getMainAttributes();
         mainAttributes.put(Attributes.Name.MAIN_CLASS, Configuration.MAIN_CLASS_NAME);
