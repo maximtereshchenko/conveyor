@@ -57,6 +57,29 @@ final class JunitJupiterPluginTests {
     }
 
     @Test
+    void givenNoConfiguration_whenTasks_thenTaskHasDefaultInputs(@TempDir Path path)
+        throws IOException {
+        var conveyor = path.resolve(".conveyor");
+
+        new Dsl(new JunitJupiterPlugin(), path)
+            .tasks()
+            .contain(
+                new ConveyorTask(
+                    "execute-junit-jupiter-tests",
+                    BindingStage.TEST,
+                    BindingStep.RUN,
+                    null,
+                    Set.of(
+                        new PathConveyorTaskInput(conveyor.resolve("classes")),
+                        new PathConveyorTaskInput(conveyor.resolve("test-classes"))
+                    ),
+                    Set.of(),
+                    Cache.ENABLED
+                )
+            );
+    }
+
+    @Test
     void givenNoTestClasses_whenExecuteTasks_thenNoTestsAreExecuted(@TempDir Path path)
         throws IOException {
         new Dsl(new JunitJupiterPlugin(), path)

@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -22,8 +23,10 @@ public final class JunitJupiterPlugin implements ConveyorPlugin {
         ConveyorSchematic schematic,
         Map<String, String> configuration
     ) {
-        var testClassesDirectory = configuredPath(configuration, "test.classes.directory");
-        var classesDirectory = configuredPath(configuration, "classes.directory");
+        var testClassesDirectory = configuredPath(configuration, "test.classes.directory")
+            .orElseGet(() -> classes(schematic, "classes"));
+        var classesDirectory = configuredPath(configuration, "classes.directory")
+            .orElseGet(() -> classes(schematic, "test-classes"));
         var dependencies = schematic.classpath(
             Set.of(ClasspathScope.IMPLEMENTATION, ClasspathScope.TEST)
         );
@@ -49,7 +52,14 @@ public final class JunitJupiterPlugin implements ConveyorPlugin {
         );
     }
 
-    private Path configuredPath(Map<String, String> configuration, String property) {
-        return Paths.get(configuration.get(property)).toAbsolutePath().normalize();
+    private Path classes(ConveyorSchematic schematic, String directory) {
+        return schematic.path().getParent().resolve(".conveyor").resolve(directory);
+    }
+
+    private Optional<Path> configuredPath(Map<String, String> configuration, String property) {
+        return Optional.ofNullable(configuration.get(property))
+            .map(Paths::get)
+            .map(Path::toAbsolutePath)
+            .map(Path::normalize);
     }
 }

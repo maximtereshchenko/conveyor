@@ -11,7 +11,6 @@ import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Set;
@@ -34,9 +33,6 @@ final class RunJunitJupiterTestsAction implements ConveyorTaskAction {
 
     @Override
     public void execute(ConveyorTaskTracer tracer) {
-        if (!Files.exists(testClassesDirectory)) {
-            return;
-        }
         var contextClassLoader = Thread.currentThread().getContextClassLoader();
         try {
             Thread.currentThread().setContextClassLoader(classLoader(classpath()));
