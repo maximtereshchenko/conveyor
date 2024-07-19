@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -23,14 +24,16 @@ public final class CompilePlugin implements ConveyorPlugin {
         ConveyorSchematic schematic,
         Map<String, String> configuration
     ) {
-        var classesDirectory = configuredPath(configuration, "classes.directory");
+        var classesDirectory = configuredPath(configuration, "classes.directory")
+            .orElseGet(() -> classesDirectory(schematic, "classes"));
         var compiler = new Compiler();
         return List.of(
             compileSourcesConveyorTask(
                 "compile-sources",
                 BindingStage.COMPILE,
                 BindingStep.RUN,
-                configuredPath(configuration, "sources.directory"),
+                configuredPath(configuration, "sources.directory")
+                    .orElseGet(() -> sourcesDirectory(schematic, "main")),
                 schematic.classpath(Set.of(ClasspathScope.IMPLEMENTATION)),
                 classesDirectory,
                 compiler
@@ -48,7 +51,8 @@ public final class CompilePlugin implements ConveyorPlugin {
                 "compile-test-sources",
                 BindingStage.TEST,
                 BindingStep.PREPARE,
-                configuredPath(configuration, "test.sources.directory"),
+                configuredPath(configuration, "test.sources.directory")
+                    .orElseGet(() -> sourcesDirectory(schematic, "test")),
                 Stream.concat(
                         schematic.classpath(
                                 Set.of(ClasspathScope.IMPLEMENTATION, ClasspathScope.TEST)
@@ -57,7 +61,8 @@ public final class CompilePlugin implements ConveyorPlugin {
                         Stream.of(classesDirectory)
                     )
                     .collect(Collectors.toSet()),
-                configuredPath(configuration, "test.classes.directory"),
+                configuredPath(configuration, "test.classes.directory")
+                    .orElseGet(() -> classesDirectory(schematic, "test-classes")),
                 compiler
             )
         );
@@ -93,7 +98,19 @@ public final class CompilePlugin implements ConveyorPlugin {
         );
     }
 
-    private Path configuredPath(Map<String, String> configuration, String property) {
-        return Paths.get(configuration.get(property)).toAbsolutePath().normalize();
+    private Path classesDirectory(ConveyorSchematic schematic, String directory) {
+        return schematic.path().getParent().resolve(".conveyor").resolve(directory);
+    }
+
+    private Path sourcesDirectory(ConveyorSchematic schematic, String sources) {
+        return schematic.path().getParent().resolve("src").resolve(sources).resolve("java");
+    }
+
+    private Optional<Path> configuredPath(Map<String, String> configuration, String property) {
+        var value = configuration.get(property);
+        if (value == null) {
+            return Optional.empty();
+        }
+        return Optional.of(Paths.get(value).toAbsolutePath().normalize());
     }
 }

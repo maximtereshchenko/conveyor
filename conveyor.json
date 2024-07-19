@@ -171,13 +171,7 @@
     },
     {
       "group": "${conveyor.schematic.group}",
-      "name": "compile-conveyor-plugin",
-      "configuration": {
-        "sources.directory": "${conveyor.schematic.directory}/src/main/java",
-        "classes.directory": "${classes.directory}",
-        "test.sources.directory": "${conveyor.schematic.directory}/src/test/java",
-        "test.classes.directory": "${test.classes.directory}"
-      }
+      "name": "compile-conveyor-plugin"
     },
     {
       "group": "${conveyor.schematic.group}",

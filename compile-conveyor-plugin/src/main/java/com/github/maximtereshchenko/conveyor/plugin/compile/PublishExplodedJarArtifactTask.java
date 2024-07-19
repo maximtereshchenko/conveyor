@@ -25,5 +25,13 @@ final class PublishExplodedJarArtifactTask implements ConveyorTaskAction {
             path,
             ArtifactClassifier.CLASSES
         );
+        tracer.submit(
+            TracingImportance.DEBUG,
+            () -> "Published %s:%s to %s".formatted(
+                path,
+                ArtifactClassifier.CLASSES,
+                Convention.CONSTRUCTION_REPOSITORY_NAME
+            )
+        );
     }
 }

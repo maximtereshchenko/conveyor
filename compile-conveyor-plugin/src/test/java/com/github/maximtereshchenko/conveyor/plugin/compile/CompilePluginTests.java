@@ -67,4 +67,55 @@ final class CompilePluginTests {
                 )
             );
     }
+
+    @Test
+    void givenNoConfiguration_whenTasks_thenTasksHaveDefaultInputs(@TempDir Path path)
+        throws IOException {
+        var classes = path.resolve(".conveyor").resolve("classes");
+
+        new Dsl(new CompilePlugin(), path)
+            .tasks()
+            .contain(
+                new ConveyorTask(
+                    "compile-sources",
+                    BindingStage.COMPILE,
+                    BindingStep.RUN,
+                    null,
+                    Set.of(
+                        new PathConveyorTaskInput(
+                            path.resolve("src").resolve("main").resolve("java")
+                        )
+                    ),
+                    Set.of(new PathConveyorTaskOutput(classes)),
+                    Cache.ENABLED
+                ),
+                new ConveyorTask(
+                    "publish-exploded-jar-artifact",
+                    BindingStage.COMPILE,
+                    BindingStep.FINALIZE,
+                    null,
+                    Set.of(),
+                    Set.of(),
+                    Cache.DISABLED
+                ),
+                new ConveyorTask(
+                    "compile-test-sources",
+                    BindingStage.TEST,
+                    BindingStep.PREPARE,
+                    null,
+                    Set.of(
+                        new PathConveyorTaskInput(classes),
+                        new PathConveyorTaskInput(
+                            path.resolve("src").resolve("test").resolve("java")
+                        )
+                    ),
+                    Set.of(
+                        new PathConveyorTaskOutput(
+                            path.resolve(".conveyor").resolve("test-classes")
+                        )
+                    ),
+                    Cache.ENABLED
+                )
+            );
+    }
 }

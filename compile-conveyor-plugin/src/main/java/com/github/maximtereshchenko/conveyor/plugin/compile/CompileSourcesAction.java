@@ -40,7 +40,10 @@ final class CompileSourcesAction implements ConveyorTaskAction {
             );
             tracer.submit(TracingImportance.INFO, () -> "Compiled classes to " + outputDirectory);
         } else {
-            tracer.submit(TracingImportance.WARN, () -> "No sources to compile");
+            tracer.submit(
+                TracingImportance.WARN,
+                () -> "No sources to compile at " + sourcesDirectory
+            );
         }
     }
 }

@@ -38,6 +38,6 @@ public final class CleanPlugin implements ConveyorPlugin {
         if (directory == null) {
             return schematic.path().getParent().resolve(".conveyor");
         }
-        return Paths.get(directory);
+        return Paths.get(directory).toAbsolutePath().normalize();
     }
 }
