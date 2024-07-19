@@ -107,10 +107,9 @@ public final class CompilePlugin implements ConveyorPlugin {
     }
 
     private Optional<Path> configuredPath(Map<String, String> configuration, String property) {
-        var value = configuration.get(property);
-        if (value == null) {
-            return Optional.empty();
-        }
-        return Optional.of(Paths.get(value).toAbsolutePath().normalize());
+        return Optional.ofNullable(configuration.get(property))
+            .map(Paths::get)
+            .map(Path::toAbsolutePath)
+            .map(Path::normalize);
     }
 }

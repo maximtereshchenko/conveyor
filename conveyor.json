@@ -175,13 +175,7 @@
     },
     {
       "group": "${conveyor.schematic.group}",
-      "name": "resources-conveyor-plugin",
-      "configuration": {
-        "resources.directory": "${conveyor.schematic.directory}/src/main/resources",
-        "classes.directory": "${classes.directory}",
-        "test.resources.directory": "${conveyor.schematic.directory}/src/test/resources",
-        "test.classes.directory": "${test.classes.directory}"
-      }
+      "name": "resources-conveyor-plugin"
     },
     {
       "group": "${conveyor.schematic.group}",

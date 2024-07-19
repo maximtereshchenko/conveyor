@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 public final class ResourcesPlugin implements ConveyorPlugin {
@@ -26,8 +27,10 @@ public final class ResourcesPlugin implements ConveyorPlugin {
                 BindingStage.COMPILE,
                 BindingStep.FINALIZE,
                 new CopyResourcesAction(
-                    configuredPath(configuration, "resources.directory"),
-                    configuredPath(configuration, "classes.directory")
+                    configuredPath(configuration, "resources.directory")
+                        .orElseGet(() -> resources(schematic, "main")),
+                    configuredPath(configuration, "resources.destination.directory")
+                        .orElseGet(() -> classes(schematic, "classes"))
                 ),
                 Set.of(),
                 Set.of(),
@@ -38,8 +41,10 @@ public final class ResourcesPlugin implements ConveyorPlugin {
                 BindingStage.TEST,
                 BindingStep.PREPARE,
                 new CopyResourcesAction(
-                    configuredPath(configuration, "test.resources.directory"),
-                    configuredPath(configuration, "test.classes.directory")
+                    configuredPath(configuration, "test.resources.directory")
+                        .orElseGet(() -> resources(schematic, "test")),
+                    configuredPath(configuration, "test.resources.destination.directory")
+                        .orElseGet(() -> classes(schematic, "test-classes"))
                 ),
                 Set.of(),
                 Set.of(),
@@ -48,7 +53,18 @@ public final class ResourcesPlugin implements ConveyorPlugin {
         );
     }
 
-    private Path configuredPath(Map<String, String> configuration, String property) {
-        return Paths.get(configuration.get(property)).toAbsolutePath().normalize();
+    private Path resources(ConveyorSchematic schematic, String sources) {
+        return schematic.path().getParent().resolve("src").resolve(sources).resolve("resources");
+    }
+
+    private Path classes(ConveyorSchematic schematic, String classes) {
+        return schematic.path().getParent().resolve(".conveyor").resolve(classes);
+    }
+
+    private Optional<Path> configuredPath(Map<String, String> configuration, String property) {
+        return Optional.ofNullable(configuration.get(property))
+            .map(Paths::get)
+            .map(Path::toAbsolutePath)
+            .map(Path::normalize);
     }
 }

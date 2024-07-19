@@ -24,9 +24,9 @@ final class CopyResourcesTests {
         throws IOException {
         new Dsl(new ResourcesPlugin(), path)
             .givenConfiguration("resources.directory")
-            .givenConfiguration("classes.directory")
+            .givenConfiguration("resources.destination.directory")
             .givenConfiguration("test.resources.directory")
-            .givenConfiguration("test.classes.directory")
+            .givenConfiguration("test.resources.destination.directory")
             .tasks()
             .contain(
                 new ConveyorTask(
@@ -59,9 +59,9 @@ final class CopyResourcesTests {
 
         new Dsl(new ResourcesPlugin(), path)
             .givenConfiguration("resources.directory", resources)
-            .givenConfiguration("classes.directory", classes)
+            .givenConfiguration("resources.destination.directory", classes)
             .givenConfiguration("test.resources.directory", resources)
-            .givenConfiguration("test.classes.directory", classes)
+            .givenConfiguration("test.resources.destination.directory", classes)
             .tasks()
             .execute();
 
@@ -78,31 +78,12 @@ final class CopyResourcesTests {
 
         new Dsl(new ResourcesPlugin(), path)
             .givenConfiguration("resources.directory", resources)
-            .givenConfiguration("classes.directory", classes)
+            .givenConfiguration("resources.destination.directory", classes)
             .givenConfiguration("test.resources.directory", resources)
-            .givenConfiguration("test.classes.directory", classes)
+            .givenConfiguration("test.resources.destination.directory", classes)
             .tasks()
             .execute()
             .thenNoException();
-    }
-
-    @Test
-    void givenNoClasses_whenExecuteTasks_thenResourcesAreNotCopied(
-        @TempDir Path path
-    ) throws IOException {
-        var classes = path.resolve("classes");
-        var resources = Files.createDirectory(path.resolve("resources"));
-        Files.createFile(resources.resolve("resource"));
-
-        new Dsl(new ResourcesPlugin(), path)
-            .givenConfiguration("resources.directory", resources)
-            .givenConfiguration("classes.directory", classes)
-            .givenConfiguration("test.resources.directory", resources)
-            .givenConfiguration("test.classes.directory", classes)
-            .tasks()
-            .execute();
-
-        assertThat(classes).doesNotExist();
     }
 
     @ParameterizedTest
@@ -116,13 +97,35 @@ final class CopyResourcesTests {
 
         new Dsl(new ResourcesPlugin(), path)
             .givenConfiguration("resources.directory", directory)
-            .givenConfiguration("classes.directory", classes)
+            .givenConfiguration("resources.destination.directory", classes)
             .givenConfiguration("test.resources.directory", directory)
-            .givenConfiguration("test.classes.directory", testClasses)
+            .givenConfiguration("test.resources.destination.directory", testClasses)
             .tasks()
             .execute();
 
         assertThat(classes).directoryContentIsEqualTo(directory);
         assertThat(testClasses).directoryContentIsEqualTo(directory);
+    }
+
+    @Test
+    void givenNoConfiguration_whenExecuteTasks_thenResourcesCopiedFromDefaultDirectoryToDefaultDestination(
+        @TempDir Path path
+    ) throws IOException {
+        var resources = Files.createDirectories(
+            path.resolve("src").resolve("main").resolve("resources")
+        );
+        Files.createFile(resources.resolve("resource"));
+        var testResources = Files.createDirectories(
+            path.resolve("src").resolve("test").resolve("resources")
+        );
+        Files.createFile(testResources.resolve("test-resource"));
+
+        new Dsl(new ResourcesPlugin(), path)
+            .tasks()
+            .execute();
+
+        var conveyor = path.resolve(".conveyor");
+        assertThat(conveyor.resolve("classes")).directoryContentIsEqualTo(resources);
+        assertThat(conveyor.resolve("test-classes")).directoryContentIsEqualTo(testResources);
     }
 }

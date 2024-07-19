@@ -4,23 +4,23 @@ import com.github.maximtereshchenko.conveyor.files.FileTree;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskAction;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskTracer;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 
 final class CopyResourcesAction implements ConveyorTaskAction {
 
     private final Path resourcesDirectory;
-    private final Path classesDirectory;
+    private final Path destinationDirectory;
 
-    CopyResourcesAction(Path resourcesDirectory, Path classesDirectory) {
+    CopyResourcesAction(Path resourcesDirectory, Path destinationDirectory) {
         this.resourcesDirectory = resourcesDirectory;
-        this.classesDirectory = classesDirectory;
+        this.destinationDirectory = destinationDirectory;
     }
 
     @Override
     public void execute(ConveyorTaskTracer tracer) {
-        if (Files.exists(resourcesDirectory) && Files.exists(classesDirectory)) {
-            new FileTree(resourcesDirectory).copyTo(classesDirectory);
+        var fileTree = new FileTree(resourcesDirectory);
+        if (fileTree.exists()) {
+            fileTree.copyTo(destinationDirectory);
         }
     }
 }
