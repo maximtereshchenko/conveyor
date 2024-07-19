@@ -29,12 +29,12 @@
     },
     {
       "group": "com.github.maximtereshchenko.conveyor",
-      "name": "compile-conveyor-plugin",
+      "name": "resources-conveyor-plugin",
       "version": "${conveyor.version}"
     },
     {
       "group": "com.github.maximtereshchenko.conveyor",
-      "name": "resources-conveyor-plugin",
+      "name": "compile-conveyor-plugin",
       "version": "${conveyor.version}"
     },
     {

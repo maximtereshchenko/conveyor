@@ -56,8 +56,9 @@ final class CacheableTask implements Task {
                 taskCache.store(inputs, outputs, directory);
             }
             taskCache.remember(inputs, outputs);
+        } else {
+            tracer.submitTaskUpToDate(original.name());
         }
-        tracer.submitTaskUpToDate(original.name());
     }
 
     @Override
