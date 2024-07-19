@@ -11,6 +11,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Set;
 
@@ -55,5 +56,18 @@ final class CleanPluginTests {
             .execute();
 
         assertThat(directory).doesNotExist();
+    }
+
+    @Test
+    void givenNoConfiguredDirectory_whenExecuteTasks_thenDefaultDirectoryIsDeleted(
+        @TempDir Path path
+    ) throws IOException {
+        var defaultDirectory = Files.createDirectory(path.resolve(".conveyor"));
+
+        new Dsl(new CleanPlugin(), path)
+            .tasks()
+            .execute();
+
+        assertThat(defaultDirectory).doesNotExist();
     }
 }

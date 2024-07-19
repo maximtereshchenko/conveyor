@@ -2,6 +2,7 @@ package com.github.maximtereshchenko.conveyor.plugin.clean;
 
 import com.github.maximtereshchenko.conveyor.plugin.api.*;
 
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
@@ -24,11 +25,19 @@ public final class CleanPlugin implements ConveyorPlugin {
                 "clean",
                 BindingStage.CLEAN,
                 BindingStep.RUN,
-                new CleanAction(Paths.get(configuration.get("directory"))),
+                new CleanAction(directory(schematic, configuration)),
                 Set.of(),
                 Set.of(),
                 Cache.DISABLED
             )
         );
+    }
+
+    private Path directory(ConveyorSchematic schematic, Map<String, String> configuration) {
+        var directory = configuration.get("directory");
+        if (directory == null) {
+            return schematic.path().getParent().resolve(".conveyor");
+        }
+        return Paths.get(directory);
     }
 }
