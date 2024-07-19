@@ -3,6 +3,7 @@ package com.github.maximtereshchenko.conveyor.core;
 import com.github.maximtereshchenko.conveyor.api.ConveyorModule;
 import com.github.maximtereshchenko.conveyor.api.Stage;
 import com.github.maximtereshchenko.conveyor.api.schematic.DependencyScope;
+import com.github.maximtereshchenko.conveyor.files.FileTree;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -654,6 +655,34 @@ final class TasksFeatureTests extends ConveyorTest {
 
         module.construct(conveyorJson, List.of(Stage.COMPILE));
         var redundant = Files.createFile(path.resolve("output").resolve("redundant"));
+        module.construct(conveyorJson, List.of(Stage.COMPILE));
+
+        assertThat(redundant).doesNotExist();
+    }
+
+    @Test
+    void givenNoPreviousChecksum_whenConstructToStage_thenRedundantFileInOutputIsDeleted(
+        @TempDir Path path,
+        ConveyorModule module,
+        BuilderFactory factory
+    ) throws Exception {
+        factory.repositoryBuilder(path)
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("cache")
+            )
+            .jar(
+                factory.jarBuilder("cache", path)
+            )
+            .install(path);
+        var conveyorJson = factory.schematicDefinitionBuilder()
+            .repository(path)
+            .plugin("cache")
+            .conveyorJson(path);
+
+        module.construct(conveyorJson, List.of(Stage.COMPILE));
+        var redundant = Files.createFile(path.resolve("output").resolve("redundant"));
+        new FileTree(path.resolve(".conveyor-cache")).delete();
         module.construct(conveyorJson, List.of(Stage.COMPILE));
 
         assertThat(redundant).doesNotExist();

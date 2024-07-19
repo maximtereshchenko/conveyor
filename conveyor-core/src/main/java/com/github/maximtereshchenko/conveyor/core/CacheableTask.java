@@ -48,7 +48,8 @@ final class CacheableTask implements Task {
     @Override
     public void execute() {
         if (taskCache.changed(inputs, outputs)) {
-            if (taskCache.restore(inputs, outputs, directory)) {
+            outputs.delete();
+            if (taskCache.restore(inputs, directory)) {
                 tracer.submitTaskRestoredFromCache(original.name());
             } else {
                 original.execute();

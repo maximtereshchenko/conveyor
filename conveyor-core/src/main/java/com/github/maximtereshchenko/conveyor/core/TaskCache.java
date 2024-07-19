@@ -18,13 +18,12 @@ final class TaskCache {
                changed(outputsChecksumPath(), outputs.checksum());
     }
 
-    boolean restore(Inputs inputs, Outputs outputs, Path destination) {
+    boolean restore(Inputs inputs, Path destination) {
         var source = directory.resolve(String.valueOf(inputs.checksum()));
         var fileTree = new FileTree(source);
         if (!fileTree.exists()) {
             return false;
         }
-        outputs.delete();
         fileTree.copyTo(destination);
         return true;
     }
