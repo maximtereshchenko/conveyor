@@ -20,6 +20,21 @@ final class FakeConveyorSchematic implements ConveyorSchematic {
     }
 
     @Override
+    public String group() {
+        return "group";
+    }
+
+    @Override
+    public String name() {
+        return "project";
+    }
+
+    @Override
+    public String version() {
+        return "1.0.0";
+    }
+
+    @Override
     public Path path() {
         return path;
     }

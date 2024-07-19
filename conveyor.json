@@ -183,11 +183,7 @@
     },
     {
       "group": "${conveyor.schematic.group}",
-      "name": "archive-conveyor-plugin",
-      "configuration": {
-        "classes.directory": "${classes.directory}",
-        "destination": "${artifact.location}"
-      }
+      "name": "archive-conveyor-plugin"
     },
     {
       "group": "${conveyor.schematic.group}",

@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 public final class ArchivePlugin implements ConveyorPlugin {
@@ -20,17 +21,24 @@ public final class ArchivePlugin implements ConveyorPlugin {
         ConveyorSchematic schematic,
         Map<String, String> configuration
     ) {
-        var classesDirectory = configuredPath(configuration, "classes.directory");
-        var destination = configuredPath(configuration, "destination");
+        var conveyor = schematic.path().getParent().resolve(".conveyor");
+        var destination = configuredPath(configuration, "destination")
+            .orElseGet(() ->
+                conveyor.resolve("%s-%s.jar".formatted(schematic.name(), schematic.version()))
+            );
         return List.of(
             new ConveyorTask(
                 "archive",
                 BindingStage.ARCHIVE,
                 BindingStep.RUN,
-                new ArchiveAction(classesDirectory, destination),
-                Set.of(new PathConveyorTaskInput(classesDirectory)),
-                Set.of(new PathConveyorTaskOutput(destination)),
-                Cache.ENABLED
+                new ArchiveAction(
+                    configuredPath(configuration, "classes.directory")
+                        .orElseGet(() -> conveyor.resolve("classes")),
+                    destination
+                ),
+                Set.of(),
+                Set.of(),
+                Cache.DISABLED
             ),
             new ConveyorTask(
                 "publish-jar-artifact",
@@ -44,7 +52,10 @@ public final class ArchivePlugin implements ConveyorPlugin {
         );
     }
 
-    private Path configuredPath(Map<String, String> configuration, String property) {
-        return Paths.get(configuration.get(property)).toAbsolutePath().normalize();
+    private Optional<Path> configuredPath(Map<String, String> configuration, String property) {
+        return Optional.ofNullable(configuration.get(property))
+            .map(Paths::get)
+            .map(Path::toAbsolutePath)
+            .map(Path::normalize);
     }
 }

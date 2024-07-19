@@ -6,6 +6,12 @@ import java.util.Set;
 
 public interface ConveyorSchematic {
 
+    String group();
+
+    String name();
+
+    String version();
+
     Path path();
 
     Optional<String> propertyValue(String key);

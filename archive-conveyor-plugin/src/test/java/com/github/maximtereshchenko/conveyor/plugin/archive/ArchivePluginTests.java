@@ -10,6 +10,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Set;
 
@@ -19,12 +20,9 @@ final class ArchivePluginTests {
 
     @Test
     void givenPlugin_whenTasks_thenTaskBindToArchiveRun(@TempDir Path path) throws IOException {
-        var classes = path.resolve("classes");
-        var destination = path.resolve("destination");
-
         new Dsl(new ArchivePlugin(), path)
-            .givenConfiguration("classes.directory", classes)
-            .givenConfiguration("destination", destination)
+            .givenConfiguration("classes.directory", path.resolve("classes"))
+            .givenConfiguration("destination", path.resolve("destination"))
             .tasks()
             .contain(
                 new ConveyorTask(
@@ -32,9 +30,9 @@ final class ArchivePluginTests {
                     BindingStage.ARCHIVE,
                     BindingStep.RUN,
                     null,
-                    Set.of(new PathConveyorTaskInput(classes)),
-                    Set.of(new PathConveyorTaskOutput(destination)),
-                    Cache.ENABLED
+                    Set.of(),
+                    Set.of(),
+                    Cache.DISABLED
                 ),
                 new ConveyorTask(
                     "publish-jar-artifact",
@@ -86,5 +84,22 @@ final class ArchivePluginTests {
         var extracted = path.resolve("extracted");
         new ZipArchive(archive).extract(extracted);
         assertThat(extracted).directoryContentIsEqualTo(directory);
+    }
+
+    @Test
+    void givenNoConfiguration_whenExecuteTask_thenArtifactInDefaultLocationContainsFilesFromDefaultDirectory(
+        @TempDir Path path
+    ) throws IOException {
+        var conveyor = path.resolve(".conveyor");
+        var classes = Files.createDirectories(conveyor.resolve("classes"));
+        Files.createFile(classes.resolve("Dummy.class"));
+
+        new Dsl(new ArchivePlugin(), path)
+            .tasks()
+            .execute();
+
+        var extracted = path.resolve("extracted");
+        new ZipArchive(conveyor.resolve("project-1.0.0.jar")).extract(extracted);
+        assertThat(extracted).directoryContentIsEqualTo(classes);
     }
 }

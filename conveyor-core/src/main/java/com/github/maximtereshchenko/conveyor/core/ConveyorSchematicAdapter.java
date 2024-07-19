@@ -35,6 +35,21 @@ final class ConveyorSchematicAdapter implements ConveyorSchematic {
     }
 
     @Override
+    public String group() {
+        return id.group();
+    }
+
+    @Override
+    public String name() {
+        return id.name();
+    }
+
+    @Override
+    public String version() {
+        return version.toString();
+    }
+
+    @Override
     public Path path() {
         return path;
     }
