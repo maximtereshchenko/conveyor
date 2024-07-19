@@ -6,9 +6,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public final class ExecutablePlugin implements ConveyorPlugin {
 
@@ -22,44 +22,76 @@ public final class ExecutablePlugin implements ConveyorPlugin {
         ConveyorSchematic schematic,
         Map<String, String> configuration
     ) {
-        var classesDirectory = configuredPath(configuration, "classes.directory");
-        var destination = configuredPath(configuration, "destination");
+        var conveyor = schematic.path().getParent().resolve(".conveyor");
+        var containerDirectory = configuredPath(configuration, "container.directory")
+            .orElseGet(() -> conveyor.resolve("executable-container"));
         var dependencies = schematic.classpath(Set.of(ClasspathScope.IMPLEMENTATION));
         return List.of(
-            new ConveyorTask(
+            task(
                 "extract-dependencies",
-                BindingStage.ARCHIVE,
-                BindingStep.FINALIZE,
-                new ExtractDependenciesAction(dependencies, classesDirectory),
-                Stream.concat(dependencies.stream(), Stream.of(classesDirectory))
+                new ExtractDependenciesAction(dependencies, containerDirectory),
+                dependencies.stream()
                     .map(PathConveyorTaskInput::new)
                     .collect(Collectors.toSet()),
-                Set.of(new PathConveyorTaskOutput(classesDirectory)),
-                //TODO copy classes and dependencies to separate directory
+                Set.of(new PathConveyorTaskOutput(containerDirectory)),
                 Cache.ENABLED
             ),
-            new ConveyorTask(
+            task(
+                "copy-classes",
+                new CopyClassesAction(
+                    configuredPath(configuration, "classes.directory")
+                        .orElseGet(() -> conveyor.resolve("classes")),
+                    containerDirectory
+                )
+            ),
+            task(
                 "write-manifest",
-                BindingStage.ARCHIVE,
-                BindingStep.FINALIZE,
-                new WriteManifestAction(classesDirectory, configuration.get("main.class")),
-                Set.of(),
-                Set.of(),
-                Cache.DISABLED
+                new WriteManifestAction(containerDirectory, configuration.get("main.class"))
             ),
-            new ConveyorTask(
+            task(
                 "archive-executable",
-                BindingStage.ARCHIVE,
-                BindingStep.FINALIZE,
-                new ArchiveExecutableAction(classesDirectory, destination),
-                Set.of(new PathConveyorTaskInput(classesDirectory)),
-                Set.of(new PathConveyorTaskOutput(destination)),
-                Cache.ENABLED
+                new ArchiveExecutableAction(
+                    containerDirectory,
+                    configuredPath(configuration, "destination")
+                        .orElseGet(() ->
+                            conveyor.resolve(
+                                "%s-%s-executable.jar".formatted(
+                                    schematic.name(),
+                                    schematic.version()
+                                )
+                            )
+                        )
+                )
             )
         );
     }
 
-    private Path configuredPath(Map<String, String> configuration, String property) {
-        return Paths.get(configuration.get(property)).toAbsolutePath().normalize();
+    private ConveyorTask task(String name, ConveyorTaskAction action) {
+        return task(name, action, Set.of(), Set.of(), Cache.DISABLED);
+    }
+
+    private ConveyorTask task(
+        String name,
+        ConveyorTaskAction action,
+        Set<ConveyorTaskInput> inputs,
+        Set<ConveyorTaskOutput> outputs,
+        Cache cache
+    ) {
+        return new ConveyorTask(
+            name,
+            BindingStage.ARCHIVE,
+            BindingStep.FINALIZE,
+            action,
+            inputs,
+            outputs,
+            cache
+        );
+    }
+
+    private Optional<Path> configuredPath(Map<String, String> configuration, String property) {
+        return Optional.ofNullable(configuration.get(property))
+            .map(Paths::get)
+            .map(Path::toAbsolutePath)
+            .map(Path::normalize);
     }
 }

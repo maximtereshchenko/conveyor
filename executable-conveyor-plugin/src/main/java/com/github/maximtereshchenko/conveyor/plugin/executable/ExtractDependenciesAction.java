@@ -12,22 +12,22 @@ import java.util.Set;
 final class ExtractDependenciesAction implements ConveyorTaskAction {
 
     private final Set<Path> dependencies;
-    private final Path classesDirectory;
+    private final Path containerDirectory;
 
-    ExtractDependenciesAction(Set<Path> dependencies, Path classesDirectory) {
+    ExtractDependenciesAction(Set<Path> dependencies, Path containerDirectory) {
         this.dependencies = dependencies;
-        this.classesDirectory = classesDirectory;
+        this.containerDirectory = containerDirectory;
     }
 
     @Override
     public void execute(ConveyorTaskTracer tracer) {
         for (var dependency : dependencies) {
-            new ZipArchive(dependency).extract(classesDirectory);
+            new ZipArchive(dependency).extract(containerDirectory);
             tracer.submit(
                 TracingImportance.INFO,
-                () -> "Extracted %s to %s".formatted(dependency, classesDirectory)
+                () -> "Extracted %s to %s".formatted(dependency, containerDirectory)
             );
         }
-        new FileTree(classesDirectory.resolve("module-info.class")).delete();
+        new FileTree(containerDirectory.resolve("module-info.class")).delete();
     }
 }

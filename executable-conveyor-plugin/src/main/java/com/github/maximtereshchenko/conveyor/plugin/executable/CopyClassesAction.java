@@ -1,32 +1,32 @@
 package com.github.maximtereshchenko.conveyor.plugin.executable;
 
+import com.github.maximtereshchenko.conveyor.files.FileTree;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskAction;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskTracer;
 import com.github.maximtereshchenko.conveyor.plugin.api.TracingImportance;
-import com.github.maximtereshchenko.conveyor.zip.ZipArchiveContainer;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 
-final class ArchiveExecutableAction implements ConveyorTaskAction {
+final class CopyClassesAction implements ConveyorTaskAction {
 
+    private final Path classesDirectory;
     private final Path containerDirectory;
-    private final Path destination;
 
-    ArchiveExecutableAction(Path containerDirectory, Path destination) {
+    CopyClassesAction(Path classesDirectory, Path containerDirectory) {
+        this.classesDirectory = classesDirectory;
         this.containerDirectory = containerDirectory;
-        this.destination = destination;
     }
 
     @Override
     public void execute(ConveyorTaskTracer tracer) {
-        if (!Files.exists(containerDirectory)) {
+        var fileTree = new FileTree(classesDirectory);
+        if (!fileTree.exists()) {
             return;
         }
-        new ZipArchiveContainer(containerDirectory).archive(destination);
+        fileTree.copyTo(containerDirectory);
         tracer.submit(
             TracingImportance.INFO,
-            () -> "Archived %s to executable %s".formatted(containerDirectory, destination)
+            () -> "Copied %s to %s".formatted(classesDirectory, containerDirectory)
         );
     }
 }

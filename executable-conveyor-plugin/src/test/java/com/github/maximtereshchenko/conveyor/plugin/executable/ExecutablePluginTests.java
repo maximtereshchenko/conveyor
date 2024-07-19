@@ -20,15 +20,15 @@ final class ExecutablePluginTests {
     @Test
     void givenPlugin_whenTasks_thenTaskBindToArchiveFinalize(@TempDir Path path)
         throws IOException {
-        var classes = path.resolve("classes");
-        var destination = path.resolve("destination");
+        var container = path.resolve("container");
         var dependency = path.resolve("dependency");
 
         new Dsl(new ExecutablePlugin(), path)
             .givenDependency(dependency)
-            .givenConfiguration("classes.directory", classes)
+            .givenConfiguration("classes.directory", path.resolve("classes"))
+            .givenConfiguration("container.directory", container)
             .givenConfiguration("main.class")
-            .givenConfiguration("destination", destination)
+            .givenConfiguration("destination", path.resolve("destination"))
             .tasks()
             .contain(
                 new ConveyorTask(
@@ -36,12 +36,18 @@ final class ExecutablePluginTests {
                     BindingStage.ARCHIVE,
                     BindingStep.FINALIZE,
                     null,
-                    Set.of(
-                        new PathConveyorTaskInput(classes),
-                        new PathConveyorTaskInput(dependency)
-                    ),
-                    Set.of(new PathConveyorTaskOutput(classes)),
+                    Set.of(new PathConveyorTaskInput(dependency)),
+                    Set.of(new PathConveyorTaskOutput(container)),
                     Cache.ENABLED
+                ),
+                new ConveyorTask(
+                    "copy-classes",
+                    BindingStage.ARCHIVE,
+                    BindingStep.FINALIZE,
+                    null,
+                    Set.of(),
+                    Set.of(),
+                    Cache.DISABLED
                 ),
                 new ConveyorTask(
                     "write-manifest",
@@ -57,65 +63,51 @@ final class ExecutablePluginTests {
                     BindingStage.ARCHIVE,
                     BindingStep.FINALIZE,
                     null,
-                    Set.of(new PathConveyorTaskInput(classes)),
-                    Set.of(new PathConveyorTaskOutput(destination)),
-                    Cache.ENABLED
+                    Set.of(),
+                    Set.of(),
+                    Cache.DISABLED
                 )
             );
-    }
-
-    @Test
-    void givenNoClasses_whenExecuteTasks_thenNoExecutable(@TempDir Path path) throws IOException {
-        var classes = path.resolve("classes");
-        var executable = path.resolve("executable");
-
-        new Dsl(new ExecutablePlugin(), path)
-            .givenConfiguration("classes.directory", classes)
-            .givenConfiguration("main.class")
-            .givenConfiguration("destination", executable)
-            .tasks()
-            .execute();
-
-        assertThat(classes).doesNotExist();
-        assertThat(executable).doesNotExist();
     }
 
     @Test
     void givenNoDependencies_whenExecuteTasks_thenClassesHaveNoExtractedDependencies(
         @TempDir Path path
     ) throws IOException {
-        var classes = Files.createDirectory(path.resolve("classes"));
+        var container = path.resolve("container");
 
         new Dsl(new ExecutablePlugin(), path)
-            .givenConfiguration("classes.directory", classes)
+            .givenConfiguration("classes.directory", path.resolve("classes"))
+            .givenConfiguration("container.directory", path.resolve("container"))
             .givenConfiguration("main.class")
             .givenConfiguration("destination", path.resolve("executable"))
             .tasks()
             .execute();
 
-        assertThat(new FileTree(classes).files()).containsExactly(manifest(classes));
+        assertThat(new FileTree(container).files()).containsExactly(manifest(container));
     }
 
     @Test
-    void givenDependency_whenExecuteTasks_thenDependencyIsExtractedToClasses(
+    void givenDependency_whenExecuteTasks_thenDependencyIsExtractedToContainer(
         @TempDir Path path
     ) throws IOException {
         var dependencyContainer = Files.createDirectory(path.resolve("dependency-container"));
         Files.createFile(dependencyContainer.resolve("file"));
         var dependency = path.resolve("dependency");
         new ZipArchiveContainer(dependencyContainer).archive(dependency);
-        var classes = Files.createDirectory(path.resolve("classes"));
+        var container = path.resolve("container");
 
         new Dsl(new ExecutablePlugin(), path)
             .givenDependency(dependency)
-            .givenConfiguration("classes.directory", classes)
+            .givenConfiguration("classes.directory", path.resolve("classes"))
+            .givenConfiguration("container.directory", container)
             .givenConfiguration("main.class")
             .givenConfiguration("destination", path.resolve("executable"))
             .tasks()
             .execute();
 
-        assertThat(classes)
-            .directoryContentIsEqualToIgnoring(dependencyContainer, manifest(classes));
+        assertThat(container)
+            .directoryContentIsEqualToIgnoring(dependencyContainer, manifest(container));
     }
 
     @Test
@@ -126,17 +118,18 @@ final class ExecutablePluginTests {
         Files.createFile(dependencyContainer.resolve("module-info.class"));
         var dependency = path.resolve("dependency");
         new ZipArchiveContainer(dependencyContainer).archive(dependency);
-        var classes = Files.createDirectory(path.resolve("classes"));
+        var container = path.resolve("container");
 
         new Dsl(new ExecutablePlugin(), path)
             .givenDependency(dependency)
-            .givenConfiguration("classes.directory", classes)
+            .givenConfiguration("classes.directory", path.resolve("classes"))
+            .givenConfiguration("container.directory", container)
             .givenConfiguration("main.class")
             .givenConfiguration("destination", path.resolve("executable"))
             .tasks()
             .execute();
 
-        assertThat(classes.resolve("module-info.class")).doesNotExist();
+        assertThat(container.resolve("module-info.class")).doesNotExist();
     }
 
     @Test
@@ -149,6 +142,7 @@ final class ExecutablePluginTests {
 
         new Dsl(new ExecutablePlugin(), path)
             .givenConfiguration("classes.directory", classes)
+            .givenConfiguration("container.directory", path.resolve("container"))
             .givenConfiguration("main.class")
             .givenConfiguration("destination", executable)
             .tasks()
@@ -157,18 +151,18 @@ final class ExecutablePluginTests {
         assertThat(executable).exists();
         var extracted = Files.createDirectory(path.resolve("extracted"));
         new ZipArchive(executable).extract(extracted);
-        assertThat(extracted).directoryContentIsEqualTo(classes);
+        assertThat(extracted).directoryContentIsEqualToIgnoring(classes, manifest(extracted));
     }
 
     @Test
     void givenMainClass_whenExecuteTasks_thenExecutableContainsManifestWithMainClass(
         @TempDir Path path
     ) throws IOException {
-        var classes = Files.createDirectory(path.resolve("classes"));
         var executable = path.resolve("executable");
 
         new Dsl(new ExecutablePlugin(), path)
-            .givenConfiguration("classes.directory", classes)
+            .givenConfiguration("classes.directory", path.resolve("classes"))
+            .givenConfiguration("container.directory", path.resolve("container"))
             .givenConfiguration("main.class", "main.Main")
             .givenConfiguration("destination", executable)
             .tasks()
@@ -180,6 +174,23 @@ final class ExecutablePluginTests {
         assertThat(manifest(extracted))
             .content()
             .contains("Main-Class: main.Main");
+    }
+
+    @Test
+    void givenNoConfiguration_whenExecuteTasks_thenDefaultPathsAreUsed(@TempDir Path path)
+        throws IOException {
+        var conveyor = path.resolve(".conveyor");
+        var classes = Files.createDirectories(conveyor.resolve("classes"));
+        Files.createFile(classes.resolve("Dummy.class"));
+
+        new Dsl(new ExecutablePlugin(), path)
+            .givenConfiguration("main.class", "Dummy")
+            .tasks()
+            .execute();
+
+        var extracted = Files.createDirectory(path.resolve("extracted"));
+        new ZipArchive(conveyor.resolve("project-1.0.0-executable.jar")).extract(extracted);
+        assertThat(extracted).directoryContentIsEqualTo(conveyor.resolve("executable-container"));
     }
 
     private Path manifest(Path path) {
