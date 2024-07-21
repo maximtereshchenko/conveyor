@@ -12,6 +12,7 @@ import org.junit.jupiter.api.extension.ParameterResolver;
 final class ConveyorExtension implements ParameterResolver {
 
     private final Namespace namespace = Namespace.create(ConveyorExtension.class);
+    private final JacksonAdapter jacksonAdapter = JacksonAdapter.configured();
 
     @Override
     public boolean supportsParameter(
@@ -19,7 +20,9 @@ final class ConveyorExtension implements ParameterResolver {
         ExtensionContext extensionContext
     ) {
         var type = parameterContext.getParameter().getType();
-        return type == ConveyorModule.class || type == BuilderFactory.class;
+        return type == ConveyorModule.class ||
+               type == BuilderFactory.class ||
+               type == ConveyorModuleBuilder.class;
     }
 
     @Override
@@ -28,15 +31,12 @@ final class ConveyorExtension implements ParameterResolver {
         ExtensionContext extensionContext
     ) {
         var store = extensionContext.getStore(namespace);
-        var jacksonAdapter = store.getOrComputeIfAbsent(
-            JacksonAdapter.class,
-            key -> JacksonAdapter.configured(),
-            JacksonAdapter.class
+        var conveyorModuleBuilder = store.getOrComputeIfAbsent(
+            ConveyorModuleBuilder.class,
+            key -> new ConveyorModuleBuilder(jacksonAdapter, Runnable::run),
+            ConveyorModuleBuilder.class
         );
-        store.getOrComputeIfAbsent(
-            ConveyorModule.class,
-            key -> new ConveyorModuleProxy(jacksonAdapter)
-        );
+        store.getOrComputeIfAbsent(ConveyorModule.class, key -> conveyorModuleBuilder.build());
         store.getOrComputeIfAbsent(
             BuilderFactory.class,
             key -> new BuilderFactory(jacksonAdapter, new XmlMapper(), new Compiler())

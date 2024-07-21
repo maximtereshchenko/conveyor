@@ -1,20 +1,17 @@
 package com.github.maximtereshchenko.conveyor.core;
 
 import com.github.maximtereshchenko.conveyor.api.ConveyorModule;
-import com.github.maximtereshchenko.conveyor.api.Stage;
-import com.github.maximtereshchenko.conveyor.api.TracingOutputLevel;
 import com.github.maximtereshchenko.conveyor.api.port.SchematicDefinitionConverter;
 
-import java.nio.file.Path;
-import java.util.List;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
-final class ConveyorModuleProxy implements ConveyorModule {
+final class ConveyorModuleBuilder {
 
     private final SchematicDefinitionConverter schematicDefinitionConverter;
     private final Executor executor;
 
-    ConveyorModuleProxy(
+    ConveyorModuleBuilder(
         SchematicDefinitionConverter schematicDefinitionConverter,
         Executor executor
     ) {
@@ -22,14 +19,14 @@ final class ConveyorModuleProxy implements ConveyorModule {
         this.executor = executor;
     }
 
-    @Override
-    public void construct(Path path, List<Stage> stages) {
-        new ConveyorFacade(
+    ConveyorModuleBuilder parallel() {
+        return new ConveyorModuleBuilder(
             schematicDefinitionConverter,
-            executor,
-            message -> {},
-            TracingOutputLevel.SILENT
-        )
-            .construct(path, stages);
+            Executors.newVirtualThreadPerTaskExecutor()
+        );
+    }
+
+    ConveyorModule build() {
+        return new ConveyorModuleProxy(schematicDefinitionConverter, executor);
     }
 }

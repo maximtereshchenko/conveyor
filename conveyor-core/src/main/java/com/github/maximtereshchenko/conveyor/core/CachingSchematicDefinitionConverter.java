@@ -4,13 +4,13 @@ import com.github.maximtereshchenko.conveyor.api.port.SchematicDefinitionConvert
 import com.github.maximtereshchenko.conveyor.api.schematic.SchematicDefinition;
 
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 final class CachingSchematicDefinitionConverter implements SchematicDefinitionConverter {
 
     private final SchematicDefinitionConverter original;
-    private final Map<Path, SchematicDefinition> cache = new HashMap<>();
+    private final Map<Path, SchematicDefinition> cache = new ConcurrentHashMap<>();
 
     CachingSchematicDefinitionConverter(SchematicDefinitionConverter original) {
         this.original = original;

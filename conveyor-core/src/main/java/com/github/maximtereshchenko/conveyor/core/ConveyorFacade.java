@@ -10,6 +10,7 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
 public final class ConveyorFacade implements ConveyorModule {
@@ -19,14 +20,17 @@ public final class ConveyorFacade implements ConveyorModule {
     private final PomDefinitionFactory pomDefinitionFactory;
     private final SchematicDefinitionConverter schematicDefinitionConverter;
     private final PreferencesFactory preferencesFactory;
+    private final Executor executor;
     private final Tracer tracer;
 
     public ConveyorFacade(
         SchematicDefinitionConverter schematicDefinitionConverter,
+        Executor executor,
         TracingOutput tracingOutput,
         TracingOutputLevel tracingOutputLevel
     ) {
         this.tracer = new Tracer(tracingOutput, tracingOutputLevel);
+        this.executor = executor;
         this.schematicDefinitionConverter =
             new CachingSchematicDefinitionConverter(
                 new TracingSchematicDefinitionConverter(schematicDefinitionConverter, tracer)
@@ -67,7 +71,7 @@ public final class ConveyorFacade implements ConveyorModule {
                 )
             )
             .collect(Collectors.toCollection(LinkedHashSet::new));
-        return new Schematics(schematics, initial(schematics, path), tracer);
+        return Schematics.from(schematics, initial(schematics, path), executor);
     }
 
     private Schematic initial(LinkedHashSet<Schematic> schematics, Path path) {

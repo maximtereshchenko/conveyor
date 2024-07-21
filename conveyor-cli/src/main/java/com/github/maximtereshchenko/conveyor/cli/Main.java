@@ -7,12 +7,18 @@ import com.github.maximtereshchenko.conveyor.jackson.JacksonAdapter;
 
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.concurrent.Executors;
 
 final class Main {
 
     public static void main(String[] args) {
         new ConveyorFacade(
             JacksonAdapter.configured(),
+            Executors.newThreadPerTaskExecutor(
+                Thread.ofVirtual()
+                    .name("virtual-", 1)
+                    .factory()
+            ),
             System.out::println,
             TracingOutputLevel.NORMAL
         )

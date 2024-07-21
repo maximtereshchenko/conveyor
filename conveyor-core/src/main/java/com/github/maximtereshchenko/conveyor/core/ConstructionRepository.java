@@ -1,14 +1,14 @@
 package com.github.maximtereshchenko.conveyor.core;
 
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 final class ConstructionRepository implements Repository<Path, Path> {
 
-    private final Map<Coordinates, Path> schematicDefinitions = new HashMap<>();
-    private final Map<Coordinates, Path> artifacts = new HashMap<>();
+    private final Map<Coordinates, Path> schematicDefinitions = new ConcurrentHashMap<>();
+    private final Map<Coordinates, Path> artifacts = new ConcurrentHashMap<>();
 
     @Override
     public void publish(

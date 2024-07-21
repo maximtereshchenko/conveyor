@@ -7,6 +7,7 @@ import com.github.maximtereshchenko.conveyor.plugin.api.Convention;
 import java.nio.file.Path;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -45,10 +46,6 @@ final class Schematic {
 
     Id id() {
         return localModel.id();
-    }
-
-    Version version() {
-        return localModel.version();
     }
 
     boolean locatedAt(Path path) {
@@ -100,6 +97,11 @@ final class Schematic {
                 properties
             )
             .execute(stages);
+    }
+
+    Set<Id> required() {
+        var properties = properties(localModel);
+        return localModel.required(properties);
     }
 
     private boolean dependencyExists(

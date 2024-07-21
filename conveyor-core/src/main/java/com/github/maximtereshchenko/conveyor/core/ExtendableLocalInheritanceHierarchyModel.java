@@ -4,6 +4,8 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 final class ExtendableLocalInheritanceHierarchyModel
     implements LocalInheritanceHierarchyModel,
@@ -101,5 +103,23 @@ final class ExtendableLocalInheritanceHierarchyModel
     @Override
     public String toString() {
         return original.toString();
+    }
+
+    Set<Id> required(Properties properties) {
+        return Stream.concat(
+                original.models()
+                    .stream()
+                    .flatMap(localSchematicModel -> {
+                        if (localSchematicModel.template() instanceof SchematicTemplateModel model) {
+                            return Stream.of(model.id());
+                        }
+                        return Stream.empty();
+                    }),
+                dependencies()
+                    .stream()
+                    .map(DependencyModel::idModel)
+                    .map(idModel -> idModel.id(properties))
+            )
+            .collect(Collectors.toSet());
     }
 }

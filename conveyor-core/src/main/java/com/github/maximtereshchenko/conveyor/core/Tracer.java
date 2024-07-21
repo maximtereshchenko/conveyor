@@ -16,6 +16,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -40,10 +41,6 @@ final class Tracer {
         var copy = new ArrayList<>(context);
         copy.add(context(name, value));
         return new Tracer(output, outputLevel, copy);
-    }
-
-    void submitConstructionOrder(List<Schematic> schematicsInConstructionOrder) {
-        submit(Importance.INFO, () -> "Construction order " + schematicsInConstructionOrder);
     }
 
     void submitDownloadedArtifact(URI uri) {
@@ -141,10 +138,12 @@ final class Tracer {
     }
 
     private String formatted(Importance importance, String message) {
-        return Stream.concat(
+        return Stream.of(
                 debugContext(),
+                context.stream(),
                 Stream.of(context("importance", importance), context("message", message))
             )
+            .flatMap(Function.identity())
             .collect(Collectors.joining(", "));
     }
 
@@ -152,17 +151,14 @@ final class Tracer {
         if (!isTraceable(Importance.DEBUG)) {
             return Stream.of();
         }
-        return Stream.concat(
-            Stream.of(
-                context(
-                    "timestamp",
-                    DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(
-                        LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
-                    )
-                ),
-                context("thread", Thread.currentThread().getName())
+        return Stream.of(
+            context(
+                "timestamp",
+                DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(
+                    LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
+                )
             ),
-            context.stream()
+            context("thread", Thread.currentThread().getName())
         );
     }
 

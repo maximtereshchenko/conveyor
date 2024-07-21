@@ -11,6 +11,7 @@ A build tool for Java projects
     * A schematic can be constructed up to the specified stage: CLEAN, COMPILE, TEST, ARCHIVE or
       PUBLISH. Stages transition from COMPILE up to specified stage. CLEAN is a special stage, it
       should be explicitly specified to be active
+    * Schematics are constructed in parallel by default
 * Dependency version resolution
     * Given the same dependency is required but with different versions, the highest version wins
       taken into account the presence of the dependency requiring that version in the result class
