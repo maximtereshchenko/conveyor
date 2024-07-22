@@ -1,4 +1,4 @@
-package com.github.maximtereshchenko.conveyor.plugin.junit.jupiter;
+package com.github.maximtereshchenko.conveyor.junit.jupiter;
 
 import org.junit.platform.engine.TestExecutionResult;
 import org.junit.platform.launcher.TestExecutionListener;

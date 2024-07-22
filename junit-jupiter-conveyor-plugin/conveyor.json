@@ -11,6 +11,10 @@
       "name": "conveyor-plugin-api"
     },
     {
+      "group": "${conveyor.schematic.group}",
+      "name": "junit-jupiter-launcher"
+    },
+    {
       "group": "org.junit.platform",
       "name": "junit-platform-launcher"
     },

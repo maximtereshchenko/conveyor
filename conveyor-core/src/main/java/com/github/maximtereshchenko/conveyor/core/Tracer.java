@@ -4,8 +4,6 @@ import com.github.maximtereshchenko.conveyor.api.TracingOutputLevel;
 import com.github.maximtereshchenko.conveyor.api.port.TracingOutput;
 import com.github.maximtereshchenko.conveyor.api.schematic.SchematicDefinition;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.net.URI;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -73,16 +71,11 @@ final class Tracer {
         submit(Importance.INFO, () -> task + " outputs were restored from cache");
     }
 
-    void submit(Importance importance, Supplier<String> supplier, Throwable... throwable) {
+    void submit(Importance importance, Supplier<String> supplier) {
         if (!isTraceable(importance)) {
             return;
         }
         output.write(formatted(importance, supplier.get()));
-        for (var element : throwable) {
-            var writer = new StringWriter();
-            element.printStackTrace(new PrintWriter(writer));
-            output.write(writer.toString());
-        }
     }
 
     void submitLocalModel(ExtendableLocalInheritanceHierarchyModel model) {

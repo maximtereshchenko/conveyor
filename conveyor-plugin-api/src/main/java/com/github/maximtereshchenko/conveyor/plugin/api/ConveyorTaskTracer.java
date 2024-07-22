@@ -4,5 +4,5 @@ import java.util.function.Supplier;
 
 public interface ConveyorTaskTracer {
 
-    void submit(TracingImportance importance, Supplier<String> supplier, Throwable... throwable);
+    void submit(TracingImportance importance, Supplier<String> supplier);
 }

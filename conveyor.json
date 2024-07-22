@@ -21,7 +21,8 @@
     "./spring-boot-launcher",
     "./assertions",
     "./zip-archive",
-    "./files"
+    "./files",
+    "./junit-jupiter-launcher"
   ],
   "repositories": [
     {
@@ -141,6 +142,11 @@
       {
         "group": "${conveyor.schematic.group}",
         "name": "files",
+        "version": "${conveyor.schematic.version}"
+      },
+      {
+        "group": "${conveyor.schematic.group}",
+        "name": "junit-jupiter-launcher",
         "version": "${conveyor.schematic.version}"
       },
       {

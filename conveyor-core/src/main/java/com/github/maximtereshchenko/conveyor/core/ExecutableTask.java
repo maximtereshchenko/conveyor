@@ -33,8 +33,8 @@ final class ExecutableTask implements Task {
     public void execute() {
         tracer.submitTaskExecution(conveyorTask.name());
         conveyorTask.action()
-            .execute((tracingImportance, supplier, throwable) ->
-                tracer.submit(Importance.valueOf(tracingImportance.name()), supplier, throwable)
+            .execute((tracingImportance, supplier) ->
+                tracer.submit(Importance.valueOf(tracingImportance.name()), supplier)
             );
     }
 

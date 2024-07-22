@@ -1,0 +1,14 @@
+{
+  "name": "junit-jupiter-launcher",
+  "template": {
+    "group": "com.github.maximtereshchenko.conveyor",
+    "name": "conveyor-template",
+    "version": "1.0.0"
+  },
+  "dependencies": [
+    {
+      "group": "org.junit.platform",
+      "name": "junit-platform-launcher"
+    }
+  ]
+}

@@ -1,7 +1,5 @@
-package com.github.maximtereshchenko.conveyor.plugin.junit.jupiter;
+package com.github.maximtereshchenko.conveyor.junit.jupiter;
 
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskTracer;
-import com.github.maximtereshchenko.conveyor.plugin.api.TracingImportance;
 import org.junit.platform.engine.TestExecutionResult;
 import org.junit.platform.engine.support.descriptor.MethodSource;
 import org.junit.platform.launcher.TestExecutionListener;
@@ -14,25 +12,18 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 final class ReportingTestExecutionListener implements TestExecutionListener {
 
-    private final ConveyorTaskTracer tracer;
     private final AtomicInteger passed = new AtomicInteger();
     private final AtomicInteger failed = new AtomicInteger();
     private final AtomicInteger skipped = new AtomicInteger();
 
-    ReportingTestExecutionListener(ConveyorTaskTracer tracer) {
-        this.tracer = tracer;
-    }
-
     @Override
     public void testPlanExecutionFinished(TestPlan testPlan) {
-        tracer.submit(
-            TracingImportance.INFO,
-            () -> "Tests run: total %d, passed %d, failed %d, skipped %d".formatted(
-                passed.get() + failed.get() + skipped.get(),
-                passed.get(),
-                failed.get(),
-                skipped.get()
-            )
+        System.out.printf(
+            ">Tests run: total %d, passed %d, failed %d, skipped %d%n",
+            passed.get() + failed.get() + skipped.get(),
+            passed.get(),
+            failed.get(),
+            skipped.get()
         );
     }
 
@@ -58,10 +49,7 @@ final class ReportingTestExecutionListener implements TestExecutionListener {
         MethodSource methodSource,
         String reason
     ) {
-        tracer.submit(
-            TracingImportance.INFO,
-            () -> message(testIdentifier, methodSource, "SKIPPED (%s)".formatted(reason))
-        );
+        report(testIdentifier, methodSource, "SKIPPED (%s)".formatted(reason));
     }
 
     private void onFinished(
@@ -71,34 +59,29 @@ final class ReportingTestExecutionListener implements TestExecutionListener {
     ) {
         switch (testExecutionResult.getStatus()) {
             case SUCCESSFUL -> {
-                tracer.submit(
-                    TracingImportance.INFO,
-                    () -> message(testIdentifier, methodSource, "OK")
-                );
+                report(testIdentifier, methodSource, "OK");
                 passed.incrementAndGet();
             }
             case ABORTED -> {
                 //empty
             }
             case FAILED -> {
-                tracer.submit(
-                    TracingImportance.INFO,
-                    () -> message(testIdentifier, methodSource, "FAILED"),
-                    testExecutionResult.getThrowable()
-                        .map(throwable -> withTrimmedStackTrace(throwable, methodSource))
-                        .orElseThrow()
-                );
+                report(testIdentifier, methodSource, "FAILED");
+                testExecutionResult.getThrowable()
+                    .map(throwable -> withTrimmedStackTrace(throwable, methodSource))
+                    .ifPresent(throwable -> throwable.printStackTrace(System.out));
                 failed.incrementAndGet();
             }
         }
     }
 
-    private String message(
+    private void report(
         TestIdentifier testIdentifier,
         MethodSource methodSource,
         String status
     ) {
-        return "%s - %s - %s".formatted(
+        System.out.printf(
+            ">%s - %s - %s%n",
             methodSource.getClassName(),
             testIdentifier.getDisplayName(),
             status

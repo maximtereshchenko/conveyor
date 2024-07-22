@@ -8,11 +8,7 @@ import java.util.function.Supplier;
 final class NoOpTracer implements ConveyorTaskTracer {
 
     @Override
-    public void submit(
-        TracingImportance importance,
-        Supplier<String> supplier,
-        Throwable... throwable
-    ) {
+    public void submit(TracingImportance importance, Supplier<String> supplier) {
         //empty
     }
 }

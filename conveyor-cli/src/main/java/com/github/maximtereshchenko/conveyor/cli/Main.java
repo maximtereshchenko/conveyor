@@ -29,6 +29,5 @@ final class Main {
                     .map(Stage::valueOf)
                     .toList()
             );
-        System.exit(0); //TODO run tests in separate JVM
     }
 }

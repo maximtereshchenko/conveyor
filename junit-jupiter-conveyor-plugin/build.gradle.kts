@@ -5,6 +5,7 @@ plugins {
 
 dependencies {
     implementation(project(":conveyor-plugin-api"))
+    implementation(project(":junit-jupiter-launcher"))
     implementation(platform(libs.junit.bom))
     implementation(libs.junit.platform.launcher)
     implementation(libs.junit.jupiter.engine)
