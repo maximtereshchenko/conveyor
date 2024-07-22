@@ -1,4 +1,4 @@
-package com.github.maximtereshchenko.conveyor.plugin.springboot;
+package com.github.maximtereshchenko.conveyor.plugin.spring.boot;
 
 import com.github.maximtereshchenko.conveyor.files.FileTree;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskAction;

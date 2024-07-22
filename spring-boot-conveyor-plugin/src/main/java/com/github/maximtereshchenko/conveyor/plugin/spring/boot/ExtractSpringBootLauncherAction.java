@@ -1,9 +1,9 @@
-package com.github.maximtereshchenko.conveyor.plugin.springboot;
+package com.github.maximtereshchenko.conveyor.plugin.spring.boot;
 
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskAction;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTaskTracer;
 import com.github.maximtereshchenko.conveyor.plugin.api.TracingImportance;
-import com.github.maximtereshchenko.conveyor.springboot.Configuration;
+import com.github.maximtereshchenko.conveyor.spring.boot.Configuration;
 import com.github.maximtereshchenko.conveyor.zip.ZipArchive;
 
 import java.net.URISyntaxException;

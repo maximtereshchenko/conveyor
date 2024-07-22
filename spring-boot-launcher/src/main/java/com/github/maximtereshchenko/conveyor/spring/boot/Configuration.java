@@ -1,4 +1,4 @@
-package com.github.maximtereshchenko.conveyor.springboot;
+package com.github.maximtereshchenko.conveyor.spring.boot;
 
 public final class Configuration {
 

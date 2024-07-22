@@ -1,4 +1,4 @@
-package com.github.maximtereshchenko.conveyor.springboot;
+package com.github.maximtereshchenko.conveyor.spring.boot;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,7 +8,7 @@ final class Main {
 
     public static void main(String[] args) throws Exception {
         var properties = properties();
-        new SpringBootLauncher(
+        new Launcher(
             properties.getProperty(Configuration.CLASS_PATH_DIRECTORY_KEY),
             properties.getProperty(Configuration.LAUNCHED_CLASS_NAME_KEY)
         )

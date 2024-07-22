@@ -1,11 +1,11 @@
-package com.github.maximtereshchenko.conveyor.plugin.springboot;
+package com.github.maximtereshchenko.conveyor.plugin.spring.boot;
 
 import com.github.maximtereshchenko.conveyor.plugin.api.BindingStage;
 import com.github.maximtereshchenko.conveyor.plugin.api.BindingStep;
 import com.github.maximtereshchenko.conveyor.plugin.api.Cache;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
 import com.github.maximtereshchenko.conveyor.plugin.test.Dsl;
-import com.github.maximtereshchenko.conveyor.springboot.Configuration;
+import com.github.maximtereshchenko.conveyor.spring.boot.Configuration;
 import com.github.maximtereshchenko.conveyor.zip.ZipArchive;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -150,8 +150,9 @@ final class SpringBootPluginTests {
                 .resolve("github")
                 .resolve("maximtereshchenko")
                 .resolve("conveyor")
-                .resolve("springboot")
-                .resolve("SpringBootLauncher.class")
+                .resolve("spring")
+                .resolve("boot")
+                .resolve("Launcher.class")
         )
             .exists();
     }
@@ -237,8 +238,9 @@ final class SpringBootPluginTests {
                 .resolve("github")
                 .resolve("maximtereshchenko")
                 .resolve("conveyor")
-                .resolve("springboot")
-                .resolve("SpringBootLauncher.class")
+                .resolve("spring")
+                .resolve("boot")
+                .resolve("Launcher.class")
         )
             .exists();
         assertThat(container.resolve(Configuration.PROPERTIES_CLASS_PATH_LOCATION)).exists();

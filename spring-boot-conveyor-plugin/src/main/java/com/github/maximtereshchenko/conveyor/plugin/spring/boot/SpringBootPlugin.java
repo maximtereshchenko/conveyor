@@ -1,7 +1,7 @@
-package com.github.maximtereshchenko.conveyor.plugin.springboot;
+package com.github.maximtereshchenko.conveyor.plugin.spring.boot;
 
 import com.github.maximtereshchenko.conveyor.plugin.api.*;
-import com.github.maximtereshchenko.conveyor.springboot.Configuration;
+import com.github.maximtereshchenko.conveyor.spring.boot.Configuration;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;

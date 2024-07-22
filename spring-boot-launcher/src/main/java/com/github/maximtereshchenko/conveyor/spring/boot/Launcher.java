@@ -1,4 +1,4 @@
-package com.github.maximtereshchenko.conveyor.springboot;
+package com.github.maximtereshchenko.conveyor.spring.boot;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -7,12 +7,12 @@ import java.net.*;
 import java.nio.file.*;
 import java.util.Map;
 
-final class SpringBootLauncher {
+final class Launcher {
 
     private final String classPathDirectory;
     private final String mainClassName;
 
-    SpringBootLauncher(String classPathDirectory, String mainClassName) {
+    Launcher(String classPathDirectory, String mainClassName) {
         this.classPathDirectory = classPathDirectory;
         this.mainClassName = mainClassName;
     }
@@ -67,7 +67,7 @@ final class SpringBootLauncher {
     private FileSystem fileSystem() throws IOException, URISyntaxException {
         return FileSystems.newFileSystem(
             Paths.get(
-                SpringBootLauncher.class
+                Launcher.class
                     .getProtectionDomain()
                     .getCodeSource()
                     .getLocation()
