@@ -58,7 +58,7 @@ final class RunJunitJupiterTestsAction implements ConveyorTaskAction {
                 failureTestExecutionListener
             );
         if (!failureTestExecutionListener.isSuccess()) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("There are test failures");
         }
     }
 

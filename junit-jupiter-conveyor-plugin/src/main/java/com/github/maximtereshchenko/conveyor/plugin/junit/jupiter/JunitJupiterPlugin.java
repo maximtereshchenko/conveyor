@@ -23,9 +23,9 @@ public final class JunitJupiterPlugin implements ConveyorPlugin {
         ConveyorSchematic schematic,
         Map<String, String> configuration
     ) {
-        var testClassesDirectory = configuredPath(configuration, "test.classes.directory")
-            .orElseGet(() -> classes(schematic, "classes"));
         var classesDirectory = configuredPath(configuration, "classes.directory")
+            .orElseGet(() -> classes(schematic, "classes"));
+        var testClassesDirectory = configuredPath(configuration, "test.classes.directory")
             .orElseGet(() -> classes(schematic, "test-classes"));
         var dependencies = schematic.classpath(
             Set.of(ClasspathScope.IMPLEMENTATION, ClasspathScope.TEST)

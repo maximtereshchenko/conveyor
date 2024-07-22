@@ -167,15 +167,15 @@
     },
     {
       "group": "${conveyor.schematic.group}",
-      "name": "resources-conveyor-plugin"
-    },
-    {
-      "group": "${conveyor.schematic.group}",
       "name": "compile-conveyor-plugin"
     },
     {
       "group": "${conveyor.schematic.group}",
       "name": "junit-jupiter-conveyor-plugin"
+    },
+    {
+      "group": "${conveyor.schematic.group}",
+      "name": "resources-conveyor-plugin"
     },
     {
       "group": "${conveyor.schematic.group}",
