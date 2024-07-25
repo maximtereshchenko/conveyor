@@ -16,10 +16,11 @@ final class CacheableTaskFactory implements TaskFactory {
     public Task task(
         Path directory,
         Properties properties,
+        String plugin,
         ConveyorTask conveyorTask,
         Tracer tracer
     ) {
-        var task = original.task(directory, properties, conveyorTask, tracer);
+        var task = original.task(directory, properties, plugin, conveyorTask, tracer);
         return switch (conveyorTask.cache()) {
             case ENABLED -> new CacheableTask(
                 task,

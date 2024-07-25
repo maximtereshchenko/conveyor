@@ -61,9 +61,9 @@ final class Plugins {
                 taskFactory.task(
                     conveyorSchematic.path().getParent(),
                     properties,
+                    conveyorPlugin.name(),
                     conveyorTask,
-                    tracer.withContext("plugin", conveyorPlugin.name())
-                        .withContext("task", conveyorTask.name())
+                    tracer
                 )
             );
     }

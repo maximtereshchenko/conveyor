@@ -6,5 +6,11 @@ import java.nio.file.Path;
 
 interface TaskFactory {
 
-    Task task(Path directory, Properties properties, ConveyorTask conveyorTask, Tracer tracer);
+    Task task(
+        Path directory,
+        Properties properties,
+        String plugin,
+        ConveyorTask conveyorTask,
+        Tracer tracer
+    );
 }

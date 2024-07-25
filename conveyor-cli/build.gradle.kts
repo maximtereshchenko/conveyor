@@ -5,6 +5,7 @@ plugins {
 dependencies {
     implementation(project(":conveyor-core"))
     implementation(project(":jackson-adapter"))
+    implementation(libs.picocli)
 }
 
 tasks.register<Jar>("standaloneJar") {

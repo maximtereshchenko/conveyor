@@ -3,7 +3,7 @@ package com.github.maximtereshchenko.conveyor.core;
 import com.github.maximtereshchenko.conveyor.api.ConveyorModule;
 import com.github.maximtereshchenko.conveyor.api.Stage;
 import com.github.maximtereshchenko.conveyor.api.TaskCache;
-import com.github.maximtereshchenko.conveyor.api.TracingOutputLevel;
+import com.github.maximtereshchenko.conveyor.api.TracingLevel;
 import com.github.maximtereshchenko.conveyor.api.port.SchematicDefinitionConverter;
 import com.github.maximtereshchenko.conveyor.api.port.TracingOutput;
 
@@ -50,7 +50,7 @@ public final class ConveyorFacade implements ConveyorModule {
         Executor executor,
         TaskCache taskCache,
         TracingOutput tracingOutput,
-        TracingOutputLevel tracingOutputLevel
+        TracingLevel tracingOutputLevel
     ) {
         var tracer = new Tracer(tracingOutput, tracingOutputLevel);
         var cachingSchematicDefinitionConverter = new CachingSchematicDefinitionConverter(

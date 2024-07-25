@@ -3,7 +3,7 @@ package com.github.maximtereshchenko.conveyor.core;
 import com.github.maximtereshchenko.conveyor.api.ConveyorModule;
 import com.github.maximtereshchenko.conveyor.api.Stage;
 import com.github.maximtereshchenko.conveyor.api.TaskCache;
-import com.github.maximtereshchenko.conveyor.api.TracingOutputLevel;
+import com.github.maximtereshchenko.conveyor.api.TracingLevel;
 import com.github.maximtereshchenko.conveyor.api.port.SchematicDefinitionConverter;
 
 import java.nio.file.Path;
@@ -33,7 +33,7 @@ final class ConveyorModuleProxy implements ConveyorModule {
                 executor,
                 taskCache,
                 message -> {},
-                TracingOutputLevel.SILENT
+                TracingLevel.SILENT
             )
             .construct(path, stages);
     }

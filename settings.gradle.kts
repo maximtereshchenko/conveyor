@@ -27,6 +27,7 @@ dependencyResolutionManagement {
             library("jackson-bom", "com.fasterxml.jackson", "jackson-bom").version("2.17.0")
             library("wiremock", "org.wiremock", "wiremock").version("3.4.2")
             library("apiguardian-api", "org.apiguardian", "apiguardian-api").version("1.1.2")
+            library("picocli", "info.picocli", "picocli").version("4.7.6")
             library("junit-jupiter-api", "org.junit.jupiter", "junit-jupiter-api").withoutVersion()
             library("junit-jupiter-engine", "org.junit.jupiter", "junit-jupiter-engine")
                 .withoutVersion()

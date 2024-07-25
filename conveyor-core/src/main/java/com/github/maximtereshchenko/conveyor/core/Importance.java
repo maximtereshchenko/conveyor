@@ -1,20 +1,20 @@
 package com.github.maximtereshchenko.conveyor.core;
 
-import com.github.maximtereshchenko.conveyor.api.TracingOutputLevel;
+import com.github.maximtereshchenko.conveyor.api.TracingLevel;
 
 enum Importance {
 
-    DEBUG(TracingOutputLevel.VERBOSE),
-    INFO(TracingOutputLevel.NORMAL),
-    WARN(TracingOutputLevel.SILENT);
+    DEBUG(TracingLevel.VERBOSE),
+    INFO(TracingLevel.NORMAL),
+    WARN(TracingLevel.SILENT);
 
-    private final TracingOutputLevel minimalOutputLevel;
+    private final TracingLevel minimalOutputLevel;
 
-    Importance(TracingOutputLevel minimalOutputLevel) {
+    Importance(TracingLevel minimalOutputLevel) {
         this.minimalOutputLevel = minimalOutputLevel;
     }
 
-    TracingOutputLevel minimalOutputLevel() {
+    TracingLevel minimalOutputLevel() {
         return minimalOutputLevel;
     }
 }

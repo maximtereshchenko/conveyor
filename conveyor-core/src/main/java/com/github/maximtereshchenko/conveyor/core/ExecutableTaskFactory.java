@@ -10,9 +10,15 @@ final class ExecutableTaskFactory implements TaskFactory {
     public Task task(
         Path directory,
         Properties properties,
+        String plugin,
         ConveyorTask conveyorTask,
         Tracer tracer
     ) {
-        return new ExecutableTask(conveyorTask, tracer);
+        return new ExecutableTask(
+            plugin,
+            conveyorTask,
+            tracer.withContext("plugin", plugin)
+                .withContext("task", conveyorTask.name())
+        );
     }
 }

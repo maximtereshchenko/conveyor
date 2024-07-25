@@ -65,4 +65,9 @@ final class CacheableTask implements Task {
     public int compareTo(Task task) {
         return original.compareTo(task);
     }
+
+    @Override
+    public String toString() {
+        return original.toString();
+    }
 }

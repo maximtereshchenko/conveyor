@@ -1,6 +1,6 @@
 package com.github.maximtereshchenko.conveyor.core;
 
-import com.github.maximtereshchenko.conveyor.api.TracingOutputLevel;
+import com.github.maximtereshchenko.conveyor.api.TracingLevel;
 import com.github.maximtereshchenko.conveyor.api.port.TracingOutput;
 import com.github.maximtereshchenko.conveyor.api.schematic.SchematicDefinition;
 
@@ -22,16 +22,16 @@ import java.util.stream.Stream;
 final class Tracer {
 
     private final TracingOutput output;
-    private final TracingOutputLevel outputLevel;
+    private final TracingLevel outputLevel;
     private final List<String> context;
 
-    private Tracer(TracingOutput output, TracingOutputLevel outputLevel, List<String> context) {
+    private Tracer(TracingOutput output, TracingLevel outputLevel, List<String> context) {
         this.output = output;
         this.outputLevel = outputLevel;
         this.context = context;
     }
 
-    Tracer(TracingOutput output, TracingOutputLevel outputLevel) {
+    Tracer(TracingOutput output, TracingLevel outputLevel) {
         this(output, outputLevel, List.of());
     }
 

@@ -22,6 +22,10 @@
     {
       "group": "${conveyor.schematic.group}",
       "name": "jackson-adapter"
+    },
+    {
+      "group": "info.picocli",
+      "name": "picocli"
     }
   ]
 }
