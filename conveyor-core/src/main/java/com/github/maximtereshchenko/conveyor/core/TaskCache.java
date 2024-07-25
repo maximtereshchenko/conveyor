@@ -41,9 +41,14 @@ final class TaskCache {
         }
     }
 
-    void remember(Inputs inputs, Outputs outputs) {
+    void storeChecksums(Inputs inputs, Outputs outputs) {
         new FileTree(inputsChecksumPath()).write(inputs.checksum());
         new FileTree(outputsChecksumPath()).write(outputs.checksum());
+    }
+
+    void deleteChecksums() {
+        new FileTree(inputsChecksumPath()).delete();
+        new FileTree(outputsChecksumPath()).delete();
     }
 
     private boolean changed(Path path, long expected) {

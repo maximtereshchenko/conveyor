@@ -19,6 +19,7 @@ final class Schematic {
     private final SchematicDefinitionConverter schematicDefinitionConverter;
     private final SchematicModelFactory schematicModelFactory;
     private final PreferencesFactory preferencesFactory;
+    private final TaskFactory taskFactory;
     private final Tracer tracer;
 
     Schematic(
@@ -27,7 +28,7 @@ final class Schematic {
         PomDefinitionFactory pomDefinitionFactory,
         SchematicDefinitionConverter schematicDefinitionConverter,
         SchematicModelFactory schematicModelFactory,
-        PreferencesFactory preferencesFactory,
+        PreferencesFactory preferencesFactory, TaskFactory taskFactory,
         Tracer tracer
     ) {
         this.localModel = localModel;
@@ -36,6 +37,7 @@ final class Schematic {
         this.schematicDefinitionConverter = schematicDefinitionConverter;
         this.schematicModelFactory = schematicModelFactory;
         this.preferencesFactory = preferencesFactory;
+        this.taskFactory = taskFactory;
         this.tracer = tracer;
     }
 
@@ -248,6 +250,7 @@ final class Schematic {
                 )
                 .collect(Collectors.toCollection(LinkedHashSet::new)),
             classpathFactory,
+            taskFactory,
             tracer
         );
         tracer.submitPlugins(plugins);

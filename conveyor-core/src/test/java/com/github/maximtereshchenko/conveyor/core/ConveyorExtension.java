@@ -2,6 +2,7 @@ package com.github.maximtereshchenko.conveyor.core;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.github.maximtereshchenko.conveyor.api.ConveyorModule;
+import com.github.maximtereshchenko.conveyor.api.TaskCache;
 import com.github.maximtereshchenko.conveyor.compiler.Compiler;
 import com.github.maximtereshchenko.conveyor.jackson.JacksonAdapter;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -33,7 +34,7 @@ final class ConveyorExtension implements ParameterResolver {
         var store = extensionContext.getStore(namespace);
         var conveyorModuleBuilder = store.getOrComputeIfAbsent(
             ConveyorModuleBuilder.class,
-            key -> new ConveyorModuleBuilder(jacksonAdapter, Runnable::run),
+            key -> new ConveyorModuleBuilder(jacksonAdapter, Runnable::run, TaskCache.ENABLED),
             ConveyorModuleBuilder.class
         );
         store.getOrComputeIfAbsent(ConveyorModule.class, key -> conveyorModuleBuilder.build());

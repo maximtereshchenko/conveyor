@@ -717,6 +717,34 @@ final class TasksFeatureTests extends ConveyorTest {
         assertThatCode(() -> module.construct(conveyorJson, stages)).doesNotThrowAnyException();
     }
 
+    @Test
+    void givenTaskCacheDisabled_whenConstructToStage_thenCacheableTaskIsExecutedDuringNextConstruction(
+        @TempDir Path path,
+        ConveyorModuleBuilder moduleBuilder,
+        BuilderFactory factory
+    ) throws Exception {
+        factory.repositoryBuilder(path)
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("cache")
+            )
+            .jar(
+                factory.jarBuilder("cache", path)
+            )
+            .install(path);
+        var conveyorJson = factory.schematicDefinitionBuilder()
+            .repository(path)
+            .plugin("cache")
+            .conveyorJson(path);
+        var output = path.resolve("output").resolve("instant");
+
+        moduleBuilder.build().construct(conveyorJson, List.of(Stage.COMPILE));
+        var instant = instant(output);
+        moduleBuilder.disabledTaskCache().build().construct(conveyorJson, List.of(Stage.COMPILE));
+
+        assertThat(instant(output)).isNotEqualTo(instant);
+    }
+
     private Instant instant(Path path, String fileName) throws IOException {
         return instant(path.resolve(fileName));
     }

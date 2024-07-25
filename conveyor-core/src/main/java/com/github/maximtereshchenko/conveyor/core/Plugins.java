@@ -2,7 +2,6 @@ package com.github.maximtereshchenko.conveyor.core;
 
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorPlugin;
 import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorSchematic;
-import com.github.maximtereshchenko.conveyor.plugin.api.ConveyorTask;
 
 import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
@@ -18,11 +17,18 @@ final class Plugins {
 
     private final LinkedHashSet<Plugin> all;
     private final ClasspathFactory classpathFactory;
+    private final TaskFactory taskFactory;
     private final Tracer tracer;
 
-    Plugins(LinkedHashSet<Plugin> all, ClasspathFactory classpathFactory, Tracer tracer) {
+    Plugins(
+        LinkedHashSet<Plugin> all,
+        ClasspathFactory classpathFactory,
+        TaskFactory taskFactory,
+        Tracer tracer
+    ) {
         this.all = all;
         this.classpathFactory = classpathFactory;
+        this.taskFactory = taskFactory;
         this.tracer = tracer;
     }
 
@@ -51,29 +57,15 @@ final class Plugins {
     ) {
         return conveyorPlugin.tasks(conveyorSchematic, named(conveyorPlugin.name()).configuration())
             .stream()
-            .map(conveyorTask -> task(conveyorSchematic, properties, conveyorPlugin, conveyorTask));
-    }
-
-    private Task task(
-        ConveyorSchematic conveyorSchematic,
-        Properties properties,
-        ConveyorPlugin conveyorPlugin,
-        ConveyorTask conveyorTask
-    ) {
-        var taskTracer = tracer.withContext("plugin", conveyorPlugin.name())
-            .withContext("task", conveyorTask.name());
-        var task = new ExecutableTask(conveyorTask, taskTracer);
-        return switch (conveyorTask.cache()) {
-            case ENABLED -> new CacheableTask(
-                task,
-                new Inputs(conveyorTask.inputs()),
-                new Outputs(conveyorTask.outputs()),
-                new TaskCache(properties.tasksCacheDirectory().resolve(conveyorTask.name())),
-                conveyorSchematic.path().getParent(),
-                taskTracer
+            .map(conveyorTask ->
+                taskFactory.task(
+                    conveyorSchematic.path().getParent(),
+                    properties,
+                    conveyorTask,
+                    tracer.withContext("plugin", conveyorPlugin.name())
+                        .withContext("task", conveyorTask.name())
+                )
             );
-            case DISABLED -> task;
-        };
     }
 
     private int byPosition(ConveyorPlugin first, ConveyorPlugin second) {
