@@ -1214,6 +1214,48 @@ final class InheritanceFeatureTests extends ConveyorTest {
             .isSorted();
     }
 
+    @Test
+    void givenUnrelatedSchematicInDefaultTemplateLocation_whenConstructToStage_thenSchematicDoesNotInheritFromIt(
+        @TempDir Path path,
+        ConveyorModule module,
+        BuilderFactory factory
+    ) throws Exception {
+        factory.repositoryBuilder(path)
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("instant")
+            )
+            .jar(
+                factory.jarBuilder("instant", path)
+            )
+            .schematicDefinition(
+                factory.schematicDefinitionBuilder()
+                    .name("template")
+            )
+            .install(path);
+        var project = path.resolve("project");
+        factory.schematicDefinitionBuilder()
+            .name("unrelated")
+            .repository(path)
+            .plugin(
+                "group",
+                "instant",
+                "1.0.0",
+                Map.of("instant", "COMPILE-RUN")
+            )
+            .conveyorJson(path);
+
+        module.construct(
+            factory.schematicDefinitionBuilder()
+                .template("template")
+                .repository(path)
+                .conveyorJson(project),
+            List.of(Stage.COMPILE)
+        );
+
+        assertThat(instantPath(project)).doesNotExist();
+    }
+
     private Instant constructed(Path path) {
         try {
             return instant(instantPath(path));

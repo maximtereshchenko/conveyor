@@ -18,7 +18,6 @@
     }
   ],
   "properties": {
-    "conveyor.schematic.template.location": "./template.json",
     "conveyor.version": "1.0.0"
   },
   "plugins": [

@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -27,14 +28,15 @@ final class DefaultSchematicModelFactory implements SchematicModelFactory {
     public LinkedHashSet<ExtendableLocalInheritanceHierarchyModel> extendableLocalInheritanceHierarchyModels(
         Path path
     ) {
-        var allSchematicPaths = allSchematicPaths(
-            extendableLocalInheritanceHierarchyModel(path).rootPath()
-        );
+        var allSchematicPaths = extendableLocalInheritanceHierarchyModel(path)
+            .map(ExtendableLocalInheritanceHierarchyModel::rootPath)
+            .map(this::allSchematicPaths)
+            .orElse(List.of());
         var models = new LinkedHashSet<ExtendableLocalInheritanceHierarchyModel>();
         for (var schematicPath : allSchematicPaths) {
             var model = extendableLocalInheritanceHierarchyModel(schematicPath);
-            tracer.submitLocalModel(model);
-            models.add(model);
+            model.ifPresent(tracer::submitLocalModel);
+            model.ifPresent(models::add);
         }
         return models;
     }
@@ -91,10 +93,15 @@ final class DefaultSchematicModelFactory implements SchematicModelFactory {
         };
     }
 
-    private StandaloneLocalSchematicModel standaloneLocalSchematicModel(Path path) {
-        return new StandaloneLocalSchematicModel(
-            path,
-            new StandaloneSchematicModel(schematicDefinitionConverter.schematicDefinition(path))
+    private Optional<StandaloneLocalSchematicModel> standaloneLocalSchematicModel(Path path) {
+        if (!Files.exists(path)) {
+            return Optional.empty();
+        }
+        return Optional.of(
+            new StandaloneLocalSchematicModel(
+                path,
+                new StandaloneSchematicModel(schematicDefinitionConverter.schematicDefinition(path))
+            )
         );
     }
 
@@ -102,43 +109,39 @@ final class DefaultSchematicModelFactory implements SchematicModelFactory {
         return Stream.concat(
                 Stream.of(path),
                 standaloneLocalSchematicModel(path)
-                    .inclusions()
+                    .map(StandaloneLocalSchematicModel::inclusions)
                     .stream()
+                    .flatMap(Collection::stream)
                     .map(this::allSchematicPaths)
                     .flatMap(Collection::stream)
             )
             .toList();
     }
 
-    private ExtendableLocalInheritanceHierarchyModel extendableLocalInheritanceHierarchyModel(
+    private Optional<ExtendableLocalInheritanceHierarchyModel> extendableLocalInheritanceHierarchyModel(
         Path path
     ) {
-        return extendableLocalInheritanceHierarchyModel(
-            path,
-            standaloneLocalSchematicModel -> new ExtendableLocalInheritanceHierarchyModel(
-                new InheritanceHierarchyModel<>(standaloneLocalSchematicModel)
+        return standaloneLocalSchematicModel(path)
+            .map(standaloneLocalSchematicModel ->
+                new InheritanceHierarchyModel<LocalSchematicModel>(standaloneLocalSchematicModel)
             )
-        );
+            .map(ExtendableLocalInheritanceHierarchyModel::new)
+            .map(this::extendableLocalInheritanceHierarchyModel);
     }
 
     private ExtendableLocalInheritanceHierarchyModel extendableLocalInheritanceHierarchyModel(
-        Path path,
-        Function<StandaloneLocalSchematicModel, ExtendableLocalInheritanceHierarchyModel> combiner
+        ExtendableLocalInheritanceHierarchyModel localModel
     ) {
-        var extendableLocalInheritanceHierarchyModel = combiner.apply(
-            standaloneLocalSchematicModel(path)
-        );
-        if (hasLocalTemplate(extendableLocalInheritanceHierarchyModel)) {
-            return extendableLocalInheritanceHierarchyModel(
-                extendableLocalInheritanceHierarchyModel.templatePath(),
-                extendableLocalInheritanceHierarchyModel::inheritedFrom
-            );
+        if (!(localModel.template() instanceof SchematicTemplateModel schematicTemplateModel)) {
+            return localModel;
         }
-        return extendableLocalInheritanceHierarchyModel;
-    }
-
-    private boolean hasLocalTemplate(ExtendableLocalInheritanceHierarchyModel localModel) {
-        return localModel.template() instanceof SchematicTemplateModel &&
-               Files.exists(localModel.templatePath());
+        return standaloneLocalSchematicModel(localModel.templatePath())
+            .filter(standaloneLocalSchematicModel ->
+                schematicTemplateModel.id().equals(standaloneLocalSchematicModel.id()) &&
+                schematicTemplateModel.version().equals(standaloneLocalSchematicModel.version())
+            )
+            .map(localModel::inheritedFrom)
+            .map(this::extendableLocalInheritanceHierarchyModel)
+            .orElse(localModel);
     }
 }
