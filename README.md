@@ -2,7 +2,31 @@
 
 A build tool for Java projects
 
-# Features
+## Goal
+
+The goal of this project IS NOT to compete with existing build tools, but rather have fun creating
+it and learn specifics about building Java projects
+
+## How to build
+
+```shell
+./gradlew build
+```
+
+After that, you can check out how to use the CLI
+
+```shell
+java -jar ./conveyor-cli/build/libs/conveyor-cli-1.0.0-standalone.jar --help
+```
+
+## Schematic definition
+
+The schematic is defined in JSON format. For an example you can check
+out [the schematic](conveyor.json) for the Conveyor itself. For a complete structure you can look at
+[Java classes](conveyor-api/src/main/java/com/github/maximtereshchenko/conveyor/api/schematic/SchematicDefinition.java)
+describing the schematic definition.
+
+## Features
 
 * Schematic
     * This is a definition of a project
